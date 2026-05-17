@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { Text } from "@/components/Text"
 import { formatShortDate, getShiftTimeRange } from "@/core/date"
 import type { Shift, ShiftStatus } from "@/core/models"
-import { AppScrollScreen, LiquidGlassCloseButton } from "@/design-system/primitives"
+import { AppScrollScreen } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
@@ -41,7 +41,7 @@ function getStatusConfig(tokens: DesignTokens, status: ShiftStatus) {
   }[status]
 }
 
-function Header({ onClose, shift }: { onClose: () => void; shift: Shift }) {
+function Header({ shift }: { shift: Shift }) {
   const tokens = useDesignTokens()
   const status = getStatusConfig(tokens, shift.status)
 
@@ -73,7 +73,6 @@ function Header({ onClose, shift }: { onClose: () => void; shift: Shift }) {
           style={{ color: tokens.textSecondary }}
         />
       </View>
-      <LiquidGlassCloseButton onPress={onClose} />
     </View>
   )
 }
@@ -251,10 +250,8 @@ export function ShiftDetailScreen() {
   if (!shift) {
     return (
       <AppScrollScreen
-        contentInsetAdjustmentBehavior="never"
         contentContainerStyle={styles.screen}
         style={{ backgroundColor: tokens.surfaceSecondary }}
-        topInset="none"
       >
         <Header
           shift={{
@@ -268,7 +265,6 @@ export function ShiftDetailScreen() {
             venueAddress: "",
             venueName: "Shift not found",
           }}
-          onClose={() => router.back()}
         />
       </AppScrollScreen>
     )
@@ -276,12 +272,10 @@ export function ShiftDetailScreen() {
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={styles.screen}
       style={{ backgroundColor: tokens.surfaceSecondary }}
-      topInset="none"
     >
-      <Header shift={shift} onClose={() => router.back()} />
+      <Header shift={shift} />
       <View style={styles.content}>
         <DetailRows shift={shift} />
         <LocationCard shift={shift} />

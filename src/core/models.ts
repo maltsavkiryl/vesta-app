@@ -202,5 +202,6 @@ export interface AppStoreState {
   earnings: EarningsSummary
   highlights: HomeHighlight[]
   tasks: HomeTask[]
+  signedContractIds: string[]
   lastPasswordResetEmail?: string
 }

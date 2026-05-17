@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react"
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -11,7 +11,6 @@ import type { HomeTask, NotificationItem, Shift, ShiftStatus } from "@/core/mode
 import {
   AppButton,
   AppScrollScreen,
-  NativeSheetHeader,
   StatusBadge,
   SurfaceCard,
   SectionTitle,
@@ -277,7 +276,17 @@ function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => vo
   const dayNumber = shift.date.split("-")[2]
 
   return (
-    <Pressable onPress={onPress} style={[styles.upcomingCard, { backgroundColor: tokens.surface }]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.upcomingCard,
+        {
+          backgroundColor: pressed ? tokens.backgroundMuted : tokens.surface,
+          borderColor: tokens.isDark ? tokens.border : "#DCDDE4",
+          shadowColor: tokens.shadow,
+        },
+      ]}
+    >
       <View style={styles.upcomingMeta}>
         <Text
           text={shift.dayLabel}
@@ -295,7 +304,7 @@ function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => vo
         style={[styles.dayNumber, { color: tokens.textPrimary }]}
       />
       <Text text={shift.startTime} size="xxs" style={{ color: tokens.textSecondary }} />
-      <View style={[styles.rolePill, { backgroundColor: tokens.background }]}>
+      <View style={[styles.rolePill, { backgroundColor: tokens.surfaceSecondary }]}>
         <Text
           text={shift.role}
           numberOfLines={1}
@@ -337,27 +346,27 @@ function UpcomingShifts({
 }
 
 function EarningsCard({
-  averageHourlyRate,
   earnedAmount,
-  hoursWorked,
   monthLabel,
-  shiftsWorked,
-  targetAmount,
   onPayslipPress,
 }: {
-  averageHourlyRate: number
   earnedAmount: number
-  hoursWorked: number
   monthLabel: string
-  shiftsWorked: number
-  targetAmount: number
   onPayslipPress: () => void
 }) {
   const tokens = useDesignTokens()
-  const progress = Math.round((earnedAmount / targetAmount) * 100)
 
   return (
-    <SurfaceCard style={styles.earningsCard}>
+    <View
+      style={[
+        styles.earningsCard,
+        {
+          backgroundColor: tokens.surface,
+          borderColor: tokens.isDark ? tokens.border : "#DCDDE4",
+          shadowColor: tokens.shadow,
+        },
+      ]}
+    >
       <View style={styles.earningsTop}>
         <View style={styles.flex}>
           <Text
@@ -370,27 +379,10 @@ function EarningsCard({
             weight="bold"
             style={[styles.earningsAmount, { color: tokens.textPrimary }]}
           />
-          <Text
-            text={`of ${formatCurrency(targetAmount)} target · ${progress}%`}
-            size="xxs"
-            style={{ color: tokens.textMuted }}
-          />
         </View>
         <View style={[styles.trendIcon, { backgroundColor: `${tokens.accent}14` }]}>
           <Ionicons color={tokens.accent} name="trending-up-outline" size={19} />
         </View>
-      </View>
-
-      <View style={[styles.progressTrack, { backgroundColor: tokens.background }]}>
-        <View
-          style={[styles.progressValue, { backgroundColor: tokens.accent, width: `${progress}%` }]}
-        />
-      </View>
-
-      <View style={styles.statsGrid}>
-        <StatCell label="Shifts" value={String(shiftsWorked)} />
-        <StatCell label="Hours" value={`${hoursWorked}h`} />
-        <StatCell label="Avg/hr" value={formatCurrency(averageHourlyRate)} />
       </View>
 
       <Pressable onPress={onPayslipPress} style={styles.payslipLink}>
@@ -403,17 +395,6 @@ function EarningsCard({
         />
         <Ionicons color={tokens.accent} name="chevron-forward-outline" size={14} />
       </Pressable>
-    </SurfaceCard>
-  )
-}
-
-function StatCell({ label, value }: { label: string; value: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.statCell, { backgroundColor: tokens.background }]}>
-      <Text text={value} size="xs" weight="bold" style={{ color: tokens.textPrimary }} />
-      <Text text={label} size="xxs" style={{ color: tokens.textMuted }} />
     </View>
   )
 }
@@ -430,10 +411,12 @@ function ToneIcon({ name, tone }: { name: IconName; tone: Tone }) {
 }
 
 const TaskRow = memo(function TaskRow({
+  isLast,
   item,
   onComplete,
   onDismiss,
 }: {
+  isLast?: boolean
   item: TaskItem
   onComplete: () => void
   onDismiss?: () => void
@@ -442,12 +425,14 @@ const TaskRow = memo(function TaskRow({
   const tone = item.urgency === "high" ? "danger" : item.urgency === "medium" ? "warning" : "accent"
 
   return (
-    <View style={[styles.listRow, { borderBottomColor: tokens.border }]}>
+    <View
+      style={[styles.listRow, isLast && styles.lastListRow, { borderBottomColor: tokens.border }]}
+    >
       <ToneIcon
         name={item.completed ? "checkmark-circle-outline" : taskIconByUrgency[item.urgency]}
         tone={item.completed ? "success" : tone}
       />
-      <View style={styles.flex}>
+      <View style={styles.taskCopy}>
         <Text
           text={item.title}
           numberOfLines={1}
@@ -537,7 +522,7 @@ function TasksSection({
   }
 
   return (
-    <View>
+    <View style={styles.tasksSection}>
       <SectionHeader
         title="Tasks"
         actionLabel="View all"
@@ -545,9 +530,10 @@ function TasksSection({
         onAction={onShowAll}
       />
       <SurfaceCard style={styles.listCard}>
-        {tasks.map((task) => (
+        {tasks.map((task, index) => (
           <TaskRow
             key={task.id}
+            isLast={index === tasks.length - 1}
             item={task}
             onComplete={() => onComplete(task)}
             onDismiss={() => onDismiss(task)}
@@ -613,51 +599,32 @@ function UpdatesSection({
   )
 }
 
-function TaskDrawer({
-  pendingTasks,
-  visible,
-  onClose,
-  onComplete,
-}: {
-  pendingTasks: TaskItem[]
-  visible: boolean
-  onClose: () => void
-  onComplete: (task: TaskItem) => void
-}) {
+export function HomeTasksScreen() {
   const tokens = useDesignTokens()
+  const router = useRouter()
+  const { state } = useAppSession()
+  const pendingTasks = state.tasks.filter((task) => !task.completed)
 
   return (
-    <Modal
-      allowSwipeDismissal
-      animationType="slide"
-      presentationStyle="pageSheet"
-      visible={visible}
-      onRequestClose={onClose}
+    <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
+      contentContainerStyle={styles.nativeSheetContent}
+      style={{ backgroundColor: tokens.background }}
+      topInset="none"
     >
-      <View style={[styles.nativeSheet, { backgroundColor: tokens.background }]}>
-        <NativeSheetHeader title="All Tasks" onClose={onClose} />
-        <ScrollView
-          contentContainerStyle={styles.nativeSheetContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <TaskGroup
-            title="Pending"
-            tasks={pendingTasks}
-            backgroundColor={tokens.surface}
-            onComplete={(task) => {
-              onClose()
-              onComplete(task)
-            }}
-          />
-          <TaskGroup
-            title="Completed"
-            tasks={completedTaskHistory}
-            backgroundColor={tokens.surface}
-            onComplete={() => undefined}
-          />
-        </ScrollView>
-      </View>
-    </Modal>
+      <TaskGroup
+        title="Pending"
+        tasks={pendingTasks}
+        backgroundColor={tokens.surface}
+        onComplete={(task) => router.replace(task.href as never)}
+      />
+      <TaskGroup
+        title="Completed"
+        tasks={completedTaskHistory}
+        backgroundColor={tokens.surface}
+        onComplete={() => undefined}
+      />
+    </AppScrollScreen>
   )
 }
 
@@ -685,8 +652,13 @@ function TaskGroup({
         style={[styles.capsLabel, { color: tokens.textMuted }]}
       />
       <View style={[styles.drawerGroupCard, { backgroundColor }]}>
-        {tasks.map((task) => (
-          <TaskRow key={task.id} item={task} onComplete={() => onComplete(task)} />
+        {tasks.map((task, index) => (
+          <TaskRow
+            key={task.id}
+            isLast={index === tasks.length - 1}
+            item={task}
+            onComplete={() => onComplete(task)}
+          />
         ))}
       </View>
     </View>
@@ -698,7 +670,6 @@ export function HomeScreen() {
   const { selectedEmployer, state, unreadNotifications } = useAppSession()
   const [greeting, setGreeting] = useState(getGreeting())
   const [hiddenTaskIds, setHiddenTaskIds] = useState<string[]>([])
-  const [isTaskDrawerVisible, setIsTaskDrawerVisible] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => setGreeting(getGreeting()), 60_000)
@@ -735,65 +706,48 @@ export function HomeScreen() {
   const openDocuments = useCallback(() => navigate("/(app)/(tabs)/documents"), [navigate])
 
   return (
-    <>
-      <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
-        <Header
-          employerName={selectedEmployer?.name}
-          firstName={state.profile.firstName}
-          greeting={greeting}
-          hasUnread={unreadNotifications > 0}
-          role={state.profile.role}
-          onEmployerPress={openProfile}
-          onNotificationsPress={openNotifications}
+    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
+      <Header
+        employerName={selectedEmployer?.name}
+        firstName={state.profile.firstName}
+        greeting={greeting}
+        hasUnread={unreadNotifications > 0}
+        role={state.profile.role}
+        onEmployerPress={openProfile}
+        onNotificationsPress={openNotifications}
+      />
+
+      <View style={styles.stack}>
+        <NextShiftCard
+          shift={nextShift}
+          onClockIn={openClock}
+          onDetails={() => openShift(nextShift)}
         />
 
-        <View style={styles.stack}>
-          <NextShiftCard
-            shift={nextShift}
-            onClockIn={openClock}
-            onDetails={() => openShift(nextShift)}
-          />
-
-          <UpcomingShifts
-            shifts={upcomingShifts}
-            onShiftPress={openShift}
-            onSeeAll={openSchedule}
-          />
+        <UpcomingShifts shifts={upcomingShifts} onShiftPress={openShift} onSeeAll={openSchedule} />
 
           <EarningsCard
-            averageHourlyRate={state.earnings.averageHourlyRate}
             earnedAmount={state.earnings.earnedAmount}
-            hoursWorked={state.earnings.hoursWorked}
             monthLabel={state.earnings.monthLabel}
-            shiftsWorked={state.earnings.shiftsWorked}
-            targetAmount={state.earnings.targetAmount}
             onPayslipPress={openDocuments}
           />
 
-          <TasksSection
-            tasks={pendingTasks}
-            onComplete={completeTask}
-            onDismiss={hideTask}
-            onShowAll={() => setIsTaskDrawerVisible(true)}
-          />
+        <TasksSection
+          tasks={pendingTasks}
+          onComplete={completeTask}
+          onDismiss={hideTask}
+          onShowAll={() => router.push("/(app)/tasks" as never)}
+        />
 
-          <UpdatesSection
-            notifications={state.notifications}
-            onNotificationPress={(notification) => {
-              if (notification.deepLink) router.push(notification.deepLink as never)
-            }}
-            onShowAll={openNotifications}
-          />
-        </View>
-      </AppScrollScreen>
-
-      <TaskDrawer
-        pendingTasks={pendingTasks}
-        visible={isTaskDrawerVisible}
-        onClose={() => setIsTaskDrawerVisible(false)}
-        onComplete={completeTask}
-      />
-    </>
+        <UpdatesSection
+          notifications={state.notifications}
+          onNotificationPress={(notification) => {
+            if (notification.deepLink) router.push(notification.deepLink as never)
+          }}
+          onShowAll={openNotifications}
+        />
+      </View>
+    </AppScrollScreen>
   )
 }
 
@@ -849,7 +803,7 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     borderRadius: 16,
     overflow: "hidden",
-    paddingHorizontal: 14,
+    paddingHorizontal: 0,
   },
   earningsAmount: {
     fontSize: 30,
@@ -857,9 +811,15 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   earningsCard: {
-    borderRadius: 20,
+    borderCurve: "continuous",
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 1,
     gap: 14,
-    padding: 18,
+    padding: 16,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
   },
   earningsTop: {
     alignItems: "flex-start",
@@ -943,19 +903,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 34,
   },
+  lastListRow: {
+    borderBottomWidth: 0,
+  },
   listCard: {
     borderRadius: 18,
     gap: 0,
     overflow: "hidden",
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingVertical: 0,
   },
   listRow: {
     alignItems: "center",
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
     minHeight: 61,
+    paddingLeft: 14,
+    paddingRight: 12,
     paddingVertical: 13,
   },
   locationRow: {
@@ -966,9 +931,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
-  },
-  nativeSheet: {
-    flex: 1,
   },
   nativeSheetContent: {
     gap: 16,
@@ -1000,15 +962,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 4,
   },
-  progressTrack: {
-    borderRadius: 99,
-    height: 5,
-    overflow: "hidden",
-  },
-  progressValue: {
-    borderRadius: 99,
-    height: "100%",
-  },
   rolePill: {
     alignSelf: "flex-start",
     borderRadius: 20,
@@ -1021,21 +974,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   stack: {
-    gap: 14,
+    gap: 18,
     marginTop: 16,
-  },
-  statCell: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
-    flex: 1,
-    gap: 1,
-    paddingHorizontal: 6,
-    paddingVertical: 9,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    gap: 8,
   },
   statusDot: {
     borderRadius: 3,
@@ -1045,13 +985,21 @@ const styles = StyleSheet.create({
   taskActions: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 6,
+    flexShrink: 0,
+    gap: 4,
   },
   taskButton: {
     borderCurve: "continuous",
     borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     paddingVertical: 5,
+  },
+  taskCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  tasksSection: {
+    gap: 10,
   },
   trendIcon: {
     alignItems: "center",
@@ -1063,13 +1011,15 @@ const styles = StyleSheet.create({
   },
   upcomingCard: {
     borderCurve: "continuous",
-    borderRadius: 18,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 1,
     minHeight: 116,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 14,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.04,
-    shadowRadius: 14,
+    shadowRadius: 12,
     width: 112,
   },
   upcomingHeader: {

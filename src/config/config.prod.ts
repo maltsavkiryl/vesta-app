@@ -7,5 +7,5 @@
  */
 export default {
   API_URL: "https://api.vesta.services/api/v1",
-  DEMO_AUTH_ENABLED: false,
+  DEMO_AUTH_ENABLED: true,
 }

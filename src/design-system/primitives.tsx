@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import { PropsWithChildren, ReactNode } from "react"
+import { PropsWithChildren, ReactNode, useMemo } from "react"
 import {
   Platform,
   Pressable,
@@ -11,8 +11,7 @@ import {
   View,
   ViewStyle,
 } from "react-native"
-import { GlassView, isGlassEffectAPIAvailable } from "expo-glass-effect"
-import { Ionicons } from "@expo/vector-icons"
+import SegmentedControl from "@react-native-segmented-control/segmented-control"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
@@ -53,7 +52,7 @@ export function AppScrollScreen({
       contentContainerStyle={[
         styles.screenContent,
         {
-          paddingTop: topInset === "safe" ? insets.top + 10 : 0,
+          paddingTop: topInset === "safe" ? 18 : 0,
           paddingBottom: insets.bottom + 28,
         },
         contentContainerStyle,
@@ -99,6 +98,57 @@ export function PageHeader({
       </View>
       {trailing}
     </View>
+  )
+}
+
+export function AppSegmentedControl<T extends string>({
+  options,
+  value,
+  onChange,
+  style,
+}: {
+  options: { label: string; value: T }[]
+  value: T
+  onChange: (value: T) => void
+  style?: StyleProp<ViewStyle>
+}) {
+  const tokens = useDesignTokens()
+  const selectedIndex = Math.max(
+    options.findIndex((option) => option.value === value),
+    0,
+  )
+  const fontStyle = useMemo(
+    () => ({
+      color: tokens.textSecondary,
+      fontSize: 13,
+      fontWeight: "500" as const,
+    }),
+    [tokens.textSecondary],
+  )
+  const activeFontStyle = useMemo(
+    () => ({
+      color: tokens.textPrimary,
+      fontSize: 13,
+      fontWeight: "600" as const,
+    }),
+    [tokens.textPrimary],
+  )
+
+  return (
+    <SegmentedControl
+      appearance={tokens.isDark ? "dark" : "light"}
+      backgroundColor={tokens.isDark ? "rgba(116, 116, 128, 0.22)" : "rgba(116, 116, 128, 0.10)"}
+      fontStyle={fontStyle}
+      selectedIndex={selectedIndex}
+      style={[styles.segmentedControl, style]}
+      tintColor={tokens.surface}
+      values={options.map((option) => option.label)}
+      activeFontStyle={activeFontStyle}
+      onChange={(event) => {
+        const nextOption = options[event.nativeEvent.selectedSegmentIndex]
+        if (nextOption) onChange(nextOption.value)
+      }}
+    />
   )
 }
 
@@ -456,79 +506,6 @@ export function MetricGrid({
   )
 }
 
-export function NativeSheetHeader({
-  title,
-  subtitle,
-  onClose,
-}: {
-  title: string
-  subtitle?: string
-  onClose: () => void
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={styles.nativeSheetHeader}>
-      <View style={styles.headerCopy}>
-        <Text text={title} size="lg" weight="bold" style={{ color: tokens.textPrimary }} />
-        {subtitle ? (
-          <Text text={subtitle} size="xxs" style={{ color: tokens.textSecondary }} />
-        ) : null}
-      </View>
-      <IconButton accessibilityLabel="Close" onPress={onClose}>
-        <Ionicons color={tokens.textSecondary} name="close" size={18} />
-      </IconButton>
-    </View>
-  )
-}
-
-export function LiquidGlassCloseButton({
-  accessibilityLabel = "Close",
-  onPress,
-}: {
-  accessibilityLabel?: string
-  onPress: () => void
-}) {
-  const tokens = useDesignTokens()
-  const supportsLiquidGlass = Platform.OS === "ios" && isGlassEffectAPIAvailable()
-
-  return (
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      hitSlop={10}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.glassCloseButton,
-        {
-          backgroundColor: supportsLiquidGlass
-            ? tokens.transparent
-            : tokens.isDark
-              ? "rgba(255, 255, 255, 0.12)"
-              : "rgba(255, 255, 255, 0.72)",
-          borderColor: supportsLiquidGlass
-            ? tokens.transparent
-            : tokens.isDark
-              ? "rgba(255, 255, 255, 0.16)"
-              : "rgba(255, 255, 255, 0.84)",
-          opacity: pressed ? 0.78 : 1,
-          shadowColor: tokens.shadow,
-        },
-      ]}
-    >
-      {supportsLiquidGlass ? (
-        <GlassView
-          colorScheme={tokens.isDark ? "dark" : "light"}
-          glassEffectStyle="regular"
-          isInteractive
-          style={StyleSheet.absoluteFill}
-        />
-      ) : null}
-      <Ionicons color={tokens.textSecondary} name="close" size={16} />
-    </Pressable>
-  )
-}
-
 export function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
   const tokens = useDesignTokens()
 
@@ -586,19 +563,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  glassCloseButton: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 15,
-    borderWidth: StyleSheet.hairlineWidth,
-    height: 30,
-    justifyContent: "center",
-    overflow: "hidden",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: Platform.select({ android: 0, default: 0.08 }),
-    shadowRadius: 8,
-    width: 30,
   },
   groupedSection: {
     gap: 8,
@@ -682,13 +646,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
-  nativeSheetHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 14,
-    justifyContent: "space-between",
-    paddingBottom: 14,
-  },
   pill: {
     alignSelf: "flex-start",
     borderCurve: "continuous",
@@ -715,6 +672,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
+  },
+  segmentedControl: {
+    borderRadius: 14,
+    height: 34,
+    overflow: "hidden",
   },
   statusBadge: {
     alignItems: "center",

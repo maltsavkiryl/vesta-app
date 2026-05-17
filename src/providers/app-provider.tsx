@@ -60,6 +60,7 @@ type AppAction =
   | { type: "endBreak" }
   | { type: "confirmClockOut" }
   | { type: "uploadDocument"; payload: DocumentUploadPayload }
+  | { type: "signContract"; payload: { contractId: string } }
   | { type: "switchEmployer"; payload: { employerId: string } }
   | { type: "joinEmployer"; payload: { employerId: string } }
   | { type: "recordPasswordReset"; payload: { email: string } }
@@ -237,6 +238,13 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
         ),
       }
     }
+    case "signContract":
+      return {
+        ...state,
+        signedContractIds: state.signedContractIds.includes(action.payload.contractId)
+          ? state.signedContractIds
+          : [...state.signedContractIds, action.payload.contractId],
+      }
     case "switchEmployer":
       return {
         ...state,
@@ -299,6 +307,7 @@ export interface AppContextValue {
   endBreak: () => void
   confirmClockOut: () => void
   uploadDocument: (payload: DocumentUploadPayload) => void
+  signContract: (contractId: string) => void
   switchEmployer: (employerId: string) => void
   joinEmployer: (employerId: string) => void
 }
@@ -370,18 +379,13 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, [state])
 
   const signIn = useCallback(
-    ({ email, password }: { email: string; password: string }): AuthResult => {
+    ({ email }: { email: string; password: string }): AuthResult => {
       const normalizedEmail = normalizeEmail(email)
-      const credentialsMatch =
-        normalizedEmail === DEMO_AUTH_CREDENTIALS.email &&
-        password === DEMO_AUTH_CREDENTIALS.password
 
-      if (!Config.DEMO_AUTH_ENABLED || !credentialsMatch) {
+      if (!Config.DEMO_AUTH_ENABLED) {
         return {
           ok: false,
-          message: Config.DEMO_AUTH_ENABLED
-            ? "Use the demo credentials or connect the production auth service."
-            : "Production authentication is not connected yet.",
+          message: "Production authentication is not connected yet.",
         }
       }
 
@@ -456,6 +460,11 @@ export function AppProvider({ children }: PropsWithChildren) {
     [dispatch],
   )
 
+  const signContract = useCallback(
+    (contractId: string) => dispatch({ type: "signContract", payload: { contractId } }),
+    [dispatch],
+  )
+
   const switchEmployer = useCallback(
     (employerId: string) => dispatch({ type: "switchEmployer", payload: { employerId } }),
     [dispatch],
@@ -498,6 +507,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       endBreak,
       confirmClockOut,
       uploadDocument,
+      signContract,
       switchEmployer,
       joinEmployer,
     }
@@ -513,6 +523,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     selectedEmployer,
     signIn,
     signOut,
+    signContract,
     startBreak,
     startClock,
     state,

@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { format } from "date-fns"
@@ -11,7 +11,6 @@ import { getClockSnapshot } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
 import {
   AppButton,
-  NativeSheetHeader,
   AppScrollScreen,
   StatusBadge,
   SurfaceCard,
@@ -490,7 +489,7 @@ function RecentEntries({
   const tokens = useDesignTokens()
 
   return (
-    <View>
+    <View style={styles.entriesSection}>
       <SectionTitle
         actionIcon={
           <Ionicons color={tokens.textSecondary} name="chevron-forward-outline" size={13} />
@@ -500,7 +499,12 @@ function RecentEntries({
         title="Recent entries"
         titleSize="sm"
       />
-      <View style={[styles.entriesCard, { backgroundColor: tokens.surface }]}>
+      <View
+        style={[
+          styles.entriesCard,
+          { backgroundColor: tokens.surface, borderColor: tokens.border },
+        ]}
+      >
         {entries.slice(0, 4).map((entry) => (
           <EntryRow
             key={entry.id}
@@ -514,77 +518,70 @@ function RecentEntries({
   )
 }
 
-function EntriesDrawer({
-  entries,
-  expandedId,
-  onClose,
-  onEntryPress,
-  visible,
-}: {
-  entries: TimeEntry[]
-  expandedId: string | null
-  onClose: () => void
-  onEntryPress: (entry: TimeEntry) => void
-  visible: boolean
-}) {
+export function TimeEntriesScreen() {
   const tokens = useDesignTokens()
+  const { state } = useAppSession()
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(
+    state.timeEntries[0]?.id ?? null,
+  )
   const groupedEntries = useMemo(() => {
-    return entries.reduce<Record<string, TimeEntry[]>>((acc, entry) => {
+    return state.timeEntries.reduce<Record<string, TimeEntry[]>>((acc, entry) => {
       const month = format(new Date(entry.date), "MMMM yyyy")
       acc[month] = [...(acc[month] ?? []), entry]
       return acc
     }, {})
-  }, [entries])
+  }, [state.timeEntries])
+
+  const handleEntryPress = useCallback((entry: TimeEntry) => {
+    setExpandedEntryId((current) => (current === entry.id ? null : entry.id))
+  }, [])
 
   return (
-    <Modal
-      allowSwipeDismissal
-      animationType="slide"
-      presentationStyle="pageSheet"
-      visible={visible}
-      onRequestClose={onClose}
+    <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
+      contentContainerStyle={styles.nativeSheetContent}
+      style={{ backgroundColor: tokens.background }}
+      topInset="none"
     >
-      <View style={[styles.nativeSheet, { backgroundColor: tokens.background }]}>
-        <NativeSheetHeader
-          onClose={onClose}
-          subtitle={`${entries.length} entries total`}
-          title="Time entries"
-        />
-        <ScrollView
-          contentContainerStyle={styles.nativeSheetContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {Object.entries(groupedEntries).map(([month, monthEntries]) => (
-            <View key={month} style={styles.monthGroup}>
-              <View style={styles.monthHeader}>
-                <Text
-                  text={month}
-                  size="xxs"
-                  weight="semiBold"
-                  style={{ color: tokens.textSecondary }}
-                />
-                <Text
-                  text={`${monthEntries.length} shifts`}
-                  size="xxs"
-                  style={{ color: tokens.textMuted }}
-                />
-              </View>
-              <View style={[styles.entriesCard, { backgroundColor: tokens.surface }]}>
-                {monthEntries.map((entry) => (
-                  <EntryRow
-                    key={entry.id}
-                    entry={entry}
-                    expanded={expandedId === entry.id}
-                    onPress={() => onEntryPress(entry)}
-                    showEarnings
-                  />
-                ))}
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-    </Modal>
+      <Text
+        text={`${state.timeEntries.length} entries total`}
+        size="xs"
+        style={{ color: tokens.textSecondary }}
+      />
+      {Object.entries(groupedEntries).map(([month, monthEntries]) => (
+        <View key={month} style={styles.monthGroup}>
+          <View style={styles.monthHeader}>
+            <Text
+              text={month}
+              size="xxs"
+              weight="semiBold"
+              style={{ color: tokens.textSecondary }}
+            />
+            <Text
+              text={`${monthEntries.length} shifts`}
+              size="xxs"
+              style={{ color: tokens.textMuted }}
+            />
+          </View>
+          <View
+            style={[
+              styles.entriesCard,
+              { backgroundColor: tokens.surface, borderColor: tokens.border },
+            ]}
+          >
+            {monthEntries.map((entry) => (
+              <EntryRow
+                key={entry.id}
+                entry={entry}
+                expanded={expandedEntryId === entry.id}
+                onPress={() => handleEntryPress(entry)}
+                showEarnings
+              />
+            ))}
+          </View>
+        </View>
+      ))}
+    </AppScrollScreen>
   )
 }
 
@@ -593,7 +590,6 @@ export function TimeScreen() {
   const { endBreak, startBreak, startClock, state } = useAppSession()
   const [now, setNow] = useState(() => new Date())
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
-  const [showAllEntries, setShowAllEntries] = useState(false)
 
   useEffect(() => {
     if (state.clockSession.state === "idle") return
@@ -622,43 +618,33 @@ export function TimeScreen() {
   const openClockOut = useCallback(() => router.push("/(app)/clock-out" as never), [router])
 
   return (
-    <>
-      <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-        <Header status={state.clockSession.state} />
+    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
+      <Header status={state.clockSession.state} />
 
-        {state.clockSession.state === "idle" ? (
-          <IdleClockCard onClockIn={startClock} />
-        ) : (
-          <ActiveClockCard
-            breakSeconds={state.clockSession.state === "onBreak" ? snapshot.breakSeconds : 0}
-            elapsedSeconds={elapsedSeconds}
-            earnings={earnings}
-            status={state.clockSession.state}
-            totalBreakSeconds={totalBreakSeconds}
-            onClockOut={openClockOut}
-            onEndBreak={endBreak}
-            onStartBreak={startBreak}
-          />
-        )}
-
-        <WeeklySummary weekTotal={weekTotal} />
-
-        <RecentEntries
-          entries={state.timeEntries}
-          expandedId={expandedEntryId}
-          onEntryPress={handleEntryPress}
-          onViewAll={() => setShowAllEntries(true)}
+      {state.clockSession.state === "idle" ? (
+        <IdleClockCard onClockIn={startClock} />
+      ) : (
+        <ActiveClockCard
+          breakSeconds={state.clockSession.state === "onBreak" ? snapshot.breakSeconds : 0}
+          elapsedSeconds={elapsedSeconds}
+          earnings={earnings}
+          status={state.clockSession.state}
+          totalBreakSeconds={totalBreakSeconds}
+          onClockOut={openClockOut}
+          onEndBreak={endBreak}
+          onStartBreak={startBreak}
         />
-      </AppScrollScreen>
+      )}
 
-      <EntriesDrawer
+      <WeeklySummary weekTotal={weekTotal} />
+
+      <RecentEntries
         entries={state.timeEntries}
         expandedId={expandedEntryId}
-        visible={showAllEntries}
-        onClose={() => setShowAllEntries(false)}
         onEntryPress={handleEntryPress}
+        onViewAll={() => router.push("/(app)/time-entries" as never)}
       />
-    </>
+    </AppScrollScreen>
   )
 }
 
@@ -668,6 +654,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   activeCard: {
+    borderRadius: 20,
     gap: 14,
     padding: 16,
   },
@@ -693,10 +680,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   clockCard: {
-    borderRadius: 8,
-    gap: 20,
+    borderRadius: 20,
+    gap: 18,
     paddingHorizontal: 20,
-    paddingVertical: 22,
+    paddingVertical: 20,
   },
   dangerAction: {
     alignItems: "center",
@@ -711,7 +698,7 @@ const styles = StyleSheet.create({
   detailCell: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 10,
+    borderRadius: 12,
     flex: 1,
     gap: 2,
     paddingHorizontal: 4,
@@ -724,7 +711,7 @@ const styles = StyleSheet.create({
   earningsRow: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 10,
+    borderRadius: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 8,
@@ -733,15 +720,19 @@ const styles = StyleSheet.create({
   },
   entriesCard: {
     borderCurve: "continuous",
-    borderRadius: 8,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
+  },
+  entriesSection: {
+    gap: 8,
   },
   entryButton: {
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
   entryDate: {
     alignItems: "center",
@@ -771,6 +762,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingHorizontal: 4,
   },
   headerTitle: {
     fontSize: 28,
@@ -783,7 +775,7 @@ const styles = StyleSheet.create({
   locationPanel: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 12,
+    borderRadius: 14,
     flexDirection: "row",
     gap: 10,
     paddingHorizontal: 14,
@@ -799,9 +791,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingLeft: 2,
   },
-  nativeSheet: {
-    flex: 1,
-  },
   nativeSheetContent: {
     gap: 16,
     paddingBottom: 36,
@@ -811,7 +800,7 @@ const styles = StyleSheet.create({
   openNotice: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 10,
+    borderRadius: 14,
     borderWidth: 1,
     flexDirection: "row",
     gap: 6,
@@ -828,7 +817,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   screen: {
-    gap: 12,
+    gap: 14,
     paddingHorizontal: 16,
   },
   secondaryAction: {
@@ -878,14 +867,14 @@ const styles = StyleSheet.create({
   timerPanel: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 8,
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 18,
   },
   verified: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 10,
+    borderRadius: 14,
     borderWidth: 1,
     flexDirection: "row",
     gap: 6,
@@ -893,8 +882,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   weekBar: {
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
     width: "100%",
   },
   weekBarColumn: {
@@ -908,7 +897,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   weekCard: {
-    borderRadius: 8,
+    borderRadius: 18,
     gap: 12,
     padding: 16,
   },

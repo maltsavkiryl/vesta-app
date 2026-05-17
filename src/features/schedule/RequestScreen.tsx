@@ -8,12 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
 import type { RequestType } from "@/core/models"
-import {
-  AppButton,
-  AppScrollScreen,
-  GroupedSection,
-  LiquidGlassCloseButton,
-} from "@/design-system/primitives"
+import { AppButton, AppScrollScreen, GroupedSection } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
@@ -117,7 +112,6 @@ export function RequestScreen() {
             <Text text={`Step ${step} of 3`} size="xxs" style={{ color: tokens.textMuted }} />
           </View>
         </View>
-        <LiquidGlassCloseButton accessibilityLabel="Close request" onPress={router.back} />
       </View>
 
       <View style={[styles.progressTrack, { backgroundColor: tokens.background }]}>

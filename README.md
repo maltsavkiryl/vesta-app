@@ -1,4 +1,4 @@
-# Vesta Mobile
+# Vesta
 
 Expo Router React Native app for the Vesta employee mobile experience.
 

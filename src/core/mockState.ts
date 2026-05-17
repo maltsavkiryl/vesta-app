@@ -405,5 +405,6 @@ export function createInitialState(): AppStoreState {
         href: "/(app)/(tabs)/schedule",
       },
     ],
+    signedContractIds: ["contract-1"],
   }
 }

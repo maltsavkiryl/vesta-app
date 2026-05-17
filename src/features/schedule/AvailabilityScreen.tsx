@@ -4,18 +4,11 @@ import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { format } from "date-fns"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
-import { formatFullDate } from "@/core/date"
 import type { AvailabilityStatus } from "@/core/models"
-import {
-  AppButton,
-  AppScrollScreen,
-  GroupedSection,
-  LiquidGlassCloseButton,
-} from "@/design-system/primitives"
+import { AppButton, AppScrollScreen, GroupedSection } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
@@ -81,31 +74,11 @@ export function AvailabilityScreen() {
   const [startTime, setStartTime] = useState(day.startTime)
   const [endTime, setEndTime] = useState(day.endTime)
 
-  const dayName = format(new Date(date), "EEEE")
-  const dateFull = formatFullDate(date)
-
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
       style={{ backgroundColor: tokens.surfaceSecondary }}
-      topInset="none"
     >
-      <View style={styles.header}>
-        <View>
-          <Text
-            text={dayName}
-            weight="bold"
-            style={{ color: tokens.textPrimary, fontSize: 22, lineHeight: 27 }}
-          />
-          <Text text={dateFull} size="xs" style={{ color: tokens.textSecondary, marginTop: 2 }} />
-        </View>
-        <LiquidGlassCloseButton
-          accessibilityLabel="Close availability editor"
-          onPress={router.back}
-        />
-      </View>
-
       <View style={styles.content}>
         <GroupedSection title="Availability status">
           {(Object.keys(statusOptions) as AvailabilityStatus[]).map((candidate, index, items) => {
@@ -306,17 +279,10 @@ const styles = StyleSheet.create({
   content: {
     gap: 18,
     paddingHorizontal: 22,
-    paddingTop: 4,
+    paddingTop: 18,
   },
   flex: {
     flex: 1,
-  },
-  header: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 22,
-    paddingVertical: 18,
   },
   periodPill: {
     borderRadius: 20,

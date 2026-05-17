@@ -24,13 +24,9 @@ export function SignInScreen() {
   const insets = useSafeAreaInsets()
   const { signIn } = useAppSession()
 
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState<string>(DEMO_AUTH_CREDENTIALS.email)
+  const [password, setPassword] = useState<string>(DEMO_AUTH_CREDENTIALS.password)
   const [error, setError] = useState<string>()
-
-  const useDemoCredentials = () => {
-    setEmail(DEMO_AUTH_CREDENTIALS.email)
-    setError(undefined)
-  }
 
   const handleContinue = () => {
     if (!email.includes("@")) {
@@ -38,7 +34,7 @@ export function SignInScreen() {
       return
     }
 
-    const result = signIn({ email, password: DEMO_AUTH_CREDENTIALS.password })
+    const result = signIn({ email, password })
     if (!result.ok) {
       setError(result.message)
       return
@@ -68,20 +64,6 @@ export function SignInScreen() {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.demoCard}>
-            <View style={styles.demoHeader}>
-              <Ionicons color="#1F64DF" name="sparkles-outline" size={18} />
-              <Text text="Demo account" weight="bold" style={styles.demoTitle} />
-            </View>
-            <View style={styles.demoRows}>
-              <CredentialRow label="Email" value={DEMO_AUTH_CREDENTIALS.email} />
-              <CredentialRow label="Password" value={DEMO_AUTH_CREDENTIALS.password} />
-            </View>
-            <Pressable onPress={useDemoCredentials} style={styles.demoButton}>
-              <Text text="Use demo account" weight="bold" style={styles.demoButtonText} />
-            </Pressable>
-          </View>
-
           <View style={styles.inputShell}>
             <TextInput
               accessibilityLabel="Email"
@@ -114,10 +96,46 @@ export function SignInScreen() {
             ) : null}
           </View>
 
+          <View style={styles.inputShell}>
+            <TextInput
+              accessibilityLabel="Password"
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
+              secureTextEntry
+              onChangeText={(value) => {
+                setPassword(value)
+                if (error) setError(undefined)
+              }}
+              onSubmitEditing={handleContinue}
+              placeholder="Password"
+              placeholderTextColor="#8E8E93"
+              returnKeyType="done"
+              selectionColor="#000000"
+              style={styles.input}
+              value={password}
+              textContentType="password"
+            />
+            {password.length > 0 ? (
+              <Pressable
+                accessibilityLabel="Clear password"
+                hitSlop={10}
+                onPress={() => setPassword("")}
+                style={styles.clearButton}
+              >
+                <Ionicons color="#FFFFFF" name="close" size={12} />
+              </Pressable>
+            ) : null}
+          </View>
+
           {error ? <Text text={error} size="xxs" style={styles.errorText} /> : null}
 
           <Pressable onPress={handleContinue} style={styles.primaryButton}>
             <Text text="Continue" weight="bold" style={styles.primaryButtonText} />
+          </Pressable>
+
+          <Pressable onPress={() => router.replace("/(auth)/register")} style={styles.registerButton}>
+            <Text text="Register" weight="bold" style={styles.registerButtonText} />
           </Pressable>
 
           <Text text="or" style={styles.dividerText} />
@@ -127,15 +145,6 @@ export function SignInScreen() {
         </View>
       </View>
     </KeyboardAvoidingView>
-  )
-}
-
-function CredentialRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.credentialRow}>
-      <Text text={label} size="xxs" style={styles.credentialLabel} />
-      <Text text={value} size="xxs" weight="semiBold" style={styles.credentialValue} />
-    </View>
   )
 }
 
@@ -181,53 +190,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 40,
-  },
-  credentialLabel: {
-    color: "#6C6C70",
-    minWidth: 58,
-  },
-  credentialRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-  credentialValue: {
-    color: "#000000",
-    flex: 1,
-  },
-  demoButton: {
-    alignItems: "center",
-    backgroundColor: "#EAF1FF",
-    borderRadius: 10,
-    justifyContent: "center",
-    minHeight: 38,
-  },
-  demoButtonText: {
-    color: "#1F64DF",
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  demoCard: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#D9E4FF",
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: 10,
-    marginBottom: 8,
-    padding: 14,
-  },
-  demoHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  demoRows: {
-    gap: 5,
-  },
-  demoTitle: {
-    color: "#000000",
-    fontSize: 15,
-    lineHeight: 20,
   },
   dividerText: {
     color: "#6C6C70",
@@ -279,6 +241,20 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: "#FFFFFF",
+    fontSize: 17,
+    lineHeight: 22,
+  },
+  registerButton: {
+    alignItems: "center",
+    backgroundColor: "#F9F9FA",
+    borderColor: "#C9C9CC",
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  registerButtonText: {
+    color: "#000000",
     fontSize: 17,
     lineHeight: 22,
   },

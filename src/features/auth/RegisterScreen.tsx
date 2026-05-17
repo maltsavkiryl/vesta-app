@@ -1,21 +1,32 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
+/* eslint-disable react-native/no-color-literals */
 
 import { useState } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
-import { useRouter } from "expo-router"
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  View,
+  ViewStyle,
+} from "react-native"
+import type { ReactNode } from "react"
 import { Ionicons } from "@expo/vector-icons"
+import { useRouter } from "expo-router"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
-import { AppButton } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
-import { AuthError, AuthScaffold } from "./AuthScaffold"
-import { AuthTextField } from "./AuthTextField"
+const vestaLogo = require("@assets/images/vesta-logo.png")
 
 export function RegisterScreen() {
   const router = useRouter()
-  const tokens = useDesignTokens()
+  const insets = useSafeAreaInsets()
   const { register } = useAppSession()
 
   const [firstName, setFirstName] = useState("")
@@ -25,6 +36,10 @@ export function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string>()
+
+  const clearError = () => {
+    if (error) setError(undefined)
+  }
 
   const handleSubmit = () => {
     if (!firstName.trim() || !lastName.trim()) {
@@ -43,126 +58,262 @@ export function RegisterScreen() {
       setError("Passwords don't match.")
       return
     }
+
     setError(undefined)
     register({ firstName, lastName, email, password })
     router.replace("/(auth)/onboarding")
   }
 
   return (
-    <AuthScaffold
-      scrollEnabled={false}
-      title={"Create your\naccount."}
-      subtitle="Join thousands of employees on Vesta."
-      footer={
-        <View style={styles.footerRow}>
-          <Text text="Already have an account?" size="xs" style={{ color: tokens.textSecondary }} />
-          <Pressable onPress={() => router.replace("/(auth)/sign-in")}>
-            <Text text="Sign in" size="xs" weight="semiBold" style={{ color: tokens.accent }} />
-          </Pressable>
-        </View>
-      }
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.screen}
     >
-      <AuthError message={error} />
-      <View style={styles.formStack}>
-        <View style={styles.nameRow}>
-          <View style={styles.flex}>
-            <AuthTextField
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingBottom: Math.max(insets.bottom, 18),
+            paddingTop: insets.top + 30,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <VestaLogo />
+          <Text text="Create account" weight="bold" style={styles.title} />
+          <Text text="Add your details to continue." style={styles.subtitle} />
+        </View>
+
+        <View style={styles.form}>
+          <View style={styles.nameRow}>
+            <Field
+              accessibilityLabel="First name"
               autoCapitalize="words"
               autoComplete="given-name"
-              label="First name"
-              onChangeText={setFirstName}
-              placeholder="Sofia"
+              onChangeText={(value) => {
+                setFirstName(value)
+                clearError()
+              }}
+              placeholder="First name"
               returnKeyType="next"
               textContentType="givenName"
               value={firstName}
             />
-          </View>
-          <View style={styles.flex}>
-            <AuthTextField
+            <Field
+              accessibilityLabel="Last name"
               autoCapitalize="words"
               autoComplete="family-name"
-              label="Last name"
-              onChangeText={setLastName}
-              placeholder="Fischer"
+              onChangeText={(value) => {
+                setLastName(value)
+                clearError()
+              }}
+              placeholder="Last name"
               returnKeyType="next"
               textContentType="familyName"
               value={lastName}
             />
           </View>
-        </View>
-        <AuthTextField
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          label="Email"
-          onChangeText={setEmail}
-          placeholder="you@email.com"
-          returnKeyType="next"
-          textContentType="username"
-          value={email}
-        />
-        <AuthTextField
-          autoComplete="new-password"
-          label="Password"
-          onChangeText={setPassword}
-          placeholder="Password"
-          returnKeyType="next"
-          secureTextEntry={!showPassword}
-          textContentType="newPassword"
-          value={password}
-          rightAccessory={
-            <Pressable
-              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-              onPress={() => setShowPassword((current) => !current)}
-              style={styles.eyeButton}
-            >
-              <Ionicons
-                color={tokens.textMuted}
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={18}
-              />
-            </Pressable>
-          }
-        />
-        <AuthTextField
-          autoComplete="new-password"
-          label="Confirm password"
-          onChangeText={setConfirmPassword}
-          placeholder="Confirm password"
-          returnKeyType="done"
-          secureTextEntry={!showPassword}
-          textContentType="newPassword"
-          value={confirmPassword}
-          onSubmitEditing={handleSubmit}
-        />
-      </View>
 
-      <AppButton label="Create account" onPress={handleSubmit} />
-    </AuthScaffold>
+          <Field
+            accessibilityLabel="Email"
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            onChangeText={(value) => {
+              setEmail(value)
+              clearError()
+            }}
+            placeholder="Email"
+            returnKeyType="next"
+            textContentType="username"
+            value={email}
+          />
+
+          <Field
+            accessibilityLabel="Password"
+            autoCapitalize="none"
+            autoComplete="new-password"
+            onChangeText={(value) => {
+              setPassword(value)
+              clearError()
+            }}
+            placeholder="Password"
+            returnKeyType="next"
+            secureTextEntry={!showPassword}
+            textContentType="newPassword"
+            value={password}
+            rightAccessory={
+              <Pressable
+                accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                hitSlop={10}
+                onPress={() => setShowPassword((current) => !current)}
+                style={styles.iconButton}
+              >
+                <Ionicons
+                  color="#6C6C70"
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                />
+              </Pressable>
+            }
+          />
+
+          <Field
+            accessibilityLabel="Confirm password"
+            autoCapitalize="none"
+            autoComplete="new-password"
+            onChangeText={(value) => {
+              setConfirmPassword(value)
+              clearError()
+            }}
+            onSubmitEditing={handleSubmit}
+            placeholder="Confirm password"
+            returnKeyType="done"
+            secureTextEntry={!showPassword}
+            textContentType="newPassword"
+            value={confirmPassword}
+          />
+
+          {error ? <Text text={error} size="xxs" style={styles.errorText} /> : null}
+
+          <Pressable onPress={handleSubmit} style={styles.primaryButton}>
+            <Text text="Create account" weight="bold" style={styles.primaryButtonText} />
+          </Pressable>
+
+          <Pressable onPress={() => router.replace("/(auth)/sign-in")} style={styles.secondaryButton}>
+            <Text text="Sign in instead" weight="bold" style={styles.secondaryButtonText} />
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  )
+}
+
+function Field({
+  containerStyle,
+  rightAccessory,
+  ...props
+}: TextInputProps & { containerStyle?: StyleProp<ViewStyle>; rightAccessory?: ReactNode }) {
+  return (
+    <View style={[styles.inputShell, containerStyle]}>
+      <TextInput
+        autoCorrect={false}
+        placeholderTextColor="#8E8E93"
+        selectionColor="#000000"
+        {...props}
+        style={styles.input}
+      />
+      {rightAccessory}
+    </View>
+  )
+}
+
+function VestaLogo() {
+  return (
+    <Image
+      accessibilityLabel="Vesta"
+      accessibilityIgnoresInvertColors
+      resizeMode="contain"
+      source={vestaLogo}
+      style={styles.logo}
+    />
   )
 }
 
 const styles = StyleSheet.create({
-  eyeButton: {
-    alignItems: "center",
-    height: 36,
+  content: {
+    flexGrow: 1,
     justifyContent: "center",
-    width: 36,
+    paddingHorizontal: 40,
   },
-  flex: {
+  errorText: {
+    color: "#D70015",
+    marginTop: -4,
+    textAlign: "center",
+  },
+  form: {
+    gap: 9,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  iconButton: {
+    alignItems: "center",
+    height: 28,
+    justifyContent: "center",
+    width: 28,
+  },
+  input: {
+    color: "#000000",
     flex: 1,
+    fontSize: 16,
+    lineHeight: 20,
+    minHeight: 22,
+    padding: 0,
   },
-  footerRow: {
+  inputShell: {
     alignItems: "center",
+    backgroundColor: "#E8E8EA",
+    borderRadius: 12,
+    flex: 1,
     flexDirection: "row",
-    gap: 5,
-    justifyContent: "center",
+    gap: 8,
+    minHeight: 48,
+    paddingHorizontal: 16,
   },
-  formStack: {
-    gap: 10,
+  logo: {
+    height: 76,
+    marginBottom: 18,
+    width: 76,
   },
   nameRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 9,
+  },
+  primaryButton: {
+    alignItems: "center",
+    backgroundColor: "#000000",
+    borderRadius: 12,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    lineHeight: 22,
+  },
+  screen: {
+    backgroundColor: "#F9F9FA",
+    flex: 1,
+  },
+  secondaryButton: {
+    alignItems: "center",
+    backgroundColor: "#F9F9FA",
+    borderColor: "#C9C9CC",
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  secondaryButtonText: {
+    color: "#000000",
+    fontSize: 17,
+    lineHeight: 22,
+  },
+  subtitle: {
+    color: "#6C6C70",
+    fontSize: 16,
+    lineHeight: 21,
+    marginTop: 6,
+    textAlign: "center",
+  },
+  title: {
+    color: "#000000",
+    fontSize: 28,
+    lineHeight: 34,
+    textAlign: "center",
   },
 })

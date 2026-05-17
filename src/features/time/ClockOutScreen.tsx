@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
-import { AppButton, AppScrollScreen, LiquidGlassCloseButton } from "@/design-system/primitives"
+import { AppButton, AppScrollScreen } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession, useClockSummary } from "@/providers/app-provider"
 
@@ -105,7 +105,6 @@ export function ClockOutScreen() {
                 style={{ color: tokens.textSecondary, marginTop: 2 }}
               />
             </View>
-            <LiquidGlassCloseButton accessibilityLabel="Close clock out" onPress={router.back} />
           </View>
 
           <View style={styles.content}>

@@ -2,7 +2,6 @@ import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import SegmentedControl from "@react-native-segmented-control/segmented-control"
 
 import { Text } from "@/components/Text"
 import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
@@ -10,6 +9,7 @@ import type { AvailabilityDay, AvailabilityStatus, RequestItem, Shift } from "@/
 import {
   AppButton,
   AppScrollScreen,
+  AppSegmentedControl,
   GroupedSection,
   MetricGrid,
   PageHeader,
@@ -21,11 +21,11 @@ import { useAppSession } from "@/providers/app-provider"
 
 type Segment = "shifts" | "availability" | "requests"
 
-const segmentLabels: Record<Segment, string> = {
-  shifts: "Shifts",
-  availability: "Availability",
-  requests: "Requests",
-}
+const segmentOptions: { label: string; value: Segment }[] = [
+  { label: "Shifts", value: "shifts" },
+  { label: "Availability", value: "availability" },
+  { label: "Requests", value: "requests" },
+]
 
 const availabilityCopy: Record<
   AvailabilityStatus,
@@ -54,49 +54,6 @@ const availabilityCopy: Record<
 
 function getRequestTone(status: RequestItem["status"]) {
   return status === "approved" ? "success" : status === "denied" ? "danger" : "warning"
-}
-
-function NativeSegmentControl({
-  selected,
-  onSelect,
-}: {
-  selected: Segment
-  onSelect: (segment: Segment) => void
-}) {
-  const tokens = useDesignTokens()
-  const segments = Object.keys(segmentLabels) as Segment[]
-  const selectedIndex = Math.max(segments.indexOf(selected), 0)
-  const fontStyle = useMemo(
-    () => ({
-      color: tokens.textSecondary,
-      fontSize: 13,
-      fontWeight: "500" as const,
-    }),
-    [tokens.textSecondary],
-  )
-  const activeFontStyle = useMemo(
-    () => ({
-      color: tokens.textPrimary,
-      fontSize: 13,
-      fontWeight: "600" as const,
-    }),
-    [tokens.textPrimary],
-  )
-  return (
-    <SegmentedControl
-      appearance={tokens.isDark ? "dark" : "light"}
-      fontStyle={fontStyle}
-      selectedIndex={selectedIndex}
-      style={styles.nativeSegmentControl}
-      tintColor={tokens.surface}
-      values={segments.map((segment) => segmentLabels[segment])}
-      activeFontStyle={activeFontStyle}
-      onChange={(event) => {
-        const nextSegment = segments[event.nativeEvent.selectedSegmentIndex]
-        if (nextSegment) onSelect(nextSegment)
-      }}
-    />
-  )
 }
 
 function SummaryCard({
@@ -400,7 +357,7 @@ export function ScheduleScreen() {
   const openShift = (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never)
 
   return (
-    <AppScrollScreen variant="grouped">
+    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
       <PageHeader eyebrow={selectedEmployer?.name ?? "Schedule"} title="Schedule" />
       <SummaryCard
         selectedDate={selectedDate}
@@ -416,7 +373,7 @@ export function ScheduleScreen() {
         onSelectDate={setSelectedDate}
       />
 
-      <NativeSegmentControl selected={segment} onSelect={setSegment} />
+      <AppSegmentedControl options={segmentOptions} value={segment} onChange={setSegment} />
 
       {segment === "shifts" ? (
         <View style={styles.stack}>
@@ -569,9 +526,6 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  nativeSegmentControl: {
-    height: 34,
-  },
   requestIcon: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -588,6 +542,9 @@ const styles = StyleSheet.create({
     minHeight: 72,
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  screen: {
+    paddingHorizontal: 16,
   },
   sectionHeader: {
     alignItems: "center",
@@ -628,14 +585,14 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 6,
   },
+  shiftPressable: {
+    borderCurve: "continuous",
+    borderRadius: 18,
+  },
   shiftPrimaryRow: {
     alignItems: "center",
     flexDirection: "row",
     gap: 10,
-  },
-  shiftPressable: {
-    borderCurve: "continuous",
-    borderRadius: 18,
   },
   shiftStatus: {
     alignItems: "center",
