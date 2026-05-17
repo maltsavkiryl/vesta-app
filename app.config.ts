@@ -21,6 +21,10 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
     ...config,
     ios: {
       ...config.ios,
+      infoPlist: {
+        ...(config.ios && config.ios.infoPlist ? config.ios.infoPlist : {}),
+        ITSAppUsesNonExemptEncryption: false,
+      },
       // This privacyManifests is to get you started.
       // See Expo's guide on apple privacy manifests here:
       // https://docs.expo.dev/guides/apple-privacy/
