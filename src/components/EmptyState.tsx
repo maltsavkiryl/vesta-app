@@ -7,7 +7,7 @@ import type { ThemedStyle } from "@/theme/types"
 import { Button, ButtonProps } from "./Button"
 import { Text, TextProps } from "./Text"
 
-const sadFace = require("@assets/images/sad-face.png")
+const vestaLogo = require("@assets/images/app-icon-android-adaptive-foreground.png")
 
 interface EmptyStateProps {
   /**
@@ -118,14 +118,13 @@ interface EmptyStatePresetItem {
  */
 export function EmptyState(props: EmptyStateProps) {
   const {
-    theme,
     themed,
     theme: { spacing },
   } = useAppTheme()
 
   const EmptyStatePresets = {
     generic: {
-      imageSource: sadFace,
+      imageSource: vestaLogo,
       heading: translate("emptyStateComponent:generic.heading"),
       content: translate("emptyStateComponent:generic.content"),
       button: translate("emptyStateComponent:generic.button"),
@@ -192,14 +191,7 @@ export function EmptyState(props: EmptyStateProps) {
 
   return (
     <View style={$containerStyles}>
-      {isImagePresent && (
-        <Image
-          source={imageSource}
-          {...ImageProps}
-          style={$imageStyles}
-          tintColor={theme.colors.palette.neutral900}
-        />
-      )}
+      {isImagePresent && <Image source={imageSource} {...ImageProps} style={$imageStyles} />}
 
       {isHeadingPresent && (
         <Text
@@ -237,7 +229,7 @@ export function EmptyState(props: EmptyStateProps) {
   )
 }
 
-const $image: ImageStyle = { alignSelf: "center" }
+const $image: ImageStyle = { alignSelf: "center", height: 96, width: 96 }
 const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
   paddingHorizontal: spacing.lg,

@@ -47,8 +47,8 @@ module.exports = {
           },
           {
             name: "react-native",
-            importNames: ["Text", "Button", "TextInput"],
-            message: "Use the custom wrapper component from '@/components'.",
+            importNames: ["Text", "Button"],
+            message: "Use the app Text component instead of the raw native text primitives.",
           },
         ],
       },

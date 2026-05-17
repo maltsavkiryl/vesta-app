@@ -1,53 +1,36 @@
-// TODO: write documentation about fonts and typography along with guides on how to add custom fonts in own
-// markdown file and add links from here
+import { Platform, type TextStyle } from "react-native"
 
-import { Platform } from "react-native"
-import {
-  SpaceGrotesk_300Light as spaceGroteskLight,
-  SpaceGrotesk_400Regular as spaceGroteskRegular,
-  SpaceGrotesk_500Medium as spaceGroteskMedium,
-  SpaceGrotesk_600SemiBold as spaceGroteskSemiBold,
-  SpaceGrotesk_700Bold as spaceGroteskBold,
-} from "@expo-google-fonts/space-grotesk"
+export const customFontsToLoad = {}
 
-export const customFontsToLoad = {
-  spaceGroteskLight,
-  spaceGroteskRegular,
-  spaceGroteskMedium,
-  spaceGroteskSemiBold,
-  spaceGroteskBold,
+type FontWeightScale = {
+  light: Pick<TextStyle, "fontFamily" | "fontWeight">
+  normal: Pick<TextStyle, "fontFamily" | "fontWeight">
+  medium: Pick<TextStyle, "fontFamily" | "fontWeight">
+  semiBold: Pick<TextStyle, "fontFamily" | "fontWeight">
+  bold: Pick<TextStyle, "fontFamily" | "fontWeight">
+}
+
+const systemFontFamily = Platform.select({
+  ios: "System",
+  android: "sans-serif",
+  default: undefined,
+})
+
+const systemFontScale: FontWeightScale = {
+  light: { fontFamily: systemFontFamily, fontWeight: "300" },
+  normal: { fontFamily: systemFontFamily, fontWeight: "400" },
+  medium: { fontFamily: systemFontFamily, fontWeight: "500" },
+  semiBold: { fontFamily: systemFontFamily, fontWeight: "600" },
+  bold: { fontFamily: systemFontFamily, fontWeight: "700" },
 }
 
 const fonts = {
-  spaceGrotesk: {
-    // Cross-platform Google font.
-    light: "spaceGroteskLight",
-    normal: "spaceGroteskRegular",
-    medium: "spaceGroteskMedium",
-    semiBold: "spaceGroteskSemiBold",
-    bold: "spaceGroteskBold",
-  },
-  helveticaNeue: {
-    // iOS only font.
-    thin: "HelveticaNeue-Thin",
-    light: "HelveticaNeue-Light",
-    normal: "Helvetica Neue",
-    medium: "HelveticaNeue-Medium",
-  },
-  courier: {
-    // iOS only font.
-    normal: "Courier",
-  },
-  sansSerif: {
-    // Android only font.
-    thin: "sans-serif-thin",
-    light: "sans-serif-light",
-    normal: "sans-serif",
-    medium: "sans-serif-medium",
-  },
-  monospace: {
-    // Android only font.
-    normal: "monospace",
+  system: systemFontScale,
+  mono: {
+    normal: {
+      fontFamily: Platform.select({ ios: "Menlo", android: "monospace", default: "monospace" }),
+      fontWeight: "400",
+    },
   },
 }
 
@@ -57,15 +40,15 @@ export const typography = {
    */
   fonts,
   /**
-   * The primary font. Used in most places.
+   * The primary font. On iOS this resolves to the system San Francisco stack.
    */
-  primary: fonts.spaceGrotesk,
+  primary: fonts.system,
   /**
    * An alternate font used for perhaps titles and stuff.
    */
-  secondary: Platform.select({ ios: fonts.helveticaNeue, android: fonts.sansSerif }),
+  secondary: fonts.system,
   /**
    * Lets get fancy with a monospace font!
    */
-  code: Platform.select({ ios: fonts.courier, android: fonts.monospace }),
+  code: fonts.mono,
 }
