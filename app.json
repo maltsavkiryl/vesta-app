@@ -1,6 +1,6 @@
 {
   "name": "vesta-mobile",
-  "slug": "vesta-mobile",
+  "slug": "vesta",
   "scheme": "vesta-mobile",
   "version": "1.0.0",
   "orientation": "portrait",
@@ -64,6 +64,11 @@
   "extra": {
     "ignite": {
       "version": "11.5.0"
+    },
+    "router": {},
+    "eas": {
+      "projectId": "3599d2c2-1d60-44a0-991e-062ed8475afd"
     }
-  }
+  },
+  "owner": "kirylmaltsav"
 }

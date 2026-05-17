@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -11,10 +11,11 @@ import { getClockSnapshot } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
 import {
   AppButton,
+  NativeSheetHeader,
   AppScrollScreen,
-  LiquidGlassCloseButton,
   StatusBadge,
   SurfaceCard,
+  SectionTitle,
 } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
@@ -153,23 +154,17 @@ function ActiveClockCard({
   return (
     <SurfaceCard elevated style={styles.activeCard}>
       <View style={styles.activeHeader}>
-        <View style={styles.flex}>
-          <Text
-            text={isOnBreak ? "Break in progress" : "Current shift"}
-            size="xs"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary }}
-          />
-          <Text
-            text={`${state.clockSession.scheduledStart} - ${state.clockSession.scheduledEnd} · ${state.clockSession.role}`}
-            numberOfLines={1}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-        </View>
-        <StatusBadge
-          label={isOnBreak ? "On break" : "Working"}
-          tone={isOnBreak ? "warning" : "success"}
+        <Text
+          text={isOnBreak ? "Break in progress" : "Current shift"}
+          size="xs"
+          weight="semiBold"
+          style={{ color: tokens.textPrimary }}
+        />
+        <Text
+          text={`${state.clockSession.scheduledStart} - ${state.clockSession.scheduledEnd} · ${state.clockSession.role}`}
+          numberOfLines={1}
+          size="xxs"
+          style={{ color: tokens.textSecondary }}
         />
       </View>
 
@@ -177,10 +172,7 @@ function ActiveClockCard({
         <Text
           text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
           weight="bold"
-          style={[
-            styles.activeTimer,
-            { color: isOnBreak ? tokens.warning : tokens.textPrimary },
-          ]}
+          style={[styles.activeTimer, { color: isOnBreak ? tokens.warning : tokens.textPrimary }]}
         />
         <Text
           text={isOnBreak ? `${formatSeconds(elapsedSeconds)} worked` : "since 17:00"}
@@ -203,12 +195,7 @@ function ActiveClockCard({
       </View>
 
       <View style={styles.summaryRows}>
-        <SummaryRow
-          color={tokens.success}
-          icon="cash-outline"
-          label="Earnings"
-          value={earnings}
-        />
+        <SummaryRow color={tokens.success} icon="cash-outline" label="Earnings" value={earnings} />
         <SummaryRow
           color={tokens.accent}
           icon="trending-up-outline"
@@ -504,18 +491,15 @@ function RecentEntries({
 
   return (
     <View>
-      <View style={styles.sectionHeader}>
-        <Text
-          text="Recent entries"
-          size="sm"
-          weight="semiBold"
-          style={[styles.sectionTitle, { color: tokens.textPrimary }]}
-        />
-        <Pressable onPress={onViewAll} style={styles.viewAllButton}>
-          <Text text="View all" size="xs" weight="medium" style={{ color: tokens.accent }} />
-          <Ionicons color={tokens.accent} name="chevron-forward-outline" size={13} />
-        </Pressable>
-      </View>
+      <SectionTitle
+        actionIcon={
+          <Ionicons color={tokens.textSecondary} name="chevron-forward-outline" size={13} />
+        }
+        actionLabel="View all"
+        onAction={onViewAll}
+        title="Recent entries"
+        titleSize="sm"
+      />
       <View style={[styles.entriesCard, { backgroundColor: tokens.surface }]}>
         {entries.slice(0, 4).map((entry) => (
           <EntryRow
@@ -561,21 +545,11 @@ function EntriesDrawer({
       onRequestClose={onClose}
     >
       <View style={[styles.nativeSheet, { backgroundColor: tokens.background }]}>
-        <View style={styles.nativeSheetHeader}>
-          <View style={styles.flex}>
-            <Text
-              text="Time entries"
-              weight="bold"
-              style={[styles.sheetTitle, { color: tokens.textPrimary }]}
-            />
-            <Text
-              text={`${entries.length} entries total`}
-              size="xxs"
-              style={{ color: tokens.textSecondary }}
-            />
-          </View>
-          <LiquidGlassCloseButton onPress={onClose} />
-        </View>
+        <NativeSheetHeader
+          onClose={onClose}
+          subtitle={`${entries.length} entries total`}
+          title="Time entries"
+        />
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
           showsVerticalScrollIndicator={false}
@@ -641,9 +615,11 @@ export function TimeScreen() {
     weekData.filter((item) => !item.today).reduce((sum, item) => sum + item.hours, 0) +
     elapsedSeconds / 3600
 
-  const handleEntryPress = (entry: TimeEntry) => {
+  const handleEntryPress = useCallback((entry: TimeEntry) => {
     setExpandedEntryId((current) => (current === entry.id ? null : entry.id))
-  }
+  }, [])
+
+  const openClockOut = useCallback(() => router.push("/(app)/clock-out" as never), [router])
 
   return (
     <>
@@ -659,7 +635,7 @@ export function TimeScreen() {
             earnings={earnings}
             status={state.clockSession.state}
             totalBreakSeconds={totalBreakSeconds}
-            onClockOut={() => router.push("/(app)/clock-out" as never)}
+            onClockOut={openClockOut}
             onEndBreak={endBreak}
             onStartBreak={startBreak}
           />
@@ -692,25 +668,32 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   activeCard: {
-    gap: 16,
-    padding: 20,
+    gap: 14,
+    padding: 16,
+  },
+  activeHeader: {
+    gap: 2,
   },
   activeTimer: {
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 34,
+    lineHeight: 40,
   },
   breakButton: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 14,
   },
   caps: {
     letterSpacing: 0,
   },
   clockCard: {
-    borderRadius: 20,
+    borderRadius: 8,
     gap: 20,
     paddingHorizontal: 20,
     paddingVertical: 22,
@@ -718,11 +701,12 @@ const styles = StyleSheet.create({
   dangerAction: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
     flex: 1,
     justifyContent: "center",
-    padding: 14,
+    minHeight: 48,
+    paddingHorizontal: 14,
   },
   detailCell: {
     alignItems: "center",
@@ -749,7 +733,7 @@ const styles = StyleSheet.create({
   },
   entriesCard: {
     borderCurve: "continuous",
-    borderRadius: 16,
+    borderRadius: 8,
     overflow: "hidden",
   },
   entryButton: {
@@ -824,14 +808,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 18,
   },
-  nativeSheetHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 16,
-    justifyContent: "space-between",
-    paddingHorizontal: 22,
-    paddingTop: 18,
-  },
   openNotice: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -851,27 +827,6 @@ const styles = StyleSheet.create({
     height: 3,
     overflow: "hidden",
   },
-  ringInner: {
-    alignItems: "center",
-    borderRadius: 82,
-    borderWidth: 6,
-    gap: 2,
-    height: 164,
-    justifyContent: "center",
-    width: 164,
-  },
-  ringOuter: {
-    alignItems: "center",
-    borderRadius: 100,
-    borderWidth: 10,
-    height: 200,
-    justifyContent: "center",
-    width: 200,
-  },
-  ringWrap: {
-    alignItems: "center",
-    gap: 6,
-  },
   screen: {
     gap: 12,
     paddingHorizontal: 16,
@@ -879,32 +834,53 @@ const styles = StyleSheet.create({
   secondaryAction: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
     flex: 1,
     flexDirection: "row",
     gap: 6,
     justifyContent: "center",
-    padding: 14,
+    minHeight: 48,
+    paddingHorizontal: 14,
   },
-  sectionHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingBottom: 10,
-    paddingHorizontal: 4,
-    paddingTop: 4,
+  shiftProgressFill: {
+    borderRadius: 999,
+    height: "100%",
   },
-  sectionTitle: {
-    letterSpacing: 0,
-  },
-  sheetTitle: {
-    fontSize: 20,
-    lineHeight: 26,
+  shiftProgressTrack: {
+    borderRadius: 999,
+    height: 5,
+    marginTop: 10,
+    overflow: "hidden",
+    width: "100%",
   },
   shiftTime: {
     fontSize: 26,
     lineHeight: 31,
+  },
+  summaryIcon: {
+    alignItems: "center",
+    borderRadius: 15,
+    height: 30,
+    justifyContent: "center",
+    width: 30,
+  },
+  summaryRow: {
+    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 46,
+  },
+  summaryRows: {
+    gap: 0,
+  },
+  timerPanel: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
   },
   verified: {
     alignItems: "center",
@@ -915,11 +891,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
-  },
-  viewAllButton: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 3,
   },
   weekBar: {
     borderTopLeftRadius: 3,
@@ -937,6 +908,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   weekCard: {
+    borderRadius: 8,
     gap: 12,
     padding: 16,
   },

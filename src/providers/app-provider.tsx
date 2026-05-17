@@ -1,4 +1,12 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react"
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from "react"
 import { format } from "date-fns"
 
 import Config from "@/config"
@@ -361,66 +369,160 @@ export function AppProvider({ children }: PropsWithChildren) {
     save(APP_STATE_STORAGE_KEY, createStateForPersistence(state))
   }, [state])
 
-  const value = useMemo<AppContextValue>(() => {
-    const selectedEmployer = state.employers.find(
-      (employer) => employer.id === state.activeEmployerId,
-    )
+  const signIn = useCallback(
+    ({ email, password }: { email: string; password: string }): AuthResult => {
+      const normalizedEmail = normalizeEmail(email)
+      const credentialsMatch =
+        normalizedEmail === DEMO_AUTH_CREDENTIALS.email &&
+        password === DEMO_AUTH_CREDENTIALS.password
 
+      if (!Config.DEMO_AUTH_ENABLED || !credentialsMatch) {
+        return {
+          ok: false,
+          message: Config.DEMO_AUTH_ENABLED
+            ? "Use the demo credentials or connect the production auth service."
+            : "Production authentication is not connected yet.",
+        }
+      }
+
+      dispatch({ type: "signIn", payload: { email: normalizedEmail } })
+      return { ok: true }
+    },
+    [dispatch],
+  )
+
+  const register = useCallback(
+    (payload: { firstName: string; lastName: string; email: string }) =>
+      dispatch({ type: "register", payload }),
+    [dispatch],
+  )
+
+  const requestPasswordReset = useCallback(
+    (email: string) => dispatch({ type: "recordPasswordReset", payload: { email } }),
+    [dispatch],
+  )
+
+  const signOut = useCallback(() => dispatch({ type: "signOut" }), [dispatch])
+
+  const completeOnboarding = useCallback(
+    (payload: { role: string; employerId: string }) =>
+      dispatch({ type: "completeOnboarding", payload }),
+    [dispatch],
+  )
+
+  const updateProfile = useCallback(
+    (payload: Partial<UserProfile>) => dispatch({ type: "updateProfile", payload }),
+    [dispatch],
+  )
+
+  const updateAvailability = useCallback(
+    (payload: AvailabilityDay) => dispatch({ type: "updateAvailability", payload }),
+    [dispatch],
+  )
+
+  const createRequest = useCallback(
+    (payload: { type: RequestItem["type"]; dateRange: string; reason: string; note?: string }) =>
+      dispatch({
+        type: "createRequest",
+        payload: {
+          id: `request-${Date.now()}`,
+          type: payload.type,
+          dateRange: payload.dateRange,
+          reason: payload.reason,
+          note: payload.note,
+          status: "pending",
+        },
+      }),
+    [dispatch],
+  )
+
+  const markNotificationRead = useCallback(
+    (id: string) => dispatch({ type: "markNotificationRead", payload: { id } }),
+    [dispatch],
+  )
+
+  const markAllNotificationsRead = useCallback(
+    () => dispatch({ type: "markAllNotificationsRead" }),
+    [dispatch],
+  )
+
+  const startClock = useCallback(() => dispatch({ type: "startClock" }), [dispatch])
+  const startBreak = useCallback(() => dispatch({ type: "startBreak" }), [dispatch])
+  const endBreak = useCallback(() => dispatch({ type: "endBreak" }), [dispatch])
+  const confirmClockOut = useCallback(() => dispatch({ type: "confirmClockOut" }), [dispatch])
+
+  const uploadDocument = useCallback(
+    (payload: DocumentUploadPayload) => dispatch({ type: "uploadDocument", payload }),
+    [dispatch],
+  )
+
+  const switchEmployer = useCallback(
+    (employerId: string) => dispatch({ type: "switchEmployer", payload: { employerId } }),
+    [dispatch],
+  )
+
+  const joinEmployer = useCallback(
+    (employerId: string) => dispatch({ type: "joinEmployer", payload: { employerId } }),
+    [dispatch],
+  )
+
+  const selectedEmployer = useMemo(
+    () => state.employers.find((employer) => employer.id === state.activeEmployerId),
+    [state.activeEmployerId, state.employers],
+  )
+
+  const unreadNotifications = useMemo(
+    () => state.notifications.filter((notification) => notification.unread).length,
+    [state.notifications],
+  )
+
+  const value = useMemo<AppContextValue>(() => {
     return {
       state,
       isSignedIn: state.authStatus === "signedIn",
       needsOnboarding: state.authStatus === "signedIn" && !state.profile.onboardingComplete,
       selectedEmployer,
-      unreadNotifications: state.notifications.filter((notification) => notification.unread).length,
-      signIn: ({ email, password }) => {
-        const normalizedEmail = normalizeEmail(email)
-        const credentialsMatch =
-          normalizedEmail === DEMO_AUTH_CREDENTIALS.email &&
-          password === DEMO_AUTH_CREDENTIALS.password
-
-        if (!Config.DEMO_AUTH_ENABLED || !credentialsMatch) {
-          return {
-            ok: false,
-            message: Config.DEMO_AUTH_ENABLED
-              ? "Use the demo credentials or connect the production auth service."
-              : "Production authentication is not connected yet.",
-          }
-        }
-
-        dispatch({ type: "signIn", payload: { email: normalizedEmail } })
-        return { ok: true }
-      },
-      register: ({ firstName, lastName, email }) =>
-        dispatch({ type: "register", payload: { firstName, lastName, email } }),
-      requestPasswordReset: (email) =>
-        dispatch({ type: "recordPasswordReset", payload: { email } }),
-      signOut: () => dispatch({ type: "signOut" }),
-      completeOnboarding: (payload) => dispatch({ type: "completeOnboarding", payload }),
-      updateProfile: (payload) => dispatch({ type: "updateProfile", payload }),
-      updateAvailability: (payload) => dispatch({ type: "updateAvailability", payload }),
-      createRequest: ({ type, dateRange, reason, note }) =>
-        dispatch({
-          type: "createRequest",
-          payload: {
-            id: `request-${Date.now()}`,
-            type,
-            dateRange,
-            reason,
-            note,
-            status: "pending",
-          },
-        }),
-      markNotificationRead: (id) => dispatch({ type: "markNotificationRead", payload: { id } }),
-      markAllNotificationsRead: () => dispatch({ type: "markAllNotificationsRead" }),
-      startClock: () => dispatch({ type: "startClock" }),
-      startBreak: () => dispatch({ type: "startBreak" }),
-      endBreak: () => dispatch({ type: "endBreak" }),
-      confirmClockOut: () => dispatch({ type: "confirmClockOut" }),
-      uploadDocument: (payload) => dispatch({ type: "uploadDocument", payload }),
-      switchEmployer: (employerId) => dispatch({ type: "switchEmployer", payload: { employerId } }),
-      joinEmployer: (employerId) => dispatch({ type: "joinEmployer", payload: { employerId } }),
+      unreadNotifications,
+      signIn,
+      register,
+      requestPasswordReset,
+      signOut,
+      completeOnboarding,
+      updateProfile,
+      updateAvailability,
+      createRequest,
+      markNotificationRead,
+      markAllNotificationsRead,
+      startClock,
+      startBreak,
+      endBreak,
+      confirmClockOut,
+      uploadDocument,
+      switchEmployer,
+      joinEmployer,
     }
-  }, [state])
+  }, [
+    createRequest,
+    completeOnboarding,
+    confirmClockOut,
+    joinEmployer,
+    markAllNotificationsRead,
+    markNotificationRead,
+    register,
+    requestPasswordReset,
+    selectedEmployer,
+    signIn,
+    signOut,
+    startBreak,
+    startClock,
+    state,
+    switchEmployer,
+    unreadNotifications,
+    updateAvailability,
+    updateProfile,
+    uploadDocument,
+    endBreak,
+  ])
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

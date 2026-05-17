@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
-import { useEffect, useMemo, useState } from "react"
-import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { memo, useCallback, useEffect, useMemo, useState } from "react"
+import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -11,9 +11,10 @@ import type { HomeTask, NotificationItem, Shift, ShiftStatus } from "@/core/mode
 import {
   AppButton,
   AppScrollScreen,
-  LiquidGlassCloseButton,
+  NativeSheetHeader,
   StatusBadge,
   SurfaceCard,
+  SectionTitle,
 } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
@@ -252,32 +253,22 @@ function SectionHeader({
   title: string
   onAction?: () => void
 }) {
+  const showChevron = actionLabel === "See all" || actionLabel === "All"
   const tokens = useDesignTokens()
 
   return (
-    <View style={styles.sectionHeader}>
-      <Text
-        text={title}
-        size="sm"
-        weight="semiBold"
-        style={[styles.sectionTitle, { color: tokens.textPrimary }]}
-      />
-      <View style={styles.sectionActions}>
-        {badgeLabel ? (
-          <View style={[styles.pendingBadge, { backgroundColor: `${tokens.danger}14` }]}>
-            <Text text={badgeLabel} size="xxs" weight="semiBold" style={{ color: tokens.danger }} />
-          </View>
-        ) : null}
-        {actionLabel && onAction ? (
-          <Pressable onPress={onAction} style={styles.inlineAction}>
-            <Text text={actionLabel} size="xs" weight="medium" style={{ color: tokens.accent }} />
-            {actionLabel === "See all" || actionLabel === "All" ? (
-              <Ionicons color={tokens.accent} name="arrow-forward-outline" size={13} />
-            ) : null}
-          </Pressable>
-        ) : null}
-      </View>
-    </View>
+    <SectionTitle
+      actionIcon={
+        showChevron ? (
+          <Ionicons color={tokens.textSecondary} name="arrow-forward-outline" size={13} />
+        ) : null
+      }
+      actionLabel={actionLabel}
+      badgeLabel={badgeLabel}
+      onAction={onAction}
+      title={title}
+      titleSize="sm"
+    />
   )
 }
 
@@ -331,17 +322,16 @@ function UpcomingShifts({
       <View style={styles.upcomingHeader}>
         <SectionHeader title="Upcoming" actionLabel="See all" onAction={onSeeAll} />
       </View>
-      <ScrollView
+      <FlatList
+        data={shifts}
         horizontal
-        contentInsetAdjustmentBehavior="never"
-        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.upcomingList}
-        style={styles.upcomingScroller}
-      >
-        {shifts.map((shift) => (
-          <UpcomingShiftCard key={shift.id} shift={shift} onPress={() => onShiftPress(shift)} />
-        ))}
-      </ScrollView>
+        keyExtractor={(shift) => shift.id}
+        showsHorizontalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <UpcomingShiftCard shift={item} onPress={() => onShiftPress(item)} />
+        )}
+      />
     </View>
   )
 }
@@ -439,7 +429,7 @@ function ToneIcon({ name, tone }: { name: IconName; tone: Tone }) {
   )
 }
 
-function TaskRow({
+const TaskRow = memo(function TaskRow({
   item,
   onComplete,
   onDismiss,
@@ -502,7 +492,7 @@ function TaskRow({
       )}
     </View>
   )
-}
+})
 
 function TasksSection({
   tasks,
@@ -645,14 +635,7 @@ function TaskDrawer({
       onRequestClose={onClose}
     >
       <View style={[styles.nativeSheet, { backgroundColor: tokens.background }]}>
-        <View style={styles.nativeSheetHeader}>
-          <Text
-            text="All Tasks"
-            weight="bold"
-            style={[styles.sheetTitle, { color: tokens.textPrimary }]}
-          />
-          <LiquidGlassCloseButton onPress={onClose} />
-        </View>
+        <NativeSheetHeader title="All Tasks" onClose={onClose} />
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
           showsVerticalScrollIndicator={false}
@@ -729,12 +712,27 @@ export function HomeScreen() {
     [hiddenTaskIds, state.tasks],
   )
 
-  const navigate = (route: HomeRoute) => router.push(route as never)
-  const openShift = (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never)
-  const completeTask = (task: TaskItem) => {
+  const navigate = useCallback((route: HomeRoute) => router.push(route as never), [router])
+  const openShift = useCallback(
+    (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never),
+    [router],
+  )
+  const completeTask = useCallback(
+    (task: TaskItem) => {
+      setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
+      router.push(task.href as never)
+    },
+    [router],
+  )
+  const hideTask = useCallback((task: TaskItem) => {
     setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
-    router.push(task.href as never)
-  }
+  }, [])
+
+  const openProfile = useCallback(() => navigate("/(app)/(tabs)/profile"), [navigate])
+  const openNotifications = useCallback(() => navigate("/notifications"), [navigate])
+  const openClock = useCallback(() => navigate("/(app)/(tabs)/time"), [navigate])
+  const openSchedule = useCallback(() => navigate("/(app)/(tabs)/schedule"), [navigate])
+  const openDocuments = useCallback(() => navigate("/(app)/(tabs)/documents"), [navigate])
 
   return (
     <>
@@ -745,21 +743,21 @@ export function HomeScreen() {
           greeting={greeting}
           hasUnread={unreadNotifications > 0}
           role={state.profile.role}
-          onEmployerPress={() => navigate("/(app)/(tabs)/profile")}
-          onNotificationsPress={() => navigate("/notifications")}
+          onEmployerPress={openProfile}
+          onNotificationsPress={openNotifications}
         />
 
         <View style={styles.stack}>
           <NextShiftCard
             shift={nextShift}
-            onClockIn={() => navigate("/(app)/(tabs)/time")}
+            onClockIn={openClock}
             onDetails={() => openShift(nextShift)}
           />
 
           <UpcomingShifts
             shifts={upcomingShifts}
             onShiftPress={openShift}
-            onSeeAll={() => navigate("/(app)/(tabs)/schedule")}
+            onSeeAll={openSchedule}
           />
 
           <EarningsCard
@@ -769,15 +767,13 @@ export function HomeScreen() {
             monthLabel={state.earnings.monthLabel}
             shiftsWorked={state.earnings.shiftsWorked}
             targetAmount={state.earnings.targetAmount}
-            onPayslipPress={() => navigate("/(app)/(tabs)/documents")}
+            onPayslipPress={openDocuments}
           />
 
           <TasksSection
             tasks={pendingTasks}
             onComplete={completeTask}
-            onDismiss={(task) =>
-              setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
-            }
+            onDismiss={hideTask}
             onShowAll={() => setIsTaskDrawerVisible(true)}
           />
 
@@ -786,7 +782,7 @@ export function HomeScreen() {
             onNotificationPress={(notification) => {
               if (notification.deepLink) router.push(notification.deepLink as never)
             }}
-            onShowAll={() => navigate("/notifications")}
+            onShowAll={openNotifications}
           />
         </View>
       </AppScrollScreen>
@@ -947,11 +943,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 34,
   },
-  inlineAction: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 3,
-  },
   listCard: {
     borderRadius: 18,
     gap: 0,
@@ -985,13 +976,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 18,
   },
-  nativeSheetHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 22,
-    paddingTop: 18,
-  },
   notificationButton: {
     alignItems: "center",
     borderRadius: 19,
@@ -1016,11 +1000,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 4,
   },
-  pendingBadge: {
-    borderRadius: 20,
-    paddingHorizontal: 9,
-    paddingVertical: 2,
-  },
   progressTrack: {
     borderRadius: 99,
     height: 5,
@@ -1040,24 +1019,6 @@ const styles = StyleSheet.create({
   },
   screenContent: {
     paddingHorizontal: 16,
-  },
-  sectionActions: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  sectionHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    letterSpacing: 0,
-  },
-  sheetTitle: {
-    fontSize: 20,
-    lineHeight: 26,
   },
   stack: {
     gap: 14,
@@ -1125,9 +1086,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 4,
-  },
-  upcomingScroller: {
-    overflow: "visible",
   },
   upcomingSection: {
     marginHorizontal: -16,
