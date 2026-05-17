@@ -1,77 +1,69 @@
-# Welcome to your new ignited app!
+# Vesta Mobile
 
-> The latest and greatest boilerplate for Infinite Red opinions
+Expo Router React Native app for the Vesta employee mobile experience.
 
-This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way to test bleeding-edge changes to our React Native stack.
+## Requirements
 
-- [Quick start documentation](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/Boilerplate.md)
-- [Full documentation](https://github.com/infinitered/ignite/blob/master/docs/README.md)
+- Node.js 20 or newer
+- pnpm
+- Xcode or Android Studio for native simulator builds
+- EAS CLI for local native builds
 
-## Getting Started
+## Setup
 
 ```bash
 pnpm install
-pnpm run start
+pnpm start
 ```
 
-To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier:
+The app uses a development client. Build one before running on a simulator or device:
 
 ```bash
-pnpm run build:ios:sim # build for ios simulator
-pnpm run build:ios:device # build for ios device
-pnpm run build:ios:prod # build for ios device
+pnpm build:ios:sim
+pnpm build:android:sim
 ```
 
-### `./assets`
+For local Android API access, reverse the common development ports:
 
-This directory is designed to organize and store various assets, making it easy for you to manage and use them in your application. The assets are further categorized into subdirectories, including `icons` and `images`:
-
-```tree
-assets
-├── icons
-└── images
+```bash
+pnpm adb
 ```
 
-**icons**
-This is where your icon assets will live. These icons can be used for buttons, navigation elements, or any other UI components. The recommended format for icons is PNG, but other formats can be used as well.
+## Configuration
 
-Ignite comes with a built-in `Icon` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/app/components/Icon.md).
+Runtime config lives in `src/config`.
 
-**images**
-This is where your images will live, such as background images, logos, or any other graphics. You can use various formats such as PNG, JPEG, or GIF for your images.
+- Development API URL: `http://localhost:3000/api/v1`
+- Production API URL: `https://api.vesta.services/api/v1`
+- Demo auth is enabled only in development config.
 
-Another valuable built-in component within Ignite is the `AutoImage` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/Components-AutoImage.md).
+Do not put API secrets, signing keys, or private tokens in the JavaScript config. Mobile bundles are inspectable by end users.
 
-How to use your `icon` or `image` assets:
+## Validation
 
-```typescript
-import { Image } from 'react-native';
+Run these before opening a PR:
 
-const MyComponent = () => {
-  return (
-    <Image source={require('assets/images/my_image.png')} />
-  );
-};
+```bash
+pnpm compile
+pnpm lint:check
+pnpm test --runInBand
+pnpm depcruise
 ```
 
-## Running Maestro end-to-end tests
+`pnpm lint` rewrites files. Use `pnpm lint:check` when you only want validation.
 
-Follow our [Maestro Setup](https://ignitecookbook.com/docs/recipes/MaestroSetup) recipe.
+## Architecture Notes
 
-## Next Steps
+- `src/app` contains Expo Router route files.
+- `src/features` contains feature screens.
+- `src/providers/app-provider.tsx` owns the current local demo session state.
+- `src/services/api` is the boundary for backend integration.
+- `src/design-system` and `src/theme` contain shared UI primitives and tokens.
 
-### Ignite Cookbook
+The repository also contains `design/` and `vesta_mobile_app/` reference artifacts. Treat them as design/prototype inputs, not production app code.
 
-[Ignite Cookbook](https://ignitecookbook.com/) is an easy way for developers to browse and share code snippets (or “recipes”) that actually work.
+## Testing
 
-### Upgrade Ignite boilerplate
+Unit and component tests use Jest with `jest-expo`. Add tests beside the code they cover using `*.test.ts` or `*.test.tsx`.
 
-Read our [Upgrade Guide](https://ignitecookbook.com/docs/recipes/UpdatingIgnite) to learn how to upgrade your Ignite project.
-
-## Community
-
-⭐️ Help us out by [starring on GitHub](https://github.com/infinitered/ignite), filing bug reports in [issues](https://github.com/infinitered/ignite/issues) or [ask questions](https://github.com/infinitered/ignite/discussions).
-
-💬 Join us on [Slack](https://join.slack.com/t/infiniteredcommunity/shared_invite/zt-1f137np4h-zPTq_CbaRFUOR_glUFs2UA) to discuss.
-
-📰 Make our Editor-in-chief happy by [reading the React Native Newsletter](https://reactnativenewsletter.com/).
+Maestro support is scaffolded through `.maestro/shared/_OnFlowStart.yaml`; production E2E flows should live under `.maestro/flows`.

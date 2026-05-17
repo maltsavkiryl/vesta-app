@@ -31,14 +31,36 @@ export interface UserProfile {
   lastName: string
   email: string
   role?: string
+  preferredName: string
   phone: string
   dateOfBirth: string
   nationality: string
   homeCity: string
+  address: {
+    street: string
+    postalCode: string
+    city: string
+    country: string
+  }
+  emergencyContact: {
+    name: string
+    relationship: string
+    phone: string
+  }
   onboardingComplete: boolean
   bio: string
   language: string
   themePreference: "system" | "light" | "dark"
+  security: {
+    faceIdEnabled: boolean
+    biometricType: string
+    passwordLastChangedAt: string
+  }
+  privacy: {
+    analyticsEnabled: boolean
+    crashReportsEnabled: boolean
+    employerDataSharingEnabled: boolean
+  }
   bankAccount: {
     iban: string
     bic: string
@@ -49,6 +71,8 @@ export interface UserProfile {
     nationalRegisterNumber: string
     taxId: string
     socialSecurityNumber: string
+    workPermitStatus: string
+    payrollStatus: string
   }
   notificationPreferences: {
     shiftReminders: boolean
@@ -95,6 +119,11 @@ export interface DocumentItem {
   category: "Identity" | "Payroll" | "Contracts"
   status: DocumentStatus
   ctaLabel: string
+  uploadedAt?: string
+  uploadedFileName?: string
+  uploadedFileSize?: number
+  uploadedMimeType?: string
+  uploadedUri?: string
 }
 
 export interface NotificationItem {

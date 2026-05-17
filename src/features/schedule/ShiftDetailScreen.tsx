@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { Text } from "@/components/Text"
 import { formatShortDate, getShiftTimeRange } from "@/core/date"
 import type { Shift, ShiftStatus } from "@/core/models"
-import { AppScrollScreen } from "@/design-system/primitives"
+import { AppScrollScreen, LiquidGlassCloseButton } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
@@ -73,12 +73,7 @@ function Header({ onClose, shift }: { onClose: () => void; shift: Shift }) {
           style={{ color: tokens.textSecondary }}
         />
       </View>
-      <Pressable
-        onPress={onClose}
-        style={[styles.closeButton, { backgroundColor: tokens.background }]}
-      >
-        <Ionicons color={tokens.textSecondary} name="close-outline" size={18} />
-      </Pressable>
+      <LiquidGlassCloseButton onPress={onClose} />
     </View>
   )
 }
@@ -256,8 +251,10 @@ export function ShiftDetailScreen() {
   if (!shift) {
     return (
       <AppScrollScreen
+        contentInsetAdjustmentBehavior="never"
         contentContainerStyle={styles.screen}
         style={{ backgroundColor: tokens.surfaceSecondary }}
+        topInset="none"
       >
         <Header
           shift={{
@@ -279,8 +276,10 @@ export function ShiftDetailScreen() {
 
   return (
     <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={styles.screen}
       style={{ backgroundColor: tokens.surfaceSecondary }}
+      topInset="none"
     >
       <Header shift={shift} onClose={() => router.back()} />
       <View style={styles.content}>
@@ -398,13 +397,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  closeButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
-  },
   colleagueAvatar: {
     alignItems: "center",
     borderRadius: 11,
@@ -482,7 +474,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   locationCard: {
     alignItems: "center",
@@ -505,6 +497,7 @@ const styles = StyleSheet.create({
   screen: {
     paddingBottom: 36,
     paddingHorizontal: 0,
+    paddingTop: 20,
   },
   statusDot: {
     borderRadius: 4,

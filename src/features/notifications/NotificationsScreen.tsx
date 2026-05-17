@@ -44,70 +44,6 @@ function groupNotification(notification: NotificationItem): GroupKey {
   return "earlier"
 }
 
-function Header({
-  onBack,
-  onClearAll,
-  onMarkAllRead,
-  totalCount,
-  unreadCount,
-}: {
-  onBack: () => void
-  onClearAll: () => void
-  onMarkAllRead: () => void
-  totalCount: number
-  unreadCount: number
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.header, { borderBottomColor: tokens.border }]}>
-      <View style={styles.titleRow}>
-        <Text
-          text="Notifications"
-          weight="bold"
-          style={[styles.title, { color: tokens.textPrimary }]}
-        />
-        {unreadCount > 0 ? (
-          <View style={[styles.unreadBadge, { backgroundColor: tokens.danger }]}>
-            <Text
-              text={String(unreadCount)}
-              size="xxs"
-              weight="bold"
-              style={{ color: "#FFFFFF" }}
-            />
-          </View>
-        ) : null}
-      </View>
-      <View style={styles.headerActions}>
-        {unreadCount > 0 ? (
-          <Pressable onPress={onMarkAllRead}>
-            <Text
-              text="Mark all read"
-              size="xxs"
-              weight="medium"
-              style={{ color: tokens.accent }}
-            />
-          </Pressable>
-        ) : null}
-        {totalCount > 0 ? (
-          <Pressable
-            onPress={onClearAll}
-            style={[styles.headerIconButton, { backgroundColor: tokens.background }]}
-          >
-            <Ionicons color={tokens.textSecondary} name="trash-outline" size={15} />
-          </Pressable>
-        ) : null}
-        <Pressable
-          onPress={onBack}
-          style={[styles.headerIconButton, { backgroundColor: tokens.background }]}
-        >
-          <Ionicons color={tokens.textSecondary} name="close-outline" size={17} />
-        </Pressable>
-      </View>
-    </View>
-  )
-}
-
 function EmptyState() {
   const tokens = useDesignTokens()
 
@@ -189,13 +125,7 @@ function NotificationRow({
           ) : null}
         </View>
       </Pressable>
-      <Pressable
-        onPress={onDismiss}
-        style={[
-          styles.dismissButton,
-          { backgroundColor: tokens.isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)" },
-        ]}
-      >
+      <Pressable onPress={onDismiss} hitSlop={10} style={styles.dismissButton}>
         <Ionicons color={tokens.textMuted} name="close-outline" size={13} />
       </Pressable>
     </View>
@@ -224,7 +154,7 @@ function NotificationGroup({
         weight="semiBold"
         style={[styles.groupLabel, { color: tokens.textMuted }]}
       />
-      <View style={[styles.groupCard, { backgroundColor: tokens.background }]}>
+      <View style={[styles.groupCard, { backgroundColor: tokens.surface }]}>
         {items.map((item) => (
           <NotificationRow
             key={item.id}
@@ -264,20 +194,33 @@ export function NotificationsScreen() {
   return (
     <AppScrollScreen
       contentContainerStyle={styles.screen}
-      style={{ backgroundColor: tokens.surfaceSecondary }}
+      variant="grouped"
+      style={{ backgroundColor: tokens.groupedBackground }}
     >
-      <Header
-        totalCount={visibleNotifications.length}
-        unreadCount={unreadCount}
-        onBack={() => router.back()}
-        onClearAll={() => setHiddenIds(state.notifications.map((item) => item.id))}
-        onMarkAllRead={markAllNotificationsRead}
-      />
-
       {visibleNotifications.length === 0 ? (
         <EmptyState />
       ) : (
         <View style={styles.groups}>
+          {unreadCount > 0 ? (
+            <View style={styles.actionsRow}>
+              <View style={[styles.unreadBadge, { backgroundColor: tokens.danger }]}>
+                <Text
+                  text={`${unreadCount} unread`}
+                  size="xxs"
+                  weight="medium"
+                  style={{ color: "#FFFFFF" }}
+                />
+              </View>
+              <Pressable onPress={markAllNotificationsRead}>
+                <Text
+                  text="Mark all read"
+                  size="xxs"
+                  weight="medium"
+                  style={{ color: tokens.accent }}
+                />
+              </Pressable>
+            </View>
+          ) : null}
           {(["today", "yesterday", "earlier"] as GroupKey[]).map((group) => (
             <NotificationGroup
               key={group}
@@ -311,6 +254,13 @@ export function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
+  actionsRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+    minHeight: 28,
+  },
   bodyText: {
     lineHeight: 18,
     marginBottom: 8,
@@ -338,11 +288,9 @@ const styles = StyleSheet.create({
   },
   dismissButton: {
     alignItems: "center",
-    borderRadius: 12,
-    height: 24,
+    height: 44,
     justifyContent: "center",
-    marginTop: 15,
-    width: 24,
+    width: 34,
   },
   dot: {
     borderRadius: 3.5,
@@ -384,28 +332,6 @@ const styles = StyleSheet.create({
   },
   groups: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  header: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingBottom: 12,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  headerActions: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  headerIconButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
   },
   notificationIcon: {
     alignItems: "center",
@@ -443,21 +369,13 @@ const styles = StyleSheet.create({
   screen: {
     paddingBottom: 40,
     paddingHorizontal: 0,
-  },
-  title: {
-    fontSize: 20,
-    lineHeight: 26,
-  },
-  titleRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 9,
+    paddingTop: 12,
   },
   unreadBadge: {
     alignItems: "center",
     borderRadius: 20,
     minWidth: 22,
     paddingHorizontal: 8,
-    paddingVertical: 1,
+    paddingVertical: 3,
   },
 })

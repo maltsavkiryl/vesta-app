@@ -1018,7 +1018,9 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   nativeSegmentControl: {
+    borderRadius: 14,
     height: 36,
+    overflow: "hidden",
   },
   notificationIcon: {
     alignItems: "center",

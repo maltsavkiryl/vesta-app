@@ -8,7 +8,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
 import type { RequestType } from "@/core/models"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
+import {
+  AppButton,
+  AppScrollScreen,
+  GroupedSection,
+  LiquidGlassCloseButton,
+} from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
@@ -112,13 +117,7 @@ export function RequestScreen() {
             <Text text={`Step ${step} of 3`} size="xxs" style={{ color: tokens.textMuted }} />
           </View>
         </View>
-        <Pressable
-          accessibilityLabel="Close request"
-          onPress={router.back}
-          style={[styles.circleButton, { backgroundColor: tokens.background }]}
-        >
-          <Ionicons color={tokens.textSecondary} name="close-outline" size={16} />
-        </Pressable>
+        <LiquidGlassCloseButton accessibilityLabel="Close request" onPress={router.back} />
       </View>
 
       <View style={[styles.progressTrack, { backgroundColor: tokens.background }]}>
@@ -224,38 +223,39 @@ function RequestTypeStep({
 
   return (
     <View style={styles.stack}>
-      <Text
-        text="What would you like to request?"
-        size="sm"
-        weight="semiBold"
-        style={{ color: tokens.textPrimary }}
-      />
-      {options.map((option) => (
-        <Pressable
-          key={option.id}
-          onPress={() => onSelect(option.id)}
-          style={[
-            styles.typeCard,
-            {
-              backgroundColor: selected === option.id ? tokens.accentSoft : tokens.background,
-              borderColor: selected === option.id ? tokens.accent : tokens.transparent,
-            },
-          ]}
-        >
-          <View style={[styles.typeIcon, { backgroundColor: option.background }]}>
-            <Ionicons color={option.color} name={option.icon} size={22} />
-          </View>
-          <View style={styles.flex}>
-            <Text
-              text={option.title}
-              size="sm"
-              weight="semiBold"
-              style={{ color: tokens.textPrimary }}
-            />
-            <Text text={option.description} size="xs" style={{ color: tokens.textSecondary }} />
-          </View>
-        </Pressable>
-      ))}
+      <GroupedSection title="Request type">
+        {options.map((option, index) => (
+          <Pressable
+            key={option.id}
+            onPress={() => onSelect(option.id)}
+            style={({ pressed }) => [
+              styles.typeRow,
+              { backgroundColor: pressed ? tokens.pressed : tokens.transparent },
+            ]}
+          >
+            <View style={[styles.typeIcon, { backgroundColor: option.background }]}>
+              <Ionicons color={option.color} name={option.icon} size={20} />
+            </View>
+            <View style={styles.flex}>
+              <Text
+                text={option.title}
+                size="xs"
+                weight="medium"
+                style={{ color: tokens.textPrimary }}
+              />
+              <Text text={option.description} size="xxs" style={{ color: tokens.textSecondary }} />
+            </View>
+            {selected === option.id ? (
+              <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+            ) : (
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            )}
+            {index === 0 ? (
+              <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
+            ) : null}
+          </Pressable>
+        ))}
+      </GroupedSection>
     </View>
   )
 }
@@ -273,19 +273,19 @@ function DateStep({
   onContinue: () => void
   onSelect: (dates: string) => void
 }) {
-  const tokens = useDesignTokens()
-
   return (
     <View style={styles.stack}>
-      <Text text="Which dates?" size="sm" weight="semiBold" style={{ color: tokens.textPrimary }} />
-      {dateOptions.map((option) => (
-        <SelectionRow
-          key={option}
-          selected={dates === option}
-          title={option}
-          onPress={() => onSelect(option)}
-        />
-      ))}
+      <GroupedSection title="Dates">
+        {dateOptions.map((option, index) => (
+          <SelectionRow
+            key={option}
+            isLast={index === dateOptions.length - 1}
+            selected={dates === option}
+            title={option}
+            onPress={() => onSelect(option)}
+          />
+        ))}
+      </GroupedSection>
       <StepActions canContinue={canContinue} onBack={onBack} onContinue={onContinue} />
     </View>
   )
@@ -314,49 +314,29 @@ function SwapStep({
 
   return (
     <View style={styles.stack}>
-      <Text
-        text="Which shift do you want to swap?"
-        size="sm"
-        weight="semiBold"
-        style={{ color: tokens.textPrimary }}
-      />
-      <Text
-        text="MY SHIFT TO SWAP:"
-        size="xxs"
-        weight="medium"
-        style={{ color: tokens.textSecondary }}
-      />
-      {shiftOptions.map((shift) => (
-        <SelectionRow
-          key={shift.id}
-          selected={myShiftId === shift.id}
-          subtitle={shift.time}
-          title={shift.label}
-          onPress={() => onShiftSelect(shift.id)}
-        />
-      ))}
+      <GroupedSection title="My shift to swap">
+        {shiftOptions.map((shift, index) => (
+          <SelectionRow
+            key={shift.id}
+            isLast={index === shiftOptions.length - 1}
+            selected={myShiftId === shift.id}
+            subtitle={shift.time}
+            title={shift.label}
+            onPress={() => onShiftSelect(shift.id)}
+          />
+        ))}
+      </GroupedSection>
 
       {myShiftId ? (
-        <View style={styles.stack}>
-          <View style={styles.colleagueLabel}>
-            <Ionicons color={tokens.textMuted} name="people-outline" size={14} />
-            <Text
-              text="Swap with a colleague:"
-              size="xs"
-              weight="medium"
-              style={{ color: tokens.textSecondary }}
-            />
-          </View>
-          {colleagueOptions.map((colleague) => (
+        <GroupedSection title="Swap with">
+          {colleagueOptions.map((colleague, index) => (
             <Pressable
               key={colleague.id}
               onPress={() => onColleagueSelect(colleague.id)}
-              style={[
+              style={({ pressed }) => [
                 styles.colleagueRow,
                 {
-                  backgroundColor:
-                    colleagueId === colleague.id ? tokens.accentSoft : tokens.background,
-                  borderColor: colleagueId === colleague.id ? tokens.accent : tokens.transparent,
+                  backgroundColor: pressed ? tokens.pressed : tokens.transparent,
                 },
               ]}
             >
@@ -388,10 +368,15 @@ function SwapStep({
                 />
                 <Text text={colleague.shift} size="xxs" style={{ color: tokens.textSecondary }} />
               </View>
-              {colleagueId === colleague.id ? <Checkmark /> : null}
+              {colleagueId === colleague.id ? (
+                <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+              ) : null}
+              {index < colleagueOptions.length - 1 ? (
+                <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
+              ) : null}
             </Pressable>
           ))}
-        </View>
+        </GroupedSection>
       ) : null}
 
       <StepActions canContinue={canContinue} onBack={onBack} onContinue={onContinue} />
@@ -424,37 +409,33 @@ function ReasonStep({
 
   return (
     <View style={styles.stack}>
-      <Text
-        text="Reason (optional)"
-        size="sm"
-        weight="semiBold"
-        style={{ color: tokens.textPrimary }}
-      />
-      <View style={styles.reasonWrap}>
-        {reasons.map((option) => {
-          const selected = option === reason
-          return (
-            <Pressable
-              key={option}
-              onPress={() => onReasonChange(selected ? "" : option)}
-              style={[
-                styles.reasonChip,
-                {
-                  backgroundColor: selected ? tokens.accent : tokens.background,
-                  borderColor: selected ? tokens.accent : tokens.border,
-                },
-              ]}
-            >
-              <Text
-                text={option}
-                size="xxs"
-                weight="medium"
-                style={{ color: selected ? tokens.accentForeground : tokens.textPrimary }}
-              />
-            </Pressable>
-          )
-        })}
-      </View>
+      <GroupedSection title="Reason">
+        <View style={styles.reasonWrap}>
+          {reasons.map((option) => {
+            const selected = option === reason
+            return (
+              <Pressable
+                key={option}
+                onPress={() => onReasonChange(selected ? "" : option)}
+                style={[
+                  styles.reasonChip,
+                  {
+                    backgroundColor: selected ? tokens.accent : tokens.surfaceSecondary,
+                    borderColor: selected ? tokens.accent : tokens.transparent,
+                  },
+                ]}
+              >
+                <Text
+                  text={option}
+                  size="xxs"
+                  weight="medium"
+                  style={{ color: selected ? tokens.accentForeground : tokens.textPrimary }}
+                />
+              </Pressable>
+            )
+          })}
+        </View>
+      </GroupedSection>
 
       <View style={[styles.inputShell, { backgroundColor: tokens.searchBackground }]}>
         <Text text="NOTE" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
@@ -489,11 +470,13 @@ function ReasonStep({
 }
 
 function SelectionRow({
+  isLast,
   selected,
   subtitle,
   title,
   onPress,
 }: {
+  isLast?: boolean
   selected: boolean
   subtitle?: string
   title: string
@@ -504,11 +487,10 @@ function SelectionRow({
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.selectionRow,
         {
-          backgroundColor: selected ? tokens.accentSoft : tokens.background,
-          borderColor: selected ? tokens.accent : tokens.transparent,
+          backgroundColor: pressed ? tokens.pressed : tokens.transparent,
         },
       ]}
     >
@@ -523,7 +505,10 @@ function SelectionRow({
           <Text text={subtitle} size="xxs" style={{ color: tokens.textSecondary }} />
         ) : null}
       </View>
-      {selected ? <Checkmark /> : null}
+      {selected ? <Ionicons color={tokens.accent} name="checkmark-outline" size={18} /> : null}
+      {!isLast ? (
+        <View style={[styles.selectionDivider, { backgroundColor: tokens.separator }]} />
+      ) : null}
     </Pressable>
   )
 }
@@ -562,27 +547,11 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function Checkmark() {
-  const tokens = useDesignTokens()
-  return (
-    <View style={[styles.checkmark, { backgroundColor: tokens.accent }]}>
-      <Ionicons color={tokens.accentForeground} name="checkmark-outline" size={12} />
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   actionRow: {
     flexDirection: "row",
     gap: 8,
     marginTop: 8,
-  },
-  checkmark: {
-    alignItems: "center",
-    borderRadius: 10,
-    height: 20,
-    justifyContent: "center",
-    width: 20,
   },
   circleButton: {
     alignItems: "center",
@@ -591,18 +560,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 32,
   },
-  colleagueLabel: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 6,
-  },
   colleagueRow: {
     alignItems: "center",
-    borderRadius: 12,
-    borderWidth: 1.5,
     flexDirection: "row",
     gap: 12,
-    paddingHorizontal: 14,
+    minHeight: 60,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   content: {
@@ -679,20 +642,35 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
+    padding: 14,
+  },
+  rowDivider: {
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    left: 60,
+    position: "absolute",
+    right: 0,
   },
   screen: {
     flexGrow: 1,
     paddingBottom: 40,
     paddingHorizontal: 0,
   },
+  selectionDivider: {
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    left: 16,
+    position: "absolute",
+    right: 0,
+  },
   selectionRow: {
     alignItems: "center",
-    borderRadius: 14,
-    borderWidth: 1.5,
     flexDirection: "row",
+    gap: 12,
     justifyContent: "space-between",
+    minHeight: 58,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
   },
   stack: {
     gap: 10,
@@ -716,19 +694,19 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: "space-between",
   },
-  typeCard: {
-    alignItems: "center",
-    borderRadius: 16,
-    borderWidth: 1.5,
-    flexDirection: "row",
-    gap: 14,
-    padding: 16,
-  },
   typeIcon: {
     alignItems: "center",
-    borderRadius: 13,
-    height: 48,
+    borderRadius: 10,
+    height: 36,
     justifyContent: "center",
-    width: 48,
+    width: 36,
+  },
+  typeRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 64,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
 })

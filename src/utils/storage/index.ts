@@ -1,6 +1,8 @@
 import { MMKV } from "react-native-mmkv"
 
-export const storage = new MMKV()
+export const storage = new MMKV({
+  id: "vesta-mobile.storage",
+})
 
 /**
  * Loads a string from storage.
@@ -37,12 +39,11 @@ export function saveString(key: string, value: string): boolean {
  * @param key The key to fetch.
  */
 export function load<T>(key: string): T | null {
-  let almostThere: string | null = null
   try {
-    almostThere = loadString(key)
-    return JSON.parse(almostThere ?? "") as T
+    const value = loadString(key)
+    return value ? (JSON.parse(value) as T) : null
   } catch {
-    return (almostThere as T) ?? null
+    return null
   }
 }
 

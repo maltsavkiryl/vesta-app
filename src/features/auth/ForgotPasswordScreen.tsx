@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { useState } from "react"
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -11,12 +11,13 @@ import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
 import { AuthError, AuthScaffold } from "./AuthScaffold"
+import { AuthTextField } from "./AuthTextField"
 
 export function ForgotPasswordScreen() {
   const router = useRouter()
   const tokens = useDesignTokens()
   const { requestPasswordReset } = useAppSession()
-  const [email, setEmail] = useState("sofia.fischer@email.com")
+  const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -31,7 +32,11 @@ export function ForgotPasswordScreen() {
   }
 
   return (
-    <AuthScaffold title={"Reset your\npassword."} subtitle="We'll send a reset link to your email.">
+    <AuthScaffold
+      scrollEnabled={false}
+      title={"Reset your\npassword."}
+      subtitle="We'll send a reset link to your email."
+    >
       {submitted ? (
         <View style={styles.sentState}>
           <View style={[styles.sentIcon, { backgroundColor: tokens.accentSoft }]}>
@@ -59,18 +64,18 @@ export function ForgotPasswordScreen() {
       ) : (
         <>
           <AuthError message={error} />
-          <View style={[styles.fieldShell, { backgroundColor: tokens.searchBackground }]}>
-            <Text text="EMAIL" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
-            <TextInput
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onChangeText={setEmail}
-              placeholder="you@email.com"
-              placeholderTextColor={tokens.textMuted}
-              style={[styles.nativeInput, { color: tokens.textPrimary }]}
-              value={email}
-            />
-          </View>
+          <AuthTextField
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            label="Email"
+            onChangeText={setEmail}
+            placeholder="you@email.com"
+            returnKeyType="done"
+            textContentType="username"
+            value={email}
+            onSubmitEditing={handleReset}
+          />
           <AppButton label="Send reset link" onPress={handleReset} />
           <AppButton
             label="Back to sign in"
@@ -84,18 +89,6 @@ export function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  fieldShell: {
-    borderRadius: 14,
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  nativeInput: {
-    fontSize: 16,
-    lineHeight: 22,
-    minHeight: 24,
-    padding: 0,
-  },
   sentIcon: {
     alignItems: "center",
     borderRadius: 32,

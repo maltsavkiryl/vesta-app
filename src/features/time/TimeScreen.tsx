@@ -9,9 +9,16 @@ import { format } from "date-fns"
 import { Text } from "@/components/Text"
 import { getClockSnapshot } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
+import {
+  AppButton,
+  AppScrollScreen,
+  LiquidGlassCloseButton,
+  StatusBadge,
+  SurfaceCard,
+} from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
+import { formatCurrency } from "@/utils/formatters"
 
 const weekData = [
   { day: "M", hours: 6 },
@@ -41,21 +48,15 @@ function formatHours(seconds: number) {
 function Header({ status }: { status: "idle" | "working" | "onBreak" }) {
   const tokens = useDesignTokens()
   const isActive = status !== "idle"
-  const color = status === "onBreak" ? tokens.warning : tokens.success
 
   return (
     <View style={styles.header}>
       <Text text="Time" weight="bold" style={[styles.headerTitle, { color: tokens.textPrimary }]} />
       {isActive ? (
-        <View style={[styles.statusBadge, { backgroundColor: `${color}18` }]}>
-          <View style={[styles.statusDot, { backgroundColor: color }]} />
-          <Text
-            text={status === "onBreak" ? "On break" : "Working"}
-            size="xxs"
-            weight="semiBold"
-            style={{ color }}
-          />
-        </View>
+        <StatusBadge
+          label={status === "onBreak" ? "On break" : "Working"}
+          tone={status === "onBreak" ? "warning" : "success"}
+        />
       ) : null}
     </View>
   )
@@ -66,7 +67,7 @@ function IdleClockCard({ onClockIn }: { onClockIn: () => void }) {
   const { state } = useAppSession()
 
   return (
-    <View style={[styles.card, styles.clockCard, { backgroundColor: tokens.surface }]}>
+    <SurfaceCard elevated style={styles.clockCard}>
       <View style={styles.idleCopy}>
         <Text
           text="TODAY'S SHIFT"
@@ -120,7 +121,7 @@ function IdleClockCard({ onClockIn }: { onClockIn: () => void }) {
       </View>
 
       <AppButton label="Clock in" onPress={onClockIn} />
-    </View>
+    </SurfaceCard>
   )
 }
 
@@ -147,33 +148,52 @@ function ActiveClockCard({
   const { state } = useAppSession()
   const isOnBreak = status === "onBreak"
   const progress = Math.min((elapsedSeconds / (6 * 3600)) * 100, 100)
-  const ringColor = isOnBreak ? tokens.warning : tokens.accent
+  const toneColor = isOnBreak ? tokens.warning : tokens.success
 
   return (
-    <View style={[styles.card, styles.activeCard, { backgroundColor: tokens.surface }]}>
-      <View style={styles.ringWrap}>
-        <View style={[styles.ringOuter, { borderColor: `${ringColor}33` }]}>
-          <View style={[styles.ringInner, { borderColor: ringColor }]}>
-            <Text
-              text={isOnBreak ? "ON BREAK" : "WORKING"}
-              size="xxs"
-              weight="semiBold"
-              style={[styles.caps, { color: isOnBreak ? tokens.warning : tokens.textMuted }]}
-            />
-            <Text
-              text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
-              weight="bold"
-              style={[
-                styles.activeTimer,
-                { color: isOnBreak ? tokens.warning : tokens.textPrimary },
-              ]}
-            />
-            <Text
-              text={isOnBreak ? `${formatSeconds(elapsedSeconds)} worked` : "since 17:00"}
-              size="xxs"
-              style={{ color: isOnBreak ? tokens.accent : tokens.textSecondary }}
-            />
-          </View>
+    <SurfaceCard elevated style={styles.activeCard}>
+      <View style={styles.activeHeader}>
+        <View style={styles.flex}>
+          <Text
+            text={isOnBreak ? "Break in progress" : "Current shift"}
+            size="xs"
+            weight="semiBold"
+            style={{ color: tokens.textPrimary }}
+          />
+          <Text
+            text={`${state.clockSession.scheduledStart} - ${state.clockSession.scheduledEnd} · ${state.clockSession.role}`}
+            numberOfLines={1}
+            size="xxs"
+            style={{ color: tokens.textSecondary }}
+          />
+        </View>
+        <StatusBadge
+          label={isOnBreak ? "On break" : "Working"}
+          tone={isOnBreak ? "warning" : "success"}
+        />
+      </View>
+
+      <View style={[styles.timerPanel, { backgroundColor: tokens.backgroundMuted }]}>
+        <Text
+          text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
+          weight="bold"
+          style={[
+            styles.activeTimer,
+            { color: isOnBreak ? tokens.warning : tokens.textPrimary },
+          ]}
+        />
+        <Text
+          text={isOnBreak ? `${formatSeconds(elapsedSeconds)} worked` : "since 17:00"}
+          size="xs"
+          style={{ color: tokens.textSecondary }}
+        />
+        <View style={[styles.shiftProgressTrack, { backgroundColor: tokens.surfaceTertiary }]}>
+          <View
+            style={[
+              styles.shiftProgressFill,
+              { backgroundColor: toneColor, width: `${progress}%` },
+            ]}
+          />
         </View>
         <Text
           text={`${Math.round(progress)}% of 6h shift${totalBreakSeconds > 0 ? ` · ${formatHours(totalBreakSeconds)} break` : ""}`}
@@ -182,10 +202,25 @@ function ActiveClockCard({
         />
       </View>
 
-      <View style={styles.statsGrid}>
-        <StatChip label="Role" value={state.clockSession.role} />
-        <StatChip label="Earning" value={earnings} />
-        <StatChip label="Rate" value={`€${state.earnings.averageHourlyRate.toFixed(2)}/h`} />
+      <View style={styles.summaryRows}>
+        <SummaryRow
+          color={tokens.success}
+          icon="cash-outline"
+          label="Earnings"
+          value={earnings}
+        />
+        <SummaryRow
+          color={tokens.accent}
+          icon="trending-up-outline"
+          label="Hourly rate"
+          value={`${formatCurrency(state.earnings.averageHourlyRate)}/h`}
+        />
+        <SummaryRow
+          color={tokens.warning}
+          icon="cafe-outline"
+          label="Break time"
+          value={formatHours(totalBreakSeconds)}
+        />
       </View>
 
       <View
@@ -211,6 +246,7 @@ function ActiveClockCard({
             { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}24` },
           ]}
         >
+          <Ionicons color={tokens.warning} name="play-outline" size={17} />
           <Text text="End break" size="xs" weight="semiBold" style={{ color: tokens.warning }} />
         </Pressable>
       ) : (
@@ -241,27 +277,30 @@ function ActiveClockCard({
           </Pressable>
         </View>
       )}
-    </View>
+    </SurfaceCard>
   )
 }
 
-function StatChip({ label, value }: { label: string; value: string }) {
+function SummaryRow({
+  color,
+  icon,
+  label,
+  value,
+}: {
+  color: string
+  icon: keyof typeof Ionicons.glyphMap
+  label: string
+  value: string
+}) {
   const tokens = useDesignTokens()
 
   return (
-    <View style={[styles.statChip, { backgroundColor: tokens.background }]}>
-      <Text
-        text={label.toUpperCase()}
-        size="xxs"
-        style={[styles.caps, { color: tokens.textMuted, fontSize: 10 }]}
-      />
-      <Text
-        text={value}
-        numberOfLines={1}
-        size="xxs"
-        weight="semiBold"
-        style={{ color: tokens.textPrimary }}
-      />
+    <View style={[styles.summaryRow, { borderBottomColor: tokens.border }]}>
+      <View style={[styles.summaryIcon, { backgroundColor: `${color}14` }]}>
+        <Ionicons color={color} name={icon} size={16} />
+      </View>
+      <Text text={label} size="xs" style={[styles.flex, { color: tokens.textSecondary }]} />
+      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
     </View>
   )
 }
@@ -314,7 +353,7 @@ function WeeklySummary({ weekTotal }: { weekTotal: number }) {
   const progress = Math.min((weekTotal / target) * 100, 100)
 
   return (
-    <View style={[styles.card, styles.weekCard, { backgroundColor: tokens.surface }]}>
+    <SurfaceCard style={styles.weekCard}>
       <View style={styles.weekHeader}>
         <View>
           <Text
@@ -324,7 +363,7 @@ function WeeklySummary({ weekTotal }: { weekTotal: number }) {
             style={{ color: tokens.textPrimary }}
           />
           <Text
-            text={`${weekTotal.toFixed(1)}h · €${(weekTotal * 12.02).toFixed(2)} est.`}
+            text={`${weekTotal.toFixed(1)}h · ${formatCurrency(weekTotal * 12.02)} est.`}
             size="xxs"
             style={{ color: tokens.textSecondary }}
           />
@@ -344,7 +383,7 @@ function WeeklySummary({ weekTotal }: { weekTotal: number }) {
           style={[styles.progressFill, { backgroundColor: tokens.accent, width: `${progress}%` }]}
         />
       </View>
-    </View>
+    </SurfaceCard>
   )
 }
 
@@ -535,13 +574,7 @@ function EntriesDrawer({
               style={{ color: tokens.textSecondary }}
             />
           </View>
-          <Pressable
-            accessibilityLabel="Close"
-            onPress={onClose}
-            style={[styles.sheetCloseButton, { backgroundColor: tokens.surface }]}
-          >
-            <Ionicons color={tokens.textSecondary} name="close-outline" size={18} />
-          </Pressable>
+          <LiquidGlassCloseButton onPress={onClose} />
         </View>
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
@@ -602,7 +635,7 @@ export function TimeScreen() {
       )
     : 0
   const payableSeconds = snapshot.payableSeconds
-  const earnings = `€${((payableSeconds / 3600) * state.earnings.averageHourlyRate).toFixed(2)}`
+  const earnings = formatCurrency((payableSeconds / 3600) * state.earnings.averageHourlyRate)
   const totalBreakSeconds = snapshot.breakSeconds
   const weekTotal =
     weekData.filter((item) => !item.today).reduce((sum, item) => sum + item.hours, 0) +
@@ -614,7 +647,7 @@ export function TimeScreen() {
 
   return (
     <>
-      <AppScrollScreen contentContainerStyle={styles.screen}>
+      <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
         <Header status={state.clockSession.state} />
 
         {state.clockSession.state === "idle" ? (
@@ -676,11 +709,8 @@ const styles = StyleSheet.create({
   caps: {
     letterSpacing: 0,
   },
-  card: {
-    borderCurve: "continuous",
-    borderRadius: 20,
-  },
   clockCard: {
+    borderRadius: 20,
     gap: 20,
     paddingHorizontal: 20,
     paddingVertical: 22,
@@ -868,13 +898,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     letterSpacing: 0,
   },
-  sheetCloseButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
-  },
   sheetTitle: {
     fontSize: 20,
     lineHeight: 26,
@@ -882,32 +905,6 @@ const styles = StyleSheet.create({
   shiftTime: {
     fontSize: 26,
     lineHeight: 31,
-  },
-  statChip: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    flex: 1,
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  statusBadge: {
-    alignItems: "center",
-    borderRadius: 20,
-    flexDirection: "row",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  statusDot: {
-    borderRadius: 3,
-    height: 6,
-    width: 6,
   },
   verified: {
     alignItems: "center",

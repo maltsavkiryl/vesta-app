@@ -1,11 +1,13 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react"
 import { format } from "date-fns"
 
+import Config from "@/config"
 import { formatTimeLabel, getClockSnapshot } from "@/core/date"
 import { buildNewTimeEntry, createInitialState } from "@/core/mockState"
 import type {
   AppStoreState,
   AvailabilityDay,
+  DocumentItem,
   Employer,
   RequestItem,
   UserProfile,
@@ -13,6 +15,26 @@ import type {
 import { load, save } from "@/utils/storage"
 
 const APP_STATE_STORAGE_KEY = "vesta-mobile.app-state"
+const APP_STATE_STORAGE_VERSION = 1
+
+export const DEMO_AUTH_CREDENTIALS = {
+  email: "demo.employee@vesta.local",
+  password: "demo-password",
+} as const
+
+type AuthResult = { ok: true } | { ok: false; message: string }
+type PersistedAppState = {
+  version: typeof APP_STATE_STORAGE_VERSION
+  state: AppStoreState
+}
+type DocumentUploadPayload = {
+  documentId?: string
+  fileName: string
+  fileSize?: number
+  mimeType?: string
+  title: string
+  uri: string
+}
 
 type AppAction =
   | { type: "hydrate"; payload: AppStoreState }
@@ -29,7 +51,7 @@ type AppAction =
   | { type: "startBreak" }
   | { type: "endBreak" }
   | { type: "confirmClockOut" }
-  | { type: "completeDocumentTask"; payload: { id: string } }
+  | { type: "uploadDocument"; payload: DocumentUploadPayload }
   | { type: "switchEmployer"; payload: { employerId: string } }
   | { type: "joinEmployer"; payload: { employerId: string } }
   | { type: "recordPasswordReset"; payload: { email: string } }
@@ -166,25 +188,47 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
         },
       }
     }
-    case "completeDocumentTask":
+    case "uploadDocument": {
+      const uploadedAt = new Date().toISOString()
+      const uploadDetails = {
+        ctaLabel: "View file",
+        status: "processing" as const,
+        subtitle: "Uploaded for HR review",
+        uploadedAt,
+        uploadedFileName: action.payload.fileName,
+        uploadedFileSize: action.payload.fileSize,
+        uploadedMimeType: action.payload.mimeType,
+        uploadedUri: action.payload.uri,
+      }
+      const updatedDocuments = action.payload.documentId
+        ? state.documents.map((document) =>
+            document.id === action.payload.documentId
+              ? {
+                  ...document,
+                  ...uploadDetails,
+                }
+              : document,
+          )
+        : [
+            {
+              id: `document-${Date.now()}`,
+              title: action.payload.title,
+              category: "Identity",
+              ...uploadDetails,
+            } satisfies DocumentItem,
+            ...state.documents,
+          ]
+
       return {
         ...state,
-        documents: state.documents.map((document) =>
-          document.id === action.payload.id
-            ? {
-                ...document,
-                status: "verified",
-                subtitle: "Uploaded and verified",
-                ctaLabel: "View file",
-              }
-            : document,
-        ),
+        documents: updatedDocuments,
         tasks: state.tasks.map((task) =>
           task.href.includes("documents")
             ? { ...task, completed: true, actionLabel: "Done" }
             : task,
         ),
       }
+    }
     case "switchEmployer":
       return {
         ...state,
@@ -222,7 +266,7 @@ export interface AppContextValue {
   needsOnboarding: boolean
   selectedEmployer?: Employer
   unreadNotifications: number
-  signIn: (payload: { email: string; password: string }) => void
+  signIn: (payload: { email: string; password: string }) => AuthResult
   register: (payload: {
     firstName: string
     lastName: string
@@ -246,22 +290,75 @@ export interface AppContextValue {
   startBreak: () => void
   endBreak: () => void
   confirmClockOut: () => void
-  completeDocumentTask: (id: string) => void
+  uploadDocument: (payload: DocumentUploadPayload) => void
   switchEmployer: (employerId: string) => void
   joinEmployer: (employerId: string) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase()
+}
+
+function sanitizeProfileForPersistence(profile: UserProfile): UserProfile {
+  return {
+    ...profile,
+    bankAccount: {
+      iban: "",
+      bic: "",
+      bankName: "",
+      accountHolder: "",
+    },
+    legal: {
+      nationalRegisterNumber: "",
+      taxId: "",
+      socialSecurityNumber: "",
+      workPermitStatus: profile.legal.workPermitStatus,
+      payrollStatus: profile.legal.payrollStatus,
+    },
+  }
+}
+
+export function createStateForPersistence(state: AppStoreState): PersistedAppState {
+  return {
+    version: APP_STATE_STORAGE_VERSION,
+    state: {
+      ...state,
+      profile: sanitizeProfileForPersistence(state.profile),
+    },
+  }
+}
+
+export function restorePersistedState(persisted: PersistedAppState | null): AppStoreState {
+  const initialState = createInitialState()
+
+  if (!persisted || persisted.version !== APP_STATE_STORAGE_VERSION) {
+    return initialState
+  }
+
+  return {
+    ...initialState,
+    ...persisted.state,
+    profile: sanitizeProfileForPersistence({
+      ...initialState.profile,
+      ...persisted.state.profile,
+    }),
+    employerDirectory: initialState.employerDirectory,
+    earnings: initialState.earnings,
+    highlights: initialState.highlights,
+  }
+}
+
 function getStoredState() {
-  return load<AppStoreState>(APP_STATE_STORAGE_KEY) ?? createInitialState()
+  return restorePersistedState(load<PersistedAppState>(APP_STATE_STORAGE_KEY))
 }
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [state, dispatch] = useReducer(reducer, undefined, getStoredState)
 
   useEffect(() => {
-    save(APP_STATE_STORAGE_KEY, state)
+    save(APP_STATE_STORAGE_KEY, createStateForPersistence(state))
   }, [state])
 
   const value = useMemo<AppContextValue>(() => {
@@ -275,7 +372,24 @@ export function AppProvider({ children }: PropsWithChildren) {
       needsOnboarding: state.authStatus === "signedIn" && !state.profile.onboardingComplete,
       selectedEmployer,
       unreadNotifications: state.notifications.filter((notification) => notification.unread).length,
-      signIn: ({ email }) => dispatch({ type: "signIn", payload: { email } }),
+      signIn: ({ email, password }) => {
+        const normalizedEmail = normalizeEmail(email)
+        const credentialsMatch =
+          normalizedEmail === DEMO_AUTH_CREDENTIALS.email &&
+          password === DEMO_AUTH_CREDENTIALS.password
+
+        if (!Config.DEMO_AUTH_ENABLED || !credentialsMatch) {
+          return {
+            ok: false,
+            message: Config.DEMO_AUTH_ENABLED
+              ? "Use the demo credentials or connect the production auth service."
+              : "Production authentication is not connected yet.",
+          }
+        }
+
+        dispatch({ type: "signIn", payload: { email: normalizedEmail } })
+        return { ok: true }
+      },
       register: ({ firstName, lastName, email }) =>
         dispatch({ type: "register", payload: { firstName, lastName, email } }),
       requestPasswordReset: (email) =>
@@ -302,7 +416,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       startBreak: () => dispatch({ type: "startBreak" }),
       endBreak: () => dispatch({ type: "endBreak" }),
       confirmClockOut: () => dispatch({ type: "confirmClockOut" }),
-      completeDocumentTask: (id) => dispatch({ type: "completeDocumentTask", payload: { id } }),
+      uploadDocument: (payload) => dispatch({ type: "uploadDocument", payload }),
       switchEmployer: (employerId) => dispatch({ type: "switchEmployer", payload: { employerId } }),
       joinEmployer: (employerId) => dispatch({ type: "joinEmployer", payload: { employerId } }),
     }

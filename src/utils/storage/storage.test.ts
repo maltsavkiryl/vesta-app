@@ -22,8 +22,14 @@ describe("MMKV Storage", () => {
     expect(load<object>("object")).toEqual(VALUE_OBJECT)
     expect(loadString("object")).toEqual(VALUE_STRING)
 
-    expect(load<string>("string")).toEqual("string")
+    expect(load<string>("string")).toBeNull()
     expect(loadString("string")).toEqual("string")
+  })
+
+  it("returns null for malformed JSON", () => {
+    storage.set("bad-json", "{not json")
+
+    expect(load<object>("bad-json")).toBeNull()
   })
 
   it("should save strings", () => {

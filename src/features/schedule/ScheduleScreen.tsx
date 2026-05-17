@@ -6,22 +6,17 @@ import SegmentedControl from "@react-native-segmented-control/segmented-control"
 
 import { Text } from "@/components/Text"
 import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
-import type {
-  AvailabilityDay,
-  AvailabilityStatus,
-  RequestItem,
-  Shift,
-  ShiftStatus,
-} from "@/core/models"
+import type { AvailabilityDay, AvailabilityStatus, RequestItem, Shift } from "@/core/models"
 import {
   AppButton,
   AppScrollScreen,
+  GroupedSection,
+  MetricGrid,
   PageHeader,
   Pill,
   SurfaceCard,
 } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
-import type { DesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
 type Segment = "shifts" | "availability" | "requests"
@@ -30,12 +25,6 @@ const segmentLabels: Record<Segment, string> = {
   shifts: "Shifts",
   availability: "Availability",
   requests: "Requests",
-}
-
-const statusToneByShiftStatus: Record<ShiftStatus, "success" | "warning" | "neutral"> = {
-  changed: "warning",
-  confirmed: "success",
-  pending: "neutral",
 }
 
 const availabilityCopy: Record<
@@ -61,14 +50,6 @@ const availabilityCopy: Record<
     label: "Unavailable",
     tone: "neutral",
   },
-}
-
-function getShiftStatusColor(tokens: DesignTokens, status: ShiftStatus) {
-  return {
-    changed: tokens.warning,
-    confirmed: tokens.success,
-    pending: tokens.textMuted,
-  }[status]
 }
 
 function getRequestTone(status: RequestItem["status"]) {
@@ -101,11 +82,9 @@ function NativeSegmentControl({
     }),
     [tokens.textPrimary],
   )
-
   return (
     <SegmentedControl
       appearance={tokens.isDark ? "dark" : "light"}
-      backgroundColor={tokens.isDark ? "rgba(116, 116, 128, 0.22)" : "rgba(116, 116, 128, 0.10)"}
       fontStyle={fontStyle}
       selectedIndex={selectedIndex}
       style={styles.nativeSegmentControl}
@@ -134,43 +113,29 @@ function SummaryCard({
   const tokens = useDesignTokens()
 
   return (
-    <SurfaceCard style={[styles.summaryCard, { backgroundColor: tokens.heroStart }]}>
-      <View style={styles.summaryHeader}>
-        <View style={styles.flex}>
-          <Text
-            text={formatFullDate(selectedDate)}
-            size="xs"
-            weight="semiBold"
-            style={{ color: tokens.heroText }}
-          />
-          <Text
-            text={`${selectedShiftCount} shift${selectedShiftCount === 1 ? "" : "s"} scheduled`}
-            size="xxs"
-            style={{ color: tokens.heroTextMuted }}
-          />
+    <GroupedSection title={formatFullDate(selectedDate)}>
+      <View style={styles.summaryBody}>
+        <View style={styles.summaryHeader}>
+          <View style={styles.flex}>
+            <Text
+              text={`${selectedShiftCount} shift${selectedShiftCount === 1 ? "" : "s"} scheduled`}
+              size="xs"
+              weight="semiBold"
+              style={{ color: tokens.textPrimary }}
+            />
+            <Text text="Weekly overview" size="xxs" style={{ color: tokens.textSecondary }} />
+          </View>
+          <Ionicons color={tokens.textMuted} name="calendar-outline" size={20} />
         </View>
-        <View style={[styles.summaryIcon, { backgroundColor: tokens.accentSoft }]}>
-          <Ionicons color={tokens.accent} name="calendar-outline" size={22} />
-        </View>
+        <MetricGrid
+          items={[
+            { label: "Available", value: `${weeklyAvailabilityCount}d` },
+            { label: "Requests", value: String(totalRequestCount) },
+            { label: "This week", value: "23.5h" },
+          ]}
+        />
       </View>
-
-      <View style={styles.summaryStats}>
-        <MiniStat label="Available" value={`${weeklyAvailabilityCount}d`} />
-        <MiniStat label="Requests" value={String(totalRequestCount)} />
-        <MiniStat label="This week" value="23.5h" />
-      </View>
-    </SurfaceCard>
-  )
-}
-
-function MiniStat({ label, value }: { label: string; value: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.miniStat, { backgroundColor: tokens.surface }]}>
-      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
-      <Text text={label} size="xxs" style={{ color: tokens.textMuted }} />
-    </View>
+    </GroupedSection>
   )
 }
 
@@ -239,55 +204,75 @@ function DateStrip({
   )
 }
 
-function ShiftCard({ shift, onPress }: { shift: Shift; onPress: () => void }) {
+function ShiftRow({ shift, onPress }: { shift: Shift; onPress: () => void }) {
   const tokens = useDesignTokens()
-  const statusColor = getShiftStatusColor(tokens, shift.status)
+  const statusColor = {
+    changed: tokens.warning,
+    confirmed: tokens.success,
+    pending: tokens.textMuted,
+  }[shift.status]
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [{ opacity: pressed ? 0.72 : 1 }]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.shiftPressable,
+        { opacity: pressed ? 0.78 : 1, transform: [{ scale: pressed ? 0.99 : 1 }] },
+      ]}
+    >
       <SurfaceCard style={styles.shiftCard}>
-        <View style={styles.shiftTop}>
-          <View style={[styles.shiftDate, { backgroundColor: tokens.surfaceSecondary }]}>
-            <Text
-              text={shift.dayLabel}
-              size="xxs"
-              weight="medium"
-              style={{ color: tokens.textMuted }}
-            />
-            <Text
-              text={formatShortDate(shift.date).replace("May ", "")}
-              size="sm"
-              weight="semiBold"
-              style={{ color: tokens.textPrimary }}
-            />
-          </View>
-          <View style={styles.flex}>
+        <View style={[styles.shiftDate, { backgroundColor: tokens.backgroundMuted }]}>
+          <Text
+            text={shift.dayLabel}
+            size="xxs"
+            weight="medium"
+            style={{ color: tokens.textMuted }}
+          />
+          <Text
+            text={formatShortDate(shift.date).replace("May ", "")}
+            size="sm"
+            weight="semiBold"
+            style={{ color: tokens.textPrimary }}
+          />
+        </View>
+        <View style={styles.shiftBody}>
+          <View style={styles.shiftPrimaryRow}>
             <Text
               text={getShiftTimeRange(shift)}
-              size="sm"
+              numberOfLines={1}
+              size="xs"
               weight="semiBold"
-              style={{ color: tokens.textPrimary }}
+              style={[styles.shiftTime, { color: tokens.textPrimary }]}
             />
-            <Text
-              text={`${shift.role} - ${shift.venueName}`}
-              size="xxs"
-              style={{ color: tokens.textSecondary }}
-            />
+            <View style={styles.shiftTrailing}>
+              <View style={styles.shiftStatus}>
+                <View style={[styles.shiftStatusDot, { backgroundColor: statusColor }]} />
+                <Text
+                  text={shift.status}
+                  numberOfLines={1}
+                  size="xxs"
+                  weight="medium"
+                  style={{ color: statusColor }}
+                />
+              </View>
+              <Ionicons color={tokens.textMuted} name="chevron-forward" size={17} />
+            </View>
           </View>
-          <View style={styles.statusGroup}>
-            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-            <Ionicons color={tokens.textMuted} name="chevron-forward" size={16} />
-          </View>
-        </View>
-        <View style={styles.shiftFooter}>
-          <Ionicons color={tokens.textMuted} name="location-outline" size={14} />
           <Text
-            text={shift.venueAddress}
+            text={`${shift.role} - ${shift.venueName}`}
             numberOfLines={1}
             size="xxs"
-            style={[styles.flex, { color: tokens.textMuted }]}
+            style={{ color: tokens.textSecondary }}
           />
-          <Pill label={shift.status} tone={statusToneByShiftStatus[shift.status]} />
+          <View style={styles.shiftFooter}>
+            <Ionicons color={tokens.textMuted} name="location-outline" size={13} />
+            <Text
+              text={shift.venueAddress}
+              numberOfLines={1}
+              size="xxs"
+              style={[styles.flex, { color: tokens.textMuted }]}
+            />
+          </View>
         </View>
       </SurfaceCard>
     </Pressable>
@@ -333,7 +318,7 @@ function AvailabilityRow({ day, onPress }: { day: AvailabilityDay; onPress: () =
       ]}
     >
       <View style={[styles.availabilityIcon, { backgroundColor: tokens.surfaceSecondary }]}>
-        <Ionicons color={tokens.accent} name={copy.icon} size={19} />
+        <Ionicons color={tokens.textSecondary} name={copy.icon} size={19} />
       </View>
       <View style={styles.flex}>
         <Text
@@ -350,6 +335,7 @@ function AvailabilityRow({ day, onPress }: { day: AvailabilityDay; onPress: () =
         />
       </View>
       <Pill label={copy.label} tone={copy.tone} />
+      <Ionicons color={tokens.textMuted} name="chevron-forward" size={16} />
     </Pressable>
   )
 }
@@ -405,7 +391,7 @@ export function ScheduleScreen() {
   }, [selectedDate, state.shifts])
 
   const selectedDayShifts = shiftsByDate.get(selectedDate) ?? []
-  const upcomingShifts = state.shifts.filter((shift) => shift.date >= selectedDate).slice(0, 6)
+  const upcomingShifts = state.shifts.filter((shift) => shift.date > selectedDate).slice(0, 6)
   const weeklyAvailability = Object.values(state.availability).slice(0, 7)
   const weeklyAvailabilityCount = weeklyAvailability.filter(
     (day) => day.status === "available" || day.status === "preferred",
@@ -414,7 +400,7 @@ export function ScheduleScreen() {
   const openShift = (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never)
 
   return (
-    <AppScrollScreen>
+    <AppScrollScreen variant="grouped">
       <PageHeader eyebrow={selectedEmployer?.name ?? "Schedule"} title="Schedule" />
       <SummaryCard
         selectedDate={selectedDate}
@@ -450,7 +436,7 @@ export function ScheduleScreen() {
 
           {selectedDayShifts.length > 0 ? (
             selectedDayShifts.map((shift) => (
-              <ShiftCard key={shift.id} shift={shift} onPress={() => openShift(shift)} />
+              <ShiftRow key={shift.id} shift={shift} onPress={() => openShift(shift)} />
             ))
           ) : (
             <EmptyPanel
@@ -469,7 +455,7 @@ export function ScheduleScreen() {
                 style={[styles.capsLabel, { color: tokens.textMuted }]}
               />
               {upcomingShifts.map((shift) => (
-                <ShiftCard
+                <ShiftRow
                   key={`upcoming-${shift.id}`}
                   shift={shift}
                   onPress={() => openShift(shift)}
@@ -482,7 +468,11 @@ export function ScheduleScreen() {
 
       {segment === "availability" ? (
         <View style={styles.stack}>
-          <SurfaceCard style={styles.availabilityCard}>
+          <GroupedSection
+            actionLabel="Set"
+            title="This week"
+            onAction={() => router.push(`/(app)/availability/${selectedDate}` as never)}
+          >
             {weeklyAvailability.map((day) => (
               <AvailabilityRow
                 key={day.date}
@@ -490,29 +480,34 @@ export function ScheduleScreen() {
                 onPress={() => router.push(`/(app)/availability/${day.date}` as never)}
               />
             ))}
-          </SurfaceCard>
-          <AppButton
-            label="Set availability"
-            onPress={() => router.push(`/(app)/availability/${selectedDate}` as never)}
-          />
+          </GroupedSection>
         </View>
       ) : null}
 
       {segment === "requests" ? (
         <View style={styles.stack}>
-          <AppButton label="New request" onPress={() => router.push("/(app)/request" as never)} />
           {state.requests.length > 0 ? (
-            <SurfaceCard style={styles.requestCard}>
+            <GroupedSection
+              actionLabel="New"
+              title="Requests"
+              onAction={() => router.push("/(app)/request" as never)}
+            >
               {state.requests.map((request) => (
                 <RequestRow key={request.id} request={request} />
               ))}
-            </SurfaceCard>
+            </GroupedSection>
           ) : (
-            <EmptyPanel
-              icon="file-tray-outline"
-              title="No requests"
-              subtitle="Time off and shift swap requests will appear here."
-            />
+            <>
+              <AppButton
+                label="New request"
+                onPress={() => router.push("/(app)/request" as never)}
+              />
+              <EmptyPanel
+                icon="file-tray-outline"
+                title="No requests"
+                subtitle="Time off and shift swap requests will appear here."
+              />
+            </>
           )}
         </View>
       ) : null}
@@ -521,11 +516,6 @@ export function ScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
-  availabilityCard: {
-    gap: 0,
-    paddingBottom: 0,
-    paddingTop: 0,
-  },
   availabilityIcon: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -540,6 +530,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     minHeight: 68,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   capsLabel: {
@@ -548,12 +539,12 @@ const styles = StyleSheet.create({
   dateButton: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 14,
+    borderRadius: 13,
     borderWidth: StyleSheet.hairlineWidth,
     gap: 2,
-    height: 74,
+    height: 68,
     justifyContent: "center",
-    width: 48,
+    width: 46,
   },
   dateStrip: {
     flexDirection: "row",
@@ -578,21 +569,8 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  miniStat: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 10,
-    flex: 1,
-    gap: 2,
-    paddingVertical: 10,
-  },
   nativeSegmentControl: {
-    height: 36,
-  },
-  requestCard: {
-    gap: 0,
-    paddingBottom: 0,
-    paddingTop: 0,
+    height: 34,
   },
   requestIcon: {
     alignItems: "center",
@@ -608,6 +586,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     minHeight: 72,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   sectionHeader: {
@@ -615,14 +594,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  shiftBody: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
   shiftCard: {
-    gap: 12,
+    alignItems: "center",
+    borderRadius: 18,
+    flexDirection: "row",
+    gap: 13,
+    minHeight: 92,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
   },
   shiftDate: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 10,
-    height: 48,
+    borderRadius: 11,
+    height: 50,
     justifyContent: "center",
     width: 44,
   },
@@ -636,44 +626,46 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 6,
+    marginTop: 6,
   },
-  shiftTop: {
+  shiftPrimaryRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
+  },
+  shiftPressable: {
+    borderCurve: "continuous",
+    borderRadius: 18,
+  },
+  shiftStatus: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 5,
+  },
+  shiftStatusDot: {
+    borderRadius: 4,
+    height: 7,
+    width: 7,
+  },
+  shiftTime: {
+    fontSize: 18,
+    lineHeight: 23,
+  },
+  shiftTrailing: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 7,
   },
   stack: {
     gap: 14,
   },
-  statusDot: {
-    borderRadius: 3,
-    height: 6,
-    width: 6,
-  },
-  statusGroup: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  summaryCard: {
-    borderRadius: 16,
-    gap: 16,
+  summaryBody: {
+    gap: 12,
+    padding: 14,
   },
   summaryHeader: {
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
-  },
-  summaryIcon: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    height: 48,
-    justifyContent: "center",
-    width: 48,
-  },
-  summaryStats: {
-    flexDirection: "row",
-    gap: 8,
   },
 })

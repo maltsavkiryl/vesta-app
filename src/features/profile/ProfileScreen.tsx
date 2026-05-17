@@ -1,24 +1,40 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
-import { useMemo, useState } from "react"
-import { Modal, Pressable, StyleSheet, View } from "react-native"
+import { useMemo } from "react"
+import { Alert, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { Text } from "@/components/Text"
-import { AppScrollScreen, Pill, SurfaceCard } from "@/design-system/primitives"
+import {
+  AppScrollScreen,
+  GroupedSection,
+  ListRow,
+  MetricGrid,
+  Pill,
+  SurfaceCard,
+} from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 import { useAppTheme } from "@/theme/context"
+import { maskIban } from "@/utils/formatters"
 
 type ProfileSection = "personal" | "employment" | "settings" | "support"
 type ProfileRoute =
   | "/profile/personal"
+  | "/profile/contact"
+  | "/profile/address"
+  | "/profile/appearance"
   | "/profile/preferences"
+  | "/profile/language"
   | "/profile/employers"
+  | "/profile/switch-employer"
   | "/profile/banking"
   | "/profile/legal"
+  | "/profile/security"
+  | "/profile/privacy"
+  | "/profile/support"
 
 interface ProfileRowItem {
   icon: keyof typeof Ionicons.glyphMap
@@ -46,10 +62,6 @@ function getInitials(firstName: string, lastName: string) {
 function capitalize(value?: string) {
   if (!value) return "Waiter"
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
-}
-
-function maskIban(iban: string) {
-  return iban.length > 7 ? `${iban.slice(0, 7)}•••` : iban
 }
 
 function formatWorkedHours(hours: number) {
@@ -125,27 +137,7 @@ function StatCard({
     value: string
   }>
 }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <SurfaceCard style={styles.statsCard}>
-      {stats.map((stat, index) => (
-        <View
-          key={stat.label}
-          style={[
-            styles.statCell,
-            index < stats.length - 1 && {
-              borderRightColor: tokens.border,
-              borderRightWidth: StyleSheet.hairlineWidth,
-            },
-          ]}
-        >
-          <Text text={stat.value} size="md" weight="bold" style={{ color: tokens.textPrimary }} />
-          <Text text={stat.label} size="xxs" style={{ color: tokens.textSecondary }} />
-        </View>
-      ))}
-    </SurfaceCard>
-  )
+  return <MetricGrid items={stats} />
 }
 
 function CompletenessCard({ progress }: { progress: number }) {
@@ -183,26 +175,16 @@ function CompletenessCard({ progress }: { progress: number }) {
 }
 
 function ProfileSectionCard({ items, title }: { items: ProfileRowItem[]; title: string }) {
-  const tokens = useDesignTokens()
-
   return (
-    <View style={styles.section}>
-      <Text
-        text={title.toUpperCase()}
-        size="xxs"
-        weight="medium"
-        style={[styles.sectionTitle, { color: tokens.textMuted }]}
-      />
-      <View style={[styles.sectionCard, { backgroundColor: tokens.surface }]}>
-        {items.map((item, index) => (
-          <ProfileRow
-            key={`${title}-${item.label}`}
-            item={item}
-            isLast={index === items.length - 1}
-          />
-        ))}
-      </View>
-    </View>
+    <GroupedSection title={title}>
+      {items.map((item, index) => (
+        <ProfileRow
+          key={`${title}-${item.label}`}
+          item={item}
+          isLast={index === items.length - 1}
+        />
+      ))}
+    </GroupedSection>
   )
 }
 
@@ -223,47 +205,29 @@ function ProfileRow({ item, isLast }: { item: ProfileRowItem; isLast: boolean })
   }
 
   return (
-    <Pressable
-      accessibilityRole={canPress ? "button" : undefined}
-      disabled={!canPress}
-      onPress={handlePress}
-      style={({ pressed }) => [
-        styles.rowButton,
-        {
-          borderBottomColor: tokens.transparent,
-          opacity: pressed ? 0.68 : 1,
-        },
-      ]}
-    >
-      <Ionicons
-        color={item.destructive ? tokens.danger : tokens.textSecondary}
-        name={item.icon}
-        size={17}
-        style={styles.rowIcon}
-      />
-      <View style={styles.rowText}>
-        <Text
-          text={item.label}
-          size="xs"
-          weight="normal"
-          style={{ color: item.destructive ? tokens.danger : tokens.textPrimary }}
+    <ListRow
+      title={item.label}
+      subtitle={item.value}
+      destructive={item.destructive}
+      isLast={isLast}
+      onPress={canPress ? handlePress : undefined}
+      leading={
+        <Ionicons
+          color={item.destructive ? tokens.danger : tokens.textSecondary}
+          name={item.icon}
+          size={17}
+          style={styles.rowIcon}
         />
-        {item.value ? (
-          <Text
-            text={item.value}
-            numberOfLines={1}
-            size="xxs"
-            style={{ color: tokens.textMuted }}
-          />
-        ) : null}
-        {item.badge ? <Pill label={item.badge} tone="accent" /> : null}
-      </View>
-      {item.rightAccessory ??
-        (item.showChevron !== false && canPress ? (
+      }
+      trailing={
+        item.rightAccessory ??
+        (item.badge ? (
+          <Pill label={item.badge} tone="accent" />
+        ) : item.showChevron !== false && canPress ? (
           <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
-        ) : null)}
-      {!isLast ? <View style={[styles.rowDivider, { backgroundColor: tokens.border }]} /> : null}
-    </Pressable>
+        ) : null)
+      }
+    />
   )
 }
 
@@ -310,64 +274,11 @@ function TogglePill({ active }: { active: boolean }) {
   )
 }
 
-function ConfirmDialog({
-  message,
-  onCancel,
-  onConfirm,
-  title,
-}: {
-  message: string
-  onCancel: () => void
-  onConfirm: () => void
-  title: string
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <Modal animationType="fade" transparent visible onRequestClose={onCancel}>
-      <View style={styles.confirmOverlay}>
-        <Pressable style={styles.confirmBackdrop} onPress={onCancel} />
-        <View style={[styles.confirmCard, { backgroundColor: tokens.surface }]}>
-          <View style={[styles.confirmIcon, { backgroundColor: `${tokens.danger}14` }]}>
-            <Ionicons color={tokens.danger} name="warning-outline" size={23} />
-          </View>
-          <Text
-            text={title}
-            size="sm"
-            weight="bold"
-            style={{ color: tokens.textPrimary, textAlign: "center" }}
-          />
-          <Text
-            text={message}
-            size="xs"
-            style={{ color: tokens.textSecondary, textAlign: "center" }}
-          />
-          <View style={styles.confirmActions}>
-            <Pressable
-              onPress={onConfirm}
-              style={[styles.confirmDanger, { backgroundColor: tokens.danger }]}
-            >
-              <Text text="Sign out" size="xs" weight="semiBold" style={{ color: "#FFFFFF" }} />
-            </Pressable>
-            <Pressable
-              onPress={onCancel}
-              style={[styles.confirmCancel, { backgroundColor: tokens.background }]}
-            >
-              <Text text="Cancel" size="xs" weight="medium" style={{ color: tokens.textPrimary }} />
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  )
-}
-
 export function ProfileScreen() {
   const tokens = useDesignTokens()
   const router = useRouter()
-  const { themeContext, setThemeContextOverride } = useAppTheme()
-  const { state, selectedEmployer, signOut, updateProfile } = useAppSession()
-  const [showSignOut, setShowSignOut] = useState(false)
+  const { themeContext } = useAppTheme()
+  const { state, selectedEmployer, signOut } = useAppSession()
 
   const fullName = `${state.profile.firstName} ${state.profile.lastName}`
   const role = capitalize(state.profile.role)
@@ -391,13 +302,20 @@ export function ProfileScreen() {
   )
 
   const handleSignOut = () => {
-    setShowSignOut(true)
-  }
-
-  const toggleAppearance = () => {
-    const nextTheme = themeContext === "dark" ? "light" : "dark"
-    updateProfile({ themePreference: nextTheme })
-    setThemeContextOverride(nextTheme)
+    Alert.alert("Sign out?", "You'll need to sign in again to access your account.", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Sign out",
+        style: "destructive",
+        onPress: () => {
+          signOut()
+          router.replace("/(auth)/sign-in")
+        },
+      },
+    ])
   }
 
   const sections: Record<ProfileSection, ProfileRowItem[]> = {
@@ -411,14 +329,14 @@ export function ProfileScreen() {
       {
         icon: "mail-outline",
         label: "Contact details",
-        route: "/profile/personal",
+        route: "/profile/contact",
         value: state.profile.email,
       },
       {
         icon: "location-outline",
         label: "Address",
-        route: "/profile/personal",
-        value: `${state.profile.homeCity}, Belgium`,
+        route: "/profile/address",
+        value: `${state.profile.address.city || state.profile.homeCity}, ${state.profile.address.country}`,
       },
       {
         icon: "card-outline",
@@ -444,7 +362,7 @@ export function ProfileScreen() {
       {
         icon: "refresh-outline",
         label: "Switch employer",
-        route: "/profile/employers",
+        route: state.employers.length > 1 ? "/profile/switch-employer" : "/profile/employers",
         value: `Currently: ${employerName}`,
       },
     ],
@@ -452,7 +370,7 @@ export function ProfileScreen() {
       {
         icon: themeContext === "dark" ? "moon-outline" : "sunny-outline",
         label: "Appearance",
-        onPress: toggleAppearance,
+        route: "/profile/appearance",
         rightAccessory: createRightLabel(themeContext === "dark" ? "Dark" : "Light", tokens),
         value: themeContext === "dark" ? "Dark" : "Light",
       },
@@ -466,19 +384,19 @@ export function ProfileScreen() {
       {
         icon: "globe-outline",
         label: "Language",
-        route: "/profile/preferences",
+        route: "/profile/language",
         value: state.profile.language,
       },
       {
         icon: "shield-checkmark-outline",
         label: "Security",
-        route: "/profile/legal",
-        value: "Password, Face ID",
+        route: "/profile/security",
+        value: `Password, ${state.profile.security.biometricType}`,
       },
       {
         icon: "lock-closed-outline",
         label: "Privacy",
-        route: "/profile/legal",
+        route: "/profile/privacy",
         value: "Data & permissions",
       },
     ],
@@ -486,14 +404,14 @@ export function ProfileScreen() {
       {
         icon: "help-circle-outline",
         label: "Help & support",
-        route: "/profile/preferences",
+        route: "/profile/support",
         value: "FAQs, contact Vesta",
       },
     ],
   }
 
   return (
-    <AppScrollScreen contentContainerStyle={styles.screenContent}>
+    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
       <ProfileHeader
         email={state.profile.email}
         employerName={employerName}
@@ -502,7 +420,9 @@ export function ProfileScreen() {
         role={role}
       />
 
-      <StatCard stats={stats} />
+      <SurfaceCard style={styles.statsWrapper}>
+        <StatCard stats={stats} />
+      </SurfaceCard>
       <CompletenessCard progress={profileCompleteness} />
 
       {Object.entries(sections).map(([section, items]) => (
@@ -513,7 +433,7 @@ export function ProfileScreen() {
         />
       ))}
 
-      <View style={[styles.signOutCard, { backgroundColor: tokens.surface }]}>
+      <GroupedSection>
         <ProfileRow
           isLast
           item={{
@@ -524,22 +444,9 @@ export function ProfileScreen() {
             showChevron: false,
           }}
         />
-      </View>
+      </GroupedSection>
 
       <VersionFooter />
-
-      {showSignOut ? (
-        <ConfirmDialog
-          title="Sign out?"
-          message="You'll need to sign in again to access your account."
-          onCancel={() => setShowSignOut(false)}
-          onConfirm={() => {
-            setShowSignOut(false)
-            signOut()
-            router.replace("/(auth)/sign-in")
-          }}
-        />
-      ) : null}
     </AppScrollScreen>
   )
 }
@@ -584,51 +491,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-  confirmActions: {
-    gap: 8,
-    marginTop: 10,
-    width: "100%",
-  },
-  confirmBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.40)",
-  },
-  confirmCancel: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    padding: 13,
-  },
-  confirmCard: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 20,
-    gap: 8,
-    maxWidth: 310,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    width: "100%",
-  },
-  confirmDanger: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    padding: 13,
-  },
-  confirmIcon: {
-    alignItems: "center",
-    borderRadius: 24,
-    height: 48,
-    justifyContent: "center",
-    marginBottom: 2,
-    width: 48,
-  },
-  confirmOverlay: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-  },
   employerPill: {
     alignItems: "center",
     alignSelf: "center",
@@ -667,68 +529,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
-  rowButton: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 48,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  rowDivider: {
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-    left: 45,
-    position: "absolute",
-    right: 0,
-  },
   rowIcon: {
     width: 17,
   },
-  rowText: {
-    flex: 1,
-    gap: 2,
-    minWidth: 0,
-  },
   screenContent: {
-    gap: 0,
+    gap: 16,
     paddingHorizontal: 16,
   },
-  section: {
-    marginBottom: 24,
-  },
-  sectionCard: {
+  statsWrapper: {
     borderRadius: 16,
-    gap: 0,
-    overflow: "hidden",
-    padding: 0,
-  },
-  sectionTitle: {
-    letterSpacing: 0.5,
-    marginBottom: 8,
-    paddingLeft: 4,
-  },
-  signOutCard: {
-    borderRadius: 16,
-    gap: 0,
-    marginBottom: 20,
-    overflow: "hidden",
-    padding: 0,
-  },
-  statCell: {
-    alignItems: "center",
-    flex: 1,
-    gap: 2,
-    paddingHorizontal: 8,
-    paddingVertical: 14,
-  },
-  statsCard: {
-    borderRadius: 16,
-    flexDirection: "row",
-    gap: 0,
-    marginBottom: 20,
-    padding: 0,
+    padding: 10,
   },
   statusDot: {
     borderRadius: 3,

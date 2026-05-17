@@ -36,6 +36,21 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         ],
       },
     },
-    plugins: [...existingPlugins],
+    plugins: [
+      ...existingPlugins,
+      [
+        "expo-image-picker",
+        {
+          cameraPermission: "Allow Vesta to take photos of documents for upload.",
+          photosPermission: "Allow Vesta to choose document photos for upload.",
+        },
+      ],
+      [
+        "expo-local-authentication",
+        {
+          faceIDPermission: "Allow Vesta to use Face ID to unlock the app.",
+        },
+      ],
+    ],
   }
 }

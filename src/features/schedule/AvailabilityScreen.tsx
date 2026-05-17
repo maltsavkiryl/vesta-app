@@ -10,7 +10,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Text } from "@/components/Text"
 import { formatFullDate } from "@/core/date"
 import type { AvailabilityStatus } from "@/core/models"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
+import {
+  AppButton,
+  AppScrollScreen,
+  GroupedSection,
+  LiquidGlassCloseButton,
+} from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
@@ -81,8 +86,10 @@ export function AvailabilityScreen() {
 
   return (
     <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
       style={{ backgroundColor: tokens.surfaceSecondary }}
+      topInset="none"
     >
       <View style={styles.header}>
         <View>
@@ -93,24 +100,15 @@ export function AvailabilityScreen() {
           />
           <Text text={dateFull} size="xs" style={{ color: tokens.textSecondary, marginTop: 2 }} />
         </View>
-        <Pressable
+        <LiquidGlassCloseButton
           accessibilityLabel="Close availability editor"
           onPress={router.back}
-          style={[styles.closeButton, { backgroundColor: tokens.background }]}
-        >
-          <Ionicons color={tokens.textSecondary} name="close-outline" size={16} />
-        </Pressable>
+        />
       </View>
 
       <View style={styles.content}>
-        <Text
-          text="AVAILABILITY STATUS"
-          size="xxs"
-          weight="semiBold"
-          style={{ color: tokens.textMuted }}
-        />
-        <View style={styles.statusGrid}>
-          {(Object.keys(statusOptions) as AvailabilityStatus[]).map((candidate) => {
+        <GroupedSection title="Availability status">
+          {(Object.keys(statusOptions) as AvailabilityStatus[]).map((candidate, index, items) => {
             const option = statusOptions[candidate]
             const active = candidate === status
             const activeColor =
@@ -118,51 +116,54 @@ export function AvailabilityScreen() {
                 ? tokens.success
                 : option.tone === "accent"
                   ? tokens.accent
-                  : tokens.textPrimary
+                  : tokens.textSecondary
 
             return (
               <Pressable
                 key={candidate}
                 onPress={() => setStatus(candidate)}
-                style={[
-                  styles.statusCard,
+                style={({ pressed }) => [
+                  styles.statusRow,
                   {
-                    backgroundColor: active ? activeColor : tokens.background,
-                    borderColor: active ? activeColor : tokens.border,
+                    backgroundColor: pressed ? tokens.pressed : tokens.transparent,
                   },
                 ]}
               >
-                <Text
-                  text={option.label}
-                  size="xxs"
-                  weight="semiBold"
-                  style={{
-                    color: active ? tokens.accentForeground : tokens.textPrimary,
-                    textAlign: "center",
-                  }}
-                />
-                <Text
-                  text={option.description}
-                  style={{
-                    color: active ? "rgba(255, 255, 255, 0.72)" : tokens.textMuted,
-                    fontSize: 10,
-                    lineHeight: 13,
-                    textAlign: "center",
-                  }}
-                />
+                <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
+                  <Ionicons
+                    color={activeColor}
+                    name={
+                      candidate === "preferred"
+                        ? "star-outline"
+                        : candidate === "available"
+                          ? "checkmark-circle-outline"
+                          : "remove-circle-outline"
+                    }
+                    size={18}
+                  />
+                </View>
+                <View style={styles.flex}>
+                  <Text
+                    text={option.label}
+                    size="xs"
+                    weight="medium"
+                    style={{ color: tokens.textPrimary }}
+                  />
+                  <Text text={option.description} size="xxs" style={{ color: tokens.textMuted }} />
+                </View>
+                {active ? (
+                  <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+                ) : null}
+                {index < items.length - 1 ? (
+                  <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
+                ) : null}
               </Pressable>
             )
           })}
-        </View>
+        </GroupedSection>
 
         {status !== "unavailable" ? (
-          <View style={styles.timeSection}>
-            <Text
-              text="WORKING HOURS"
-              size="xxs"
-              weight="semiBold"
-              style={{ color: tokens.textMuted }}
-            />
+          <GroupedSection title="Working hours">
             <View style={styles.timeRow}>
               <TimeField label="From" value={startTime} onChange={setStartTime} />
               <Text
@@ -178,7 +179,7 @@ export function AvailabilityScreen() {
               size="xs"
               style={{ color: tokens.textSecondary, textAlign: "center" }}
             />
-          </View>
+          </GroupedSection>
         ) : null}
 
         <AppButton
@@ -302,17 +303,13 @@ function RoundIconButton({
 }
 
 const styles = StyleSheet.create({
-  closeButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
-  },
   content: {
-    gap: 10,
+    gap: 18,
     paddingHorizontal: 22,
     paddingTop: 4,
+  },
+  flex: {
+    flex: 1,
   },
   header: {
     alignItems: "flex-start",
@@ -334,26 +331,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 34,
   },
+  rowDivider: {
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    left: 62,
+    position: "absolute",
+    right: 0,
+  },
   screen: {
     flexGrow: 1,
     paddingBottom: 30,
     paddingHorizontal: 0,
   },
-  statusCard: {
+  statusGlyph: {
     alignItems: "center",
-    borderRadius: 14,
-    borderWidth: 1,
-    flex: 1,
-    gap: 4,
+    borderRadius: 10,
+    height: 34,
     justifyContent: "center",
-    minHeight: 66,
-    paddingHorizontal: 6,
-    paddingVertical: 12,
+    width: 34,
   },
-  statusGrid: {
+  statusRow: {
+    alignItems: "center",
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 10,
+    gap: 12,
+    minHeight: 62,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   stepperRow: {
     alignItems: "center",
@@ -366,7 +369,6 @@ const styles = StyleSheet.create({
   },
   timeField: {
     alignItems: "center",
-    borderRadius: 16,
     flex: 1,
     gap: 10,
     paddingHorizontal: 10,
@@ -376,9 +378,5 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     flexDirection: "row",
     gap: 10,
-  },
-  timeSection: {
-    gap: 10,
-    marginBottom: 10,
   },
 })

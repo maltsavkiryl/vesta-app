@@ -1,0 +1,11 @@
+appId: ${MAESTRO_APP_ID}
+onFlowStart:
+  - runFlow: ../shared/_OnFlowStart.yaml
+---
+- assertVisible: "Welcome"
+- tapOn: "you@email.com"
+- inputText: "demo.employee@vesta.local"
+- tapOn: "Password"
+- inputText: "demo-password"
+- tapOn: "Sign in"
+- assertVisible: "Home"

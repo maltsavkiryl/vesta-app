@@ -1,18 +1,25 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
-import { useMemo, useState } from "react"
-import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native"
+import { useEffect, useMemo, useState } from "react"
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import SegmentedControl from "@react-native-segmented-control/segmented-control"
 
 import { Text } from "@/components/Text"
 import type { DocumentItem, DocumentStatus } from "@/core/models"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
+import { AppButton, AppScrollScreen, LiquidGlassCloseButton } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
 type Category = "required" | "payslips" | "contracts"
+type UploadTarget = { id?: string; title: string }
+type SelectedUploadAsset = {
+  fileName: string
+  fileSize?: number
+  mimeType?: string
+  uri: string
+}
 
 interface Payslip {
   id: string
@@ -37,6 +44,8 @@ const categories: { id: Category; label: string }[] = [
   { id: "payslips", label: "Payslips" },
   { id: "contracts", label: "Contracts" },
 ]
+const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+const ACCEPTED_UPLOAD_TYPES = ["application/pdf", "image/jpeg", "image/png"]
 
 const payslips: Payslip[] = [
   {
@@ -438,23 +447,110 @@ function ContractCard({
 }
 
 function UploadSheet({
-  documentName,
+  target,
   onClose,
   onComplete,
 }: {
-  documentName: string | null
+  target: UploadTarget | null
   onClose: () => void
-  onComplete: () => void
+  onComplete: (asset: SelectedUploadAsset) => void
 }) {
   const tokens = useDesignTokens()
+  const documentName = target?.title ?? null
+  const [error, setError] = useState<string | null>(null)
+  const [selectedAsset, setSelectedAsset] = useState<SelectedUploadAsset | null>(null)
   const [uploading, setUploading] = useState(false)
+
+  useEffect(() => {
+    setError(null)
+    setSelectedAsset(null)
+    setUploading(false)
+  }, [documentName])
+
+  const validateAndSelectAsset = (asset: SelectedUploadAsset) => {
+    if (asset.fileSize && asset.fileSize > MAX_UPLOAD_SIZE_BYTES) {
+      setError("Choose a file smaller than 10 MB.")
+      return
+    }
+
+    if (asset.mimeType && !ACCEPTED_UPLOAD_TYPES.includes(asset.mimeType)) {
+      setError("Upload a PDF, JPG, or PNG file.")
+      return
+    }
+
+    setError(null)
+    setSelectedAsset(asset)
+  }
+
+  const takePhoto = async () => {
+    try {
+      const ImagePicker = await import("expo-image-picker")
+      const permission = await ImagePicker.requestCameraPermissionsAsync()
+      if (!permission.granted) {
+        Alert.alert("Camera access needed", "Allow camera access to take a document photo.")
+        return
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        quality: 0.85,
+      })
+
+      if (result.canceled) return
+      const asset = result.assets[0]
+      if (!asset) return
+
+      validateAndSelectAsset({
+        fileName: asset.fileName ?? "document-photo.jpg",
+        fileSize: asset.fileSize,
+        mimeType: asset.mimeType ?? "image/jpeg",
+        uri: asset.uri,
+      })
+    } catch {
+      Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
+    }
+  }
+
+  const browseFiles = async () => {
+    try {
+      const DocumentPicker = await import("expo-document-picker")
+      const result = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: true,
+        multiple: false,
+        type: ACCEPTED_UPLOAD_TYPES,
+      })
+
+      if (result.canceled) return
+      const asset = result.assets[0]
+      if (!asset) return
+
+      validateAndSelectAsset({
+        fileName: asset.name,
+        fileSize: asset.size,
+        mimeType: asset.mimeType,
+        uri: asset.uri,
+      })
+    } catch {
+      Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
+    }
+  }
+
+  const submitUpload = () => {
+    if (!selectedAsset) {
+      setError("Choose a file before uploading.")
+      return
+    }
+
+    setUploading(true)
+    setTimeout(() => onComplete(selectedAsset), 500)
+  }
 
   return (
     <Modal
       allowSwipeDismissal={!uploading}
       animationType="slide"
       presentationStyle="pageSheet"
-      visible={documentName !== null}
+      visible={target !== null}
       onRequestClose={uploading ? () => undefined : onClose}
     >
       <View style={[styles.nativeSheet, { backgroundColor: tokens.background }]}>
@@ -469,14 +565,7 @@ function UploadSheet({
               <Text text={documentName} size="xxs" style={{ color: tokens.textSecondary }} />
             ) : null}
           </View>
-          <Pressable
-            accessibilityLabel="Close"
-            disabled={uploading}
-            onPress={onClose}
-            style={[styles.sheetCloseButton, { backgroundColor: tokens.surface }]}
-          >
-            <Ionicons color={tokens.textSecondary} name="close-outline" size={18} />
-          </Pressable>
+          <LiquidGlassCloseButton onPress={uploading ? () => undefined : onClose} />
         </View>
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
@@ -514,20 +603,35 @@ function UploadSheet({
                   <Ionicons color={tokens.accent} name="cloud-upload-outline" size={25} />
                 </View>
                 <Text
-                  text="Choose a file"
+                  text={selectedAsset ? selectedAsset.fileName : "Choose a file"}
                   size="xs"
                   weight="semiBold"
                   style={{ color: tokens.textPrimary }}
                 />
                 <Text
-                  text="PDF, JPG, PNG · Max 10 MB"
+                  text={
+                    selectedAsset?.fileSize
+                      ? `${(selectedAsset.fileSize / 1024 / 1024).toFixed(1)} MB selected`
+                      : "PDF, JPG, PNG · Max 10 MB"
+                  }
                   size="xxs"
                   style={{ color: tokens.textSecondary }}
                 />
               </View>
+              {error ? (
+                <View
+                  style={[
+                    styles.uploadError,
+                    { backgroundColor: `${tokens.danger}10`, borderColor: `${tokens.danger}22` },
+                  ]}
+                >
+                  <Ionicons color={tokens.danger} name="alert-circle-outline" size={15} />
+                  <Text text={error} size="xxs" style={[styles.flex, { color: tokens.danger }]} />
+                </View>
+              ) : null}
               <View style={styles.uploadOptions}>
                 <Pressable
-                  onPress={() => setUploading(true)}
+                  onPress={takePhoto}
                   style={[
                     styles.uploadOption,
                     { backgroundColor: tokens.background, borderColor: tokens.border },
@@ -541,7 +645,7 @@ function UploadSheet({
                   />
                 </Pressable>
                 <Pressable
-                  onPress={() => setUploading(true)}
+                  onPress={browseFiles}
                   style={[
                     styles.uploadOption,
                     { backgroundColor: tokens.background, borderColor: tokens.border },
@@ -555,13 +659,7 @@ function UploadSheet({
                   />
                 </Pressable>
               </View>
-              <AppButton
-                label="Upload"
-                onPress={() => {
-                  setUploading(true)
-                  setTimeout(onComplete, 500)
-                }}
-              />
+              <AppButton label="Upload" disabled={!selectedAsset} onPress={submitUpload} />
             </>
           )}
         </ScrollView>
@@ -593,13 +691,7 @@ function PayslipSheet({ onClose, payslip }: { onClose: () => void; payslip: Pays
               <Text text={payslip.period} size="xxs" style={{ color: tokens.textSecondary }} />
             ) : null}
           </View>
-          <Pressable
-            accessibilityLabel="Close"
-            onPress={onClose}
-            style={[styles.sheetCloseButton, { backgroundColor: tokens.surface }]}
-          >
-            <Ionicons color={tokens.textSecondary} name="close-outline" size={18} />
-          </Pressable>
+          <LiquidGlassCloseButton onPress={onClose} />
         </View>
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
@@ -703,13 +795,7 @@ function ContractSheet({
               />
             ) : null}
           </View>
-          <Pressable
-            accessibilityLabel="Close"
-            onPress={onClose}
-            style={[styles.sheetCloseButton, { backgroundColor: tokens.surface }]}
-          >
-            <Ionicons color={tokens.textSecondary} name="close-outline" size={18} />
-          </Pressable>
+          <LiquidGlassCloseButton onPress={onClose} />
         </View>
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
@@ -810,11 +896,11 @@ function ContractSheet({
 }
 
 export function DocumentsScreen() {
-  const { completeDocumentTask, state } = useAppSession()
+  const { state, uploadDocument } = useAppSession()
   const [category, setCategory] = useState<Category>("required")
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [uploadDocumentName, setUploadDocumentName] = useState<string | null>(null)
+  const [uploadTarget, setUploadTarget] = useState<UploadTarget | null>(null)
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null)
   const [contracts, setContracts] = useState(initialContracts)
   const [viewContract, setViewContract] = useState<Contract | null>(null)
@@ -837,10 +923,15 @@ export function DocumentsScreen() {
     query ? contract.name.toLowerCase().includes(query.toLowerCase()) : true,
   )
 
-  const finishUpload = () => {
-    const document = state.documents.find((item) => item.title === uploadDocumentName)
-    if (document) completeDocumentTask(document.id)
-    setUploadDocumentName(null)
+  const finishUpload = (asset: SelectedUploadAsset) => {
+    if (uploadTarget) {
+      uploadDocument({
+        documentId: uploadTarget.id,
+        title: uploadTarget.title,
+        ...asset,
+      })
+    }
+    setUploadTarget(null)
   }
 
   return (
@@ -855,7 +946,7 @@ export function DocumentsScreen() {
           }}
           onQueryChange={setQuery}
           onSearch={() => setIsSearching(true)}
-          onUpload={() => setUploadDocumentName("Document")}
+          onUpload={() => setUploadTarget({ title: "Uploaded document" })}
         />
 
         {!isSearching ? (
@@ -871,7 +962,9 @@ export function DocumentsScreen() {
                 key={document.id}
                 document={document}
                 onPress={() => {
-                  if (document.status === "action_required") setUploadDocumentName(document.title)
+                  if (document.status === "action_required") {
+                    setUploadTarget({ id: document.id, title: document.title })
+                  }
                 }}
               />
             ))}
@@ -906,8 +999,8 @@ export function DocumentsScreen() {
       </AppScrollScreen>
 
       <UploadSheet
-        documentName={uploadDocumentName}
-        onClose={() => setUploadDocumentName(null)}
+        target={uploadTarget}
+        onClose={() => setUploadTarget(null)}
         onComplete={finishUpload}
       />
       <PayslipSheet payslip={selectedPayslip} onClose={() => setSelectedPayslip(null)} />
@@ -1075,7 +1168,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   nativeSegmentControl: {
+    borderRadius: 14,
     height: 34,
+    overflow: "hidden",
   },
   nativeSheet: {
     flex: 1,
@@ -1139,13 +1234,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     padding: 0,
   },
-  sheetCloseButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
-  },
   sheetTitle: {
     fontSize: 20,
     lineHeight: 26,
@@ -1181,6 +1269,16 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 14,
     paddingVertical: 7,
+  },
+  uploadError: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
   uploadOption: {
     alignItems: "center",

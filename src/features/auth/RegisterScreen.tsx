@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { useState } from "react"
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -11,6 +11,7 @@ import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 
 import { AuthError, AuthScaffold } from "./AuthScaffold"
+import { AuthTextField } from "./AuthTextField"
 
 export function RegisterScreen() {
   const router = useRouter()
@@ -49,6 +50,7 @@ export function RegisterScreen() {
 
   return (
     <AuthScaffold
+      scrollEnabled={false}
       title={"Create your\naccount."}
       subtitle="Join thousands of employees on Vesta."
       footer={
@@ -64,66 +66,53 @@ export function RegisterScreen() {
       <View style={styles.formStack}>
         <View style={styles.nameRow}>
           <View style={styles.flex}>
-            <View style={[styles.fieldShell, { backgroundColor: tokens.searchBackground }]}>
-              <Text
-                text="FIRST NAME"
-                size="xxs"
-                weight="medium"
-                style={{ color: tokens.textMuted }}
-              />
-              <TextInput
-                autoCapitalize="words"
-                onChangeText={setFirstName}
-                placeholder="Sofia"
-                placeholderTextColor={tokens.textMuted}
-                style={[styles.nativeInput, { color: tokens.textPrimary }]}
-                value={firstName}
-              />
-            </View>
+            <AuthTextField
+              autoCapitalize="words"
+              autoComplete="given-name"
+              label="First name"
+              onChangeText={setFirstName}
+              placeholder="Sofia"
+              returnKeyType="next"
+              textContentType="givenName"
+              value={firstName}
+            />
           </View>
           <View style={styles.flex}>
-            <View style={[styles.fieldShell, { backgroundColor: tokens.searchBackground }]}>
-              <Text
-                text="LAST NAME"
-                size="xxs"
-                weight="medium"
-                style={{ color: tokens.textMuted }}
-              />
-              <TextInput
-                autoCapitalize="words"
-                onChangeText={setLastName}
-                placeholder="Fischer"
-                placeholderTextColor={tokens.textMuted}
-                style={[styles.nativeInput, { color: tokens.textPrimary }]}
-                value={lastName}
-              />
-            </View>
+            <AuthTextField
+              autoCapitalize="words"
+              autoComplete="family-name"
+              label="Last name"
+              onChangeText={setLastName}
+              placeholder="Fischer"
+              returnKeyType="next"
+              textContentType="familyName"
+              value={lastName}
+            />
           </View>
         </View>
-        <View style={[styles.fieldShell, { backgroundColor: tokens.searchBackground }]}>
-          <Text text="EMAIL" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
-          <TextInput
-            autoCapitalize="none"
-            keyboardType="email-address"
-            onChangeText={setEmail}
-            placeholder="you@email.com"
-            placeholderTextColor={tokens.textMuted}
-            style={[styles.nativeInput, { color: tokens.textPrimary }]}
-            value={email}
-          />
-        </View>
-        <View style={[styles.fieldShell, { backgroundColor: tokens.searchBackground }]}>
-          <Text text="PASSWORD" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
-          <View style={styles.passwordRow}>
-            <TextInput
-              onChangeText={setPassword}
-              placeholder="••••••••"
-              placeholderTextColor={tokens.textMuted}
-              secureTextEntry={!showPassword}
-              style={[styles.nativeInput, styles.flex, { color: tokens.textPrimary }]}
-              value={password}
-            />
+        <AuthTextField
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          label="Email"
+          onChangeText={setEmail}
+          placeholder="you@email.com"
+          returnKeyType="next"
+          textContentType="username"
+          value={email}
+        />
+        <AuthTextField
+          autoComplete="new-password"
+          label="Password"
+          onChangeText={setPassword}
+          placeholder="Password"
+          returnKeyType="next"
+          secureTextEntry={!showPassword}
+          textContentType="newPassword"
+          value={password}
+          rightAccessory={
             <Pressable
+              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
               onPress={() => setShowPassword((current) => !current)}
               style={styles.eyeButton}
             >
@@ -133,24 +122,19 @@ export function RegisterScreen() {
                 size={18}
               />
             </Pressable>
-          </View>
-        </View>
-        <View style={[styles.fieldShell, { backgroundColor: tokens.searchBackground }]}>
-          <Text
-            text="CONFIRM PASSWORD"
-            size="xxs"
-            weight="medium"
-            style={{ color: tokens.textMuted }}
-          />
-          <TextInput
-            onChangeText={setConfirmPassword}
-            placeholder="••••••••"
-            placeholderTextColor={tokens.textMuted}
-            secureTextEntry={!showPassword}
-            style={[styles.nativeInput, { color: tokens.textPrimary }]}
-            value={confirmPassword}
-          />
-        </View>
+          }
+        />
+        <AuthTextField
+          autoComplete="new-password"
+          label="Confirm password"
+          onChangeText={setConfirmPassword}
+          placeholder="Confirm password"
+          returnKeyType="done"
+          secureTextEntry={!showPassword}
+          textContentType="newPassword"
+          value={confirmPassword}
+          onSubmitEditing={handleSubmit}
+        />
       </View>
 
       <AppButton label="Create account" onPress={handleSubmit} />
@@ -164,12 +148,6 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     width: 36,
-  },
-  fieldShell: {
-    borderRadius: 14,
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   flex: {
     flex: 1,
@@ -186,16 +164,5 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: "row",
     gap: 10,
-  },
-  nativeInput: {
-    fontSize: 16,
-    lineHeight: 22,
-    minHeight: 24,
-    padding: 0,
-  },
-  passwordRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
   },
 })

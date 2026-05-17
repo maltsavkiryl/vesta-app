@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
+import { AppButton, AppScrollScreen, LiquidGlassCloseButton } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession, useClockSummary } from "@/providers/app-provider"
 
@@ -105,13 +105,7 @@ export function ClockOutScreen() {
                 style={{ color: tokens.textSecondary, marginTop: 2 }}
               />
             </View>
-            <Pressable
-              accessibilityLabel="Close clock out"
-              onPress={router.back}
-              style={[styles.closeButton, { backgroundColor: tokens.background }]}
-            >
-              <Ionicons color={tokens.textSecondary} name="close-outline" size={16} />
-            </Pressable>
+            <LiquidGlassCloseButton accessibilityLabel="Close clock out" onPress={router.back} />
           </View>
 
           <View style={styles.content}>
@@ -239,13 +233,6 @@ const styles = StyleSheet.create({
   centerStack: {
     alignItems: "center",
     gap: 6,
-  },
-  closeButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
   },
   content: {
     gap: 12,

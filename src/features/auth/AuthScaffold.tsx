@@ -11,10 +11,12 @@ import { useDesignTokens } from "@/design-system/tokens"
 export function AuthScaffold({
   children,
   footer,
+  scrollEnabled = true,
   subtitle,
   title,
 }: PropsWithChildren<{
   footer?: ReactNode
+  scrollEnabled?: boolean
   subtitle: string
   title: string
 }>) {
@@ -23,6 +25,7 @@ export function AuthScaffold({
 
   return (
     <AppScrollScreen
+      alwaysBounceVertical={scrollEnabled}
       contentContainerStyle={[
         styles.screen,
         {
@@ -30,6 +33,8 @@ export function AuthScaffold({
           paddingTop: insets.top + 52,
         },
       ]}
+      scrollEnabled={scrollEnabled}
+      showsVerticalScrollIndicator={scrollEnabled}
       style={{ backgroundColor: "#0D0D0F" }}
     >
       <View style={styles.hero}>

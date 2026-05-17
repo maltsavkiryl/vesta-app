@@ -6,5 +6,6 @@
  * https://reactnative.dev/docs/security#storing-sensitive-info
  */
 export default {
-  API_URL: "https://api.rss2json.com/v1/",
+  API_URL: "https://api.vesta.services/api/v1",
+  DEMO_AUTH_ENABLED: false,
 }

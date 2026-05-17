@@ -32,7 +32,17 @@ export default function AppLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="notifications" options={nativeSheetOptions} />
+      <Stack.Screen
+        name="notifications"
+        options={{
+          ...nativeSheetOptions,
+          headerShown: true,
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.text,
+          title: "Notifications",
+        }}
+      />
       <Stack.Screen name="request" options={nativeSheetOptions} />
       <Stack.Screen name="shift/[id]" options={nativeSheetOptions} />
       <Stack.Screen name="availability/[date]" options={nativeSheetOptions} />

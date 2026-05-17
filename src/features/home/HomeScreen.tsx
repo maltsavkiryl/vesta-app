@@ -8,10 +8,17 @@ import { Ionicons } from "@expo/vector-icons"
 import { Text } from "@/components/Text"
 import { getShiftTimeRange } from "@/core/date"
 import type { HomeTask, NotificationItem, Shift, ShiftStatus } from "@/core/models"
-import { AppButton, AppScrollScreen, SurfaceCard } from "@/design-system/primitives"
+import {
+  AppButton,
+  AppScrollScreen,
+  LiquidGlassCloseButton,
+  StatusBadge,
+  SurfaceCard,
+} from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
+import { formatCurrency } from "@/utils/formatters"
 
 const completedTaskHistory: TaskItem[] = [
   {
@@ -78,10 +85,6 @@ function getGreeting() {
   if (hour < 12) return "Good morning"
   if (hour < 18) return "Good afternoon"
   return "Good evening"
-}
-
-function formatCurrency(value: number) {
-  return `€${value.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 function getToneColor(tokens: DesignTokens, tone: Tone) {
@@ -201,9 +204,7 @@ function NextShiftCard({
             style={{ color: mutedText, marginTop: 2 }}
           />
         </View>
-        <View style={[styles.statusPill, { backgroundColor: `${tokens.success}32` }]}>
-          <Text text="Confirmed" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
-        </View>
+        <StatusBadge label="Confirmed" tone="success" />
       </View>
 
       <Pressable onPress={onDetails} style={[styles.locationRow, { backgroundColor: panelColor }]}>
@@ -326,12 +327,16 @@ function UpcomingShifts({
   onSeeAll: () => void
 }) {
   return (
-    <View>
-      <SectionHeader title="Upcoming" actionLabel="See all" onAction={onSeeAll} />
+    <View style={styles.upcomingSection}>
+      <View style={styles.upcomingHeader}>
+        <SectionHeader title="Upcoming" actionLabel="See all" onAction={onSeeAll} />
+      </View>
       <ScrollView
         horizontal
+        contentInsetAdjustmentBehavior="never"
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.upcomingList}
+        style={styles.upcomingScroller}
       >
         {shifts.map((shift) => (
           <UpcomingShiftCard key={shift.id} shift={shift} onPress={() => onShiftPress(shift)} />
@@ -376,7 +381,7 @@ function EarningsCard({
             style={[styles.earningsAmount, { color: tokens.textPrimary }]}
           />
           <Text
-            text={`of €${targetAmount.toLocaleString("en")} target · ${progress}%`}
+            text={`of ${formatCurrency(targetAmount)} target · ${progress}%`}
             size="xxs"
             style={{ color: tokens.textMuted }}
           />
@@ -563,67 +568,6 @@ function TasksSection({
   )
 }
 
-function QuickAction({
-  icon,
-  label,
-  tone,
-  onPress,
-}: {
-  icon: IconName
-  label: string
-  tone: Tone
-  onPress: () => void
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <Pressable onPress={onPress} style={styles.quickAction}>
-      <ToneIcon name={icon} tone={tone} />
-      <Text
-        text={label}
-        numberOfLines={1}
-        size="xxs"
-        weight="medium"
-        style={{ color: tokens.textPrimary }}
-      />
-    </Pressable>
-  )
-}
-
-function QuickActions({ navigate }: { navigate: (route: HomeRoute) => void }) {
-  return (
-    <View>
-      <SectionHeader title="Quick actions" />
-      <View style={styles.quickGrid}>
-        <QuickAction
-          icon="calendar-outline"
-          label="Schedule"
-          tone="accent"
-          onPress={() => navigate("/(app)/(tabs)/schedule")}
-        />
-        <QuickAction
-          icon="time-outline"
-          label="Clock in"
-          tone="success"
-          onPress={() => navigate("/(app)/(tabs)/time")}
-        />
-        <QuickAction
-          icon="cloud-upload-outline"
-          label="Upload"
-          tone="warning"
-          onPress={() => navigate("/(app)/(tabs)/documents")}
-        />
-        <QuickAction
-          icon="document-text-outline"
-          label="Payslips"
-          tone="danger"
-          onPress={() => navigate("/(app)/(tabs)/documents")}
-        />
-      </View>
-    </View>
-  )
-}
-
 function UpdateRow({ item, onPress }: { item: NotificationItem; onPress: () => void }) {
   const tokens = useDesignTokens()
   const tone = item.kind === "documents" ? "danger" : item.kind === "payroll" ? "success" : "accent"
@@ -707,13 +651,7 @@ function TaskDrawer({
             weight="bold"
             style={[styles.sheetTitle, { color: tokens.textPrimary }]}
           />
-          <Pressable
-            accessibilityLabel="Close"
-            onPress={onClose}
-            style={[styles.sheetCloseButton, { backgroundColor: tokens.surface }]}
-          >
-            <Ionicons color={tokens.textSecondary} name="close-outline" size={18} />
-          </Pressable>
+          <LiquidGlassCloseButton onPress={onClose} />
         </View>
         <ScrollView
           contentContainerStyle={styles.nativeSheetContent}
@@ -800,7 +738,7 @@ export function HomeScreen() {
 
   return (
     <>
-      <AppScrollScreen contentContainerStyle={styles.screenContent}>
+      <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
         <Header
           employerName={selectedEmployer?.name}
           firstName={state.profile.firstName}
@@ -842,8 +780,6 @@ export function HomeScreen() {
             }
             onShowAll={() => setIsTaskDrawerVisible(true)}
           />
-
-          <QuickActions navigate={navigate} />
 
           <UpdatesSection
             notifications={state.notifications}
@@ -1094,19 +1030,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     height: "100%",
   },
-  quickAction: {
-    alignItems: "center",
-    flex: 1,
-    gap: 9,
-    minWidth: 0,
-    paddingBottom: 12,
-    paddingHorizontal: 4,
-    paddingTop: 4,
-  },
-  quickGrid: {
-    flexDirection: "row",
-    gap: 9,
-  },
   rolePill: {
     alignSelf: "flex-start",
     borderRadius: 20,
@@ -1131,13 +1054,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     letterSpacing: 0,
-  },
-  sheetCloseButton: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
   },
   sheetTitle: {
     fontSize: 20,
@@ -1164,11 +1080,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     height: 6,
     width: 6,
-  },
-  statusPill: {
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
   },
   taskActions: {
     alignItems: "center",
@@ -1200,15 +1111,26 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     width: 112,
   },
+  upcomingHeader: {
+    paddingHorizontal: 16,
+  },
   upcomingList: {
     gap: 9,
-    paddingBottom: 4,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 2,
   },
   upcomingMeta: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 4,
+  },
+  upcomingScroller: {
+    overflow: "visible",
+  },
+  upcomingSection: {
+    marginHorizontal: -16,
   },
   updateRow: {
     alignItems: "center",

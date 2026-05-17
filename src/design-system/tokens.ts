@@ -6,7 +6,9 @@ export interface DesignTokens {
   isDark: boolean
   background: string
   backgroundMuted: string
+  groupedBackground: string
   surface: string
+  surfaceElevated: string
   surfaceSecondary: string
   surfaceTertiary: string
   textPrimary: string
@@ -30,6 +32,12 @@ export interface DesignTokens {
   avatarBackground: string
   avatarText: string
   searchBackground: string
+  separator: string
+  pressed: string
+  overlay: string
+  successSoft: string
+  warningSoft: string
+  dangerSoft: string
 }
 
 export function useDesignTokens() {
@@ -41,7 +49,9 @@ export function useDesignTokens() {
         isDark: true,
         background: "#000000",
         backgroundMuted: "#101012",
+        groupedBackground: "#000000",
         surface: "#1C1C1E",
+        surfaceElevated: "#242426",
         surfaceSecondary: "#2C2C2E",
         surfaceTertiary: "#3A3A3C",
         textPrimary: "#FFFFFF",
@@ -65,6 +75,12 @@ export function useDesignTokens() {
         avatarBackground: "#2C2C2E",
         avatarText: "#FFFFFF",
         searchBackground: "#1C1C1E",
+        separator: "rgba(84, 84, 88, 0.56)",
+        pressed: "rgba(255, 255, 255, 0.08)",
+        overlay: "rgba(0, 0, 0, 0.52)",
+        successSoft: "rgba(48, 209, 88, 0.14)",
+        warningSoft: "rgba(255, 214, 10, 0.14)",
+        dangerSoft: "rgba(255, 69, 58, 0.14)",
       }
     }
 
@@ -72,7 +88,9 @@ export function useDesignTokens() {
       isDark: false,
       background: "#FFFFFF",
       backgroundMuted: "#F6F6F8",
+      groupedBackground: "#F2F2F7",
       surface: "#FFFFFF",
+      surfaceElevated: "#FFFFFF",
       surfaceSecondary: "#F1F1F6",
       surfaceTertiary: "#E8E8EE",
       textPrimary: "#1C1C1E",
@@ -96,6 +114,12 @@ export function useDesignTokens() {
       avatarBackground: "#EAF3FF",
       avatarText: "#007AFF",
       searchBackground: "#F1F1F6",
+      separator: "rgba(60, 60, 67, 0.18)",
+      pressed: "rgba(60, 60, 67, 0.08)",
+      overlay: "rgba(0, 0, 0, 0.36)",
+      successSoft: "rgba(52, 199, 89, 0.12)",
+      warningSoft: "rgba(255, 159, 10, 0.12)",
+      dangerSoft: "rgba(255, 59, 48, 0.12)",
     }
   }, [theme.isDark])
 }
