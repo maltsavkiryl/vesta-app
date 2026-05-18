@@ -1,3 +1,3 @@
-import { ContractDetailScreen } from "@/features/documents/DocumentsScreen"
+import { ContractDetailScreen } from "@/features/documents"
 
 export default ContractDetailScreen

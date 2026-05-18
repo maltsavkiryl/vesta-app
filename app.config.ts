@@ -24,6 +24,8 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
       infoPlist: {
         ...(config.ios && config.ios.infoPlist ? config.ios.infoPlist : {}),
         ITSAppUsesNonExemptEncryption: false,
+        NSLocationWhenInUseUsageDescription:
+          "Allow Vesta to capture your work location for clock-in, breaks, and clock-out.",
         NSSupportsLiveActivities: true,
       },
       // This privacyManifests is to get you started.

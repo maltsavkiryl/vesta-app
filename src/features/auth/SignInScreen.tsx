@@ -1,40 +1,37 @@
 /* eslint-disable react-native/no-color-literals */
 
 import { useState } from "react"
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native"
+import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
-import { DEMO_AUTH_CREDENTIALS, useAppSession } from "@/providers/app-provider"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { DEMO_AUTH_CREDENTIALS } from "@/providers/app-provider"
+import { Banner, Button, Text, useDesignTokens } from "@/ui"
+
+import { AuthTextField } from "./AuthTextField"
 
 const vestaLogo = require("@assets/images/vesta-logo.png")
 
 export function SignInScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const { signIn } = useAppSession()
+  const tokens = useDesignTokens()
+  const { signIn } = useAuthActions()
 
   const [email, setEmail] = useState<string>(DEMO_AUTH_CREDENTIALS.email)
   const [password, setPassword] = useState<string>(DEMO_AUTH_CREDENTIALS.password)
   const [error, setError] = useState<string>()
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!email.includes("@")) {
       setError("Please enter a valid email address.")
       return
     }
 
-    const result = signIn({ email, password })
+    const response = await signIn({ email, password })
+    const result = response.result
     if (!result.ok) {
       setError(result.message)
       return
@@ -64,79 +61,76 @@ export function SignInScreen() {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.inputShell}>
-            <TextInput
-              accessibilityLabel="Email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect={false}
-              keyboardType="email-address"
-              onChangeText={(value) => {
-                setEmail(value)
-                if (error) setError(undefined)
-              }}
-              onSubmitEditing={handleContinue}
-              placeholder="Email"
-              placeholderTextColor="#8E8E93"
-              returnKeyType="done"
-              selectionColor="#000000"
-              style={styles.input}
-              textContentType="username"
-              value={email}
-            />
-            {email.length > 0 ? (
-              <Pressable
-                accessibilityLabel="Clear email"
-                hitSlop={10}
-                onPress={() => setEmail("")}
-                style={styles.clearButton}
-              >
-                <Ionicons color="#FFFFFF" name="close" size={12} />
-              </Pressable>
-            ) : null}
-          </View>
+          <AuthTextField
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            label="Email"
+            labelCase="default"
+            onChangeText={(value) => {
+              setEmail(value)
+              if (error) setError(undefined)
+            }}
+            onSubmitEditing={handleContinue}
+            placeholder="you@email.com"
+            returnKeyType="next"
+            textContentType="username"
+            value={email}
+            rightAccessory={
+              email.length > 0 ? (
+                <Pressable
+                  accessibilityLabel="Clear email"
+                  hitSlop={10}
+                  onPress={() => setEmail("")}
+                  style={styles.clearButton}
+                >
+                  <Ionicons color={tokens.accentForeground} name="close" size={12} />
+                </Pressable>
+              ) : null
+            }
+          />
 
-          <View style={styles.inputShell}>
-            <TextInput
-              accessibilityLabel="Password"
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect={false}
-              secureTextEntry
-              onChangeText={(value) => {
-                setPassword(value)
-                if (error) setError(undefined)
-              }}
-              onSubmitEditing={handleContinue}
-              placeholder="Password"
-              placeholderTextColor="#8E8E93"
-              returnKeyType="done"
-              selectionColor="#000000"
-              style={styles.input}
-              value={password}
-              textContentType="password"
-            />
-            {password.length > 0 ? (
-              <Pressable
-                accessibilityLabel="Clear password"
-                hitSlop={10}
-                onPress={() => setPassword("")}
-                style={styles.clearButton}
-              >
-                <Ionicons color="#FFFFFF" name="close" size={12} />
-              </Pressable>
-            ) : null}
-          </View>
+          <AuthTextField
+            autoCapitalize="none"
+            autoComplete="off"
+            label="Password"
+            labelCase="default"
+            onChangeText={(value) => {
+              setPassword(value)
+              if (error) setError(undefined)
+            }}
+            onSubmitEditing={handleContinue}
+            placeholder="Password"
+            returnKeyType="done"
+            secureTextEntry
+            textContentType="password"
+            value={password}
+            rightAccessory={
+              password.length > 0 ? (
+                <Pressable
+                  accessibilityLabel="Clear password"
+                  hitSlop={10}
+                  onPress={() => setPassword("")}
+                  style={styles.clearButton}
+                >
+                  <Ionicons color={tokens.accentForeground} name="close" size={12} />
+                </Pressable>
+              ) : null
+            }
+          />
 
-          {error ? <Text text={error} size="xxs" style={styles.errorText} /> : null}
+          {error ? (
+            <Banner tone="danger">
+              <Text text={error} size="xxs" />
+            </Banner>
+          ) : null}
 
-          <Pressable onPress={handleContinue} style={styles.primaryButton}>
-            <Text text="Continue" weight="bold" style={styles.primaryButtonText} />
-          </Pressable>
-
-          <Pressable onPress={() => router.replace("/(auth)/register")} style={styles.registerButton}>
-            <Text text="Register" weight="bold" style={styles.registerButtonText} />
-          </Pressable>
+          <Button label="Continue" onPress={handleContinue} />
+          <Button
+            label="Register"
+            onPress={() => router.replace("/(auth)/register")}
+            variant="secondary"
+          />
 
           <Text text="or" style={styles.dividerText} />
 
@@ -198,11 +192,6 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     textAlign: "center",
   },
-  errorText: {
-    color: "#D70015",
-    marginTop: -4,
-    textAlign: "center",
-  },
   form: {
     gap: 9,
   },
@@ -210,53 +199,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
-  input: {
-    color: "#000000",
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 20,
-    minHeight: 22,
-    padding: 0,
-  },
-  inputShell: {
-    alignItems: "center",
-    backgroundColor: "#E8E8EA",
-    borderRadius: 12,
-    flexDirection: "row",
-    gap: 8,
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
   logo: {
     height: 76,
     marginBottom: 18,
     width: 76,
-  },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: "#000000",
-    borderRadius: 12,
-    justifyContent: "center",
-    minHeight: 48,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    lineHeight: 22,
-  },
-  registerButton: {
-    alignItems: "center",
-    backgroundColor: "#F9F9FA",
-    borderColor: "#C9C9CC",
-    borderRadius: 12,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 48,
-  },
-  registerButtonText: {
-    color: "#000000",
-    fontSize: 17,
-    lineHeight: 22,
   },
   screen: {
     backgroundColor: "#F9F9FA",

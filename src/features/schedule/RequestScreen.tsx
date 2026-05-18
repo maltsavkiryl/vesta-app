@@ -6,11 +6,10 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
 import type { RequestType } from "@/core/models"
-import { AppButton, AppScrollScreen, GroupedSection } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
+import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { AppButton, AppScrollScreen, GroupedSection, Text, useDesignTokens } from "@/ui"
 
 type SheetRequestType = "timeoff" | "swap"
 type Step = 1 | 2 | 3
@@ -27,7 +26,8 @@ export function RequestScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
-  const { state, createRequest } = useAppSession()
+  const { createRequest } = useScheduleActions()
+  const { state } = useScheduleStateQuery()
   const [step, setStep] = useState<Step>(1)
   const [type, setType] = useState<SheetRequestType | null>(null)
   const [dates, setDates] = useState("")
@@ -39,12 +39,12 @@ export function RequestScreen() {
 
   const shiftOptions = useMemo(
     () =>
-      state.shifts.slice(0, 3).map((shift) => ({
+      (state?.shifts ?? []).slice(0, 3).map((shift) => ({
         id: shift.id,
         label: shift.dayLabel,
         time: `${shift.startTime} - ${shift.endTime}`,
       })),
-    [state.shifts],
+    [state?.shifts],
   )
   const selectedShift = shiftOptions.find((shift) => shift.id === myShiftId)
   const selectedColleague = colleagueOptions.find((colleague) => colleague.id === colleagueId)

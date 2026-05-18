@@ -6,11 +6,10 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession, useClockSummary } from "@/providers/app-provider"
+import { useTimeActions } from "@/features/time/data/time.mutations"
+import { useClockSummary, useTimeDataQuery } from "@/features/time/data/time.queries"
+import { AppButton, AppScrollScreen, Text, useDesignTokens } from "@/ui"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
@@ -20,9 +19,15 @@ export function ClockOutScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
-  const { state, confirmClockOut } = useAppSession()
+  const { confirmClockOut } = useTimeActions()
+  const query = useTimeDataQuery()
+  const clockSession = query.data?.clockSession
   const summary = useClockSummary()
   const [confirmed, setConfirmed] = useState(false)
+
+  if (!clockSession) {
+    return null
+  }
 
   const netSeconds = Math.max(summary.payableSeconds, 0)
   const breakLabel = formatDurationLabel(summary.breakSeconds)
@@ -33,7 +38,7 @@ export function ClockOutScreen() {
 
   const finish = async () => {
     const occurredAt = new Date().toISOString()
-    const location = await captureLocationSnapshot(state.clockSession.venueAddress)
+    const location = await captureLocationSnapshot(clockSession.venueAddress)
     confirmClockOut({ occurredAt, location })
     setConfirmed(true)
     setTimeout(() => router.replace("/(app)/(tabs)/time"), 900)
@@ -106,7 +111,7 @@ export function ClockOutScreen() {
                 style={{ color: tokens.textPrimary, fontSize: 22, lineHeight: 27 }}
               />
               <Text
-                text={`${state.clockSession.role} · ${state.clockSession.venueName}`}
+                text={`${clockSession.role} · ${clockSession.venueName}`}
                 size="xxs"
                 style={{ color: tokens.textSecondary, marginTop: 2 }}
               />

@@ -4,13 +4,12 @@ import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
 import type { NotificationItem, NotificationKind } from "@/core/models"
-import { AppScrollScreen } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import type { DesignTokens } from "@/design-system/tokens"
 import { useAppAction } from "@/features/actions/useAppAction"
-import { useAppSession } from "@/providers/app-provider"
+import { useNotificationActions } from "@/features/notifications/data/notifications.mutations"
+import { useNotificationsStateQuery } from "@/features/notifications/data/notifications.queries"
+import { AppScrollScreen, Text, useDesignTokens } from "@/ui"
+import type { DesignTokens } from "@/ui"
 
 const iconByKind: Record<NotificationKind, keyof typeof Ionicons.glyphMap> = {
   announcements: "megaphone-outline",
@@ -169,12 +168,13 @@ function NotificationGroup({
 }
 
 export function NotificationsScreen() {
-  const { state, markAllNotificationsRead, markNotificationRead } = useAppSession()
+  const { markAllNotificationsRead, markNotificationRead } = useNotificationActions()
+  const { notifications } = useNotificationsStateQuery()
   const { runAction } = useAppAction()
   const [hiddenIds, setHiddenIds] = useState<string[]>([])
   const tokens = useDesignTokens()
 
-  const visibleNotifications = state.notifications.filter((item) => !hiddenIds.includes(item.id))
+  const visibleNotifications = notifications.filter((item) => !hiddenIds.includes(item.id))
   const grouped = useMemo(() => {
     return visibleNotifications.reduce<Record<GroupKey, NotificationItem[]>>(
       (acc, notification) => {
@@ -234,7 +234,7 @@ export function NotificationsScreen() {
           ))}
           {visibleNotifications.length > 2 ? (
             <Pressable
-              onPress={() => setHiddenIds(state.notifications.map((item) => item.id))}
+              onPress={() => setHiddenIds(notifications.map((item) => item.id))}
               style={[
                 styles.clearAllButton,
                 { backgroundColor: `${tokens.danger}08`, borderColor: `${tokens.danger}18` },

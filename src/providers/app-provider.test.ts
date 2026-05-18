@@ -1,34 +1,28 @@
 import { createInitialState } from "@/core/mockState"
-
 import {
-  createStateForPersistence,
+  createMockBackendDb,
+  migrateLegacyPersistedState,
+  toAccountSnapshotDto,
+  toAppStoreState,
   DEMO_AUTH_CREDENTIALS,
-  restorePersistedState,
-} from "./app-provider"
+} from "@/services/app/app.transformer"
 
-function createTestState() {
-  return JSON.parse(JSON.stringify(createInitialState())) as ReturnType<typeof createInitialState>
-}
+describe("mock backend persistence", () => {
+  it("seeds a demo account by default", () => {
+    const db = createMockBackendDb()
 
-describe("app-provider persistence", () => {
-  it("does not persist sensitive profile fields", () => {
-    const state = createTestState()
-    state.profile.bankAccount.iban = "BE68 5390 0754 7034"
-    state.profile.legal.nationalRegisterNumber = "95.01.15-123.45"
-
-    const persisted = createStateForPersistence(state)
-
-    expect(persisted.state.profile.bankAccount.iban).toBe("")
-    expect(persisted.state.profile.legal.nationalRegisterNumber).toBe("")
+    expect(db.accounts).toHaveLength(1)
+    expect(db.accounts[0].email).toBe(DEMO_AUTH_CREDENTIALS.email)
+    expect(db.session.accountId).toBeNull()
   })
 
-  it("restores supported persisted state over the current initial shape", () => {
-    const state = createTestState()
+  it("round-trips account snapshots back into app state", () => {
+    const state = createInitialState()
     state.authStatus = "signedIn"
     state.profile.email = DEMO_AUTH_CREDENTIALS.email
     state.activeEmployerId = "grand-cafe"
 
-    const restored = restorePersistedState(createStateForPersistence(state))
+    const restored = toAppStoreState(toAccountSnapshotDto(state), "signedIn")
 
     expect(restored.authStatus).toBe("signedIn")
     expect(restored.profile.email).toBe(DEMO_AUTH_CREDENTIALS.email)
@@ -36,9 +30,18 @@ describe("app-provider persistence", () => {
     expect(restored.employerDirectory).toEqual(createInitialState().employerDirectory)
   })
 
-  it("ignores unsupported persisted payloads", () => {
-    const restored = restorePersistedState(null)
+  it("migrates legacy persisted state into an account and session", () => {
+    const legacyState = createInitialState()
+    legacyState.authStatus = "signedIn"
+    legacyState.profile.email = "legacy.employee@vesta.local"
 
-    expect(restored).toEqual(createInitialState())
+    const migrated = migrateLegacyPersistedState({
+      state: legacyState,
+      version: 2,
+    })
+
+    expect(migrated?.accounts).toHaveLength(1)
+    expect(migrated?.accounts[0].email).toBe("legacy.employee@vesta.local")
+    expect(migrated?.session.accountId).toBe(migrated?.accounts[0].id)
   })
 })

@@ -2,20 +2,33 @@ import { format } from "date-fns"
 
 import type { ClockSession, Shift } from "./models"
 
+export function parseDateValue(value: string | Date | number) {
+  const date = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
 export function formatFullDate(dateString: string) {
-  return format(new Date(dateString), "EEEE, MMMM d")
+  const date = parseDateValue(dateString)
+  return date ? format(date, "EEEE, MMMM d") : "Unknown date"
 }
 
 export function formatShortDate(dateString: string) {
-  return format(new Date(dateString), "MMM d")
+  const date = parseDateValue(dateString)
+  return date ? format(date, "MMM d") : "Unknown date"
 }
 
 export function formatMonthLabel(dateString: string) {
-  return format(new Date(dateString), "MMMM yyyy")
+  const date = parseDateValue(dateString)
+  return date ? format(date, "MMMM yyyy") : "Unknown month"
 }
 
 export function formatTimeLabel(date: Date) {
   return format(date, "HH:mm")
+}
+
+export function formatTimeValue(value: string | Date | number, fallback = "--:--") {
+  const date = parseDateValue(value)
+  return date ? format(date, "HH:mm") : fallback
 }
 
 export function formatDurationLabel(totalSeconds: number) {

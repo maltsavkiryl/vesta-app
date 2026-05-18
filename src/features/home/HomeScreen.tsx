@@ -5,7 +5,6 @@ import { FlatList, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
 import { getShiftTimeRange } from "@/core/date"
 import type {
   AppNavigationRoute,
@@ -14,17 +13,19 @@ import type {
   Shift,
   ShiftStatus,
 } from "@/core/models"
+import { useAppAction } from "@/features/actions/useAppAction"
+import { useHomeQuery } from "@/features/home/data/home.queries"
 import {
   AppScrollScreen,
   InCardActionButton,
+  ListCard,
+  ListCardItem,
+  SectionBlock,
   StatusBadge,
-  SurfaceCard,
-  SectionTitle,
-} from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import type { DesignTokens } from "@/design-system/tokens"
-import { useAppAction } from "@/features/actions/useAppAction"
-import { useAppSession } from "@/providers/app-provider"
+  Text,
+  useDesignTokens,
+} from "@/ui"
+import type { DesignTokens } from "@/ui"
 import { formatCurrency } from "@/utils/formatters"
 
 const completedTaskHistory: TaskItem[] = [
@@ -241,36 +242,6 @@ function NextShiftCard({
   )
 }
 
-function SectionHeader({
-  actionLabel,
-  badgeLabel,
-  title,
-  onAction,
-}: {
-  actionLabel?: string
-  badgeLabel?: string
-  title: string
-  onAction?: () => void
-}) {
-  const showChevron = actionLabel === "See all" || actionLabel === "All"
-  const tokens = useDesignTokens()
-
-  return (
-    <SectionTitle
-      actionIcon={
-        showChevron ? (
-          <Ionicons color={tokens.textSecondary} name="arrow-forward-outline" size={13} />
-        ) : null
-      }
-      actionLabel={actionLabel}
-      badgeLabel={badgeLabel}
-      onAction={onAction}
-      title={title}
-      titleSize="sm"
-    />
-  )
-}
-
 function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => void }) {
   const tokens = useDesignTokens()
   const dayNumber = shift.date.split("-")[2]
@@ -329,7 +300,7 @@ function UpcomingShifts({
   return (
     <View style={styles.upcomingSection}>
       <View style={styles.upcomingHeader}>
-        <SectionHeader title="Upcoming" actionLabel="See all" onAction={onSeeAll} />
+        <SectionBlock title="Upcoming" actionLabel="See all" onAction={onSeeAll} />
       </View>
       <FlatList
         data={shifts}
@@ -425,57 +396,49 @@ const TaskRow = memo(function TaskRow({
   const tone = item.urgency === "high" ? "danger" : item.urgency === "medium" ? "warning" : "accent"
 
   return (
-    <View
-      style={[styles.listRow, isLast && styles.lastListRow, { borderBottomColor: tokens.border }]}
-    >
-      <ToneIcon
-        name={item.completed ? "checkmark-circle-outline" : taskIconByUrgency[item.urgency]}
-        tone={item.completed ? "success" : tone}
-      />
-      <View style={styles.taskCopy}>
-        <Text
-          text={item.title}
-          numberOfLines={1}
-          size="xs"
-          weight="medium"
-          style={[
-            { color: item.completed ? tokens.textSecondary : tokens.textPrimary },
-            item.completed && styles.completedText,
-          ]}
+    <ListCardItem
+      isLast={isLast}
+      leading={
+        <ToneIcon
+          name={item.completed ? "checkmark-circle-outline" : taskIconByUrgency[item.urgency]}
+          tone={item.completed ? "success" : tone}
         />
-        <Text
-          text={item.completed ? `Done ${item.completedDate}` : item.subtitle}
-          numberOfLines={1}
-          size="xxs"
-          style={{ color: item.completed ? tokens.textMuted : tokens.textSecondary }}
-        />
-      </View>
-      {item.completed ? (
-        <Ionicons color={tokens.success} name="checkmark-circle-outline" size={17} />
-      ) : (
-        <View style={styles.taskActions}>
-          <Pressable
-            onPress={onComplete}
-            style={[styles.taskButton, { backgroundColor: `${tokens.accent}14` }]}
-          >
-            <Text
-              text={item.actionLabel}
-              size="xxs"
-              weight="semiBold"
-              style={{ color: tokens.accent }}
-            />
-          </Pressable>
-          {onDismiss ? (
+      }
+      subtitle={item.completed ? `Done ${item.completedDate}` : item.subtitle}
+      subtitleStyle={{ color: item.completed ? tokens.textMuted : tokens.textSecondary }}
+      title={item.title}
+      titleStyle={[
+        { color: item.completed ? tokens.textSecondary : tokens.textPrimary },
+        item.completed && styles.completedText,
+      ]}
+      trailing={
+        item.completed ? (
+          <Ionicons color={tokens.success} name="checkmark-circle-outline" size={17} />
+        ) : (
+          <View style={styles.taskActions}>
             <Pressable
-              onPress={onDismiss}
-              style={[styles.dismissButton, { backgroundColor: tokens.background }]}
+              onPress={onComplete}
+              style={[styles.taskButton, { backgroundColor: `${tokens.accent}14` }]}
             >
-              <Ionicons color={tokens.textMuted} name="checkmark-outline" size={14} />
+              <Text
+                text={item.actionLabel}
+                size="xxs"
+                weight="semiBold"
+                style={{ color: tokens.accent }}
+              />
             </Pressable>
-          ) : null}
-        </View>
-      )}
-    </View>
+            {onDismiss ? (
+              <Pressable
+                onPress={onDismiss}
+                style={[styles.dismissButton, { backgroundColor: tokens.background }]}
+              >
+                <Ionicons color={tokens.textMuted} name="checkmark-outline" size={14} />
+              </Pressable>
+            ) : null}
+          </View>
+        )
+      }
+    />
   )
 })
 
@@ -522,14 +485,13 @@ function TasksSection({
   }
 
   return (
-    <View style={styles.tasksSection}>
-      <SectionHeader
-        title="Tasks"
-        actionLabel="View all"
-        badgeLabel={`${tasks.length} pending`}
-        onAction={onShowAll}
-      />
-      <SurfaceCard style={styles.listCard}>
+    <SectionBlock
+      title="Tasks"
+      actionLabel="View all"
+      badgeLabel={`${tasks.length} pending`}
+      onAction={onShowAll}
+    >
+      <ListCard>
         {tasks.map((task, index) => (
           <TaskRow
             key={task.id}
@@ -539,38 +501,39 @@ function TasksSection({
             onDismiss={() => onDismiss(task)}
           />
         ))}
-      </SurfaceCard>
-    </View>
+      </ListCard>
+    </SectionBlock>
   )
 }
 
-function UpdateRow({ item, onPress }: { item: NotificationItem; onPress: () => void }) {
+function UpdateRow({
+  item,
+  onPress,
+  isLast,
+}: {
+  item: NotificationItem
+  onPress: () => void
+  isLast?: boolean
+}) {
   const tokens = useDesignTokens()
   const tone = item.kind === "documents" ? "danger" : item.kind === "payroll" ? "success" : "accent"
 
   return (
-    <Pressable onPress={onPress} style={[styles.updateRow, { borderBottomColor: tokens.border }]}>
-      <ToneIcon name={notificationIconByKind[item.kind]} tone={tone} />
-      <View style={styles.flex}>
-        <View style={styles.updateTitleRow}>
-          <Text
-            text={item.title}
-            numberOfLines={1}
-            size="xxs"
-            weight="semiBold"
-            style={[styles.flex, { color: tokens.textPrimary }]}
-          />
+    <ListCardItem
+      isLast={isLast}
+      leading={<ToneIcon name={notificationIconByKind[item.kind]} tone={tone} />}
+      onPress={onPress}
+      subtitle={item.body}
+      subtitleStyle={{ color: tokens.textSecondary }}
+      title={item.title}
+      titleStyle={{ color: tokens.textPrimary }}
+      trailing={
+        <View style={styles.updateTrailing}>
           <Text text={item.relativeTime} size="xxs" style={{ color: tokens.textMuted }} />
+          <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
         </View>
-        <Text
-          text={item.body}
-          numberOfLines={1}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
-      <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
-    </Pressable>
+      }
+    />
   )
 }
 
@@ -584,26 +547,26 @@ function UpdatesSection({
   onShowAll: () => void
 }) {
   return (
-    <View>
-      <SectionHeader title="Updates" actionLabel="All" onAction={onShowAll} />
-      <View>
-        {notifications.slice(0, 3).map((notification) => (
+    <SectionBlock title="Updates" actionLabel="All" onAction={onShowAll}>
+      <ListCard>
+        {notifications.slice(0, 3).map((notification, index, items) => (
           <UpdateRow
             key={notification.id}
+            isLast={index === items.length - 1}
             item={notification}
             onPress={() => onNotificationPress(notification)}
           />
         ))}
-      </View>
-    </View>
+      </ListCard>
+    </SectionBlock>
   )
 }
 
 export function HomeTasksScreen() {
   const tokens = useDesignTokens()
-  const { state } = useAppSession()
+  const home = useHomeQuery()
   const { runAction } = useAppAction()
-  const pendingTasks = state.tasks.filter((task) => !task.completed)
+  const pendingTasks = (home?.tasks ?? []).filter((task) => !task.completed)
 
   return (
     <AppScrollScreen
@@ -651,7 +614,7 @@ function TaskGroup({
         weight="semiBold"
         style={[styles.capsLabel, { color: tokens.textMuted }]}
       />
-      <View style={[styles.drawerGroupCard, { backgroundColor }]}>
+      <ListCard style={[styles.drawerGroupCard, { backgroundColor }]}>
         {tasks.map((task, index) => (
           <TaskRow
             key={task.id}
@@ -660,14 +623,14 @@ function TaskGroup({
             onComplete={() => onComplete(task)}
           />
         ))}
-      </View>
+      </ListCard>
     </View>
   )
 }
 
 export function HomeScreen() {
   const router = useRouter()
-  const { selectedEmployer, state, unreadNotifications } = useAppSession()
+  const home = useHomeQuery()
   const { runAction } = useAppAction()
   const [greeting, setGreeting] = useState(getGreeting())
   const [hiddenTaskIds, setHiddenTaskIds] = useState<string[]>([])
@@ -677,11 +640,11 @@ export function HomeScreen() {
     return () => clearInterval(interval)
   }, [])
 
-  const nextShift = state.shifts[0]
-  const upcomingShifts = state.shifts.slice(1, 7)
+  const nextShift = home?.shifts[0]
+  const upcomingShifts = home?.shifts.slice(1, 7) ?? []
   const pendingTasks = useMemo(
-    () => state.tasks.filter((task) => !task.completed && !hiddenTaskIds.includes(task.id)),
-    [hiddenTaskIds, state.tasks],
+    () => (home?.tasks ?? []).filter((task) => !task.completed && !hiddenTaskIds.includes(task.id)),
+    [hiddenTaskIds, home?.tasks],
   )
 
   const navigate = useCallback((route: AppNavigationRoute) => router.push(route as never), [router])
@@ -689,10 +652,7 @@ export function HomeScreen() {
     (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never),
     [router],
   )
-  const completeTask = useCallback(
-    (task: TaskItem) => void runAction(task.action),
-    [runAction],
-  )
+  const completeTask = useCallback((task: TaskItem) => void runAction(task.action), [runAction])
   const hideTask = useCallback((task: TaskItem) => {
     setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
   }, [])
@@ -706,27 +666,29 @@ export function HomeScreen() {
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
       <Header
-        employerName={selectedEmployer?.name}
-        firstName={state.profile.firstName}
+        employerName={home?.selectedEmployer?.name}
+        firstName={home?.profile.firstName ?? ""}
         greeting={greeting}
-        hasUnread={unreadNotifications > 0}
-        role={state.profile.role}
+        hasUnread={(home?.unreadNotifications ?? 0) > 0}
+        role={home?.profile.role}
         onEmployerPress={openProfile}
         onNotificationsPress={openNotifications}
       />
 
       <View style={styles.stack}>
-        <NextShiftCard
-          shift={nextShift}
-          onClockIn={openClock}
-          onDetails={() => openShift(nextShift)}
-        />
+        {nextShift ? (
+          <NextShiftCard
+            shift={nextShift}
+            onClockIn={openClock}
+            onDetails={() => openShift(nextShift)}
+          />
+        ) : null}
 
         <UpcomingShifts shifts={upcomingShifts} onShiftPress={openShift} onSeeAll={openSchedule} />
 
         <EarningsCard
-          earnedAmount={state.earnings.earnedAmount}
-          monthLabel={state.earnings.monthLabel}
+          earnedAmount={home?.earnings.earnedAmount ?? 0}
+          monthLabel={home?.earnings.monthLabel ?? ""}
           onPayslipPress={openDocuments}
         />
 
@@ -738,7 +700,7 @@ export function HomeScreen() {
         />
 
         <UpdatesSection
-          notifications={state.notifications}
+          notifications={home?.notifications ?? []}
           onNotificationPress={(notification) => void runAction(notification.action)}
           onShowAll={openNotifications}
         />
@@ -899,26 +861,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 34,
   },
-  lastListRow: {
-    borderBottomWidth: 0,
-  },
-  listCard: {
-    borderRadius: 18,
-    gap: 0,
-    overflow: "hidden",
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-  },
-  listRow: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 10,
-    minHeight: 61,
-    paddingLeft: 14,
-    paddingRight: 12,
-    paddingVertical: 13,
-  },
   locationRow: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -990,13 +932,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
-  taskCopy: {
-    flex: 1,
-    minWidth: 0,
-  },
-  tasksSection: {
-    gap: 10,
-  },
   trendIcon: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -1036,14 +971,7 @@ const styles = StyleSheet.create({
   upcomingSection: {
     marginHorizontal: -16,
   },
-  updateRow: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 12,
-    paddingVertical: 13,
-  },
-  updateTitleRow: {
+  updateTrailing: {
     alignItems: "center",
     flexDirection: "row",
     gap: 8,

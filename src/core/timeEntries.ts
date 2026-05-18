@@ -1,5 +1,6 @@
 import { format } from "date-fns"
 
+import { formatTimeValue, parseDateValue } from "./date"
 import { formatCurrency } from "@/utils/formatters"
 
 import { formatDurationLabel } from "./date"
@@ -88,7 +89,7 @@ export function buildTimeEntryFromClockSession({
 }
 
 export function getTimeEntryTimeRangeLabel(entry: TimeEntry) {
-  return `${format(new Date(entry.clockInAt), "HH:mm")} - ${format(new Date(entry.clockOutAt), "HH:mm")}`
+  return `${formatTimeValue(entry.clockInAt)} - ${formatTimeValue(entry.clockOutAt)}`
 }
 
 export function getTimeEntryWorkedLabel(entry: TimeEntry) {
@@ -146,15 +147,14 @@ export function getBreakSegments(events: TimeEntryEvent[]): TimeEntryBreakSegmen
 
     if (event.type === "breakEnd" && activeBreakStart) {
       const startEvent = activeBreakStart
+      const startTime = parseDateValue(startEvent.occurredAt)?.getTime()
+      const endTime = parseDateValue(event.occurredAt)?.getTime()
       segments.push({
         id: `${startEvent.id}-${event.id}`,
         startEvent,
         endEvent: event,
         durationSeconds: Math.max(
-          Math.floor(
-            (new Date(event.occurredAt).getTime() - new Date(startEvent.occurredAt).getTime()) /
-              1000,
-          ),
+          Math.floor(((endTime ?? startTime ?? 0) - (startTime ?? endTime ?? 0)) / 1000),
           0,
         ),
       })

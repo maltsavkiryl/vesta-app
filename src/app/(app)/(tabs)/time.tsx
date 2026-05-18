@@ -1,3 +1,3 @@
-import { TimeScreen } from "@/features/time/TimeScreen"
+import { TimeScreen } from "@/features/time"
 
 export default TimeScreen

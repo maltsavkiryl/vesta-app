@@ -3,11 +3,9 @@
 import { Image, StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { format } from "date-fns"
 import MapView, { Marker } from "react-native-maps"
 
-import { Text } from "@/components/Text"
-import { formatDurationLabel, formatFullDate } from "@/core/date"
+import { formatDurationLabel, formatFullDate, formatShortDate, formatTimeValue } from "@/core/date"
 import type { TimeEntryEvent } from "@/core/models"
 import {
   getBreakSegments,
@@ -21,14 +19,15 @@ import {
   getTimeEntryTimeRangeLabel,
   getTimeEntryWorkedLabel,
 } from "@/core/timeEntries"
+import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import {
   AppScrollScreen,
   GroupedSection,
   StatusBadge,
   SurfaceCard,
-} from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+  Text,
+  useDesignTokens,
+} from "@/ui"
 
 function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean }) {
   const tokens = useDesignTokens()
@@ -76,7 +75,7 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
         />
       </View>
       <Text
-        text={format(new Date(event.occurredAt), "HH:mm")}
+        text={formatTimeValue(event.occurredAt)}
         size="xs"
         weight="medium"
         style={{ color: tokens.textPrimary }}
@@ -99,8 +98,8 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 export function TimeEntryDetailScreen() {
   const tokens = useDesignTokens()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { state } = useAppSession()
-  const entry = state.timeEntries.find((candidate) => candidate.id === id)
+  const query = useTimeDataQuery()
+  const entry = query.data?.timeEntries.find((candidate) => candidate.id === id)
 
   if (!entry) {
     return (
@@ -125,7 +124,7 @@ export function TimeEntryDetailScreen() {
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-      <Stack.Screen options={{ title: format(new Date(entry.clockInAt), "MMM d") }} />
+      <Stack.Screen options={{ title: formatShortDate(entry.clockInAt) }} />
 
       <SurfaceCard elevated style={styles.heroCard}>
         <View style={styles.heroTopRow}>
@@ -205,7 +204,7 @@ export function TimeEntryDetailScreen() {
             <Image source={{ uri: entry.clockInProofPhoto.uri }} style={styles.photo} />
           </View>
           <Text
-            text={`Captured at ${format(new Date(entry.clockInProofPhoto.capturedAt), "HH:mm")}`}
+            text={`Captured at ${formatTimeValue(entry.clockInProofPhoto.capturedAt)}`}
             size="xxs"
             style={[styles.photoCaption, { color: tokens.textSecondary }]}
           />
@@ -234,10 +233,8 @@ export function TimeEntryDetailScreen() {
                   style={{ color: tokens.textPrimary }}
                 />
                 <Text
-                  text={`${format(new Date(segment.startEvent.occurredAt), "HH:mm")} - ${
-                    segment.endEvent
-                      ? format(new Date(segment.endEvent.occurredAt), "HH:mm")
-                      : "--:--"
+                  text={`${formatTimeValue(segment.startEvent.occurredAt)} - ${
+                    segment.endEvent ? formatTimeValue(segment.endEvent.occurredAt) : "--:--"
                   }`}
                   size="xxs"
                   style={{ color: tokens.textSecondary }}

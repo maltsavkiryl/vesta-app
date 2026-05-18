@@ -1,16 +1,26 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { useMemo, useState } from "react"
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import SegmentedControl from "@react-native-segmented-control/segmented-control"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
-import { AppButton, AppScrollScreen } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { useAuthSession } from "@/features/auth/data/auth.queries"
+import {
+  AppButton,
+  AppScrollScreen,
+  AppSegmentedControl,
+  SelectionCard,
+  SelectionChip,
+  SelectionRow,
+  Text,
+  ToggleSwitch,
+  useDesignTokens,
+} from "@/ui"
+
+import { AuthTextField } from "./AuthTextField"
 
 const totalSteps = 6
 const roles = [
@@ -68,14 +78,16 @@ export function OnboardingScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
-  const { completeOnboarding, state } = useAppSession()
+  const { completeOnboarding } = useAuthActions()
+  const { state } = useAuthSession()
+  const accountState = state
   const [step, setStep] = useState(0)
-  const [selectedRole, setSelectedRole] = useState(state.profile.role ?? "")
-  const [selectedEmployerId, setSelectedEmployerId] = useState(state.activeEmployerId)
+  const [selectedRole, setSelectedRole] = useState(accountState?.profile.role ?? "")
+  const [selectedEmployerId, setSelectedEmployerId] = useState(accountState?.activeEmployerId ?? "")
   const [joinMode, setJoinMode] = useState<"code" | "search">("code")
   const [code, setCode] = useState("")
   const [search, setSearch] = useState("")
-  const [joined, setJoined] = useState(Boolean(state.activeEmployerId))
+  const [joined, setJoined] = useState(Boolean(accountState?.activeEmployerId))
   const [availabilityDays, setAvailabilityDays] = useState(["Mon", "Tue", "Wed", "Thu", "Fri"])
   const [timeSlot, setTimeSlot] = useState("evenings")
   const [notifications, setNotifications] = useState<Record<string, boolean>>({
@@ -88,12 +100,15 @@ export function OnboardingScreen() {
 
   const employers = useMemo(
     () => [
-      ...state.employers,
-      ...state.employerDirectory.filter(
-        (employer) => !state.employers.some((joinedEmployer) => joinedEmployer.id === employer.id),
-      ),
+      ...(accountState?.employers ?? []),
+      ...(accountState?.employerDirectory.filter(
+        (employer) =>
+          !(accountState?.employers ?? []).some(
+            (joinedEmployer) => joinedEmployer.id === employer.id,
+          ),
+      ) ?? []),
     ],
-    [state.employerDirectory, state.employers],
+    [accountState?.employerDirectory, accountState?.employers],
   )
   const selectedEmployer = employers.find((employer) => employer.id === selectedEmployerId)
   const foundEmployer = employers.find(
@@ -117,10 +132,11 @@ export function OnboardingScreen() {
     true,
   ][step]
 
-  const complete = () => {
-    completeOnboarding({
+  const complete = async () => {
+    await completeOnboarding({
       role: selectedRole || "Waiter",
-      employerId: (activeEmployer ?? state.employers[0])?.id ?? state.activeEmployerId,
+      employerId:
+        (activeEmployer ?? accountState?.employers[0])?.id ?? accountState?.activeEmployerId ?? "",
     })
     router.replace("/")
   }
@@ -157,7 +173,7 @@ export function OnboardingScreen() {
         </View>
         <View style={styles.welcomeCopy}>
           <Text
-            text={`Welcome to Vesta,\n${state.profile.firstName}.`}
+            text={`Welcome to Vesta,\n${accountState?.profile.firstName ?? "there"}.`}
             weight="bold"
             style={{ color: tokens.textPrimary, fontSize: 32, lineHeight: 38 }}
           />
@@ -335,35 +351,15 @@ function RoleStep({
       </View>
       <View style={styles.roleGrid}>
         {roles.map((role) => {
-          const active = selectedRole === role.id
           return (
-            <Pressable
+            <SelectionCard
               key={role.id}
               onPress={() => onSelectRole(role.id)}
-              style={[
-                styles.roleCard,
-                {
-                  backgroundColor: active ? tokens.textPrimary : tokens.surfaceSecondary,
-                  borderColor: active ? tokens.textPrimary : tokens.border,
-                },
-              ]}
-            >
-              <Ionicons
-                color={active ? tokens.background : tokens.textPrimary}
-                name={role.icon}
-                size={22}
-              />
-              <Text
-                text={role.label}
-                style={{
-                  color: active ? tokens.background : tokens.textPrimary,
-                  fontSize: 12,
-                  lineHeight: 16,
-                  textAlign: "center",
-                }}
-                weight="medium"
-              />
-            </Pressable>
+              selected={selectedRole === role.id}
+              style={styles.roleCard}
+              title={role.label}
+              icon={<Ionicons color={tokens.textPrimary} name={role.icon} size={22} />}
+            />
           )
         })}
       </View>
@@ -432,39 +428,26 @@ function EmployerStep({
         />
       </View>
 
-      <SegmentedControl
-        appearance={tokens.isDark ? "dark" : "light"}
-        backgroundColor={tokens.isDark ? "rgba(116, 116, 128, 0.22)" : "rgba(116, 116, 128, 0.10)"}
-        fontStyle={{ color: tokens.textSecondary, fontSize: 13, fontWeight: "500" }}
-        selectedIndex={joinMode === "code" ? 0 : 1}
-        style={styles.nativeSegmentControl}
-        tintColor={tokens.surface}
-        values={["Invite code", "Search"]}
-        activeFontStyle={{ color: tokens.textPrimary, fontSize: 13, fontWeight: "600" }}
-        onChange={(event) =>
-          onModeChange(event.nativeEvent.selectedSegmentIndex === 0 ? "code" : "search")
-        }
+      <AppSegmentedControl
+        onChange={onModeChange}
+        options={[
+          { label: "Invite code", value: "code" },
+          { label: "Search", value: "search" },
+        ]}
+        style={styles.segmentedControl}
+        value={joinMode}
       />
 
       {joinMode === "code" ? (
         <View style={styles.stack}>
           <CodeBoxes code={code} />
-          <View style={[styles.inputShell, { backgroundColor: tokens.searchBackground }]}>
-            <Text
-              text="INVITE CODE"
-              size="xxs"
-              weight="medium"
-              style={{ color: tokens.textMuted }}
-            />
-            <TextInput
-              autoCapitalize="characters"
-              maxLength={6}
-              onChangeText={onCodeChange}
-              placeholderTextColor={tokens.textMuted}
-              style={[styles.nativeInput, { color: tokens.textPrimary }]}
-              value={code}
-            />
-          </View>
+          <AuthTextField
+            autoCapitalize="characters"
+            label="Invite code"
+            maxLength={6}
+            onChangeText={onCodeChange}
+            value={code}
+          />
           <Text
             text={
               code.length === 0
@@ -481,16 +464,13 @@ function EmployerStep({
         </View>
       ) : (
         <View style={styles.stack}>
-          <View style={[styles.inputShell, { backgroundColor: tokens.searchBackground }]}>
-            <Text text="SEARCH" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
-            <TextInput
-              onChangeText={onSearchChange}
-              placeholder="Search by name or city..."
-              placeholderTextColor={tokens.textMuted}
-              style={[styles.nativeInput, { color: tokens.textPrimary }]}
-              value={search}
-            />
-          </View>
+          <AuthTextField
+            label="Search"
+            labelCase="default"
+            onChangeText={onSearchChange}
+            placeholder="Search by name or city..."
+            value={search}
+          />
           {searchResults.map((employer) => (
             <EmployerRow
               key={employer.id}
@@ -618,37 +598,23 @@ function EmployerRow({
   const tokens = useDesignTokens()
 
   return (
-    <Pressable
+    <SelectionRow
       onPress={onPress}
-      style={[
-        styles.searchRow,
-        {
-          backgroundColor: selected ? tokens.accentSoft : tokens.surfaceSecondary,
-          borderColor: selected ? tokens.accent : tokens.border,
-        },
-      ]}
-    >
-      <View style={[styles.searchIcon, { backgroundColor: tokens.background }]}>
-        <Ionicons color={tokens.textSecondary} name="location-outline" size={15} />
-      </View>
-      <View style={styles.flex}>
-        <Text
-          text={employer.name}
-          size="xs"
-          weight="medium"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text
-          text={`${employer.type} · ${employer.city}`}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
-      <View style={styles.rating}>
-        <Ionicons color={tokens.warning} name="star" size={11} />
-        <Text text={String(employer.rating)} size="xxs" style={{ color: tokens.textSecondary }} />
-      </View>
-    </Pressable>
+      selected={selected}
+      subtitle={`${employer.type} · ${employer.city}`}
+      title={employer.name}
+      leading={
+        <View style={[styles.searchIcon, { backgroundColor: tokens.background }]}>
+          <Ionicons color={tokens.textSecondary} name="location-outline" size={15} />
+        </View>
+      }
+      trailing={
+        <View style={styles.rating}>
+          <Ionicons color={tokens.warning} name="star" size={11} />
+          <Text text={String(employer.rating)} size="xxs" style={{ color: tokens.textSecondary }} />
+        </View>
+      }
+    />
   )
 }
 
@@ -701,26 +667,13 @@ function AvailabilityStep({
       <Text text="DAYS" size="xxs" weight="semiBold" style={{ color: tokens.textMuted }} />
       <View style={styles.dayWrap}>
         {days.map((day) => {
-          const active = availabilityDays.includes(day)
           return (
-            <Pressable
+            <SelectionChip
               key={day}
               onPress={() => onDayToggle(day)}
-              style={[
-                styles.dayChip,
-                {
-                  backgroundColor: active ? tokens.textPrimary : tokens.surfaceSecondary,
-                  borderColor: active ? tokens.textPrimary : tokens.border,
-                },
-              ]}
-            >
-              <Text
-                text={day}
-                size="xxs"
-                weight="medium"
-                style={{ color: active ? tokens.background : tokens.textPrimary }}
-              />
-            </Pressable>
+              label={day}
+              selected={availabilityDays.includes(day)}
+            />
           )
         })}
       </View>
@@ -785,7 +738,7 @@ function NotificationsStep({
               <Text text={item.label} size="xs" style={{ color: tokens.textPrimary }} />
               <Text text={item.desc} size="xxs" style={{ color: tokens.textMuted }} />
             </View>
-            <Toggle value={notifications[item.key]} onChange={() => onToggle(item.key)} />
+            <ToggleSwitch value={notifications[item.key]} onChange={() => onToggle(item.key)} />
           </View>
         ))}
       </View>
@@ -873,42 +826,19 @@ function ChoiceRow({
   const tokens = useDesignTokens()
 
   return (
-    <Pressable
+    <SelectionRow
       onPress={onPress}
-      style={[
-        styles.choiceRow,
-        {
-          backgroundColor: selected ? tokens.accentSoft : tokens.surfaceSecondary,
-          borderColor: selected ? tokens.accent : tokens.transparent,
-        },
-      ]}
-    >
-      <View>
-        <Text text={title} size="xs" weight="medium" style={{ color: tokens.textPrimary }} />
-        <Text text={subtitle} size="xxs" style={{ color: tokens.textSecondary }} />
-      </View>
-      {selected ? (
-        <View style={[styles.smallCheck, { backgroundColor: tokens.accent }]}>
-          <Ionicons color={tokens.accentForeground} name="checkmark-outline" size={13} />
-        </View>
-      ) : null}
-    </Pressable>
-  )
-}
-
-function Toggle({ value, onChange }: { value: boolean; onChange: () => void }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <Pressable
-      onPress={onChange}
-      style={[
-        styles.toggleTrack,
-        { backgroundColor: value ? tokens.success : tokens.surfaceTertiary },
-      ]}
-    >
-      <View style={[styles.toggleThumb, { left: value ? 22 : 2 }]} />
-    </Pressable>
+      selected={selected}
+      subtitle={subtitle}
+      title={title}
+      trailing={
+        selected ? (
+          <View style={[styles.smallCheck, { backgroundColor: tokens.accent }]}>
+            <Ionicons color={tokens.accentForeground} name="checkmark-outline" size={13} />
+          </View>
+        ) : null
+      }
+    />
   )
 }
 
@@ -923,15 +853,6 @@ const styles = StyleSheet.create({
   },
   backButtonSpacer: {
     width: 32,
-  },
-  choiceRow: {
-    alignItems: "center",
-    borderRadius: 14,
-    borderWidth: 1.5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 13,
   },
   codeBox: {
     alignItems: "center",
@@ -953,12 +874,6 @@ const styles = StyleSheet.create({
     gap: 8,
     justifyContent: "center",
     padding: 16,
-  },
-  dayChip: {
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
   },
   dayWrap: {
     flexDirection: "row",
@@ -997,12 +912,6 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  inputShell: {
-    borderRadius: 14,
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
   joinedCard: {
     alignItems: "center",
     borderRadius: 16,
@@ -1010,17 +919,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     padding: 16,
-  },
-  nativeInput: {
-    fontSize: 16,
-    lineHeight: 22,
-    minHeight: 24,
-    padding: 0,
-  },
-  nativeSegmentControl: {
-    borderRadius: 14,
-    height: 36,
-    overflow: "hidden",
   },
   notificationIcon: {
     alignItems: "center",
@@ -1069,14 +967,6 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   roleCard: {
-    alignItems: "center",
-    borderRadius: 16,
-    borderWidth: 1,
-    gap: 8,
-    justifyContent: "center",
-    minHeight: 84,
-    paddingHorizontal: 8,
-    paddingVertical: 16,
     width: "31%",
   },
   roleGrid: {
@@ -1096,14 +986,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 36,
   },
-  searchRow: {
-    alignItems: "center",
+  segmentedControl: {
     borderRadius: 14,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
   },
   skipButton: {
     alignItems: "center",
@@ -1147,19 +1031,6 @@ const styles = StyleSheet.create({
   },
   titleBlock: {
     gap: 6,
-  },
-  toggleThumb: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 13.5,
-    height: 27,
-    position: "absolute",
-    top: 2,
-    width: 27,
-  },
-  toggleTrack: {
-    borderRadius: 15.5,
-    height: 31,
-    width: 51,
   },
   welcomeArt: {
     alignItems: "center",

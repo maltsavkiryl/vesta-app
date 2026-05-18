@@ -1,33 +1,38 @@
 /* eslint-disable react-native/no-inline-styles */
 
 import { useMemo, useState } from "react"
-import {
-  Alert,
-  KeyboardTypeOptions,
-  Pressable,
-  StyleSheet,
-  Switch,
-  TextInput,
-  View,
-} from "react-native"
+import { Alert, Pressable, StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
+import { createInitialState } from "@/core/mockState"
 import type { Employer } from "@/core/models"
+import { useAuthSession } from "@/features/auth/data/auth.queries"
+import { useProfileActions } from "@/features/profile/data/profile.mutations"
+import {
+  AddressEditSections,
+  BankingEditSections,
+  ContactEditSections,
+  LegalEditSections,
+  PersonalEditSections,
+} from "@/features/profile/ProfileEditableSections"
 import {
   AppButton,
+  AppSegmentedControl,
   AppScrollScreen,
   GroupedSection,
   ListRow,
   MetricGrid,
+  SelectionCard,
+  ToggleSwitch,
   StatusBadge,
-} from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import type { DesignTokens } from "@/design-system/tokens"
-import { createHeaderActionOptions } from "@/navigation/native-sheet"
-import { useAppSession } from "@/providers/app-provider"
-import { useAppTheme } from "@/theme/context"
+  Text,
+  TextField,
+  createHeaderActionOptions,
+  useAppTheme,
+  useDesignTokens,
+} from "@/ui"
+import type { DesignTokens } from "@/ui"
 import { maskSensitiveId } from "@/utils/formatters"
 
 type SectionKey =
@@ -154,58 +159,6 @@ function SectionFooter({ text }: { text: string }) {
   return <Text text={text} size="xxs" style={[styles.sectionFooter, { color: tokens.textMuted }]} />
 }
 
-function Field({
-  label,
-  value,
-  onChangeText,
-  autoCapitalize = "sentences",
-  keyboardType = "default",
-  multiline,
-  placeholder = "Not added",
-}: {
-  label: string
-  value: string
-  onChangeText: (value: string) => void
-  autoCapitalize?: "none" | "sentences" | "words" | "characters"
-  keyboardType?: KeyboardTypeOptions
-  multiline?: boolean
-  placeholder?: string
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.fieldShell, { borderBottomColor: tokens.separator }]}>
-      <Text
-        text={label}
-        numberOfLines={1}
-        size="xs"
-        style={[styles.fieldLabel, { color: tokens.textSecondary }]}
-      />
-      <TextInput
-        autoCapitalize={autoCapitalize}
-        keyboardType={keyboardType}
-        multiline={multiline}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={tokens.textMuted}
-        selectionColor={tokens.accent}
-        style={[
-          styles.input,
-          multiline ? styles.multilineInput : null,
-          { color: tokens.textPrimary },
-        ]}
-        value={value}
-      />
-    </View>
-  )
-}
-
-function FieldStack({ children }: { children: React.ReactNode }) {
-  const tokens = useDesignTokens()
-
-  return <View style={[styles.fieldStack, { backgroundColor: tokens.surface }]}>{children}</View>
-}
-
 function isEditableSection(section: SectionKey) {
   return (
     section === "personal" ||
@@ -230,34 +183,16 @@ function ThemeOption({
   const tokens = useDesignTokens()
 
   return (
-    <Pressable
-      accessibilityRole="button"
+    <SelectionCard
+      icon={
+        <Ionicons color={selected ? tokens.accent : tokens.textSecondary} name={icon} size={21} />
+      }
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.themeOption,
-        {
-          backgroundColor: selected ? tokens.accentSoft : tokens.surface,
-          borderColor: selected ? tokens.accent : tokens.border,
-          opacity: pressed ? 0.72 : 1,
-        },
-      ]}
-    >
-      <Ionicons color={selected ? tokens.accent : tokens.textSecondary} name={icon} size={21} />
-      <Text
-        text={label}
-        size="xxs"
-        weight="semiBold"
-        style={{ color: selected ? tokens.accent : tokens.textPrimary }}
-      />
-      {selected ? (
-        <Ionicons
-          color={tokens.accent}
-          name="checkmark-circle"
-          size={16}
-          style={styles.themeCheck}
-        />
-      ) : null}
-    </Pressable>
+      selected={selected}
+      style={styles.themeOption}
+      subtitle={selected ? "Selected" : undefined}
+      title={label}
+    />
   )
 }
 
@@ -272,7 +207,7 @@ function switchEmployerWithConfirmation({
   switchEmployer,
 }: {
   employerId: string
-  employers: ReturnType<typeof useAppSession>["state"]["employers"]
+  employers: Employer[]
   router: ReturnType<typeof useRouter>
   switchEmployer: (employerId: string) => void
 }) {
@@ -430,8 +365,10 @@ export function ProfileDetailScreen() {
   const { section: rawSection } = useLocalSearchParams<{ section?: string }>()
   const section = getSection(rawSection)
   const tokens = useDesignTokens()
-  const { state, joinEmployer, switchEmployer, updateProfile } = useAppSession()
+  const { state: sessionState } = useAuthSession()
+  const { joinEmployer, switchEmployer, updateProfile } = useProfileActions()
   const { setThemeContextOverride, theme } = useAppTheme()
+  const state = sessionState ?? createInitialState()
 
   const [personalState, setPersonalState] = useState({
     bio: state.profile.bio,
@@ -624,166 +561,20 @@ export function ProfileDetailScreen() {
 
       {section === "personal" ? (
         <>
-          <GroupedSection title="Profile">
-            <FieldStack>
-              <Field
-                label="First name"
-                value={personalState.firstName}
-                onChangeText={(firstName) =>
-                  setPersonalState((current) => ({ ...current, firstName }))
-                }
-              />
-              <Field
-                label="Last name"
-                value={personalState.lastName}
-                onChangeText={(lastName) =>
-                  setPersonalState((current) => ({ ...current, lastName }))
-                }
-              />
-              <Field
-                label="Preferred name"
-                value={personalState.preferredName}
-                onChangeText={(preferredName) =>
-                  setPersonalState((current) => ({ ...current, preferredName }))
-                }
-              />
-              <Field
-                label="Date of birth"
-                keyboardType="numbers-and-punctuation"
-                placeholder="DD/MM/YYYY"
-                value={personalState.dateOfBirth}
-                onChangeText={(dateOfBirth) =>
-                  setPersonalState((current) => ({ ...current, dateOfBirth }))
-                }
-              />
-              <Field
-                label="Nationality"
-                value={personalState.nationality}
-                onChangeText={(nationality) =>
-                  setPersonalState((current) => ({ ...current, nationality }))
-                }
-              />
-            </FieldStack>
-          </GroupedSection>
-          <GroupedSection title="About">
-            <FieldStack>
-              <Field
-                label="Employee note"
-                multiline
-                value={personalState.bio}
-                onChangeText={(bio) => setPersonalState((current) => ({ ...current, bio }))}
-              />
-            </FieldStack>
-          </GroupedSection>
+          <PersonalEditSections personalState={personalState} setPersonalState={setPersonalState} />
         </>
       ) : null}
 
       {section === "contact" ? (
         <>
-          <GroupedSection title="Reachability">
-            <FieldStack>
-              <Field
-                autoCapitalize="none"
-                keyboardType="email-address"
-                label="Email"
-                value={contactState.email}
-                onChangeText={(email) => setContactState((current) => ({ ...current, email }))}
-              />
-              <Field
-                keyboardType="phone-pad"
-                label="Mobile phone"
-                value={contactState.phone}
-                onChangeText={(phone) => setContactState((current) => ({ ...current, phone }))}
-              />
-            </FieldStack>
-          </GroupedSection>
+          <ContactEditSections contactState={contactState} setContactState={setContactState} />
           <SectionFooter text="Your active employer can use these details for schedule changes and urgent shift updates." />
-          <GroupedSection title="Emergency contact">
-            <FieldStack>
-              <Field
-                label="Full name"
-                value={contactState.emergencyContact.name}
-                onChangeText={(name) =>
-                  setContactState((current) => ({
-                    ...current,
-                    emergencyContact: { ...current.emergencyContact, name },
-                  }))
-                }
-              />
-              <Field
-                label="Relationship"
-                value={contactState.emergencyContact.relationship}
-                onChangeText={(relationship) =>
-                  setContactState((current) => ({
-                    ...current,
-                    emergencyContact: { ...current.emergencyContact, relationship },
-                  }))
-                }
-              />
-              <Field
-                keyboardType="phone-pad"
-                label="Phone"
-                value={contactState.emergencyContact.phone}
-                onChangeText={(phone) =>
-                  setContactState((current) => ({
-                    ...current,
-                    emergencyContact: { ...current.emergencyContact, phone },
-                  }))
-                }
-              />
-            </FieldStack>
-          </GroupedSection>
         </>
       ) : null}
 
       {section === "address" ? (
         <>
-          <GroupedSection title="Home address">
-            <FieldStack>
-              <Field
-                label="Street and number"
-                value={addressState.address.street}
-                onChangeText={(street) =>
-                  setAddressState((current) => ({
-                    ...current,
-                    address: { ...current.address, street },
-                  }))
-                }
-              />
-              <Field
-                keyboardType="number-pad"
-                label="Postal code"
-                value={addressState.address.postalCode}
-                onChangeText={(postalCode) =>
-                  setAddressState((current) => ({
-                    ...current,
-                    address: { ...current.address, postalCode },
-                  }))
-                }
-              />
-              <Field
-                label="City"
-                value={addressState.address.city}
-                onChangeText={(city) =>
-                  setAddressState((current) => ({
-                    ...current,
-                    address: { ...current.address, city },
-                    homeCity: city,
-                  }))
-                }
-              />
-              <Field
-                label="Country"
-                value={addressState.address.country}
-                onChangeText={(country) =>
-                  setAddressState((current) => ({
-                    ...current,
-                    address: { ...current.address, country },
-                  }))
-                }
-              />
-            </FieldStack>
-          </GroupedSection>
+          <AddressEditSections addressState={addressState} setAddressState={setAddressState} />
           <SectionFooter text="This address is used for employment records, payroll correspondence, and legally required mail." />
         </>
       ) : null}
@@ -844,24 +635,18 @@ export function ProfileDetailScreen() {
                       />
                     }
                     trailing={
-                      <Switch
+                      <ToggleSwitch
                         accessibilityLabel={`${key
                           .replace(/([A-Z])/g, " $1")
                           .replace(/^./, (value) => value.toUpperCase())} notifications`}
-                        ios_backgroundColor={tokens.surfaceTertiary}
-                        onValueChange={(nextEnabled) =>
+                        onChange={() =>
                           updateProfile({
                             notificationPreferences: {
                               ...state.profile.notificationPreferences,
-                              [preferenceKey]: nextEnabled,
+                              [preferenceKey]: !enabled,
                             },
                           })
                         }
-                        thumbColor="#FFFFFF"
-                        trackColor={{
-                          false: tokens.surfaceTertiary,
-                          true: tokens.success,
-                        }}
                         value={enabled}
                       />
                     }
@@ -994,45 +779,21 @@ export function ProfileDetailScreen() {
 
       {section === "join-employer" ? (
         <>
-          <View style={[styles.joinModeControl, { backgroundColor: tokens.surfaceSecondary }]}>
-            {(
-              [
-                { label: "Invite code", value: "code" },
-                { label: "Search", value: "search" },
-              ] satisfies Array<{ label: string; value: JoinMode }>
-            ).map((mode) => {
-              const selected = joinMode === mode.value
-
-              return (
-                <Pressable
-                  key={mode.value}
-                  accessibilityRole="button"
-                  onPress={() => {
-                    setJoinMode(mode.value)
-                    setJoinCode("")
-                    setJoinSearch("")
-                    setSelectedJoinEmployerId(undefined)
-                    setJoinedEmployerId(undefined)
-                  }}
-                  style={[
-                    styles.joinModeButton,
-                    {
-                      backgroundColor: selected ? tokens.surface : tokens.transparent,
-                      shadowColor: tokens.shadow,
-                      shadowOpacity: selected ? 0.1 : 0,
-                    },
-                  ]}
-                >
-                  <Text
-                    text={mode.label}
-                    size="xxs"
-                    weight={selected ? "semiBold" : "normal"}
-                    style={{ color: selected ? tokens.textPrimary : tokens.textSecondary }}
-                  />
-                </Pressable>
-              )
-            })}
-          </View>
+          <AppSegmentedControl
+            onChange={(mode) => {
+              setJoinMode(mode)
+              setJoinCode("")
+              setJoinSearch("")
+              setSelectedJoinEmployerId(undefined)
+              setJoinedEmployerId(undefined)
+            }}
+            options={[
+              { label: "Invite code", value: "code" },
+              { label: "Search", value: "search" },
+            ]}
+            style={styles.joinModeControl}
+            value={joinMode}
+          />
 
           {joinMode === "code" ? (
             <GroupedSection title="Invite code">
@@ -1042,24 +803,19 @@ export function ProfileDetailScreen() {
                   size="xs"
                   style={{ color: tokens.textSecondary, textAlign: "center" }}
                 />
-                <TextInput
+                <TextField
                   autoCapitalize="characters"
                   autoCorrect={false}
+                  containerStyle={styles.joinCodeField}
+                  inputStyle={styles.joinCodeInput}
+                  label="Invite code"
+                  labelCase="default"
                   maxLength={6}
                   onChangeText={(value) => {
                     setJoinCode(value.toUpperCase())
                     setJoinedEmployerId(undefined)
                   }}
                   placeholder={availableEmployers[0]?.code ?? "ABC123"}
-                  placeholderTextColor={tokens.textMuted}
-                  selectionColor={tokens.accent}
-                  style={[
-                    styles.joinCodeInput,
-                    {
-                      backgroundColor: tokens.backgroundMuted,
-                      color: tokens.textPrimary,
-                    },
-                  ]}
                   value={joinCode}
                 />
                 <Text
@@ -1087,22 +843,21 @@ export function ProfileDetailScreen() {
 
           {joinMode === "search" ? (
             <>
-              <View style={[styles.searchShell, { backgroundColor: tokens.surface }]}>
-                <Ionicons color={tokens.textMuted} name="search-outline" size={16} />
-                <TextInput
-                  autoCapitalize="words"
-                  onChangeText={(value) => {
-                    setJoinSearch(value)
-                    setSelectedJoinEmployerId(undefined)
-                    setJoinedEmployerId(undefined)
-                  }}
-                  placeholder="Search by name, type or city"
-                  placeholderTextColor={tokens.textMuted}
-                  selectionColor={tokens.accent}
-                  style={[styles.searchInput, { color: tokens.textPrimary }]}
-                  value={joinSearch}
-                />
-              </View>
+              <TextField
+                autoCapitalize="words"
+                label="Search"
+                labelCase="default"
+                leftAccessory={
+                  <Ionicons color={tokens.textMuted} name="search-outline" size={16} />
+                }
+                onChangeText={(value) => {
+                  setJoinSearch(value)
+                  setSelectedJoinEmployerId(undefined)
+                  setJoinedEmployerId(undefined)
+                }}
+                placeholder="Search by name, type or city"
+                value={joinSearch}
+              />
 
               <GroupedSection title="Results">
                 {searchResults.length > 0 ? (
@@ -1253,15 +1008,9 @@ export function ProfileDetailScreen() {
                 />
               }
               trailing={
-                <Switch
+                <ToggleSwitch
                   accessibilityLabel={`${state.profile.security.biometricType} unlock`}
-                  ios_backgroundColor={tokens.surfaceTertiary}
-                  onValueChange={updateFaceId}
-                  thumbColor="#FFFFFF"
-                  trackColor={{
-                    false: tokens.surfaceTertiary,
-                    true: tokens.success,
-                  }}
+                  onChange={() => updateFaceId(!state.profile.security.faceIdEnabled)}
                   value={state.profile.security.faceIdEnabled}
                 />
               }
@@ -1290,22 +1039,17 @@ export function ProfileDetailScreen() {
               subtitle="Share profile, availability, and documents with linked employers"
               leading={<Ionicons color={tokens.textSecondary} name="business-outline" size={18} />}
               trailing={
-                <Switch
+                <ToggleSwitch
                   accessibilityLabel="Employer data sharing"
-                  ios_backgroundColor={tokens.surfaceTertiary}
-                  onValueChange={(employerDataSharingEnabled) =>
+                  onChange={() =>
                     updateProfile({
                       privacy: {
                         ...state.profile.privacy,
-                        employerDataSharingEnabled,
+                        employerDataSharingEnabled:
+                          !state.profile.privacy.employerDataSharingEnabled,
                       },
                     })
                   }
-                  thumbColor="#FFFFFF"
-                  trackColor={{
-                    false: tokens.surfaceTertiary,
-                    true: tokens.success,
-                  }}
                   value={state.profile.privacy.employerDataSharingEnabled}
                 />
               }
@@ -1315,22 +1059,16 @@ export function ProfileDetailScreen() {
               subtitle="Help Vesta understand which workflows need improvement"
               leading={<Ionicons color={tokens.textSecondary} name="analytics-outline" size={18} />}
               trailing={
-                <Switch
+                <ToggleSwitch
                   accessibilityLabel="App analytics"
-                  ios_backgroundColor={tokens.surfaceTertiary}
-                  onValueChange={(analyticsEnabled) =>
+                  onChange={() =>
                     updateProfile({
                       privacy: {
                         ...state.profile.privacy,
-                        analyticsEnabled,
+                        analyticsEnabled: !state.profile.privacy.analyticsEnabled,
                       },
                     })
                   }
-                  thumbColor="#FFFFFF"
-                  trackColor={{
-                    false: tokens.surfaceTertiary,
-                    true: tokens.success,
-                  }}
                   value={state.profile.privacy.analyticsEnabled}
                 />
               }
@@ -1341,22 +1079,16 @@ export function ProfileDetailScreen() {
               subtitle="Send diagnostics when the app fails"
               leading={<Ionicons color={tokens.textSecondary} name="bug-outline" size={18} />}
               trailing={
-                <Switch
+                <ToggleSwitch
                   accessibilityLabel="Crash reports"
-                  ios_backgroundColor={tokens.surfaceTertiary}
-                  onValueChange={(crashReportsEnabled) =>
+                  onChange={() =>
                     updateProfile({
                       privacy: {
                         ...state.profile.privacy,
-                        crashReportsEnabled,
+                        crashReportsEnabled: !state.profile.privacy.crashReportsEnabled,
                       },
                     })
                   }
-                  thumbColor="#FFFFFF"
-                  trackColor={{
-                    false: tokens.surfaceTertiary,
-                    true: tokens.success,
-                  }}
                   value={state.profile.privacy.crashReportsEnabled}
                 />
               }
@@ -1454,34 +1186,7 @@ export function ProfileDetailScreen() {
 
       {section === "banking" ? (
         <>
-          <GroupedSection title="Payroll account">
-            <FieldStack>
-              <Field
-                autoCapitalize="characters"
-                label="IBAN"
-                value={bankState.iban}
-                onChangeText={(iban) => setBankState((current) => ({ ...current, iban }))}
-              />
-              <Field
-                autoCapitalize="characters"
-                label="BIC"
-                value={bankState.bic}
-                onChangeText={(bic) => setBankState((current) => ({ ...current, bic }))}
-              />
-              <Field
-                label="Bank name"
-                value={bankState.bankName}
-                onChangeText={(bankName) => setBankState((current) => ({ ...current, bankName }))}
-              />
-              <Field
-                label="Account holder"
-                value={bankState.accountHolder}
-                onChangeText={(accountHolder) =>
-                  setBankState((current) => ({ ...current, accountHolder }))
-                }
-              />
-            </FieldStack>
-          </GroupedSection>
+          <BankingEditSections bankState={bankState} setBankState={setBankState} />
           <SectionFooter text="Bank details are masked in the app and only used by payroll once your employer verifies them." />
           <GroupedSection title="Verification">
             <ListRow
@@ -1504,51 +1209,8 @@ export function ProfileDetailScreen() {
 
       {section === "legal" ? (
         <>
-          <GroupedSection title="Identity">
-            <FieldStack>
-              <Field
-                keyboardType="numbers-and-punctuation"
-                label="National register number"
-                value={legalState.nationalRegisterNumber}
-                onChangeText={(nationalRegisterNumber) =>
-                  setLegalState((current) => ({ ...current, nationalRegisterNumber }))
-                }
-              />
-              <Field
-                autoCapitalize="characters"
-                label="Tax ID"
-                value={legalState.taxId}
-                onChangeText={(taxId) => setLegalState((current) => ({ ...current, taxId }))}
-              />
-              <Field
-                keyboardType="numbers-and-punctuation"
-                label="Social security"
-                value={legalState.socialSecurityNumber}
-                onChangeText={(socialSecurityNumber) =>
-                  setLegalState((current) => ({ ...current, socialSecurityNumber }))
-                }
-              />
-            </FieldStack>
-          </GroupedSection>
+          <LegalEditSections legalState={legalState} setLegalState={setLegalState} />
           <SectionFooter text="Identity numbers stay hidden after saving. Vesta only exposes what payroll and employment compliance require." />
-          <GroupedSection title="Employment compliance">
-            <FieldStack>
-              <Field
-                label="Work permit status"
-                value={legalState.workPermitStatus}
-                onChangeText={(workPermitStatus) =>
-                  setLegalState((current) => ({ ...current, workPermitStatus }))
-                }
-              />
-              <Field
-                label="Payroll status"
-                value={legalState.payrollStatus}
-                onChangeText={(payrollStatus) =>
-                  setLegalState((current) => ({ ...current, payrollStatus }))
-                }
-              />
-            </FieldStack>
-          </GroupedSection>
           <GroupedSection title="Privacy preview">
             <ListRow
               isLast
@@ -1611,62 +1273,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 24,
   },
-  fieldLabel: {
-    flexShrink: 0,
-    width: 128,
-  },
-  fieldShell: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 48,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  fieldStack: {
-    borderCurve: "continuous",
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
-    minHeight: 30,
-    padding: 0,
-  },
   joinCodeContent: {
     alignItems: "center",
     gap: 10,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
+  joinCodeField: {
+    width: "100%",
+  },
   joinCodeInput: {
-    borderCurve: "continuous",
-    borderRadius: 12,
     fontSize: 22,
     fontWeight: "700",
     letterSpacing: 2,
-    minHeight: 54,
-    paddingHorizontal: 18,
+    minHeight: 30,
     textAlign: "center",
-    width: "100%",
-  },
-  joinModeButton: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 8,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: 32,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 3,
   },
   joinModeControl: {
     borderCurve: "continuous",
     borderRadius: 10,
-    flexDirection: "row",
-    gap: 2,
-    padding: 2,
   },
   joinPreviewCard: {
     borderCurve: "continuous",
@@ -1698,11 +1323,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 60,
   },
-  multilineInput: {
-    minHeight: 86,
-    paddingTop: 4,
-    textAlignVertical: "top",
-  },
   ratingRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -1721,25 +1341,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 38,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    lineHeight: 20,
-    minHeight: 24,
-    padding: 0,
-  },
   searchMeta: {
     alignItems: "flex-end",
     gap: 2,
-  },
-  searchShell: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 14,
-    flexDirection: "row",
-    gap: 10,
-    minHeight: 48,
-    paddingHorizontal: 14,
   },
   sectionFooter: {
     paddingHorizontal: 4,
@@ -1750,11 +1354,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 12,
     paddingVertical: 5,
-  },
-  themeCheck: {
-    position: "absolute",
-    right: 8,
-    top: 8,
   },
   themeGrid: {
     flexDirection: "row",

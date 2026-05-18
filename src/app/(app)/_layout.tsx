@@ -1,12 +1,12 @@
 import { Redirect, Stack, useRouter } from "expo-router"
 
+import { useAppSession } from "@/providers/app-provider"
 import {
   createHeaderActionOptions,
   createPushDetailOptions,
   createSheetOptions,
-} from "@/navigation/native-sheet"
-import { useAppSession } from "@/providers/app-provider"
-import { useAppTheme } from "@/theme/context"
+  useAppTheme,
+} from "@/ui"
 
 export default function AppLayout() {
   const { isSignedIn, needsOnboarding } = useAppSession()

@@ -4,13 +4,11 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
 import { formatShortDate, getShiftTimeRange } from "@/core/date"
 import type { Shift, ShiftStatus } from "@/core/models"
-import { AppScrollScreen } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import type { DesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { AppScrollScreen, Text, useDesignTokens } from "@/ui"
+import type { DesignTokens } from "@/ui"
 
 const colleagues = ["Emma D.", "Lucas M.", "Yasmine K."]
 
@@ -226,10 +224,7 @@ function ActionCard({
   return (
     <Pressable
       onPress={onPress}
-      style={[
-        styles.actionCard,
-        { backgroundColor: tokens.surface, borderColor: tokens.border },
-      ]}
+      style={[styles.actionCard, { backgroundColor: tokens.surface, borderColor: tokens.border }]}
     >
       <Ionicons color={tokens.textPrimary} name={icon} size={19} />
       <View>
@@ -244,8 +239,8 @@ export function ShiftDetailScreen() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const tokens = useDesignTokens()
-  const { state } = useAppSession()
-  const shift = state.shifts.find((item) => item.id === id)
+  const { state } = useScheduleStateQuery()
+  const shift = state?.shifts.find((item) => item.id === id)
 
   if (!shift) {
     return (

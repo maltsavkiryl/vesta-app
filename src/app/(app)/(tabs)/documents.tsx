@@ -1,3 +1,3 @@
-import { DocumentsScreen } from "@/features/documents/DocumentsScreen"
+import { DocumentsScreen } from "@/features/documents"
 
 export default DocumentsScreen

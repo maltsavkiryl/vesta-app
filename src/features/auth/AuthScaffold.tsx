@@ -4,9 +4,7 @@ import { PropsWithChildren, ReactNode } from "react"
 import { StyleSheet, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
-import { AppScrollScreen } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
+import { AppScrollScreen, Banner, Text, useDesignTokens } from "@/ui"
 
 export function AuthScaffold({
   children,
@@ -70,19 +68,12 @@ function VestaMark() {
 }
 
 export function AuthError({ message }: { message?: string }) {
-  const tokens = useDesignTokens()
-
   if (!message) return null
 
   return (
-    <View
-      style={[
-        styles.error,
-        { backgroundColor: `${tokens.danger}10`, borderColor: `${tokens.danger}22` },
-      ]}
-    >
-      <Text text={message} size="xxs" style={{ color: tokens.danger }} />
-    </View>
+    <Banner tone="danger">
+      <Text text={message} size="xxs" />
+    </Banner>
   )
 }
 
@@ -94,12 +85,6 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingHorizontal: 24,
     paddingTop: 28,
-  },
-  error: {
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
   },
   footer: {
     alignItems: "center",

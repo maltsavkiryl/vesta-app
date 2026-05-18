@@ -7,27 +7,25 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleProp,
   StyleSheet,
-  TextInput,
-  TextInputProps,
   View,
-  ViewStyle,
 } from "react-native"
-import type { ReactNode } from "react"
-import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
-import { useAppSession } from "@/providers/app-provider"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { Banner, Button, Text, useDesignTokens } from "@/ui"
+
+import { AuthTextField } from "./AuthTextField"
 
 const vestaLogo = require("@assets/images/vesta-logo.png")
 
 export function RegisterScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const { register } = useAppSession()
+  const tokens = useDesignTokens()
+  const { register } = useAuthActions()
 
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -41,7 +39,7 @@ export function RegisterScreen() {
     if (error) setError(undefined)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!firstName.trim() || !lastName.trim()) {
       setError("Please enter your full name.")
       return
@@ -60,7 +58,11 @@ export function RegisterScreen() {
     }
 
     setError(undefined)
-    register({ firstName, lastName, email, password })
+    const response = await register({ firstName, lastName, email, password })
+    if (!response.result.ok) {
+      setError(response.result.message)
+      return
+    }
     router.replace("/(auth)/onboarding")
   }
 
@@ -88,58 +90,65 @@ export function RegisterScreen() {
 
         <View style={styles.form}>
           <View style={styles.nameRow}>
-            <Field
+            <AuthTextField
               accessibilityLabel="First name"
               autoCapitalize="words"
               autoComplete="given-name"
+              containerStyle={styles.nameField}
               onChangeText={(value) => {
                 setFirstName(value)
                 clearError()
               }}
-              placeholder="First name"
+              label="First name"
+              labelCase="default"
               returnKeyType="next"
               textContentType="givenName"
               value={firstName}
             />
-            <Field
+            <AuthTextField
               accessibilityLabel="Last name"
               autoCapitalize="words"
               autoComplete="family-name"
+              containerStyle={styles.nameField}
               onChangeText={(value) => {
                 setLastName(value)
                 clearError()
               }}
-              placeholder="Last name"
+              label="Last name"
+              labelCase="default"
               returnKeyType="next"
               textContentType="familyName"
               value={lastName}
             />
           </View>
 
-          <Field
+          <AuthTextField
             accessibilityLabel="Email"
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
+            label="Email"
+            labelCase="default"
             onChangeText={(value) => {
               setEmail(value)
               clearError()
             }}
-            placeholder="Email"
+            placeholder="you@email.com"
             returnKeyType="next"
             textContentType="username"
             value={email}
           />
 
-          <Field
+          <AuthTextField
             accessibilityLabel="Password"
             autoCapitalize="none"
             autoComplete="new-password"
+            label="Password"
+            labelCase="default"
             onChangeText={(value) => {
               setPassword(value)
               clearError()
             }}
-            placeholder="Password"
             returnKeyType="next"
             secureTextEntry={!showPassword}
             textContentType="newPassword"
@@ -152,7 +161,7 @@ export function RegisterScreen() {
                 style={styles.iconButton}
               >
                 <Ionicons
-                  color="#6C6C70"
+                  color={tokens.textSecondary}
                   name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
                 />
@@ -160,53 +169,38 @@ export function RegisterScreen() {
             }
           />
 
-          <Field
+          <AuthTextField
             accessibilityLabel="Confirm password"
             autoCapitalize="none"
             autoComplete="new-password"
+            label="Confirm password"
+            labelCase="default"
             onChangeText={(value) => {
               setConfirmPassword(value)
               clearError()
             }}
             onSubmitEditing={handleSubmit}
-            placeholder="Confirm password"
             returnKeyType="done"
             secureTextEntry={!showPassword}
             textContentType="newPassword"
             value={confirmPassword}
           />
 
-          {error ? <Text text={error} size="xxs" style={styles.errorText} /> : null}
+          {error ? (
+            <Banner tone="danger">
+              <Text text={error} size="xxs" />
+            </Banner>
+          ) : null}
 
-          <Pressable onPress={handleSubmit} style={styles.primaryButton}>
-            <Text text="Create account" weight="bold" style={styles.primaryButtonText} />
-          </Pressable>
-
-          <Pressable onPress={() => router.replace("/(auth)/sign-in")} style={styles.secondaryButton}>
-            <Text text="Sign in instead" weight="bold" style={styles.secondaryButtonText} />
-          </Pressable>
+          <Button label="Create account" onPress={handleSubmit} />
+          <Button
+            label="Sign in instead"
+            onPress={() => router.replace("/(auth)/sign-in")}
+            variant="secondary"
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
-}
-
-function Field({
-  containerStyle,
-  rightAccessory,
-  ...props
-}: TextInputProps & { containerStyle?: StyleProp<ViewStyle>; rightAccessory?: ReactNode }) {
-  return (
-    <View style={[styles.inputShell, containerStyle]}>
-      <TextInput
-        autoCorrect={false}
-        placeholderTextColor="#8E8E93"
-        selectionColor="#000000"
-        {...props}
-        style={styles.input}
-      />
-      {rightAccessory}
-    </View>
   )
 }
 
@@ -228,11 +222,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 40,
   },
-  errorText: {
-    color: "#D70015",
-    marginTop: -4,
-    textAlign: "center",
-  },
   form: {
     gap: 9,
   },
@@ -246,62 +235,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 28,
   },
-  input: {
-    color: "#000000",
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 20,
-    minHeight: 22,
-    padding: 0,
-  },
-  inputShell: {
-    alignItems: "center",
-    backgroundColor: "#E8E8EA",
-    borderRadius: 12,
-    flex: 1,
-    flexDirection: "row",
-    gap: 8,
-    minHeight: 48,
-    paddingHorizontal: 16,
-  },
   logo: {
     height: 76,
     marginBottom: 18,
     width: 76,
   },
+  nameField: {
+    flex: 1,
+  },
   nameRow: {
     flexDirection: "row",
     gap: 9,
   },
-  primaryButton: {
-    alignItems: "center",
-    backgroundColor: "#000000",
-    borderRadius: 12,
-    justifyContent: "center",
-    minHeight: 48,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    lineHeight: 22,
-  },
   screen: {
     backgroundColor: "#F9F9FA",
     flex: 1,
-  },
-  secondaryButton: {
-    alignItems: "center",
-    backgroundColor: "#F9F9FA",
-    borderColor: "#C9C9CC",
-    borderRadius: 12,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 48,
-  },
-  secondaryButtonText: {
-    color: "#000000",
-    fontSize: 17,
-    lineHeight: 22,
   },
   subtitle: {
     color: "#6C6C70",

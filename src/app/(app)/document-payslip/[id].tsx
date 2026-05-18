@@ -1,3 +1,3 @@
-import { PayslipDetailScreen } from "@/features/documents/DocumentsScreen"
+import { PayslipDetailScreen } from "@/features/documents"
 
 export default PayslipDetailScreen

@@ -9,6 +9,30 @@ const extensions = metroConfig?.resolver?.sourceExts.flatMap((pExt) =>
 module.exports = {
   forbidden: [
     {
+      name: "no-legacy-ui-imports",
+      severity: "error",
+      comment:
+        "App, feature, and navigation code should consume the canonical src/ui layer instead of importing legacy UI or theme modules directly.",
+      from: {
+        path: "^src/(app|features|navigation)/",
+      },
+      to: {
+        path: "^src/(components|design-system|theme)/",
+      },
+    },
+    {
+      name: "ui-not-to-features",
+      severity: "error",
+      comment:
+        "Shared UI must stay reusable and cannot depend on feature-specific modules.",
+      from: {
+        path: "^src/ui/",
+      },
+      to: {
+        path: "^src/features/",
+      },
+    },
+    {
       name: "no-circular",
       severity: "warn",
       comment:

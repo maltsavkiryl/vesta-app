@@ -1,7 +1,7 @@
 {
   "name": "Vesta",
   "slug": "vesta",
-  "scheme": "vesta-mobile",
+  "scheme": "vesta",
   "version": "1.0.0",
   "orientation": "portrait",
   "userInterfaceStyle": "automatic",

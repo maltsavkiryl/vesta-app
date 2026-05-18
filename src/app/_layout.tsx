@@ -2,14 +2,15 @@ import { useEffect, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { Slot, SplashScreen } from "expo-router"
 import { ThemeProvider as NavigationThemeProvider } from "@react-navigation/native"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
 
-import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary"
 import Config from "@/config"
 import { initI18n } from "@/i18n"
 import { AppProvider } from "@/providers/app-provider"
-import { ThemeProvider, useAppTheme } from "@/theme/context"
+import { createAppQueryClient } from "@/services/app/app.queries"
+import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { initCrashReporting } from "@/utils/crashReporting"
 import { loadDateFnsLocale } from "@/utils/formatDate"
 
@@ -23,19 +24,23 @@ if (__DEV__) {
   require("@/devtools/ReactotronConfig")
 }
 
+const queryClient = createAppQueryClient()
+
 function AppShell() {
   const { navigationTheme, theme } = useAppTheme()
 
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
-        <AppProvider>
-          <KeyboardProvider>
-            <ErrorBoundary catchErrors={Config.catchErrors}>
-              <Slot />
-            </ErrorBoundary>
-          </KeyboardProvider>
-        </AppProvider>
+        <QueryClientProvider client={queryClient}>
+          <AppProvider>
+            <KeyboardProvider>
+              <ErrorBoundary catchErrors={Config.catchErrors}>
+                <Slot />
+              </ErrorBoundary>
+            </KeyboardProvider>
+          </AppProvider>
+        </QueryClientProvider>
       </View>
     </NavigationThemeProvider>
   )

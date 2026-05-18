@@ -2,8 +2,8 @@ import { Platform, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import type { NativeStackHeaderItem, NativeStackNavigationOptions } from "@react-navigation/native-stack"
 
-import { Text } from "@/components/Text"
-import type { Theme } from "@/theme/types"
+import type { Theme } from "@/ui/foundations/theme"
+import { Text } from "@/ui/primitives/Text"
 
 const SHEET_DETENTS = {
   large: 0.98,

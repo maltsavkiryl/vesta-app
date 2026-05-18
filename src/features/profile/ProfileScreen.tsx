@@ -5,19 +5,23 @@ import { Alert, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
+import { createInitialState } from "@/core/mockState"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { useAuthSession } from "@/features/auth/data/auth.queries"
+import { useSelectedEmployerQuery } from "@/features/profile/data/profile.queries"
 import {
   AppScrollScreen,
-  GroupedSection,
-  ListRow,
+  ListCard,
+  ListCardItem,
   MetricGrid,
   Pill,
+  SectionBlock,
   SurfaceCard,
-} from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import type { DesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
-import { useAppTheme } from "@/theme/context"
+  Text,
+  useAppTheme,
+  useDesignTokens,
+} from "@/ui"
+import type { DesignTokens } from "@/ui"
 import { maskIban } from "@/utils/formatters"
 
 type ProfileSection = "personal" | "employment" | "settings" | "support"
@@ -176,15 +180,17 @@ function CompletenessCard({ progress }: { progress: number }) {
 
 function ProfileSectionCard({ items, title }: { items: ProfileRowItem[]; title: string }) {
   return (
-    <GroupedSection title={title}>
-      {items.map((item, index) => (
-        <ProfileRow
-          key={`${title}-${item.label}`}
-          item={item}
-          isLast={index === items.length - 1}
-        />
-      ))}
-    </GroupedSection>
+    <SectionBlock title={title}>
+      <ListCard>
+        {items.map((item, index) => (
+          <ProfileRow
+            key={`${title}-${item.label}`}
+            item={item}
+            isLast={index === items.length - 1}
+          />
+        ))}
+      </ListCard>
+    </SectionBlock>
   )
 }
 
@@ -205,11 +211,12 @@ function ProfileRow({ item, isLast }: { item: ProfileRowItem; isLast: boolean })
   }
 
   return (
-    <ListRow
-      title={item.label}
-      subtitle={item.value}
-      destructive={item.destructive}
+    <ListCardItem
       isLast={isLast}
+      subtitle={item.value}
+      subtitleStyle={{ color: item.destructive ? tokens.danger : tokens.textSecondary }}
+      title={item.label}
+      titleStyle={{ color: item.destructive ? tokens.danger : tokens.textPrimary }}
       onPress={canPress ? handlePress : undefined}
       leading={
         <Ionicons
@@ -278,7 +285,10 @@ export function ProfileScreen() {
   const tokens = useDesignTokens()
   const router = useRouter()
   const { themeContext } = useAppTheme()
-  const { state, selectedEmployer, signOut } = useAppSession()
+  const { signOut } = useAuthActions()
+  const { state: sessionState } = useAuthSession()
+  const selectedEmployer = useSelectedEmployerQuery()
+  const state = sessionState ?? createInitialState()
 
   const fullName = `${state.profile.firstName} ${state.profile.lastName}`
   const role = capitalize(state.profile.role)
@@ -311,7 +321,7 @@ export function ProfileScreen() {
         text: "Sign out",
         style: "destructive",
         onPress: () => {
-          signOut()
+          void signOut()
           router.replace("/(auth)/sign-in")
         },
       },
@@ -433,7 +443,7 @@ export function ProfileScreen() {
         />
       ))}
 
-      <GroupedSection>
+      <ListCard>
         <ProfileRow
           isLast
           item={{
@@ -444,7 +454,7 @@ export function ProfileScreen() {
             showChevron: false,
           }}
         />
-      </GroupedSection>
+      </ListCard>
 
       <VersionFooter />
     </AppScrollScreen>

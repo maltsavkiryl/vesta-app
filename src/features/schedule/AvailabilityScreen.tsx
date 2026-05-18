@@ -6,11 +6,10 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
 import type { AvailabilityStatus } from "@/core/models"
-import { AppButton, AppScrollScreen, GroupedSection } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
+import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { AppButton, AppScrollScreen, GroupedSection, Text, useDesignTokens } from "@/ui"
 
 const MINUTES = ["00", "15", "30", "45"] as const
 
@@ -58,17 +57,18 @@ export function AvailabilityScreen() {
   const insets = useSafeAreaInsets()
   const { date = new Date().toISOString() } = useLocalSearchParams<{ date: string }>()
   const tokens = useDesignTokens()
-  const { state, updateAvailability } = useAppSession()
+  const { updateAvailability } = useScheduleActions()
+  const { state } = useScheduleStateQuery()
 
   const day = useMemo(
     () =>
-      state.availability[date] ?? {
+      state?.availability[date] ?? {
         date,
         status: "available" as const,
         startTime: "17:00",
         endTime: "23:00",
       },
-    [date, state.availability],
+    [date, state?.availability],
   )
   const [status, setStatus] = useState<AvailabilityStatus>(day.status)
   const [startTime, setStartTime] = useState(day.startTime)

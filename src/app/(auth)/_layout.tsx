@@ -1,7 +1,7 @@
 import { Redirect, Stack } from "expo-router"
 
 import { useAppSession } from "@/providers/app-provider"
-import { useAppTheme } from "@/theme/context"
+import { useAppTheme } from "@/ui"
 
 export default function AuthLayout() {
   const { isSignedIn, needsOnboarding } = useAppSession()

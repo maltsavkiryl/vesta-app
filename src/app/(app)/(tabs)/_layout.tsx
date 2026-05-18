@@ -1,6 +1,6 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs"
 
-import { useDesignTokens } from "@/design-system/tokens"
+import { useDesignTokens } from "@/ui"
 
 const labelStyle = {
   fontSize: 11,

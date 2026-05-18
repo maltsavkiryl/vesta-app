@@ -2,8 +2,9 @@ import { useCallback } from "react"
 import { useRouter } from "expo-router"
 
 import type { AppActionIntent, AvailabilityDay } from "@/core/models"
+import { useDocumentActions } from "@/features/documents/data/documents.mutations"
 import { showDocumentUploadOptions } from "@/features/documents/documentUploadFlow"
-import { useAppSession } from "@/providers/app-provider"
+import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 
 type ActionResult = "completed" | "opened" | "cancelled" | "failed"
 
@@ -15,7 +16,8 @@ function getFirstAvailabilityDate(availability: Record<string, AvailabilityDay>)
 
 export function useAppAction() {
   const router = useRouter()
-  const { state, uploadDocument } = useAppSession()
+  const { state } = useScheduleStateQuery()
+  const { uploadDocument } = useDocumentActions()
 
   const runAction = useCallback(
     async (action?: AppActionIntent): Promise<ActionResult> => {
@@ -34,7 +36,7 @@ export function useAppAction() {
             uploadDocument,
           })
         case "editAvailability": {
-          const date = action.date ?? getFirstAvailabilityDate(state.availability)
+          const date = action.date ?? getFirstAvailabilityDate(state?.availability ?? {})
           if (!date) {
             router.push("/(app)/(tabs)/schedule" as never)
             return "opened"
@@ -44,7 +46,7 @@ export function useAppAction() {
         }
       }
     },
-    [router, state.availability, uploadDocument],
+    [router, state?.availability, uploadDocument],
   )
 
   return { runAction }

@@ -5,10 +5,8 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
-import { AppButton } from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { AppButton, Text, useDesignTokens } from "@/ui"
 
 import { AuthError, AuthScaffold } from "./AuthScaffold"
 import { AuthTextField } from "./AuthTextField"
@@ -16,18 +14,18 @@ import { AuthTextField } from "./AuthTextField"
 export function ForgotPasswordScreen() {
   const router = useRouter()
   const tokens = useDesignTokens()
-  const { requestPasswordReset } = useAppSession()
+  const { requestPasswordReset } = useAuthActions()
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string>()
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!email.includes("@")) {
       setError("Enter your email to reset your password.")
       return
     }
     setError(undefined)
-    requestPasswordReset(email)
+    await requestPasswordReset(email)
     setSubmitted(true)
   }
 

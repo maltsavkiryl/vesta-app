@@ -3,21 +3,23 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text } from "@/components/Text"
 import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
 import type { AvailabilityDay, AvailabilityStatus, RequestItem, Shift } from "@/core/models"
+import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import {
   AppButton,
   AppScrollScreen,
   AppSegmentedControl,
-  GroupedSection,
+  ListCard,
+  ListCardItem,
   MetricGrid,
   PageHeader,
   Pill,
+  SectionBlock,
   SurfaceCard,
-} from "@/design-system/primitives"
-import { useDesignTokens } from "@/design-system/tokens"
-import { useAppSession } from "@/providers/app-provider"
+  Text,
+  useDesignTokens,
+} from "@/ui"
 
 type Segment = "shifts" | "availability" | "requests"
 
@@ -70,29 +72,31 @@ function SummaryCard({
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection title={formatFullDate(selectedDate)}>
-      <View style={styles.summaryBody}>
-        <View style={styles.summaryHeader}>
-          <View style={styles.flex}>
-            <Text
-              text={`${selectedShiftCount} shift${selectedShiftCount === 1 ? "" : "s"} scheduled`}
-              size="xs"
-              weight="semiBold"
-              style={{ color: tokens.textPrimary }}
-            />
-            <Text text="Weekly overview" size="xxs" style={{ color: tokens.textSecondary }} />
+    <SectionBlock title={formatFullDate(selectedDate)}>
+      <SurfaceCard style={styles.summaryCard}>
+        <View style={styles.summaryBody}>
+          <View style={styles.summaryHeader}>
+            <View style={styles.flex}>
+              <Text
+                text={`${selectedShiftCount} shift${selectedShiftCount === 1 ? "" : "s"} scheduled`}
+                size="xs"
+                weight="semiBold"
+                style={{ color: tokens.textPrimary }}
+              />
+              <Text text="Weekly overview" size="xxs" style={{ color: tokens.textSecondary }} />
+            </View>
+            <Ionicons color={tokens.textMuted} name="calendar-outline" size={20} />
           </View>
-          <Ionicons color={tokens.textMuted} name="calendar-outline" size={20} />
+          <MetricGrid
+            items={[
+              { label: "Available", value: `${weeklyAvailabilityCount}d` },
+              { label: "Requests", value: String(totalRequestCount) },
+              { label: "This week", value: "23.5h" },
+            ]}
+          />
         </View>
-        <MetricGrid
-          items={[
-            { label: "Available", value: `${weeklyAvailabilityCount}d` },
-            { label: "Requests", value: String(totalRequestCount) },
-            { label: "This week", value: "23.5h" },
-          ]}
-        />
-      </View>
-    </GroupedSection>
+      </SurfaceCard>
+    </SectionBlock>
   )
 }
 
@@ -262,94 +266,92 @@ function EmptyPanel({
   )
 }
 
-function AvailabilityRow({ day, onPress }: { day: AvailabilityDay; onPress: () => void }) {
+function AvailabilityRow({
+  day,
+  isLast,
+  onPress,
+}: {
+  day: AvailabilityDay
+  isLast?: boolean
+  onPress: () => void
+}) {
   const tokens = useDesignTokens()
   const copy = availabilityCopy[day.status]
 
   return (
-    <Pressable
+    <ListCardItem
+      isLast={isLast}
+      leading={
+        <View style={[styles.availabilityIcon, { backgroundColor: tokens.surfaceSecondary }]}>
+          <Ionicons color={tokens.textSecondary} name={copy.icon} size={19} />
+        </View>
+      }
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.availabilityRow,
-        { borderBottomColor: tokens.border, opacity: pressed ? 0.72 : 1 },
-      ]}
-    >
-      <View style={[styles.availabilityIcon, { backgroundColor: tokens.surfaceSecondary }]}>
-        <Ionicons color={tokens.textSecondary} name={copy.icon} size={19} />
-      </View>
-      <View style={styles.flex}>
-        <Text
-          text={formatFullDate(day.date)}
-          numberOfLines={1}
-          size="xs"
-          weight="semiBold"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text
-          text={`${day.startTime} - ${day.endTime}`}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
-      <Pill label={copy.label} tone={copy.tone} />
-      <Ionicons color={tokens.textMuted} name="chevron-forward" size={16} />
-    </Pressable>
+      subtitle={`${day.startTime} - ${day.endTime}`}
+      subtitleStyle={{ color: tokens.textSecondary }}
+      title={formatFullDate(day.date)}
+      titleStyle={{ color: tokens.textPrimary }}
+      trailing={
+        <View style={styles.rowTrailing}>
+          <Pill label={copy.label} tone={copy.tone} />
+          <Ionicons color={tokens.textMuted} name="chevron-forward" size={16} />
+        </View>
+      }
+    />
   )
 }
 
-function RequestRow({ request }: { request: RequestItem }) {
+function RequestRow({ request, isLast }: { request: RequestItem; isLast?: boolean }) {
   const tokens = useDesignTokens()
 
   return (
-    <View style={[styles.requestRow, { borderBottomColor: tokens.border }]}>
-      <View style={[styles.requestIcon, { backgroundColor: tokens.surfaceSecondary }]}>
-        <Ionicons color={tokens.accent} name="swap-horizontal-outline" size={19} />
-      </View>
-      <View style={styles.flex}>
-        <Text
-          text={request.type}
-          size="xs"
-          weight="semiBold"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text
-          text={`${request.dateRange} - ${request.reason}`}
-          numberOfLines={1}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
-      <Pill label={request.status} tone={getRequestTone(request.status)} />
-    </View>
+    <ListCardItem
+      isLast={isLast}
+      leading={
+        <View style={[styles.requestIcon, { backgroundColor: tokens.surfaceSecondary }]}>
+          <Ionicons color={tokens.accent} name="swap-horizontal-outline" size={19} />
+        </View>
+      }
+      subtitle={`${request.dateRange} - ${request.reason}`}
+      subtitleStyle={{ color: tokens.textSecondary }}
+      title={request.type}
+      titleStyle={{ color: tokens.textPrimary }}
+      trailing={<Pill label={request.status} tone={getRequestTone(request.status)} />}
+    />
   )
 }
 
 export function ScheduleScreen() {
   const router = useRouter()
   const tokens = useDesignTokens()
-  const { selectedEmployer, state } = useAppSession()
+  const { selectedEmployer, state } = useScheduleStateQuery()
   const [segment, setSegment] = useState<Segment>("shifts")
   const [selectedDate, setSelectedDate] = useState(
-    state.shifts[0]?.date ?? new Date().toISOString(),
+    state?.shifts[0]?.date ?? new Date().toISOString(),
   )
 
   const shiftsByDate = useMemo(() => {
-    return state.shifts.reduce((result, shift) => {
+    return (state?.shifts ?? []).reduce((result, shift) => {
       const shifts = result.get(shift.date) ?? []
       result.set(shift.date, [...shifts, shift])
       return result
     }, new Map<string, Shift[]>())
-  }, [state.shifts])
+  }, [state?.shifts])
 
   const dateStripDates = useMemo(() => {
-    const sourceDates = Array.from(new Set(state.shifts.map((shift) => shift.date))).slice(0, 7)
+    const sourceDates = Array.from(new Set((state?.shifts ?? []).map((shift) => shift.date))).slice(
+      0,
+      7,
+    )
 
     return sourceDates.length > 0 ? sourceDates : [selectedDate]
-  }, [selectedDate, state.shifts])
+  }, [selectedDate, state?.shifts])
 
   const selectedDayShifts = shiftsByDate.get(selectedDate) ?? []
-  const upcomingShifts = state.shifts.filter((shift) => shift.date > selectedDate).slice(0, 6)
-  const weeklyAvailability = Object.values(state.availability).slice(0, 7)
+  const upcomingShifts = (state?.shifts ?? [])
+    .filter((shift) => shift.date > selectedDate)
+    .slice(0, 6)
+  const weeklyAvailability = Object.values(state?.availability ?? {}).slice(0, 7)
   const weeklyAvailabilityCount = weeklyAvailability.filter(
     (day) => day.status === "available" || day.status === "preferred",
   ).length
@@ -362,7 +364,7 @@ export function ScheduleScreen() {
       <SummaryCard
         selectedDate={selectedDate}
         selectedShiftCount={selectedDayShifts.length}
-        totalRequestCount={state.requests.length}
+        totalRequestCount={state?.requests.length ?? 0}
         weeklyAvailabilityCount={weeklyAvailabilityCount}
       />
 
@@ -377,82 +379,86 @@ export function ScheduleScreen() {
 
       {segment === "shifts" ? (
         <View style={styles.stack}>
-          <View style={styles.sectionHeader}>
-            <Text
-              text={formatFullDate(selectedDate)}
-              size="xs"
-              weight="semiBold"
-              style={{ color: tokens.textSecondary }}
-            />
-            <Text
-              text={`${upcomingShifts.length} upcoming`}
-              size="xxs"
-              style={{ color: tokens.textMuted }}
-            />
-          </View>
-
-          {selectedDayShifts.length > 0 ? (
-            selectedDayShifts.map((shift) => (
-              <ShiftRow key={shift.id} shift={shift} onPress={() => openShift(shift)} />
-            ))
-          ) : (
-            <EmptyPanel
-              icon="bed-outline"
-              title="Day off"
-              subtitle="No shift is scheduled for this date."
-            />
-          )}
+          <SectionBlock
+            title={formatFullDate(selectedDate)}
+            trailing={
+              <Text
+                text={`${upcomingShifts.length} upcoming`}
+                size="xxs"
+                style={{ color: tokens.textMuted }}
+              />
+            }
+          >
+            <View style={styles.stack}>
+              {selectedDayShifts.length > 0 ? (
+                selectedDayShifts.map((shift) => (
+                  <ShiftRow key={shift.id} shift={shift} onPress={() => openShift(shift)} />
+                ))
+              ) : (
+                <EmptyPanel
+                  icon="bed-outline"
+                  title="Day off"
+                  subtitle="No shift is scheduled for this date."
+                />
+              )}
+            </View>
+          </SectionBlock>
 
           {upcomingShifts.length > 0 ? (
-            <View style={styles.stack}>
-              <Text
-                text="UPCOMING"
-                size="xxs"
-                weight="medium"
-                style={[styles.capsLabel, { color: tokens.textMuted }]}
-              />
-              {upcomingShifts.map((shift) => (
-                <ShiftRow
-                  key={`upcoming-${shift.id}`}
-                  shift={shift}
-                  onPress={() => openShift(shift)}
-                />
-              ))}
-            </View>
+            <SectionBlock title="Upcoming">
+              <View style={styles.stack}>
+                {upcomingShifts.map((shift) => (
+                  <ShiftRow
+                    key={`upcoming-${shift.id}`}
+                    shift={shift}
+                    onPress={() => openShift(shift)}
+                  />
+                ))}
+              </View>
+            </SectionBlock>
           ) : null}
         </View>
       ) : null}
 
       {segment === "availability" ? (
         <View style={styles.stack}>
-          <GroupedSection
+          <SectionBlock
             actionLabel="Set"
             title="This week"
             onAction={() => router.push(`/(app)/availability/${selectedDate}` as never)}
           >
-            {weeklyAvailability.map((day) => (
-              <AvailabilityRow
-                key={day.date}
-                day={day}
-                onPress={() => router.push(`/(app)/availability/${day.date}` as never)}
-              />
-            ))}
-          </GroupedSection>
+            <ListCard>
+              {weeklyAvailability.map((day, index) => (
+                <AvailabilityRow
+                  key={day.date}
+                  day={day}
+                  isLast={index === weeklyAvailability.length - 1}
+                  onPress={() => router.push(`/(app)/availability/${day.date}` as never)}
+                />
+              ))}
+            </ListCard>
+          </SectionBlock>
         </View>
       ) : null}
 
       {segment === "requests" ? (
         <View style={styles.stack}>
-          {state.requests.length > 0 ? (
-            <GroupedSection
+          {(state?.requests.length ?? 0) > 0 ? (
+            <SectionBlock
               actionLabel="New"
               title="Requests"
               onAction={() => router.push("/(app)/request" as never)}
             >
-              {state.requests.map((request) => (
-                <RequestRow key={request.id} request={request} />
-              ))}
-            </GroupedSection>
+              <ListCard>
+                {(state?.requests ?? []).map((request, index) => (
+                  <RequestRow
+                    key={request.id}
+                    isLast={index === (state?.requests.length ?? 0) - 1}
+                    request={request}
+                  />
+                ))}
+              </ListCard>
+            </SectionBlock>
           ) : (
             <>
               <AppButton
@@ -480,18 +486,6 @@ const styles = StyleSheet.create({
     height: 38,
     justifyContent: "center",
     width: 38,
-  },
-  availabilityRow: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 68,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  capsLabel: {
-    letterSpacing: 0.5,
   },
   dateButton: {
     alignItems: "center",
@@ -534,22 +528,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 38,
   },
-  requestRow: {
+  rowTrailing: {
     alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
-    gap: 12,
-    minHeight: 72,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    gap: 8,
   },
   screen: {
     paddingHorizontal: 16,
-  },
-  sectionHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   shiftBody: {
     flex: 1,
@@ -619,6 +604,11 @@ const styles = StyleSheet.create({
   summaryBody: {
     gap: 12,
     padding: 14,
+  },
+  summaryCard: {
+    borderRadius: 16,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
   summaryHeader: {
     alignItems: "center",
