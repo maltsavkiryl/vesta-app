@@ -25,7 +25,11 @@ export function ForgotPasswordScreen() {
       return
     }
     setError(undefined)
-    await requestPasswordReset(email)
+    const result = await requestPasswordReset(email)
+    if (!result.ok) {
+      setError(result.error.message)
+      return
+    }
     setSubmitted(true)
   }
 

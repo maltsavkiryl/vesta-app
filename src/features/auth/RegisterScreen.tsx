@@ -58,9 +58,9 @@ export function RegisterScreen() {
     }
 
     setError(undefined)
-    const response = await register({ firstName, lastName, email, password })
-    if (!response.result.ok) {
-      setError(response.result.message)
+    const result = await register({ firstName, lastName, email, password })
+    if (!result.ok) {
+      setError(result.error.message)
       return
     }
     router.replace("/(auth)/onboarding")

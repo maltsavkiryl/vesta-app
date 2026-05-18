@@ -30,10 +30,9 @@ export function SignInScreen() {
       return
     }
 
-    const response = await signIn({ email, password })
-    const result = response.result
+    const result = await signIn({ email, password })
     if (!result.ok) {
-      setError(result.message)
+      setError(result.error.message)
       return
     }
 

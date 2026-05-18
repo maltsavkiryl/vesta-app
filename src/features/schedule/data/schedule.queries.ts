@@ -1,17 +1,20 @@
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useCurrentAppStateQuery } from "@/services/app/app.queries"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
+
+export const scheduleQueryKeys = {
+  overview: (accountId: string | null) => ["schedule", accountId, "overview"] as const,
+}
 
 export function useScheduleQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => ({
-    activeEmployerId: state.activeEmployerId,
-    availability: state.availability,
-    employers: state.employers,
-    requests: state.requests,
-    shifts: state.shifts,
-  }))
+  const { accountId } = useAppSession()
+  return useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.schedule.getSchedule(accountId!),
+    queryKey: scheduleQueryKeys.overview(accountId),
+  })
 }
 
 export function useScheduleStateQuery() {

@@ -33,6 +33,55 @@ module.exports = {
       },
     },
     {
+      name: "ui-not-to-services",
+      severity: "error",
+      comment: "Shared UI must not depend on app services or infrastructure.",
+      from: {
+        path: "^src/ui/",
+      },
+      to: {
+        path: "^src/services/",
+      },
+    },
+    {
+      name: "feature-data-no-cross-feature-imports",
+      severity: "error",
+      comment:
+        "Feature data layers must not import other features directly. Depend on shared contracts or infrastructure only.",
+      from: {
+        path: "^src/features/[^/]+/data/",
+      },
+      to: {
+        path: "^src/features/([^/]+)/",
+        pathNot: "^src/features/([^/]+)/data/",
+      },
+    },
+    {
+      name: "screens-not-to-app-store-internals",
+      severity: "error",
+      comment:
+        "Screens should consume feature hooks and repositories, not app-store infrastructure directly.",
+      from: {
+        path: "^src/features/",
+        pathNot: "^src/features/[^/]+/data/",
+      },
+      to: {
+        path: "^src/services/app/",
+      },
+    },
+    {
+      name: "services-app-no-feature-behavior",
+      severity: "error",
+      comment:
+        "App services are infrastructure only and should not depend on feature modules.",
+      from: {
+        path: "^src/services/app/",
+      },
+      to: {
+        path: "^src/features/",
+      },
+    },
+    {
       name: "no-circular",
       severity: "warn",
       comment:

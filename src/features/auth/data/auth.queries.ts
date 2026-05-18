@@ -1,21 +1,26 @@
-import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { useCurrentAppStateQuery, useAppSessionQuery } from "@/services/app/app.queries"
+import { appRepositories } from "@/composition/repositories"
+
+export const authQueryKeys = {
+  session: ["auth", "session"] as const,
+}
+
+export function useAuthSessionQuery() {
+  return useQuery({
+    initialData: () => undefined,
+    queryFn: () => appRepositories.auth.getSession(),
+    queryKey: authQueryKeys.session,
+  })
+}
 
 export function useAuthSession() {
-  const sessionQuery = useAppSessionQuery()
-  const accountId = sessionQuery.data?.accountId ?? null
-  const stateQuery = useCurrentAppStateQuery(accountId)
+  const query = useAuthSessionQuery()
 
-  return useMemo(
-    () => ({
-      accountId,
-      isSignedIn: Boolean(accountId),
-      needsOnboarding:
-        stateQuery.data?.authStatus === "signedIn" && !stateQuery.data.profile.onboardingComplete,
-      session: sessionQuery.data,
-      state: stateQuery.data,
-    }),
-    [accountId, sessionQuery.data, stateQuery.data],
-  )
+  return {
+    accountId: query.data?.accountId ?? null,
+    isSignedIn: query.data?.isSignedIn ?? false,
+    needsOnboarding: query.data?.needsOnboarding ?? false,
+    session: query.data,
+  }
 }

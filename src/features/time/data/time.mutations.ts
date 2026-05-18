@@ -1,42 +1,71 @@
 import { useMemo } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { AppStoreState } from "@/core/models"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { setAccountStateCache } from "@/services/app/app.cache"
-import type { ClockActionPayload } from "@/services/app/app.types"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
 
-import { confirmClockOut, endBreak, startBreak, startClock } from "./time.service"
+import { timeQueryKeys } from "./time.queries"
+import { clockInWorkflow, clockOutWorkflow } from "./time.workflow"
 
-function useTimeMutation<TPayload>(
-  mutationFn: (accountId: string, payload: TPayload) => Promise<AppStoreState> | AppStoreState,
-) {
+function invalidateTimeQueries(queryClient: ReturnType<typeof useQueryClient>, accountId: string) {
+  void queryClient.invalidateQueries({ queryKey: timeQueryKeys.overview(accountId) })
+  void queryClient.invalidateQueries({ queryKey: ["home", accountId] })
+}
+
+export function useStartClockMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, TPayload>({
-    mutationFn: (payload: TPayload) => Promise.resolve(mutationFn(accountId!, payload)),
-    onSuccess: (state) => {
-      if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof clockInWorkflow>[2]) =>
+      clockInWorkflow(appRepositories.time, accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateTimeQueries(queryClient, accountId)
     },
   })
 }
 
-export function useStartClockMutation() {
-  return useTimeMutation<ClockActionPayload | undefined>(startClock)
-}
-
 export function useStartBreakMutation() {
-  return useTimeMutation<ClockActionPayload | undefined>(startBreak)
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof appRepositories.time.startBreak>[1]) =>
+      appRepositories.time.startBreak(accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateTimeQueries(queryClient, accountId)
+    },
+  })
 }
 
 export function useEndBreakMutation() {
-  return useTimeMutation<ClockActionPayload | undefined>(endBreak)
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof appRepositories.time.endBreak>[1]) =>
+      appRepositories.time.endBreak(accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateTimeQueries(queryClient, accountId)
+    },
+  })
 }
 
 export function useConfirmClockOutMutation() {
-  return useTimeMutation<ClockActionPayload | undefined>(confirmClockOut)
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof clockOutWorkflow>[2]) =>
+      clockOutWorkflow(appRepositories.time, accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateTimeQueries(queryClient, accountId)
+    },
+  })
 }
 
 export function useTimeActions() {
@@ -47,10 +76,14 @@ export function useTimeActions() {
 
   return useMemo(
     () => ({
-      confirmClockOut: (payload?: ClockActionPayload) => confirmClockOutMutation.mutate(payload),
-      endBreak: (payload?: ClockActionPayload) => endBreakMutation.mutate(payload),
-      startBreak: (payload?: ClockActionPayload) => startBreakMutation.mutate(payload),
-      startClock: (payload?: ClockActionPayload) => startClockMutation.mutate(payload),
+      confirmClockOut: (payload?: Parameters<typeof clockOutWorkflow>[2]) =>
+        confirmClockOutMutation.mutateAsync(payload),
+      endBreak: (payload?: Parameters<typeof appRepositories.time.endBreak>[1]) =>
+        endBreakMutation.mutateAsync(payload),
+      startBreak: (payload?: Parameters<typeof appRepositories.time.startBreak>[1]) =>
+        startBreakMutation.mutateAsync(payload),
+      startClock: (payload?: Parameters<typeof clockInWorkflow>[2]) =>
+        startClockMutation.mutateAsync(payload),
     }),
     [confirmClockOutMutation, endBreakMutation, startBreakMutation, startClockMutation],
   )

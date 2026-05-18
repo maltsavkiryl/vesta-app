@@ -1,4 +1,5 @@
 export * from "./Banner"
+export * from "./DateBadge"
 export * from "./DetailForm"
 export * from "./List"
 export * from "./SectionTitle"

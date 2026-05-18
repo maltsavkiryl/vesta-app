@@ -1,27 +1,31 @@
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useCurrentAppStateQuery } from "@/services/app/app.queries"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
 
-import { getContracts } from "../documents.utils"
-
-export function useDocumentsQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => state.documents)
+export const documentsQueryKeys = {
+  contracts: (accountId: string | null) => ["documents", accountId, "contracts"] as const,
+  documents: (accountId: string | null) => ["documents", accountId, "list"] as const,
 }
 
-export function useSignedContractIdsQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => state.signedContractIds)
+export function useDocumentsQuery() {
+  const { accountId } = useAppSession()
+  return useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.documents.getDocuments(accountId!),
+    queryKey: documentsQueryKeys.documents(accountId),
+  })
 }
 
 export function useContractsQuery() {
-  const signedContractIdsQuery = useSignedContractIdsQuery()
-
-  return useMemo(
-    () => getContracts(signedContractIdsQuery.data ?? []),
-    [signedContractIdsQuery.data],
-  )
+  const { accountId } = useAppSession()
+  const query = useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.documents.getContracts(accountId!),
+    queryKey: documentsQueryKeys.contracts(accountId),
+  })
+  return query.data ?? []
 }
 
 export function useDocumentsStateQuery() {

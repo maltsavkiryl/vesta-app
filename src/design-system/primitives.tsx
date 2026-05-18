@@ -741,10 +741,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nativeButtonHost: {
+    justifyContent: "center",
+    minHeight: 52,
     width: "100%",
   },
   nativeButtonWrapper: {
     alignSelf: "stretch",
+    minHeight: 52,
   },
   pill: {
     alignSelf: "flex-start",

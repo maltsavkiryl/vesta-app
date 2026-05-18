@@ -1,34 +1,41 @@
 import { useMemo } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { AppStoreState } from "@/core/models"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { setAccountStateCache } from "@/services/app/app.cache"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
 
-import { markAllNotificationsRead, markNotificationRead } from "./notifications.service"
+import { notificationsQueryKeys } from "./notifications.queries"
+
+function invalidateNotificationQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  accountId: string,
+) {
+  void queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.list(accountId) })
+  void queryClient.invalidateQueries({ queryKey: ["home", accountId] })
+}
 
 export function useMarkNotificationReadMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, string>({
-    mutationFn: (id: string) => Promise.resolve(markNotificationRead(accountId!, id)),
-    onSuccess: (state) => {
+  return useMutation({
+    mutationFn: (id: string) => appRepositories.notifications.markRead(accountId!, id),
+    onSuccess: () => {
       if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+      invalidateNotificationQueries(queryClient, accountId)
     },
   })
 }
 
 export function useMarkAllNotificationsReadMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, void>({
-    mutationFn: () => Promise.resolve(markAllNotificationsRead(accountId!)),
-    onSuccess: (state) => {
+  return useMutation({
+    mutationFn: () => appRepositories.notifications.markAllRead(accountId!),
+    onSuccess: () => {
       if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+      invalidateNotificationQueries(queryClient, accountId)
     },
   })
 }
@@ -39,8 +46,8 @@ export function useNotificationActions() {
 
   return useMemo(
     () => ({
-      markAllNotificationsRead: () => markAllNotificationsReadMutation.mutate(),
-      markNotificationRead: (id: string) => markNotificationReadMutation.mutate(id),
+      markAllNotificationsRead: () => markAllNotificationsReadMutation.mutateAsync(),
+      markNotificationRead: (id: string) => markNotificationReadMutation.mutateAsync(id),
     }),
     [markAllNotificationsReadMutation, markNotificationReadMutation],
   )

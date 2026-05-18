@@ -9,7 +9,15 @@ import {
   getTimeEntryTimeRangeLabel,
   getTimeEntryWorkedLabel,
 } from "@/core/timeEntries"
-import { AppScrollScreen, SectionTitle, Text, appLayout, useDesignTokens } from "@/ui"
+import {
+  AppScrollScreen,
+  DateBadge,
+  ListCard,
+  SectionBlock,
+  Text,
+  appLayout,
+  useDesignTokens,
+} from "@/ui"
 
 export function RecentEntries({
   entries,
@@ -20,30 +28,19 @@ export function RecentEntries({
   onOpenEntry: (entry: TimeEntry) => void
   onViewAll: () => void
 }) {
-  const tokens = useDesignTokens()
-
   return (
-    <View style={styles.entriesSection}>
-      <SectionTitle
-        actionIcon={
-          <Ionicons color={tokens.textSecondary} name="chevron-forward-outline" size={13} />
-        }
-        actionLabel="View all"
-        onAction={onViewAll}
-        title="Recent entries"
-        titleSize="sm"
-      />
-      <View
-        style={[
-          styles.entriesCard,
-          { backgroundColor: tokens.surface, borderColor: tokens.border },
-        ]}
-      >
-        {entries.slice(0, 4).map((entry) => (
-          <EntryRow key={entry.id} entry={entry} onPress={() => onOpenEntry(entry)} />
+    <SectionBlock title="Recent entries" actionLabel="View all" onAction={onViewAll}>
+      <ListCard style={styles.entriesCard}>
+        {entries.slice(0, 4).map((entry, index, items) => (
+          <EntryRow
+            key={entry.id}
+            entry={entry}
+            isLast={index === items.length - 1}
+            onPress={() => onOpenEntry(entry)}
+          />
         ))}
-      </View>
-    </View>
+      </ListCard>
+    </SectionBlock>
   )
 }
 
@@ -60,7 +57,6 @@ export function TimeEntriesListScreen({
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={styles.sheetContent}
       style={{ backgroundColor: tokens.background }}
       topInset="none"
@@ -71,36 +67,29 @@ export function TimeEntriesListScreen({
         style={{ color: tokens.textSecondary }}
       />
       {Object.entries(groupedEntries).map(([month, monthEntries]) => (
-        <View key={month} style={styles.monthGroup}>
-          <View style={styles.monthHeader}>
-            <Text
-              text={month}
-              size="xxs"
-              weight="semiBold"
-              style={{ color: tokens.textSecondary }}
-            />
+        <SectionBlock
+          key={month}
+          title={month}
+          trailing={
             <Text
               text={`${monthEntries.length} shifts`}
               size="xxs"
               style={{ color: tokens.textMuted }}
             />
-          </View>
-          <View
-            style={[
-              styles.entriesCard,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ]}
-          >
-            {monthEntries.map((entry) => (
+          }
+        >
+          <ListCard style={styles.entriesCard}>
+            {monthEntries.map((entry, index) => (
               <EntryRow
                 key={entry.id}
                 entry={entry}
+                isLast={index === monthEntries.length - 1}
                 onPress={() => onOpenEntry(entry)}
                 showEarnings
               />
             ))}
-          </View>
-        </View>
+          </ListCard>
+        </SectionBlock>
       ))}
     </AppScrollScreen>
   )
@@ -108,10 +97,12 @@ export function TimeEntriesListScreen({
 
 function EntryRow({
   entry,
+  isLast,
   onPress,
   showEarnings,
 }: {
   entry: TimeEntry
+  isLast?: boolean
   onPress: () => void
   showEarnings?: boolean
 }) {
@@ -126,21 +117,13 @@ function EntryRow({
       onPress={onPress}
       style={[
         styles.entryButton,
-        { borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth },
+        !isLast && {
+          borderBottomColor: tokens.border,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        },
       ]}
     >
-      <View style={styles.entryDate}>
-        <Text
-          text={weekday}
-          size="xxs"
-          style={[styles.entryWeekday, { color: tokens.textMuted }]}
-        />
-        <Text
-          text={day}
-          weight="semiBold"
-          style={[styles.entryDay, { color: tokens.textPrimary }]}
-        />
-      </View>
+      <DateBadge label={weekday} value={day} variant="plain" />
       <View style={[styles.entryDivider, { backgroundColor: tokens.border }]} />
       <View style={styles.flex}>
         <Text
@@ -176,13 +159,7 @@ function EntryRow({
 
 const styles = StyleSheet.create({
   entriesCard: {
-    borderCurve: "continuous",
     borderRadius: 18,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: "hidden",
-  },
-  entriesSection: {
-    gap: 8,
   },
   entryButton: {
     alignItems: "center",
@@ -190,14 +167,6 @@ const styles = StyleSheet.create({
     gap: appLayout.rowGap,
     paddingHorizontal: 16,
     paddingVertical: 16,
-  },
-  entryDate: {
-    alignItems: "center",
-    width: 36,
-  },
-  entryDay: {
-    fontSize: 18,
-    lineHeight: 21,
   },
   entryDivider: {
     height: 32,
@@ -208,21 +177,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
-  entryWeekday: {
-    fontSize: 10,
-  },
   flex: {
     flex: 1,
-  },
-  monthGroup: {
-    marginBottom: 16,
-  },
-  monthHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-    paddingLeft: 2,
   },
   sheetContent: {
     gap: appLayout.sheetGap,

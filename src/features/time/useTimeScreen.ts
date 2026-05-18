@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { Alert } from "react-native"
 import { useRouter } from "expo-router"
 
 import { getClockSnapshot } from "@/core/date"
@@ -59,21 +60,30 @@ export function useTimeScreen() {
     const location = await captureLocationSnapshot(state.clockSession.venueAddress)
     const proofPhoto = await captureOptionalClockInPhoto()
     if (proofPhoto === null) return
-    startClock({ occurredAt, location, proofPhoto })
+    const result = await startClock({ occurredAt, location, proofPhoto })
+    if (!result.ok) {
+      Alert.alert("Clock-in unavailable", result.error.message)
+    }
   }, [startClock, state.clockSession.venueAddress])
 
   const handleStartBreak = useCallback(async () => {
-    startBreak({
+    const result = await startBreak({
       occurredAt: new Date().toISOString(),
       location: await captureLocationSnapshot(state.clockSession.venueAddress),
     })
+    if (!result.ok) {
+      Alert.alert("Break unavailable", result.error.message)
+    }
   }, [startBreak, state.clockSession.venueAddress])
 
   const handleEndBreak = useCallback(async () => {
-    endBreak({
+    const result = await endBreak({
       occurredAt: new Date().toISOString(),
       location: await captureLocationSnapshot(state.clockSession.venueAddress),
     })
+    if (!result.ok) {
+      Alert.alert("Break unavailable", result.error.message)
+    }
   }, [endBreak, state.clockSession.venueAddress])
 
   return {

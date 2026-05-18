@@ -1,9 +1,18 @@
 import type {
   AppStoreState,
   AvailabilityDay,
+  ClockSession,
+  DocumentItem,
+  EarningsSummary,
+  Employer,
+  HomeHighlight,
+  HomeTask,
   LocationSnapshot,
+  NotificationItem,
   ProofPhoto,
   RequestItem,
+  Shift,
+  TimeEntry,
   UserProfile,
 } from "@/core/models"
 
@@ -58,12 +67,61 @@ export type AppAction =
 
 export interface AccountSnapshotDto extends Omit<AppStoreState, "authStatus"> {}
 
+export interface ProfileAggregateDto {
+  activeEmployerId: string
+  employerDirectory: Employer[]
+  employers: Employer[]
+  lastPasswordResetEmail?: string
+  profile: UserProfile
+  version: 1
+}
+
+export interface ScheduleAggregateDto {
+  availability: Record<string, AvailabilityDay>
+  requests: RequestItem[]
+  shifts: Shift[]
+  version: 1
+}
+
+export interface TimeAggregateDto {
+  clockSession: ClockSession
+  earnings: EarningsSummary
+  timeEntries: TimeEntry[]
+  version: 1
+}
+
+export interface DocumentsAggregateDto {
+  documents: DocumentItem[]
+  signedContractIds: string[]
+  version: 1
+}
+
+export interface NotificationsAggregateDto {
+  notifications: NotificationItem[]
+  version: 1
+}
+
+export interface HomeAggregateDto {
+  highlights: HomeHighlight[]
+  tasks: HomeTask[]
+  version: 1
+}
+
+export interface MockAccountAggregatesDto {
+  documents: DocumentsAggregateDto
+  home: HomeAggregateDto
+  notifications: NotificationsAggregateDto
+  profile: ProfileAggregateDto
+  schedule: ScheduleAggregateDto
+  time: TimeAggregateDto
+}
+
 export interface MockAccountDto {
+  aggregates: MockAccountAggregatesDto
   createdAt: string
   email: string
   id: string
   password: string
-  state: AccountSnapshotDto
   updatedAt: string
 }
 

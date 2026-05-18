@@ -13,7 +13,7 @@ export type SelectedUploadAsset = {
 type UploadResult = "completed" | "cancelled" | "failed"
 type UploadDocumentHandler = (
   payload: SelectedUploadAsset & { title: string; documentId?: string },
-) => void
+) => Promise<unknown>
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 const ACCEPTED_UPLOAD_TYPES = ["application/pdf", "image/jpeg", "image/png"]
@@ -98,11 +98,24 @@ export async function uploadDocumentFromSource({
       return "failed"
     }
 
-    uploadDocument({
+    const result = await uploadDocument({
       documentId: target.id,
       title: target.title,
       ...asset,
     })
+    if (
+      typeof result === "object" &&
+      result &&
+      "ok" in result &&
+      !result.ok &&
+      "error" in result &&
+      result.error &&
+      typeof result.error === "object" &&
+      "message" in result.error
+    ) {
+      Alert.alert("Cannot upload file", String(result.error.message))
+      return "failed"
+    }
     Alert.alert("Upload complete", `${target.title} has been uploaded.`)
     return "completed"
   } catch {

@@ -1,36 +1,45 @@
 import { useMemo } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { AppStoreState, AvailabilityDay, RequestItem } from "@/core/models"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { setAccountStateCache } from "@/services/app/app.cache"
+import { appRepositories } from "@/composition/repositories"
+import type { AvailabilityDay } from "@/core/models"
+import { useAppSession } from "@/providers/app-provider"
 
-import { createRequest, updateAvailability } from "./schedule.service"
+import { scheduleQueryKeys } from "./schedule.queries"
+import { createRequestWorkflow } from "./schedule.workflow"
+
+function invalidateScheduleQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  accountId: string,
+) {
+  void queryClient.invalidateQueries({ queryKey: scheduleQueryKeys.overview(accountId) })
+  void queryClient.invalidateQueries({ queryKey: ["home", accountId] })
+}
 
 export function useUpdateAvailabilityMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, AvailabilityDay>({
-    mutationFn: (payload: Parameters<typeof updateAvailability>[1]) =>
-      Promise.resolve(updateAvailability(accountId!, payload)),
-    onSuccess: (state) => {
-      if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+  return useMutation({
+    mutationFn: (payload: AvailabilityDay) =>
+      appRepositories.schedule.saveAvailability(accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateScheduleQueries(queryClient, accountId)
     },
   })
 }
 
 export function useCreateRequestMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, Omit<RequestItem, "id" | "status">>({
-    mutationFn: (payload: Parameters<typeof createRequest>[1]) =>
-      Promise.resolve(createRequest(accountId!, payload)),
-    onSuccess: (state) => {
-      if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof createRequestWorkflow>[2]) =>
+      createRequestWorkflow(appRepositories.schedule, accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateScheduleQueries(queryClient, accountId)
     },
   })
 }
@@ -41,10 +50,10 @@ export function useScheduleActions() {
 
   return useMemo(
     () => ({
-      createRequest: (payload: Parameters<typeof createRequest>[1]) =>
-        createRequestMutation.mutate(payload),
-      updateAvailability: (payload: Parameters<typeof updateAvailability>[1]) =>
-        updateAvailabilityMutation.mutate(payload),
+      createRequest: (payload: Parameters<typeof createRequestWorkflow>[2]) =>
+        createRequestMutation.mutateAsync(payload),
+      updateAvailability: (payload: AvailabilityDay) =>
+        updateAvailabilityMutation.mutateAsync(payload),
     }),
     [createRequestMutation, updateAvailabilityMutation],
   )

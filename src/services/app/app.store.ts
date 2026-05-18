@@ -10,8 +10,8 @@ import {
   MOCK_BACKEND_STORAGE_KEY,
   MOCK_BACKEND_VERSION,
   migrateLegacyPersistedState,
-  toAppStoreState,
-  toAccountSnapshotDto,
+  toAppStoreStateFromAggregates,
+  toPersistedAggregates,
 } from "./app.transformer"
 import type {
   AppAction,
@@ -71,7 +71,7 @@ export function buildAccountState(
   account: MockAccountDto,
   authStatus: AppStoreState["authStatus"],
 ) {
-  const state = toAppStoreState(account.state, authStatus)
+  const state = toAppStoreStateFromAggregates(account.aggregates, authStatus)
   return {
     ...state,
     timeEntries: state.timeEntries.filter((entry) => isValidTimeEntry(entry, parseDateValue)),
@@ -100,7 +100,7 @@ export function commitAccountAction(
   const nextState = applyAction(currentState, action)
   const nextDb = withUpdatedAccount(db, accountId, (account) => ({
     ...account,
-    state: toAccountSnapshotDto(nextState),
+    aggregates: toPersistedAggregates(nextState),
     updatedAt: new Date().toISOString(),
   }))
 

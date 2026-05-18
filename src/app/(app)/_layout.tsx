@@ -68,7 +68,7 @@ export default function AppLayout() {
         options={createSheetOptions(theme, "End shift", {
           backgroundColor: groupedSheetBackground,
           ...closeActions,
-          preset: "medium",
+          initialDetent: "large",
         })}
       />
       <Stack.Screen

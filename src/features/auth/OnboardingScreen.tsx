@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
+import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import {
   AppButton,
   AppScrollScreen,
@@ -79,8 +79,7 @@ export function OnboardingScreen() {
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
   const { completeOnboarding } = useAuthActions()
-  const { state } = useAuthSession()
-  const accountState = state
+  const { state: accountState } = useProfileStateQuery()
   const [step, setStep] = useState(0)
   const [selectedRole, setSelectedRole] = useState(accountState?.profile.role ?? "")
   const [selectedEmployerId, setSelectedEmployerId] = useState(accountState?.activeEmployerId ?? "")
@@ -133,11 +132,12 @@ export function OnboardingScreen() {
   ][step]
 
   const complete = async () => {
-    await completeOnboarding({
+    const result = await completeOnboarding({
       role: selectedRole || "Waiter",
       employerId:
         (activeEmployer ?? accountState?.employers[0])?.id ?? accountState?.activeEmployerId ?? "",
     })
+    if (!result.ok) return
     router.replace("/")
   }
 

@@ -7,8 +7,9 @@ import { Ionicons } from "@expo/vector-icons"
 
 import { createInitialState } from "@/core/mockState"
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useSelectedEmployerQuery } from "@/features/profile/data/profile.queries"
+import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
+import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import {
   AppScrollScreen,
   ListCard,
@@ -286,9 +287,17 @@ export function ProfileScreen() {
   const router = useRouter()
   const { themeContext } = useAppTheme()
   const { signOut } = useAuthActions()
-  const { state: sessionState } = useAuthSession()
-  const selectedEmployer = useSelectedEmployerQuery()
-  const state = sessionState ?? createInitialState()
+  const { selectedEmployer, state: profileState } = useProfileStateQuery()
+  const { state: scheduleState } = useScheduleStateQuery()
+  const timeQuery = useTimeDataQuery()
+  const fallbackState = createInitialState()
+  const state = {
+    ...fallbackState,
+    ...profileState,
+    earnings: timeQuery.data?.earnings ?? fallbackState.earnings,
+    shifts: scheduleState?.shifts ?? fallbackState.shifts,
+    timeEntries: timeQuery.data?.timeEntries ?? fallbackState.timeEntries,
+  }
 
   const fullName = `${state.profile.firstName} ${state.profile.lastName}`
   const role = capitalize(state.profile.role)

@@ -1,23 +1,19 @@
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useCurrentAppStateQuery } from "@/services/app/app.queries"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
+
+export const homeQueryKeys = {
+  overview: (accountId: string | null) => ["home", accountId, "overview"] as const,
+}
 
 export function useHomeQuery() {
-  const { accountId } = useAuthSession()
-  const query = useCurrentAppStateQuery(accountId, (state) => {
-    const selectedEmployer = state.employers.find(
-      (employer) => employer.id === state.activeEmployerId,
-    )
-    return {
-      earnings: state.earnings,
-      notifications: state.notifications,
-      profile: state.profile,
-      selectedEmployer,
-      shifts: state.shifts,
-      tasks: state.tasks,
-      unreadNotifications: state.notifications.filter((notification) => notification.unread).length,
-    }
+  const { accountId } = useAppSession()
+  const query = useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.home.getHomeOverview(accountId!),
+    queryKey: homeQueryKeys.overview(accountId),
   })
 
   return useMemo(() => query.data, [query.data])

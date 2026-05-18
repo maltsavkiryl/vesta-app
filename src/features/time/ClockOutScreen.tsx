@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { useState } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -39,7 +39,8 @@ export function ClockOutScreen() {
   const finish = async () => {
     const occurredAt = new Date().toISOString()
     const location = await captureLocationSnapshot(clockSession.venueAddress)
-    confirmClockOut({ occurredAt, location })
+    const result = await confirmClockOut({ occurredAt, location })
+    if (!result.ok) return
     setConfirmed(true)
     setTimeout(() => router.replace("/(app)/(tabs)/time"), 900)
   }
@@ -188,17 +189,7 @@ export function ClockOutScreen() {
               </View>
             ) : null}
 
-            <Pressable
-              onPress={finish}
-              style={[styles.dangerButton, { backgroundColor: tokens.danger }]}
-            >
-              <Text
-                text="Confirm clock out"
-                size="sm"
-                weight="semiBold"
-                style={{ color: "#FFFFFF" }}
-              />
-            </Pressable>
+            <AppButton label="Confirm clock out" variant="danger" onPress={finish} />
             <AppButton label="Keep working" variant="secondary" onPress={router.back} />
           </View>
         </>
@@ -247,11 +238,6 @@ const styles = StyleSheet.create({
   content: {
     gap: 12,
     padding: 20,
-  },
-  dangerButton: {
-    alignItems: "center",
-    borderRadius: 16,
-    padding: 16,
   },
   earningsCard: {
     alignItems: "center",

@@ -1,30 +1,39 @@
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useCurrentAppStateQuery } from "@/services/app/app.queries"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
+
+export const notificationsQueryKeys = {
+  list: (accountId: string | null) => ["notifications", accountId, "list"] as const,
+}
 
 export function useNotificationsQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => state.notifications)
+  const { accountId } = useAppSession()
+  return useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.notifications.getNotifications(accountId!),
+    queryKey: notificationsQueryKeys.list(accountId),
+  })
 }
 
 export function useUnreadNotificationsQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(
-    accountId,
-    (state) => state.notifications.filter((notification) => notification.unread).length,
+  const query = useNotificationsQuery()
+  return useMemo(
+    () => query.data?.filter((notification) => notification.unread).length ?? 0,
+    [query.data],
   )
 }
 
 export function useNotificationsStateQuery() {
   const notificationsQuery = useNotificationsQuery()
-  const unreadCountQuery = useUnreadNotificationsQuery()
+  const unreadCount = useUnreadNotificationsQuery()
 
   return useMemo(
     () => ({
       notifications: notificationsQuery.data ?? [],
-      unreadCount: unreadCountQuery.data ?? 0,
+      unreadCount,
     }),
-    [notificationsQuery.data, unreadCountQuery.data],
+    [notificationsQuery.data, unreadCount],
   )
 }

@@ -1,32 +1,41 @@
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useCurrentAppStateQuery } from "@/services/app/app.queries"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
+
+export const profileQueryKeys = {
+  employers: (accountId: string | null) => ["profile", accountId, "employers"] as const,
+  profile: (accountId: string | null) => ["profile", accountId, "detail"] as const,
+}
 
 export function useProfileQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => state.profile)
+  const { accountId } = useAppSession()
+  return useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.profile.getProfile(accountId!),
+    queryKey: profileQueryKeys.profile(accountId),
+  })
 }
 
 export function useEmployersQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => ({
-    activeEmployerId: state.activeEmployerId,
-    employerDirectory: state.employerDirectory,
-    employers: state.employers,
-  }))
+  const { accountId } = useAppSession()
+  return useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.profile.getEmployers(accountId!),
+    queryKey: profileQueryKeys.employers(accountId),
+  })
 }
 
 export function useSelectedEmployerQuery() {
-  const { accountId } = useAuthSession()
-  const query = useCurrentAppStateQuery(accountId, (state) => ({
-    activeEmployerId: state.activeEmployerId,
-    employers: state.employers,
-  }))
+  const employersQuery = useEmployersQuery()
 
   return useMemo(
-    () => query.data?.employers.find((employer) => employer.id === query.data?.activeEmployerId),
-    [query.data],
+    () =>
+      employersQuery.data?.employers.find(
+        (employer) => employer.id === employersQuery.data?.activeEmployerId,
+      ),
+    [employersQuery.data],
   )
 }
 

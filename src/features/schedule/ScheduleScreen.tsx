@@ -10,6 +10,7 @@ import {
   AppButton,
   AppScrollScreen,
   AppSegmentedControl,
+  DateBadge,
   ListCard,
   ListCardItem,
   MetricGrid,
@@ -182,20 +183,11 @@ function ShiftRow({ shift, onPress }: { shift: Shift; onPress: () => void }) {
       ]}
     >
       <SurfaceCard style={styles.shiftCard}>
-        <View style={[styles.shiftDate, { backgroundColor: tokens.backgroundMuted }]}>
-          <Text
-            text={shift.dayLabel}
-            size="xxs"
-            weight="medium"
-            style={{ color: tokens.textMuted }}
-          />
-          <Text
-            text={formatShortDate(shift.date).replace("May ", "")}
-            size="sm"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary }}
-          />
-        </View>
+        <DateBadge
+          label={shift.dayLabel}
+          value={formatShortDate(shift.date).replace("May ", "")}
+          variant="muted"
+        />
         <View style={styles.shiftBody}>
           <View style={styles.shiftPrimaryRow}>
             <Text
@@ -549,14 +541,6 @@ const styles = StyleSheet.create({
     minHeight: 92,
     paddingHorizontal: 14,
     paddingVertical: 13,
-  },
-  shiftDate: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
-    height: 50,
-    justifyContent: "center",
-    width: 44,
   },
   shiftDot: {
     borderRadius: 3,

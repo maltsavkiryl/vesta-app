@@ -150,8 +150,8 @@ export function RequestScreen() {
             onBack={() => setStep(2)}
             onNoteChange={setNote}
             onReasonChange={setReason}
-            onSubmit={() => {
-              createRequest({
+            onSubmit={async () => {
+              const result = await createRequest({
                 type: requestType,
                 dateRange:
                   type === "swap"
@@ -162,6 +162,7 @@ export function RequestScreen() {
                 reason: reason || "No reason provided",
                 note,
               })
+              if (!result.ok) return
               setDone(true)
             }}
             reason={reason}

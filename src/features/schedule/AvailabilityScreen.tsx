@@ -159,13 +159,14 @@ export function AvailabilityScreen() {
 
         <AppButton
           label="Save availability"
-          onPress={() => {
-            updateAvailability({
+          onPress={async () => {
+            const result = await updateAvailability({
               date,
               status,
               startTime,
               endTime,
             })
+            if (!result.ok) return
             router.back()
           }}
         />

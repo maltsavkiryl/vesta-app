@@ -1,17 +1,24 @@
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
 
+import { appRepositories } from "@/composition/repositories"
 import { formatTimeLabel, getClockSnapshot } from "@/core/date"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { useCurrentAppStateQuery } from "@/services/app/app.queries"
+import { useAppSession } from "@/providers/app-provider"
+
+export const timeQueryKeys = {
+  detail: (accountId: string | null, entryId: string) =>
+    ["time", accountId, "entry", entryId] as const,
+  overview: (accountId: string | null) => ["time", accountId, "overview"] as const,
+}
 
 export function useTimeDataQuery() {
-  const { accountId } = useAuthSession()
-  return useCurrentAppStateQuery(accountId, (state) => ({
-    clockSession: state.clockSession,
-    earnings: state.earnings,
-    timeEntries: state.timeEntries,
-  }))
+  const { accountId } = useAppSession()
+  return useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.time.getTimeOverview(accountId!),
+    queryKey: timeQueryKeys.overview(accountId),
+  })
 }
 
 export function useClockSessionQuery() {

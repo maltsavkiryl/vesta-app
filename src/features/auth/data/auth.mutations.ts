@@ -1,33 +1,35 @@
 import { useMemo } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { AppStoreState } from "@/core/models"
-import { setAccountStateCache, setSessionCache } from "@/services/app/app.cache"
-import type {
-  AuthResult,
-  MockBackendSessionDto,
-  RegisterPayload,
-  SignInPayload,
-} from "@/services/app/app.types"
+import { appRepositories } from "@/composition/repositories"
+import type { AppSession } from "@/features/auth/data/auth.transformer"
 
-import { useAuthSession } from "./auth.queries"
-import { completeOnboarding, signIn, signOut, register, requestPasswordReset } from "./auth.service"
+import { authQueryKeys, useAuthSession } from "./auth.queries"
+import { completeOnboardingWorkflow } from "./auth.workflow"
 
-type AuthMutationResult = {
-  result: AuthResult
-  session: MockBackendSessionDto
-  state: AppStoreState | null
+const resourceRoots = ["profile", "schedule", "time", "documents", "notifications", "home"]
+
+function invalidateSignedInResources(
+  queryClient: ReturnType<typeof useQueryClient>,
+  accountId: string,
+) {
+  for (const root of resourceRoots) {
+    void queryClient.invalidateQueries({ queryKey: [root, accountId] })
+  }
 }
 
 export function useSignInMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<AuthMutationResult, Error, SignInPayload>({
-    mutationFn: async (payload) => signIn(payload),
-    onSuccess: (response) => {
-      if (!response.result.ok || !response.session.accountId || !response.state) return
-      setSessionCache(queryClient, response.session)
-      setAccountStateCache(queryClient, response.session.accountId, response.state)
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof appRepositories.auth.signIn>[0]) =>
+      appRepositories.auth.signIn(payload),
+    onSuccess: (result) => {
+      if (!result.ok) return
+      queryClient.setQueryData(authQueryKeys.session, result.data)
+      if (result.data.accountId) {
+        invalidateSignedInResources(queryClient, result.data.accountId)
+      }
     },
   })
 }
@@ -35,12 +37,15 @@ export function useSignInMutation() {
 export function useRegisterMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<AuthMutationResult, Error, RegisterPayload>({
-    mutationFn: async (payload) => register(payload),
-    onSuccess: (response) => {
-      if (!response.result.ok || !response.session.accountId || !response.state) return
-      setSessionCache(queryClient, response.session)
-      setAccountStateCache(queryClient, response.session.accountId, response.state)
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof appRepositories.auth.register>[0]) =>
+      appRepositories.auth.register(payload),
+    onSuccess: (result) => {
+      if (!result.ok) return
+      queryClient.setQueryData(authQueryKeys.session, result.data)
+      if (result.data.accountId) {
+        invalidateSignedInResources(queryClient, result.data.accountId)
+      }
     },
   })
 }
@@ -48,22 +53,20 @@ export function useRegisterMutation() {
 export function useSignOutMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<MockBackendSessionDto, Error, void>({
-    mutationFn: async () => signOut(),
+  return useMutation({
+    mutationFn: () => appRepositories.auth.signOut(),
     onSuccess: (session) => {
-      setSessionCache(queryClient, session)
+      queryClient.setQueryData(authQueryKeys.session, session)
+      for (const root of resourceRoots) {
+        void queryClient.removeQueries({ queryKey: [root] })
+      }
     },
   })
 }
 
 export function useRequestPasswordResetMutation() {
-  const queryClient = useQueryClient()
-
-  return useMutation<MockBackendSessionDto, Error, string>({
-    mutationFn: async (email) => requestPasswordReset(email),
-    onSuccess: (session) => {
-      setSessionCache(queryClient, session)
-    },
+  return useMutation({
+    mutationFn: (email: string) => appRepositories.auth.requestPasswordReset(email),
   })
 }
 
@@ -71,12 +74,15 @@ export function useCompleteOnboardingMutation() {
   const queryClient = useQueryClient()
   const { accountId } = useAuthSession()
 
-  return useMutation<AppStoreState, Error, Parameters<typeof completeOnboarding>[1]>({
-    mutationFn: (payload: Parameters<typeof completeOnboarding>[1]) =>
-      Promise.resolve(completeOnboarding(accountId!, payload)),
-    onSuccess: (state) => {
-      if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof completeOnboardingWorkflow>[2]) =>
+      completeOnboardingWorkflow(appRepositories.auth, accountId!, payload),
+    onSuccess: (result) => {
+      if (!result.ok) return
+      queryClient.setQueryData(authQueryKeys.session, result.data)
+      if (result.data.accountId) {
+        invalidateSignedInResources(queryClient, result.data.accountId)
+      }
     },
   })
 }
@@ -90,12 +96,14 @@ export function useAuthActions() {
 
   return useMemo(
     () => ({
-      completeOnboarding: (payload: Parameters<typeof completeOnboarding>[1]) =>
+      completeOnboarding: (payload: Parameters<typeof completeOnboardingWorkflow>[2]) =>
         completeOnboardingMutation.mutateAsync(payload),
-      register: (payload: Parameters<typeof register>[0]) => registerMutation.mutateAsync(payload),
+      register: (payload: Parameters<typeof appRepositories.auth.register>[0]) =>
+        registerMutation.mutateAsync(payload),
       requestPasswordReset: (email: string) => requestPasswordResetMutation.mutateAsync(email),
-      signIn: (payload: Parameters<typeof signIn>[0]) => signInMutation.mutateAsync(payload),
-      signOut: () => signOutMutation.mutateAsync(),
+      signIn: (payload: Parameters<typeof appRepositories.auth.signIn>[0]) =>
+        signInMutation.mutateAsync(payload),
+      signOut: (): Promise<AppSession> => signOutMutation.mutateAsync(),
     }),
     [
       completeOnboardingMutation,

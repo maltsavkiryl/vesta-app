@@ -16,9 +16,10 @@ export function useContractDetailScreen() {
   const contract = findContract(contracts, id)
   const canSign = Boolean(signature.trim())
 
-  const signCurrentContract = () => {
+  const signCurrentContract = async () => {
     if (!contract || !canSign) return
-    signContract(contract.id)
+    const result = await signContract(contract.id)
+    if (!result.ok) return
     router.back()
   }
 

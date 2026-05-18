@@ -1,35 +1,45 @@
 import { useMemo } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { AppStoreState } from "@/core/models"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
-import { setAccountStateCache } from "@/services/app/app.cache"
-import type { DocumentUploadPayload } from "@/services/app/app.types"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
 
-import { signContract, uploadDocument } from "./documents.service"
+import { documentsQueryKeys } from "./documents.queries"
+import { uploadDocumentWorkflow } from "./documents.workflow"
+
+function invalidateDocumentsQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  accountId: string,
+) {
+  void queryClient.invalidateQueries({ queryKey: documentsQueryKeys.documents(accountId) })
+  void queryClient.invalidateQueries({ queryKey: documentsQueryKeys.contracts(accountId) })
+  void queryClient.invalidateQueries({ queryKey: ["home", accountId] })
+}
 
 export function useUploadDocumentMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, DocumentUploadPayload>({
-    mutationFn: (payload: DocumentUploadPayload) => uploadDocument(accountId!, payload),
-    onSuccess: (state) => {
-      if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof uploadDocumentWorkflow>[2]) =>
+      uploadDocumentWorkflow(appRepositories.documents, accountId!, payload),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateDocumentsQueries(queryClient, accountId)
     },
   })
 }
 
 export function useSignContractMutation() {
   const queryClient = useQueryClient()
-  const { accountId } = useAuthSession()
+  const { accountId } = useAppSession()
 
-  return useMutation<AppStoreState, Error, string>({
-    mutationFn: (contractId: string) => Promise.resolve(signContract(accountId!, contractId)),
-    onSuccess: (state) => {
-      if (!accountId) return
-      setAccountStateCache(queryClient, accountId, state)
+  return useMutation({
+    mutationFn: (contractId: string) =>
+      appRepositories.documents.signContract(accountId!, contractId),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      invalidateDocumentsQueries(queryClient, accountId)
     },
   })
 }
@@ -40,8 +50,9 @@ export function useDocumentActions() {
 
   return useMemo(
     () => ({
-      signContract: (contractId: string) => signContractMutation.mutate(contractId),
-      uploadDocument: (payload: DocumentUploadPayload) => uploadDocumentMutation.mutate(payload),
+      signContract: (contractId: string) => signContractMutation.mutateAsync(contractId),
+      uploadDocument: (payload: Parameters<typeof uploadDocumentWorkflow>[2]) =>
+        uploadDocumentMutation.mutateAsync(payload),
     }),
     [signContractMutation, uploadDocumentMutation],
   )
