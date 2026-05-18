@@ -13,7 +13,6 @@ export type SectionKey =
   | "preferences"
   | "language"
   | "employers"
-  | "switch-employer"
   | "join-employer"
   | "banking"
   | "legal"

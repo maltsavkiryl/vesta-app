@@ -20,7 +20,7 @@ export {
   Pill,
   StatusBadge,
   SurfaceCard,
-} from "@/design-system/primitives"
+} from "./AppPrimitives"
 
 export {
   AppButton as Button,
@@ -31,4 +31,4 @@ export {
   Pill as Label,
   StatusBadge as Badge,
   SurfaceCard as Card,
-} from "@/design-system/primitives"
+} from "./AppPrimitives"

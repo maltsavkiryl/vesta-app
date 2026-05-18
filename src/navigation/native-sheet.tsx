@@ -1,6 +1,9 @@
 import { Platform, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import type { NativeStackHeaderItem, NativeStackNavigationOptions } from "@react-navigation/native-stack"
+import type {
+  NativeStackHeaderItem,
+  NativeStackNavigationOptions,
+} from "@react-navigation/native-stack"
 
 import type { Theme } from "@/ui/foundations/theme"
 import { Text } from "@/ui/primitives/Text"
@@ -12,6 +15,7 @@ const SHEET_DETENTS = {
 
 type SheetPreset = "medium" | "resizable"
 type SheetDetent = "medium" | "large"
+type SheetPresentation = "formSheet" | "pageSheet"
 type HeaderActionKind = "close" | "confirm"
 
 interface BaseNavigationOptions {
@@ -35,12 +39,7 @@ interface HeaderActionOptions {
   disabled?: boolean
 }
 
-export function HeaderActionButton({
-  kind,
-  onPress,
-  theme,
-  disabled,
-}: HeaderActionButtonProps) {
+export function HeaderActionButton({ kind, onPress, theme, disabled }: HeaderActionButtonProps) {
   const isConfirm = kind === "confirm"
   const backgroundColor = isConfirm
     ? disabled
@@ -176,16 +175,21 @@ function createHeaderBaseOptions(
 export function createSheetOptions(
   theme: Theme,
   title?: string,
-  options: BaseNavigationOptions & { initialDetent?: SheetDetent; preset?: SheetPreset } = {},
+  options: BaseNavigationOptions & {
+    initialDetent?: SheetDetent
+    preset?: SheetPreset
+    presentation?: SheetPresentation
+  } = {},
 ) {
   const preset = options.preset ?? "resizable"
+  const presentation = options.presentation ?? "formSheet"
   const detents =
     preset === "medium" ? [SHEET_DETENTS.medium] : [SHEET_DETENTS.medium, SHEET_DETENTS.large]
   const initialDetentIndex =
     preset === "medium" || options.initialDetent !== "large" ? 0 : detents.length - 1
 
   return {
-    presentation: "formSheet" as const,
+    presentation,
     sheetAllowedDetents: detents,
     sheetCornerRadius: 24,
     sheetGrabberVisible: true,

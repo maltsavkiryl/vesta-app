@@ -7,9 +7,7 @@ import { createInitialState } from "@/core/mockState"
 import type { TimeEntry } from "@/core/models"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
-import { formatCurrency } from "@/utils/formatters"
 
-import { weekData } from "./time.data"
 import { captureLocationSnapshot, captureOptionalClockInPhoto } from "./timeCapture"
 
 export function useTimeScreen() {
@@ -43,13 +41,7 @@ export function useTimeScreen() {
         0,
       )
     : 0
-  const payableSeconds = snapshot.payableSeconds
-  const earnings = formatCurrency((payableSeconds / 3600) * state.earnings.averageHourlyRate)
   const totalBreakSeconds = snapshot.breakSeconds
-  const weekTotal =
-    weekData.filter((item) => !item.today).reduce((sum, item) => sum + item.hours, 0) +
-    elapsedSeconds / 3600
-
   const openEntry = useCallback(
     (entry: TimeEntry) => router.push(`/(app)/time-entry/${entry.id}` as never),
     [router],
@@ -87,7 +79,6 @@ export function useTimeScreen() {
   }, [endBreak, state.clockSession.venueAddress])
 
   return {
-    earnings,
     elapsedSeconds,
     handleClockIn,
     handleEndBreak,
@@ -98,6 +89,5 @@ export function useTimeScreen() {
     snapshot,
     state,
     totalBreakSeconds,
-    weekTotal,
   }
 }

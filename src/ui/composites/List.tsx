@@ -1,10 +1,10 @@
 import { PropsWithChildren, ReactNode } from "react"
 import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 
-import { SurfaceCard } from "@/design-system/primitives"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
 
+import { SurfaceCard } from "./AppPrimitives"
 import { SectionTitle } from "./SectionTitle"
 
 export function SectionBlock({

@@ -88,9 +88,32 @@ function MetricCard({ label, value }: { label: string; value: string }) {
   const tokens = useDesignTokens()
 
   return (
-    <View style={[styles.metricCard, { backgroundColor: tokens.backgroundMuted }]}>
-      <Text text={label} size="xxs" style={{ color: tokens.textMuted }} />
-      <Text text={value} size="sm" weight="semiBold" style={{ color: tokens.textPrimary }} />
+    <View
+      style={[
+        styles.metricRow,
+        { borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth },
+      ]}
+    >
+      <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
+      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
+    </View>
+  )
+}
+
+function DetailRow({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
+  const tokens = useDesignTokens()
+
+  return (
+    <View
+      style={[
+        styles.metricRow,
+        !isLast
+          ? { borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth }
+          : null,
+      ]}
+    >
+      <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
+      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
     </View>
   )
 }
@@ -148,23 +171,21 @@ export function TimeEntryDetailScreen() {
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
-        <View style={[styles.heroLocation, { backgroundColor: tokens.backgroundMuted }]}>
+        <View style={styles.heroMetaRow}>
           <Ionicons color={tokens.textMuted} name="location-outline" size={16} />
           <Text
             text={primaryLocation?.addressLabel ?? entry.venueAddress}
             size="xxs"
-            style={[styles.flex, { color: tokens.textSecondary }]}
+            style={[styles.flex, { color: tokens.textSecondary, lineHeight: 20 }]}
           />
         </View>
       </SurfaceCard>
 
       <GroupedSection title="Summary">
-        <View style={styles.metricGrid}>
-          <MetricCard label="Worked" value={getTimeEntryWorkedLabel(entry)} />
-          <MetricCard label="Breaks" value={getTimeEntryBreakLabel(entry)} />
-          <MetricCard label="Gross span" value={getTimeEntryGrossLabel(entry)} />
-          <MetricCard label="Estimated pay" value={getTimeEntryEarningsLabel(entry)} />
-        </View>
+        <DetailRow label="Worked" value={getTimeEntryWorkedLabel(entry)} />
+        <DetailRow label="Breaks" value={getTimeEntryBreakLabel(entry)} />
+        <DetailRow label="Gross span" value={getTimeEntryGrossLabel(entry)} />
+        <DetailRow isLast label="Estimated pay" value={getTimeEntryEarningsLabel(entry)} />
       </GroupedSection>
 
       {mapRegion ? (
@@ -282,17 +303,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroCard: {
-    gap: 12,
+    gap: 10,
     padding: 18,
   },
-  heroLocation: {
+  heroMetaRow: {
     alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 14,
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    marginTop: 2,
   },
   heroTitle: {
     fontSize: 28,
@@ -310,19 +328,13 @@ const styles = StyleSheet.create({
     height: 220,
     overflow: "hidden",
   },
-  metricCard: {
-    borderCurve: "continuous",
-    borderRadius: 14,
-    gap: 6,
-    minHeight: 78,
-    padding: 14,
-    width: "48.5%",
-  },
-  metricGrid: {
+  metricRow: {
+    alignItems: "center",
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    padding: 12,
+    justifyContent: "space-between",
+    minHeight: 54,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   photo: {
     height: 280,

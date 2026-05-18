@@ -1,8 +1,8 @@
 import { PropsWithChildren, ReactNode } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 
-import { getTonePalette, type Emphasis, type Tone } from "@/ui/foundations/variants"
 import { useDesignTokens } from "@/ui/foundations/tokens"
+import { getTonePalette, type Emphasis, type Tone } from "@/ui/foundations/variants"
 import { Text } from "@/ui/primitives/Text"
 
 export function Banner({

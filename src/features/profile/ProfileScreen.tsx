@@ -34,7 +34,6 @@ type ProfileRoute =
   | "/profile/preferences"
   | "/profile/language"
   | "/profile/employers"
-  | "/profile/switch-employer"
   | "/profile/banking"
   | "/profile/legal"
   | "/profile/security"
@@ -377,12 +376,6 @@ export function ProfileScreen() {
         label: `${state.employers.length} employer${state.employers.length === 1 ? "" : "s"}`,
         route: "/profile/employers",
         value: state.employers.map((employer) => employer.name).join(", ") || "None",
-      },
-      {
-        icon: "refresh-outline",
-        label: "Switch employer",
-        route: state.employers.length > 1 ? "/profile/switch-employer" : "/profile/employers",
-        value: `Currently: ${employerName}`,
       },
     ],
     settings: [

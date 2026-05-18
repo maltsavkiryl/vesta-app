@@ -1,8 +1,8 @@
 import { format } from "date-fns"
 
-import { formatTimeValue, parseDateValue } from "./date"
 import { formatCurrency } from "@/utils/formatters"
 
+import { formatTimeValue, parseDateValue } from "./date"
 import { formatDurationLabel } from "./date"
 import type {
   ClockSession,

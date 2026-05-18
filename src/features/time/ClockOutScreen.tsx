@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useClockSummary, useTimeDataQuery } from "@/features/time/data/time.queries"
-import { AppButton, AppScrollScreen, Text, useDesignTokens } from "@/ui"
+import { AppButton, AppScrollScreen, GroupedSection, Text, useDesignTokens } from "@/ui"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
@@ -33,6 +33,7 @@ export function ClockOutScreen() {
   const breakLabel = formatDurationLabel(summary.breakSeconds)
   const workedLabel = formatDurationLabel(netSeconds)
   const earnings = ((netSeconds / 3600) * HOURLY_RATE).toFixed(2)
+  const rateLabel = `€${HOURLY_RATE.toFixed(2)}/hr`
   const overtime = netSeconds > 6 * 3600 ? netSeconds - 6 * 3600 : 0
   const clockOutTime = formatTimeLabel(new Date())
 
@@ -103,113 +104,57 @@ export function ClockOutScreen() {
           </View>
         </View>
       ) : (
-        <>
-          <View style={styles.header}>
-            <View>
-              <Text
-                text="End shift"
-                weight="bold"
-                style={{ color: tokens.textPrimary, fontSize: 22, lineHeight: 27 }}
-              />
-              <Text
-                text={`${clockSession.role} · ${clockSession.venueName}`}
-                size="xxs"
-                style={{ color: tokens.textSecondary, marginTop: 2 }}
-              />
-            </View>
+        <View style={styles.content}>
+          <View style={styles.summaryIntro}>
+            <Text
+              text={workedLabel}
+              weight="bold"
+              style={{ color: tokens.textPrimary, fontSize: 40, lineHeight: 44 }}
+            />
           </View>
 
-          <View style={styles.content}>
-            <View style={[styles.summaryCard, { backgroundColor: tokens.surface }]}>
-              <SummaryRow
-                icon="time-outline"
-                label="Clocked in"
-                value={summary.startedAtLabel ?? "--:--"}
-              />
-              <SummaryRow icon="time-outline" label="Clocked out" value={clockOutTime} />
-              <SummaryRow icon="time-outline" label="Time worked" value={workedLabel} />
-              <SummaryRow
-                icon="cafe-outline"
-                label="Break time"
-                tone="warning"
-                value={breakLabel}
-                withDivider={false}
-              />
-            </View>
-
-            <View
-              style={[
-                styles.earningsCard,
-                {
-                  backgroundColor: `${tokens.success}0D`,
-                  borderColor: `${tokens.success}26`,
-                },
-              ]}
-            >
-              <View style={styles.earningsCopy}>
-                <Ionicons color={tokens.success} name="cash-outline" size={17} />
-                <View>
-                  <Text
-                    text="Estimated earnings"
-                    size="xs"
-                    weight="medium"
-                    style={{ color: tokens.textPrimary }}
-                  />
-                  <Text
-                    text={`€${HOURLY_RATE}/hr x ${workedLabel}`}
-                    size="xxs"
-                    style={{ color: tokens.textSecondary }}
-                  />
-                </View>
-              </View>
-              <Text
-                text={`€${earnings}`}
-                weight="bold"
-                style={{ color: tokens.success, fontSize: 22, lineHeight: 27 }}
-              />
-            </View>
-
+          <GroupedSection title="Shift summary">
+            <SummaryItem label="Clocked in" value={summary.startedAtLabel ?? "--:--"} />
+            <SummaryItem label="Clocked out" value={clockOutTime} />
+            <SummaryItem label="Break time" tone="warning" value={breakLabel} />
             {overtime > 0 ? (
-              <View
-                style={[
-                  styles.overtimeCard,
-                  {
-                    backgroundColor: `${tokens.warning}10`,
-                    borderColor: `${tokens.warning}26`,
-                  },
-                ]}
-              >
-                <Ionicons color={tokens.warning} name="star-outline" size={14} />
-                <Text
-                  text={`${formatDurationLabel(overtime)} overtime`}
-                  size="xs"
-                  weight="medium"
-                  style={{ color: tokens.warning }}
-                />
-              </View>
-            ) : null}
+              <SummaryItem
+                isLast
+                label="Overtime"
+                tone="warning"
+                value={formatDurationLabel(overtime)}
+              />
+            ) : (
+              <SummaryItem isLast label="Hourly rate" value={rateLabel} />
+            )}
+          </GroupedSection>
 
-            <AppButton label="Confirm clock out" variant="danger" onPress={finish} />
-            <AppButton label="Keep working" variant="secondary" onPress={router.back} />
+          <GroupedSection title="Pay">
+            <PaySummary workedLabel={workedLabel} earnings={earnings} />
+          </GroupedSection>
+
+          <View style={styles.footerBlock}>
+            <View style={styles.footerActions}>
+              <AppButton label="Confirm clock out" variant="danger" onPress={finish} />
+              <AppButton label="Keep working" variant="secondary" onPress={router.back} />
+            </View>
           </View>
-        </>
+        </View>
       )}
     </AppScrollScreen>
   )
 }
 
-function SummaryRow({
-  icon,
+function SummaryItem({
+  isLast,
   label,
   tone,
   value,
-  withDivider = true,
 }: {
-  icon: keyof typeof Ionicons.glyphMap
+  isLast?: boolean
   label: string
   tone?: "warning"
   value: string
-  withDivider?: boolean
 }) {
   const tokens = useDesignTokens()
   const valueColor = tone === "warning" ? tokens.warning : tokens.textPrimary
@@ -217,17 +162,52 @@ function SummaryRow({
   return (
     <View
       style={[
-        styles.summaryRow,
-        withDivider ? { borderBottomColor: tokens.border, borderBottomWidth: 1 } : null,
+        styles.summaryItem,
+        !isLast
+          ? {
+              borderBottomColor: tokens.separator,
+              borderBottomWidth: StyleSheet.hairlineWidth,
+            }
+          : null,
       ]}
     >
-      <View style={styles.rowLabel}>
-        <Ionicons color={tokens.textMuted} name={icon} size={15} />
+      <View style={styles.summaryItemCopy}>
         <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
       </View>
       <Text text={value} size="xs" weight="semiBold" style={{ color: valueColor }} />
     </View>
   )
+}
+
+function PaySummary({ earnings, workedLabel }: { earnings: string; workedLabel: string }) {
+  const tokens = useDesignTokens()
+
+  return (
+    <View style={styles.payRow}>
+      <View style={styles.payCopy}>
+        <Text
+          text="Estimated earnings"
+          size="xs"
+          weight="medium"
+          style={{ color: tokens.textPrimary }}
+        />
+        <Text
+          text={`${rateLabelForDisplay(workedLabel)}`}
+          size="xxs"
+          style={{ color: tokens.textSecondary }}
+        />
+      </View>
+      <Text
+        text={`€${earnings}`}
+        weight="bold"
+        style={{ color: tokens.success, fontSize: 24, lineHeight: 28 }}
+      />
+    </View>
+  )
+}
+
+function rateLabelForDisplay(workedLabel: string) {
+  return `€${HOURLY_RATE.toFixed(2)}/hr x ${workedLabel}`
 }
 
 const styles = StyleSheet.create({
@@ -236,42 +216,30 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   content: {
-    gap: 12,
+    gap: 20,
     padding: 20,
   },
-  earningsCard: {
-    alignItems: "center",
-    borderRadius: 16,
-    borderWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  earningsCopy: {
-    alignItems: "center",
-    flexDirection: "row",
+  footerActions: {
+    alignSelf: "stretch",
     gap: 10,
   },
-  header: {
+  footerBlock: {
+    alignItems: "center",
+    alignSelf: "stretch",
+    gap: 12,
+    paddingTop: 4,
+  },
+  payCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  payRow: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  overtimeCard: {
-    alignItems: "center",
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  rowLabel: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
+    minHeight: 58,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   screen: {
     flexGrow: 1,
@@ -303,15 +271,22 @@ const styles = StyleSheet.create({
     gap: 20,
     marginTop: 4,
   },
-  summaryCard: {
-    borderRadius: 16,
-    overflow: "hidden",
+  summaryIntro: {
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
-  summaryRow: {
+  summaryItem: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+    minHeight: 54,
     paddingHorizontal: 16,
-    paddingVertical: 13,
+    paddingVertical: 12,
+  },
+  summaryItemCopy: {
+    flex: 1,
+    minWidth: 0,
   },
 })

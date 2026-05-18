@@ -7,7 +7,6 @@ import { Ionicons } from "@expo/vector-icons"
 import {
   AppearanceSection,
   BankingVerificationSection,
-  EmployerSwitchCard,
   EmployersSection,
   JoinEmployerSection,
   LANGUAGE_OPTIONS,
@@ -105,11 +104,6 @@ const sectionMeta: Record<
     subtitle: "Find answers or contact Vesta support.",
     title: "Help & support",
   },
-  "switch-employer": {
-    icon: "refresh-outline",
-    subtitle: "Select your active employer. Only one employer can be active at a time.",
-    title: "Switch employer",
-  },
 }
 
 function getSection(value?: string): SectionKey {
@@ -120,7 +114,6 @@ function getSection(value?: string): SectionKey {
     value === "preferences" ||
     value === "language" ||
     value === "employers" ||
-    value === "switch-employer" ||
     value === "join-employer" ||
     value === "banking" ||
     value === "legal" ||
@@ -186,7 +179,7 @@ export function ProfileDetailScreen() {
     section in dirtyState ? dirtyState[section as keyof typeof dirtyState] : false
   const canSaveCurrentSection = isEditableSection(section)
   const closeSection = () => {
-    if (section === "switch-employer" || section === "join-employer") {
+    if (section === "join-employer") {
       router.replace("/profile/employers")
       return
     }
@@ -284,30 +277,6 @@ export function ProfileDetailScreen() {
           }
           tokens={tokens}
         />
-      ) : null}
-
-      {section === "switch-employer" ? (
-        <View style={styles.employerSwitchStack}>
-          {state.employers.map((employer) => (
-            <EmployerSwitchCard
-              key={employer.id}
-              active={Boolean(employer.active)}
-              city={employer.city}
-              name={employer.name}
-              rating={employer.rating}
-              tokens={tokens}
-              type={employer.type}
-              onPress={() =>
-                switchEmployerWithConfirmation({
-                  employerId: employer.id,
-                  employers: state.employers,
-                  router,
-                  switchEmployer,
-                })
-              }
-            />
-          ))}
-        </View>
       ) : null}
 
       {section === "join-employer" ? (
@@ -453,9 +422,6 @@ export function ProfileDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  employerSwitchStack: {
-    gap: 10,
-  },
   screen: {
     gap: 12,
     paddingHorizontal: 16,

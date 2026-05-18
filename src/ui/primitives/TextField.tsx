@@ -1,7 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
 
 import { ReactNode } from "react"
-import { StyleProp, StyleSheet, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+import {
+  StyleProp,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native"
 
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { getTonePalette, type Tone } from "@/ui/foundations/variants"
@@ -33,8 +41,7 @@ export function TextField({
   ...props
 }: TextFieldProps) {
   const tokens = useDesignTokens()
-  const normalizedLabel =
-    labelCase === "uppercase" && label ? label.toUpperCase() : label
+  const normalizedLabel = labelCase === "uppercase" && label ? label.toUpperCase() : label
   const tonePalette =
     variant === "outline"
       ? getTonePalette(tokens, tone, "outline")
@@ -46,7 +53,10 @@ export function TextField({
           }
         : {
             backgroundColor: tokens.background,
-            borderColor: tone === "neutral" ? tokens.border : getTonePalette(tokens, tone, "outline").borderColor,
+            borderColor:
+              tone === "neutral"
+                ? tokens.border
+                : getTonePalette(tokens, tone, "outline").borderColor,
             color: tokens.textPrimary,
           }
 
@@ -80,9 +90,7 @@ export function TextField({
         />
         {rightAccessory}
       </View>
-      {caption ? (
-        <Text text={caption} size="xxs" style={{ color: tokens.textSecondary }} />
-      ) : null}
+      {caption ? <Text text={caption} size="xxs" style={{ color: tokens.textSecondary }} /> : null}
     </View>
   )
 }

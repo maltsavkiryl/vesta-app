@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import { Alert, Pressable, StyleSheet, View } from "react-native"
+import { Alert, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -51,78 +51,6 @@ export function switchEmployerWithConfirmation({
         },
       },
     ],
-  )
-}
-
-export function EmployerSwitchCard({
-  active,
-  city,
-  name,
-  onPress,
-  rating,
-  tokens,
-  type,
-}: {
-  active: boolean
-  city: string
-  name: string
-  onPress: () => void
-  rating: number
-  tokens: DesignTokens
-  type: string
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={active}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.employerSwitchCard,
-        {
-          backgroundColor: tokens.surface,
-          borderColor: active ? tokens.accent : tokens.transparent,
-          opacity: pressed ? 0.72 : 1,
-          shadowColor: tokens.shadow,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.employerInitial,
-          { backgroundColor: active ? tokens.accent : tokens.textPrimary },
-        ]}
-      >
-        <Text
-          text={getEmployerInitial(name)}
-          size="sm"
-          weight="bold"
-          style={{ color: tokens.accentForeground }}
-        />
-      </View>
-      <View style={styles.employerSwitchCopy}>
-        <Text text={name} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
-        <Text text={`${type} - ${city}`} size="xxs" style={{ color: tokens.textSecondary }} />
-        <View style={styles.ratingRow}>
-          <Ionicons color={tokens.warning} name="star" size={11} />
-          <Text text={String(rating)} size="xxs" style={{ color: tokens.textSecondary }} />
-        </View>
-      </View>
-      {active ? (
-        <View style={styles.activeStatus}>
-          <View style={[styles.activeDot, { backgroundColor: tokens.success }]} />
-          <Text text="Active" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
-        </View>
-      ) : (
-        <View
-          style={[
-            styles.switchPill,
-            { backgroundColor: tokens.backgroundMuted, borderColor: tokens.border },
-          ]}
-        >
-          <Text text="Switch" size="xxs" weight="medium" style={{ color: tokens.textSecondary }} />
-        </View>
-      )}
-    </Pressable>
   )
 }
 
@@ -462,16 +390,6 @@ export function JoinEmployerSection(props: {
 }
 
 const styles = StyleSheet.create({
-  activeDot: {
-    borderRadius: 4,
-    height: 8,
-    width: 8,
-  },
-  activeStatus: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 5,
-  },
   employerInitial: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -479,20 +397,6 @@ const styles = StyleSheet.create({
     height: 46,
     justifyContent: "center",
     width: 46,
-  },
-  employerSwitchCard: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 16,
-    borderWidth: 1.5,
-    flexDirection: "row",
-    gap: 13,
-    minHeight: 74,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 14,
   },
   employerSwitchCopy: {
     flex: 1,
@@ -572,12 +476,5 @@ const styles = StyleSheet.create({
   searchMeta: {
     alignItems: "flex-end",
     gap: 2,
-  },
-  switchPill: {
-    borderCurve: "continuous",
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
   },
 })

@@ -1,10 +1,9 @@
 import { FC } from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 
-import { Screen } from "@/components/Screen"
-import { Text } from "@/components/Text"
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
+import { Screen, Text } from "@/ui"
 import type { ThemedStyle } from "@/theme/types"
 import { useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
 

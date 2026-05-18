@@ -6,7 +6,7 @@ import { AppSegmentedControl, Banner, Text, appLayout, useDesignTokens } from "@
 
 import { documentCategories } from "../documents.data"
 import type { Contract, DocumentCategory, Payslip } from "../documents.types"
-import { getDocumentStatusConfig } from "../documents.utils"
+import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.utils"
 
 export function AttentionBanner({ count, onPress }: { count: number; onPress: () => void }) {
   const tokens = useDesignTokens()
@@ -59,6 +59,7 @@ export function RequiredDocumentRow({
   const tokens = useDesignTokens()
   const status = getDocumentStatusConfig(tokens, document.status)
   const isMissing = document.status === "action_required"
+  const showsStatusText = shouldShowDocumentRowStatus(document.status)
 
   return (
     <Pressable onPress={onPress} style={[styles.documentRow, { borderBottomColor: tokens.border }]}>
@@ -79,7 +80,18 @@ export function RequiredDocumentRow({
         />
       </View>
       <View style={styles.rowTail}>
-        <Text text={status.label} size="xxs" weight="medium" style={{ color: status.color }} />
+        {showsStatusText ? (
+          <View
+            style={[
+              styles.statusBadge,
+              {
+                backgroundColor: status.backgroundColor,
+              },
+            ]}
+          >
+            <Text text={status.label} size="xxs" weight="medium" style={{ color: status.color }} />
+          </View>
+        ) : null}
         {isMissing ? (
           <View style={[styles.inlineUpload, { backgroundColor: tokens.accent }]}>
             <Text
@@ -277,6 +289,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
+  },
+  statusBadge: {
+    borderCurve: "continuous",
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   statusIcon: {
     alignItems: "center",

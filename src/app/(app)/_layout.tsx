@@ -61,6 +61,7 @@ export default function AppLayout() {
         options={createSheetOptions(theme, "Availability", {
           backgroundColor: secondarySheetBackground,
           ...closeActions,
+          presentation: "pageSheet",
         })}
       />
       <Stack.Screen

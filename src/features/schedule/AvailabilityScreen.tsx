@@ -1,17 +1,25 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
 import { useMemo, useState } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { Platform, Pressable, StyleSheet, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker"
 
 import type { AvailabilityStatus } from "@/core/models"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
-import { AppButton, AppScrollScreen, GroupedSection, Text, useDesignTokens } from "@/ui"
+import {
+  AppButton,
+  AppScrollScreen,
+  GroupedSection,
+  ListRow,
+  Text,
+  appLayout,
+  useDesignTokens,
+} from "@/ui"
 
-const MINUTES = ["00", "15", "30", "45"] as const
+const TIME_REFERENCE_DATE = "2026-01-01"
 
 const statusOptions: Record<
   AvailabilityStatus,
@@ -39,6 +47,18 @@ function formatTime(hour: number, minute: string) {
   return `${String((hour + 24) % 24).padStart(2, "0")}:${minute}`
 }
 
+function timeValueToDate(value: string) {
+  const [hour, minute] = parseTime(value)
+  return new Date(`${TIME_REFERENCE_DATE}T${String(hour).padStart(2, "0")}:${minute}:00`)
+}
+
+function formatTimeLabel(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(timeValueToDate(value))
+}
+
 function durationLabel(startTime: string, endTime: string) {
   const [startHour, startMinute] = parseTime(startTime)
   const [endHour, endMinute] = parseTime(endTime)
@@ -54,7 +74,6 @@ function durationLabel(startTime: string, endTime: string) {
 
 export function AvailabilityScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
   const { date = new Date().toISOString() } = useLocalSearchParams<{ date: string }>()
   const tokens = useDesignTokens()
   const { updateAvailability } = useScheduleActions()
@@ -73,13 +92,38 @@ export function AvailabilityScreen() {
   const [status, setStatus] = useState<AvailabilityStatus>(day.status)
   const [startTime, setStartTime] = useState(day.startTime)
   const [endTime, setEndTime] = useState(day.endTime)
+  const [activeTimeField, setActiveTimeField] = useState<"startTime" | "endTime" | null>(null)
+
+  const pickerValue = activeTimeField === "endTime" ? endTime : startTime
+
+  const handleTimeChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      if (event.type !== "set" || !selectedDate || !activeTimeField) {
+        setActiveTimeField(null)
+        return
+      }
+    }
+
+    if (!selectedDate || !activeTimeField) {
+      return
+    }
+
+    const nextValue = formatTime(selectedDate.getHours(), nearestMinute(selectedDate.getMinutes()))
+    if (activeTimeField === "startTime") {
+      setStartTime(nextValue)
+    } else {
+      setEndTime(nextValue)
+    }
+
+    if (Platform.OS === "android") {
+      setActiveTimeField(null)
+    }
+  }
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
+      contentContainerStyle={styles.screen}
       style={{ backgroundColor: tokens.surfaceSecondary }}
-      topInset="none"
     >
       <View style={styles.content}>
         <GroupedSection title="Availability status">
@@ -139,16 +183,57 @@ export function AvailabilityScreen() {
 
         {status !== "unavailable" ? (
           <GroupedSection title="Working hours">
-            <View style={styles.timeRow}>
-              <TimeField label="From" value={startTime} onChange={setStartTime} />
-              <Text
-                text="-"
-                size="lg"
-                weight="semiBold"
-                style={{ color: tokens.textMuted, paddingTop: 44 }}
+            <ListRow
+              title="From"
+              subtitle="When you want to start working"
+              trailing={<TimeValue value={startTime} />}
+              onPress={() =>
+                setActiveTimeField((current) => (current === "startTime" ? null : "startTime"))
+              }
+            />
+            <ListRow
+              title="To"
+              subtitle="When you want to stop working"
+              trailing={<TimeValue value={endTime} />}
+              onPress={() =>
+                setActiveTimeField((current) => (current === "endTime" ? null : "endTime"))
+              }
+              isLast={activeTimeField == null || Platform.OS === "android"}
+            />
+            {activeTimeField && Platform.OS === "ios" ? (
+              <View
+                style={[
+                  styles.pickerCard,
+                  {
+                    backgroundColor: tokens.backgroundMuted,
+                    borderColor: tokens.border,
+                  },
+                ]}
+              >
+                <Text
+                  text={activeTimeField === "startTime" ? "Choose start time" : "Choose end time"}
+                  size="xxs"
+                  weight="semiBold"
+                  style={{ color: tokens.textMuted }}
+                />
+                <DateTimePicker
+                  display="spinner"
+                  mode="time"
+                  minuteInterval={15}
+                  onChange={handleTimeChange}
+                  value={timeValueToDate(pickerValue)}
+                />
+              </View>
+            ) : null}
+            {activeTimeField && Platform.OS === "android" ? (
+              <DateTimePicker
+                display="default"
+                mode="time"
+                minuteInterval={15}
+                onChange={handleTimeChange}
+                value={timeValueToDate(pickerValue)}
               />
-              <TimeField label="To" value={endTime} onChange={setEndTime} />
-            </View>
+            ) : null}
             <Text
               text={`Duration: ${durationLabel(startTime, endTime)}`}
               size="xs"
@@ -175,130 +260,47 @@ export function AvailabilityScreen() {
   )
 }
 
-function TimeField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
+function TimeValue({ value }: { value: string }) {
   const tokens = useDesignTokens()
-  const [hour, minute] = parseTime(value)
-  const minuteIndex = Math.max(MINUTES.indexOf(minute as (typeof MINUTES)[number]), 0)
-  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-
-  const stepHour = (direction: number) => {
-    onChange(formatTime(hour + direction, minute))
-  }
-
-  const stepMinute = (direction: number) => {
-    const nextIndex = (minuteIndex + direction + MINUTES.length) % MINUTES.length
-    if (direction > 0 && nextIndex === 0) {
-      onChange(formatTime(hour + 1, "00"))
-      return
-    }
-    if (direction < 0 && minuteIndex === 0) {
-      onChange(formatTime(hour - 1, "45"))
-      return
-    }
-    onChange(formatTime(hour, MINUTES[nextIndex]))
-  }
 
   return (
-    <View style={[styles.timeField, { backgroundColor: tokens.background }]}>
+    <View style={styles.timeValue}>
       <Text
-        text={label.toUpperCase()}
-        style={{ color: tokens.textMuted, fontSize: 11, fontWeight: "600", lineHeight: 14 }}
+        text={formatTimeLabel(value)}
+        size="xs"
+        weight="semiBold"
+        style={{ color: tokens.textPrimary }}
       />
-      <Stepper
-        value={String(displayHour).padStart(2, "0")}
-        onDown={() => stepHour(-1)}
-        onUp={() => stepHour(1)}
-      />
-      <View style={[styles.timeDivider, { backgroundColor: tokens.border }]} />
-      <Stepper value={minute} onDown={() => stepMinute(-1)} onUp={() => stepMinute(1)} />
-      <View style={[styles.periodPill, { backgroundColor: tokens.accentSoft }]}>
-        <Text
-          text={hour < 12 ? "AM" : "PM"}
-          size="xxs"
-          weight="semiBold"
-          style={{ color: tokens.accent }}
-        />
+      <View
+        style={[
+          styles.timeValueBadge,
+          {
+            backgroundColor: tokens.accentSoft,
+          },
+        ]}
+      >
+        <Ionicons color={tokens.accent} name="time-outline" size={14} />
       </View>
     </View>
   )
 }
 
-function Stepper({ value, onDown, onUp }: { value: string; onDown: () => void; onUp: () => void }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={styles.stepperRow}>
-      <RoundIconButton icon="chevron-down-outline" onPress={onDown} />
-      <Text
-        text={value}
-        weight="bold"
-        style={{
-          color: tokens.textPrimary,
-          fontSize: 28,
-          lineHeight: 34,
-          minWidth: 44,
-          textAlign: "center",
-        }}
-      />
-      <RoundIconButton icon="chevron-up-outline" onPress={onUp} />
-    </View>
-  )
-}
-
-function RoundIconButton({
-  icon,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap
-  onPress: () => void
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.roundButton,
-        {
-          backgroundColor: tokens.surfaceSecondary,
-          borderColor: tokens.border,
-        },
-      ]}
-    >
-      <Ionicons color={tokens.accent} name={icon} size={15} />
-    </Pressable>
-  )
-}
-
 const styles = StyleSheet.create({
   content: {
-    gap: 18,
-    paddingHorizontal: 22,
-    paddingTop: 18,
+    gap: appLayout.sheetGap,
+    paddingBottom: appLayout.sheetPaddingBottom,
+    paddingHorizontal: appLayout.sheetPaddingHorizontal,
+    paddingTop: appLayout.sheetPaddingTop,
   },
   flex: {
     flex: 1,
   },
-  periodPill: {
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  roundButton: {
+  pickerCard: {
     alignItems: "center",
-    borderRadius: 17,
-    borderWidth: 1,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   rowDivider: {
     bottom: 0,
@@ -309,7 +311,6 @@ const styles = StyleSheet.create({
   },
   screen: {
     flexGrow: 1,
-    paddingBottom: 30,
     paddingHorizontal: 0,
   },
   statusGlyph: {
@@ -327,25 +328,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  stepperRow: {
+  timeValue: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 8,
+    gap: 10,
   },
-  timeDivider: {
-    height: 1,
-    width: "70%",
-  },
-  timeField: {
+  timeValueBadge: {
     alignItems: "center",
-    flex: 1,
-    gap: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 14,
-  },
-  timeRow: {
-    alignItems: "stretch",
-    flexDirection: "row",
-    gap: 10,
+    borderRadius: 12,
+    height: 24,
+    justifyContent: "center",
+    width: 24,
   },
 })

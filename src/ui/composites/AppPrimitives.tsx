@@ -5,20 +5,18 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  ScrollViewProps,
-  StyleProp,
+  type ScrollViewProps,
+  type StyleProp,
   StyleSheet,
   View,
-  ViewStyle,
+  type ViewStyle,
 } from "react-native"
 import { isLiquidGlassAvailable } from "expo-glass-effect"
 import SegmentedControl from "@react-native-segmented-control/segmented-control"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/components/Text"
-
-import { useDesignTokens } from "./tokens"
-import type { DesignTokens } from "./tokens"
+import { Text } from "@/ui/primitives/Text"
+import { useDesignTokens, type DesignTokens } from "@/ui/foundations/tokens"
 
 type AppButtonVariant = "primary" | "secondary" | "danger"
 
@@ -50,16 +48,16 @@ export function AppScrollScreen({
     <ScrollView
       {...props}
       contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
-      keyboardShouldPersistTaps="handled"
-      style={[styles.flex, { backgroundColor }, props.style]}
       contentContainerStyle={[
         styles.screenContent,
         {
-          paddingTop: topInset === "safe" ? 18 : 0,
           paddingBottom: insets.bottom + 28,
+          paddingTop: topInset === "safe" ? 18 : 0,
         },
         contentContainerStyle,
       ]}
+      keyboardShouldPersistTaps="handled"
+      style={[styles.flex, { backgroundColor }, props.style]}
     >
       {children}
     </ScrollView>
@@ -73,8 +71,8 @@ export function PageHeader({
   trailing,
 }: {
   eyebrow?: string
-  title: string
   subtitle?: string
+  title: string
   trailing?: ReactNode
 }) {
   const tokens = useDesignTokens()
@@ -84,19 +82,19 @@ export function PageHeader({
       <View style={styles.headerCopy}>
         {eyebrow ? (
           <Text
-            text={eyebrow.toUpperCase()}
             size="xxs"
-            weight="medium"
             style={[headerEyebrowStyle, { color: tokens.textSecondary }]}
+            text={eyebrow.toUpperCase()}
+            weight="medium"
           />
         ) : null}
         <Text
-          text={title}
           preset="heading"
           style={[headerTitleStyle, { color: tokens.textPrimary }]}
+          text={title}
         />
         {subtitle ? (
-          <Text text={subtitle} size="xs" style={{ color: tokens.textSecondary, maxWidth: 320 }} />
+          <Text size="xs" style={{ color: tokens.textSecondary, maxWidth: 320 }} text={subtitle} />
         ) : null}
       </View>
       {trailing}
@@ -110,16 +108,13 @@ export function AppSegmentedControl<T extends string>({
   onChange,
   style,
 }: {
-  options: { label: string; value: T }[]
-  value: T
   onChange: (value: T) => void
+  options: { label: string; value: T }[]
   style?: StyleProp<ViewStyle>
+  value: T
 }) {
   const tokens = useDesignTokens()
-  const selectedIndex = Math.max(
-    options.findIndex((option) => option.value === value),
-    0,
-  )
+  const selectedIndex = Math.max(options.findIndex((option) => option.value === value), 0)
   const fontStyle = useMemo(
     () => ({
       color: tokens.textSecondary,
@@ -139,18 +134,18 @@ export function AppSegmentedControl<T extends string>({
 
   return (
     <SegmentedControl
+      activeFontStyle={activeFontStyle}
       appearance={tokens.isDark ? "dark" : "light"}
       backgroundColor={tokens.isDark ? "rgba(116, 116, 128, 0.22)" : "rgba(116, 116, 128, 0.10)"}
       fontStyle={fontStyle}
-      selectedIndex={selectedIndex}
-      style={[styles.segmentedControl, style]}
-      tintColor={tokens.surface}
-      values={options.map((option) => option.label)}
-      activeFontStyle={activeFontStyle}
       onChange={(event) => {
         const nextOption = options[event.nativeEvent.selectedSegmentIndex]
         if (nextOption) onChange(nextOption.value)
       }}
+      selectedIndex={selectedIndex}
+      style={[styles.segmentedControl, style]}
+      tintColor={tokens.surface}
+      values={options.map((option) => option.label)}
     />
   )
 }
@@ -160,7 +155,7 @@ export function HeaderAvatar({ initials }: { initials: string }) {
 
   return (
     <View style={[styles.avatarShell, { backgroundColor: tokens.avatarBackground }]}>
-      <Text text={initials} size="sm" weight="semiBold" style={{ color: tokens.avatarText }} />
+      <Text size="sm" style={{ color: tokens.avatarText }} text={initials} weight="semiBold" />
     </View>
   )
 }
@@ -205,8 +200,8 @@ export function SectionTitle({
   onAction?: () => void
   onPress?: () => void
   title: string
-  trailing?: ReactNode
   titleSize?: "md" | "sm"
+  trailing?: ReactNode
 }) {
   const tokens = useDesignTokens()
   const actionHandler = onAction ?? onPress
@@ -214,16 +209,21 @@ export function SectionTitle({
 
   return (
     <View style={styles.sectionHeader}>
-      <Text text={title} size={textSize} weight="semiBold" style={{ color: tokens.textPrimary }} />
+      <Text size={textSize} style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
       <View style={styles.sectionHeaderActions}>
         {badgeLabel ? (
           <View style={[styles.sectionBadge, { backgroundColor: `${tokens.danger}14` }]}>
-            <Text text={badgeLabel} size="xxs" weight="semiBold" style={{ color: tokens.danger }} />
+            <Text
+              size="xxs"
+              style={{ color: tokens.danger }}
+              text={badgeLabel}
+              weight="semiBold"
+            />
           </View>
         ) : null}
         {actionLabel && actionHandler ? (
           <Pressable accessibilityRole="button" onPress={actionHandler} style={styles.inlineAction}>
-            <Text text={actionLabel} size="xs" weight="medium" style={{ color: tokens.accent }} />
+            <Text size="xs" style={{ color: tokens.accent }} text={actionLabel} weight="medium" />
             {actionIcon}
           </Pressable>
         ) : null}
@@ -239,10 +239,10 @@ export function AppButton({
   variant = "primary",
   disabled,
 }: {
+  disabled?: boolean
   label: string
   onPress: () => void
   variant?: AppButtonVariant
-  disabled?: boolean
 }) {
   const tokens = useDesignTokens()
   const isPrimary = variant === "primary"
@@ -275,13 +275,8 @@ export function AppButton({
       nativeDisabled(Boolean(disabled)),
     ]
 
-    if (variant === "primary") {
-      modifiers.push(tint(tokens.accent))
-    }
-
-    if (variant === "danger") {
-      modifiers.push(tint(tokens.danger))
-    }
+    if (variant === "primary") modifiers.push(tint(tokens.accent))
+    if (variant === "danger") modifiers.push(tint(tokens.danger))
 
     return (
       <View style={styles.nativeButtonWrapper}>
@@ -316,10 +311,10 @@ export function AppButton({
       ]}
     >
       <Text
-        text={label}
         size="xs"
-        weight="semiBold"
         style={{ color: isPrimary || isDanger ? tokens.accentForeground : tokens.textPrimary }}
+        text={label}
+        weight="semiBold"
       />
     </Pressable>
   )
@@ -331,10 +326,10 @@ export function InCardActionButton({
   icon,
   disabled,
 }: {
+  disabled?: boolean
+  icon?: ReactNode
   label: string
   onPress: () => void
-  icon?: ReactNode
-  disabled?: boolean
 }) {
   const tokens = useDesignTokens()
 
@@ -352,7 +347,7 @@ export function InCardActionButton({
       ]}
     >
       {icon}
-      <Text text={label} size="xs" weight="semiBold" style={{ color: tokens.accentForeground }} />
+      <Text size="xs" style={{ color: tokens.accentForeground }} text={label} weight="semiBold" />
     </Pressable>
   )
 }
@@ -366,16 +361,16 @@ export function Pill({
 }) {
   const tokens = useDesignTokens()
   const palette = {
-    neutral: { backgroundColor: tokens.surfaceTertiary, color: tokens.textSecondary },
     accent: { backgroundColor: tokens.accentSoft, color: tokens.accent },
+    danger: { backgroundColor: `${tokens.danger}22`, color: tokens.danger },
+    neutral: { backgroundColor: tokens.surfaceTertiary, color: tokens.textSecondary },
     success: { backgroundColor: `${tokens.success}22`, color: tokens.success },
     warning: { backgroundColor: `${tokens.warning}22`, color: tokens.warning },
-    danger: { backgroundColor: `${tokens.danger}22`, color: tokens.danger },
   }[tone]
 
   return (
     <View style={[styles.pill, { backgroundColor: palette.backgroundColor }]}>
-      <Text text={label} size="xxs" weight="medium" style={{ color: palette.color }} />
+      <Text size="xxs" style={{ color: palette.color }} text={label} weight="medium" />
     </View>
   )
 }
@@ -437,7 +432,7 @@ export function StatusBadge({
   return (
     <View style={[styles.statusBadge, { backgroundColor: palette.backgroundColor }]}>
       <View style={[styles.statusDot, { backgroundColor: palette.color }]} />
-      <Text text={label} size="xxs" weight="semiBold" style={{ color: palette.color }} />
+      <Text size="xxs" style={{ color: palette.color }} text={label} weight="semiBold" />
     </View>
   )
 }
@@ -449,8 +444,8 @@ export function GroupedSection({
   onAction,
 }: PropsWithChildren<{
   actionLabel?: string
-  title?: string
   onAction?: () => void
+  title?: string
 }>) {
   const tokens = useDesignTokens()
 
@@ -460,17 +455,17 @@ export function GroupedSection({
         <View style={styles.groupedSectionHeader}>
           {title ? (
             <Text
-              text={title}
               size="xxs"
-              weight="semiBold"
               style={[styles.groupedSectionTitle, { color: tokens.textMuted }]}
+              text={title}
+              weight="semiBold"
             />
           ) : (
             <View />
           )}
           {actionLabel && onAction ? (
             <Pressable accessibilityRole="button" onPress={onAction}>
-              <Text text={actionLabel} size="xs" weight="medium" style={{ color: tokens.accent }} />
+              <Text size="xs" style={{ color: tokens.accent }} text={actionLabel} weight="medium" />
             </Pressable>
           ) : null}
         </View>
@@ -500,13 +495,13 @@ export function ListRow({
   destructive,
   isLast,
 }: {
-  title: string
-  subtitle?: string
-  leading?: ReactNode
-  trailing?: ReactNode
-  onPress?: () => void
   destructive?: boolean
   isLast?: boolean
+  leading?: ReactNode
+  onPress?: () => void
+  subtitle?: string
+  title: string
+  trailing?: ReactNode
 }) {
   const tokens = useDesignTokens()
   const content = (
@@ -514,18 +509,18 @@ export function ListRow({
       {leading}
       <View style={styles.listRowCopy}>
         <Text
-          text={title}
           numberOfLines={1}
           size="xs"
-          weight="medium"
           style={{ color: destructive ? tokens.danger : tokens.textPrimary }}
+          text={title}
+          weight="medium"
         />
         {subtitle ? (
           <Text
-            text={subtitle}
             numberOfLines={1}
             size="xxs"
             style={{ color: tokens.textSecondary }}
+            text={subtitle}
           />
         ) : null}
       </View>
@@ -567,22 +562,19 @@ export function MetricGrid({
   return (
     <View style={styles.metricGrid}>
       {items.map((item) => (
-        <View
-          key={item.label}
-          style={[styles.metricCell, { backgroundColor: tokens.backgroundMuted }]}
-        >
+        <View key={item.label} style={[styles.metricCell, { backgroundColor: tokens.backgroundMuted }]}>
           <Text
-            text={item.value}
             numberOfLines={1}
             size="xs"
-            weight="bold"
             style={{ color: tokens.textPrimary }}
+            text={item.value}
+            weight="bold"
           />
           <Text
-            text={item.label}
             numberOfLines={1}
             size="xxs"
             style={{ color: tokens.textMuted }}
+            text={item.label}
           />
         </View>
       ))}
@@ -590,18 +582,14 @@ export function MetricGrid({
   )
 }
 
-export function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
+export function EmptyState({ title, subtitle }: { subtitle: string; title: string }) {
   const tokens = useDesignTokens()
 
   return (
     <SurfaceCard>
       <View style={styles.emptyState}>
-        <Text text={title} size="sm" weight="semiBold" style={{ color: tokens.textPrimary }} />
-        <Text
-          text={subtitle}
-          size="xs"
-          style={{ color: tokens.textSecondary, textAlign: "center" }}
-        />
+        <Text size="sm" style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
+        <Text size="xs" style={{ color: tokens.textSecondary, textAlign: "center" }} text={subtitle} />
       </View>
     </SurfaceCard>
   )
@@ -614,7 +602,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     height: 46,
     justifyContent: "center",
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { height: 6, width: 0 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
     width: 46,
@@ -635,7 +623,7 @@ const styles = StyleSheet.create({
     elevation: 0,
     gap: 12,
     padding: 16,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { height: 8, width: 0 },
     shadowOpacity: Platform.select({ android: 0, default: 0.04 }),
     shadowRadius: 14,
   },
@@ -657,7 +645,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     elevation: Platform.select({ android: 1, default: 0 }),
     overflow: "hidden",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { height: 8, width: 0 },
     shadowOpacity: Platform.select({ android: 0, default: 0.04 }),
     shadowRadius: 14,
   },

@@ -59,6 +59,10 @@ export function getDocumentStatusConfig(
   return statusMap[normalized]
 }
 
+export function shouldShowDocumentRowStatus(status: DisplayDocumentStatus) {
+  return status === "processing"
+}
+
 export function getContracts(signedContractIds: string[]) {
   return initialContracts.map((contract) =>
     signedContractIds.includes(contract.id) ? { ...contract, status: "signed" as const } : contract,

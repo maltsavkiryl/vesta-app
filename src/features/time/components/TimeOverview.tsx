@@ -1,25 +1,137 @@
+import type { ReactNode } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
+import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons } from "@expo/vector-icons"
 
+import { formatDurationLabel, formatTimeValue } from "@/core/date"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
-import {
-  Banner,
-  InCardActionButton,
-  StatusBadge,
-  SurfaceCard,
-  Text,
-  appLayout,
-  appTypography,
-  useDesignTokens,
-} from "@/ui"
-import { formatCurrency } from "@/utils/formatters"
+import { InCardActionButton, SurfaceCard, Text, appTypography, useDesignTokens } from "@/ui"
 
-import { weekData } from "../time.data"
 import { formatHours, formatSeconds } from "../time.utils"
 
-export function TimeHeader({ status }: { status: "idle" | "working" | "onBreak" }) {
+const HERO_SURFACE_DIVIDER = "rgba(255, 255, 255, 0.10)"
+const HERO_CARD_BACKGROUND = "#060A12"
+const HERO_CARD_BORDER = "rgba(186, 210, 255, 0.28)"
+const HERO_CARD_EDGE = "rgba(227, 237, 255, 0.18)"
+const HERO_CARD_SHADOW = "#9EBEFF"
+
+function timeToMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number)
+  return hours * 60 + minutes
+}
+
+function getShiftDurationHours(start: string, end: string) {
+  let minutes = timeToMinutes(end) - timeToMinutes(start)
+  if (minutes < 0) minutes += 24 * 60
+  return Math.round((minutes / 60) * 10) / 10
+}
+
+function formatDurationHoursLabel(hours: number) {
+  const wholeHours = Math.floor(hours)
+  const minutes = Math.round((hours - wholeHours) * 60)
+
+  if (wholeHours === 0) return `${minutes}m`
+  if (minutes === 0) return `${wholeHours}h`
+  return `${wholeHours}h ${minutes}m`
+}
+
+function getClockInOpenLabel(start: string) {
+  const minutes = (timeToMinutes(start) + 24 * 60 - 15) % (24 * 60)
+  const hours = String(Math.floor(minutes / 60)).padStart(2, "0")
+  const minuteValue = String(minutes % 60).padStart(2, "0")
+  return `${hours}:${minuteValue}`
+}
+
+function HeroCard({ children, style }: { children: ReactNode; style?: object }) {
+  return (
+    <SurfaceCard elevated style={[styles.heroCard, style]}>
+      <LinearGradient
+        colors={["#02050B", "#090E18", "#1C294A"]}
+        end={{ x: 0.94, y: 0.06 }}
+        pointerEvents="none"
+        start={{ x: 0.06, y: 0.92 }}
+        style={styles.heroGradient}
+      />
+      <LinearGradient
+        colors={[
+          "rgba(124, 154, 219, 0.00)",
+          "rgba(124, 154, 219, 0.08)",
+          "rgba(124, 154, 219, 0.18)",
+        ]}
+        end={{ x: 0.88, y: 0.2 }}
+        pointerEvents="none"
+        start={{ x: 0.42, y: 0.96 }}
+        style={styles.heroTopBloom}
+      />
+      <LinearGradient
+        colors={[
+          "rgba(165, 186, 234, 0.18)",
+          "rgba(165, 186, 234, 0.04)",
+          "rgba(165, 186, 234, 0.00)",
+        ]}
+        end={{ x: 0.7, y: 0.34 }}
+        pointerEvents="none"
+        start={{ x: 0.02, y: 1 }}
+        style={styles.heroBottomBloom}
+      />
+      <View pointerEvents="none" style={styles.heroEdgeHighlight} />
+      <View style={styles.heroContent}>{children}</View>
+    </SurfaceCard>
+  )
+}
+
+function HeroMetaPill({
+  icon,
+  text,
+  tone = "default",
+}: {
+  icon: keyof typeof Ionicons.glyphMap
+  text: string
+  tone?: "default" | "success" | "warning"
+}) {
   const tokens = useDesignTokens()
-  const isActive = status !== "idle"
+  const color =
+    tone === "success"
+      ? tokens.success
+      : tone === "warning"
+        ? tokens.warning
+        : `${tokens.accentForeground}D6`
+
+  return (
+    <View style={[styles.heroMetaPill, { backgroundColor: `${tokens.accentForeground}12` }]}>
+      <Ionicons color={color} name={icon} size={12} />
+      <Text text={text} size="xxs" weight="medium" style={{ color }} />
+    </View>
+  )
+}
+
+function HeroDetailRow({
+  icon,
+  text,
+  trailing,
+}: {
+  icon: keyof typeof Ionicons.glyphMap
+  text: string
+  trailing?: ReactNode
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <View style={styles.heroDetailRow}>
+      <Ionicons color={`${tokens.accentForeground}80`} name={icon} size={16} />
+      <Text
+        numberOfLines={1}
+        text={text}
+        size="xs"
+        style={[styles.flex, { color: `${tokens.accentForeground}C7` }]}
+      />
+      {trailing}
+    </View>
+  )
+}
+
+export function TimeHeader({ status: _status }: { status: "idle" | "working" | "onBreak" }) {
+  const tokens = useDesignTokens()
 
   return (
     <View style={styles.header}>
@@ -28,12 +140,6 @@ export function TimeHeader({ status }: { status: "idle" | "working" | "onBreak" 
         weight="bold"
         style={[appTypography.pageTitle, { color: tokens.textPrimary }]}
       />
-      {isActive ? (
-        <StatusBadge
-          label={status === "onBreak" ? "On break" : "Working"}
-          tone={status === "onBreak" ? "warning" : "success"}
-        />
-      ) : null}
     </View>
   )
 }
@@ -45,68 +151,63 @@ export function IdleClockCard({ onClockIn }: { onClockIn: () => void }) {
 
   if (!clockSession) return null
 
-  return (
-    <SurfaceCard elevated style={styles.clockCard}>
-      <View style={styles.idleCopy}>
-        <Text
-          text="TODAY'S SHIFT"
-          size="xxs"
-          weight="semiBold"
-          style={[styles.caps, { color: tokens.textMuted }]}
-        />
-        <Text
-          text={`${clockSession.scheduledStart} - ${clockSession.scheduledEnd}`}
-          weight="bold"
-          style={[styles.shiftTime, { color: tokens.textPrimary }]}
-        />
-        <Text
-          text={`${clockSession.role} · 6h Evening shift`}
-          size="xs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
+  const durationHours = getShiftDurationHours(
+    clockSession.scheduledStart,
+    clockSession.scheduledEnd,
+  )
 
-      <View style={[styles.locationPanel, { backgroundColor: tokens.background }]}>
-        <Ionicons color={tokens.textMuted} name="location-outline" size={15} />
+  return (
+    <HeroCard>
+      <View style={styles.heroTopRow}>
         <View style={styles.flex}>
           <Text
-            text={clockSession.venueName}
-            size="xs"
-            weight="medium"
-            style={{ color: tokens.textPrimary }}
+            text="TODAY'S SHIFT"
+            size="xxs"
+            weight="semiBold"
+            style={[styles.caps, { color: `${tokens.accentForeground}99` }]}
           />
           <Text
-            text={clockSession.venueAddress}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
+            text={`${clockSession.scheduledStart} - ${clockSession.scheduledEnd}`}
+            weight="bold"
+            style={[styles.heroShiftTime, { color: tokens.accentForeground }]}
+          />
+          <Text
+            text={`${clockSession.role} · ${formatDurationHoursLabel(durationHours)} planned`}
+            size="xs"
+            style={{ color: `${tokens.accentForeground}BF` }}
           />
         </View>
-        <Ionicons color={tokens.success} name="checkmark-circle-outline" size={15} />
+        <HeroMetaPill icon="checkmark-circle" text="Confirmed" tone="success" />
       </View>
 
-      <Banner
-        icon={<Ionicons color={tokens.warning} name="flash-outline" size={13} />}
-        tone="warning"
-      >
+      <HeroDetailRow
+        icon="location-outline"
+        text={`${clockSession.venueName} · ${clockSession.venueAddress}`}
+        trailing={<Ionicons color={tokens.success} name="navigate-circle-outline" size={18} />}
+      />
+
+      <View style={styles.heroDivider} />
+
+      <View style={styles.heroInfoRow}>
+        <Ionicons color={tokens.warning} name="flash-outline" size={13} />
         <Text
-          text="Clock-in opens at 16:45 · Opens in 2h 21m"
+          text={`Clock-in opens at ${getClockInOpenLabel(clockSession.scheduledStart)}`}
           size="xxs"
           weight="medium"
-          style={[styles.flex, { color: tokens.warning }]}
+          style={{ color: tokens.warning }}
         />
-      </Banner>
+      </View>
 
-      <View style={styles.cardAction}>
+      <View style={styles.heroFooter}>
         <InCardActionButton label="Clock in" onPress={onClockIn} />
       </View>
-    </SurfaceCard>
+    </HeroCard>
   )
 }
 
 export function ActiveClockCard({
   breakSeconds,
   elapsedSeconds,
-  earnings,
   onClockOut,
   onEndBreak,
   onStartBreak,
@@ -115,7 +216,6 @@ export function ActiveClockCard({
 }: {
   breakSeconds: number
   elapsedSeconds: number
-  earnings: string
   onClockOut: () => void
   onEndBreak: () => void
   onStartBreak: () => void
@@ -127,38 +227,67 @@ export function ActiveClockCard({
   const state = query.data
   const isOnBreak = status === "onBreak"
   if (!state) return null
-  const progress = Math.min((elapsedSeconds / (6 * 3600)) * 100, 100)
+  const durationHours = getShiftDurationHours(
+    state.clockSession.scheduledStart,
+    state.clockSession.scheduledEnd,
+  )
+  const shiftDurationSeconds = durationHours * 3600
+  const progress = Math.min((elapsedSeconds / shiftDurationSeconds) * 100, 100)
   const toneColor = isOnBreak ? tokens.warning : tokens.success
+  const remainingSeconds = Math.max(shiftDurationSeconds - elapsedSeconds, 0)
 
   return (
-    <SurfaceCard elevated style={styles.activeCard}>
-      <View style={styles.activeHeader}>
-        <Text
-          text={isOnBreak ? "Break in progress" : "Current shift"}
-          size="xs"
-          weight="semiBold"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text
-          text={`${state.clockSession.scheduledStart} - ${state.clockSession.scheduledEnd} · ${state.clockSession.role}`}
-          numberOfLines={1}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
+    <HeroCard>
+      <View style={styles.heroTopRow}>
+        <View style={styles.heroPrimaryStack}>
+          <Text
+            text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
+            weight="bold"
+            style={[
+              styles.heroTimerValue,
+              { color: isOnBreak ? tokens.warning : tokens.accentForeground },
+            ]}
+          />
+          <Text
+            text={`${state.clockSession.scheduledStart} - ${state.clockSession.scheduledEnd} · ${state.clockSession.role}`}
+            numberOfLines={1}
+            size="xs"
+            style={{ color: `${tokens.accentForeground}BF` }}
+          />
+        </View>
+        <HeroMetaPill
+          icon={isOnBreak ? "cafe-outline" : "radio-outline"}
+          text={isOnBreak ? "On break" : "Working"}
+          tone={isOnBreak ? "warning" : "success"}
         />
       </View>
 
-      <View style={[styles.timerPanel, { backgroundColor: tokens.backgroundMuted }]}>
+      <View style={styles.timerPanel}>
         <Text
-          text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
-          weight="bold"
-          style={[styles.activeTimer, { color: isOnBreak ? tokens.warning : tokens.textPrimary }]}
+          text={
+            isOnBreak
+              ? `${formatSeconds(elapsedSeconds)} worked`
+              : `Started at ${formatTimeValue(state.clockSession.startedAt ?? state.clockSession.scheduledStart)}`
+          }
+          size="xxs"
+          weight="medium"
+          style={{ color: `${tokens.accentForeground}B3` }}
         />
         <Text
-          text={isOnBreak ? `${formatSeconds(elapsedSeconds)} worked` : "since 17:00"}
+          text={
+            isOnBreak
+              ? `${formatDurationLabel(totalBreakSeconds)} total break`
+              : remainingSeconds > 0
+                ? `${formatDurationLabel(remainingSeconds)} remaining`
+                : "Shift target reached"
+          }
           size="xs"
-          style={{ color: tokens.textSecondary }}
+          weight="semiBold"
+          style={{ color: tokens.accentForeground }}
         />
-        <View style={[styles.shiftProgressTrack, { backgroundColor: tokens.surfaceTertiary }]}>
+        <View
+          style={[styles.shiftProgressTrack, { backgroundColor: `${tokens.accentForeground}14` }]}
+        >
           <View
             style={[
               styles.shiftProgressFill,
@@ -167,39 +296,24 @@ export function ActiveClockCard({
           />
         </View>
         <Text
-          text={`${Math.round(progress)}% of 6h shift${totalBreakSeconds > 0 ? ` · ${formatHours(totalBreakSeconds)} break` : ""}`}
+          text={`${Math.round(progress)}% of ${formatDurationHoursLabel(durationHours)} shift${totalBreakSeconds > 0 ? ` · ${formatHours(totalBreakSeconds)} paused` : ""}`}
           size="xxs"
-          style={{ color: tokens.textMuted }}
+          style={{ color: `${tokens.accentForeground}99` }}
         />
       </View>
 
-      <View style={styles.summaryRows}>
-        <SummaryRow color={tokens.success} icon="cash-outline" label="Earnings" value={earnings} />
-        <SummaryRow
-          color={tokens.accent}
-          icon="trending-up-outline"
-          label="Hourly rate"
-          value={`${formatCurrency(state.earnings.averageHourlyRate)}/h`}
-        />
-        <SummaryRow
-          color={tokens.warning}
-          icon="cafe-outline"
-          label="Break time"
-          value={formatHours(totalBreakSeconds)}
-        />
-      </View>
+      <View style={styles.heroDivider} />
 
-      <Banner
-        icon={<Ionicons color={tokens.success} name="checkmark-circle-outline" size={14} />}
-        tone="success"
-      >
+      <View style={styles.heroStatusRow}>
+        <Ionicons color={tokens.success} name="checkmark-circle-outline" size={14} />
         <Text
           text={`Location verified · ${state.clockSession.venueName}`}
           size="xxs"
           weight="medium"
           style={[styles.flex, { color: tokens.success }]}
         />
-      </Banner>
+        <Text text="On site" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
+      </View>
 
       {isOnBreak ? (
         <Pressable
@@ -218,15 +332,20 @@ export function ActiveClockCard({
             onPress={onStartBreak}
             style={[
               styles.secondaryAction,
-              { backgroundColor: tokens.background, borderColor: tokens.border },
+              {
+                backgroundColor: tokens.isDark
+                  ? `${tokens.accentForeground}0D`
+                  : `${tokens.accentForeground}10`,
+                borderColor: `${tokens.accentForeground}12`,
+              },
             ]}
           >
-            <Ionicons color={tokens.textSecondary} name="cafe-outline" size={16} />
+            <Ionicons color={`${tokens.accentForeground}BF`} name="cafe-outline" size={16} />
             <Text
               text="Start break"
               size="xs"
               weight="medium"
-              style={{ color: tokens.textPrimary }}
+              style={{ color: tokens.accentForeground }}
             />
           </Pressable>
           <Pressable
@@ -240,113 +359,7 @@ export function ActiveClockCard({
           </Pressable>
         </View>
       )}
-    </SurfaceCard>
-  )
-}
-
-function SummaryRow({
-  color,
-  icon,
-  label,
-  value,
-}: {
-  color: string
-  icon: keyof typeof Ionicons.glyphMap
-  label: string
-  value: string
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.summaryRow, { borderBottomColor: tokens.border }]}>
-      <View style={[styles.summaryIcon, { backgroundColor: `${color}14` }]}>
-        <Ionicons color={color} name={icon} size={16} />
-      </View>
-      <Text text={label} size="xs" style={[styles.flex, { color: tokens.textSecondary }]} />
-      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
-    </View>
-  )
-}
-
-export function WeeklySummary({ weekTotal }: { weekTotal: number }) {
-  const tokens = useDesignTokens()
-  const target = 30
-  const progress = Math.min((weekTotal / target) * 100, 100)
-
-  return (
-    <SurfaceCard style={styles.weekCard}>
-      <View style={styles.weekHeader}>
-        <View>
-          <Text
-            text="This week"
-            size="xs"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary }}
-          />
-          <Text
-            text={`${weekTotal.toFixed(1)}h · ${formatCurrency(weekTotal * 12.02)} est.`}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-        </View>
-        <View style={styles.weekTotal}>
-          <Text
-            text={`${weekTotal.toFixed(1)}h`}
-            weight="bold"
-            style={[styles.weekTotalValue, { color: tokens.textPrimary }]}
-          />
-          <Text text="of 30h target" size="xxs" style={{ color: tokens.textMuted }} />
-        </View>
-      </View>
-      <WeekChart todayHours={Math.max(weekTotal - 29.45, 0)} />
-      <View style={[styles.progressTrack, { backgroundColor: tokens.background }]}>
-        <View
-          style={[styles.progressFill, { backgroundColor: tokens.accent, width: `${progress}%` }]}
-        />
-      </View>
-    </SurfaceCard>
-  )
-}
-
-function WeekChart({ todayHours }: { todayHours: number }) {
-  const tokens = useDesignTokens()
-  const maxHours = 8
-
-  return (
-    <View>
-      <View style={styles.weekBars}>
-        {weekData.map((item, index) => {
-          const hours = item.today ? todayHours : item.hours
-          const height = Math.max(Math.min(hours / maxHours, 1) * 48, hours > 0 ? 3 : 0)
-          const color = item.today
-            ? hours > 0
-              ? tokens.accent
-              : `${tokens.accent}33`
-            : hours > 0
-              ? tokens.isDark
-                ? "#48484A"
-                : "#C7C7CC"
-              : tokens.surfaceSecondary
-
-          return (
-            <View key={`${item.day}-${index}`} style={styles.weekBarColumn}>
-              <View style={[styles.weekBar, { backgroundColor: color, height }]} />
-            </View>
-          )
-        })}
-      </View>
-      <View style={styles.weekLabels}>
-        {weekData.map((item, index) => (
-          <Text
-            key={`${item.day}-${index}`}
-            text={item.day}
-            size="xxs"
-            weight={item.today ? "semiBold" : "normal"}
-            style={[styles.weekLabel, { color: item.today ? tokens.accent : tokens.textMuted }]}
-          />
-        ))}
-      </View>
-    </View>
+    </HeroCard>
   )
 }
 
@@ -354,18 +367,7 @@ const styles = StyleSheet.create({
   actionGrid: {
     flexDirection: "row",
     gap: 8,
-  },
-  activeCard: {
-    borderRadius: 20,
-    gap: appLayout.cardGap,
-    padding: 16,
-  },
-  activeHeader: {
-    gap: 2,
-  },
-  activeTimer: {
-    fontSize: 34,
-    lineHeight: 40,
+    marginTop: 4,
   },
   breakButton: {
     alignItems: "center",
@@ -375,20 +377,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
+    marginTop: 4,
     minHeight: 48,
     paddingHorizontal: 14,
   },
   caps: {
     letterSpacing: 0,
-  },
-  cardAction: {
-    marginTop: 4,
-  },
-  clockCard: {
-    borderRadius: 20,
-    gap: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
   },
   dangerAction: {
     alignItems: "center",
@@ -409,27 +403,104 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 4,
   },
-  idleCopy: {
-    alignItems: "center",
-    gap: 4,
+  heroBottomBloom: {
+    borderRadius: 220,
+    bottom: -132,
+    height: 280,
+    left: -128,
+    opacity: 0.95,
+    position: "absolute",
+    width: 360,
   },
-  locationPanel: {
+  heroCard: {
+    backgroundColor: HERO_CARD_BACKGROUND,
+    borderColor: HERO_CARD_BORDER,
+    borderRadius: 24,
+    borderWidth: 1,
+    elevation: 18,
+    gap: 16,
+    overflow: "hidden",
+    padding: 20,
+    shadowColor: HERO_CARD_SHADOW,
+    shadowOffset: { width: 0, height: 22 },
+    shadowOpacity: 0.22,
+    shadowRadius: 32,
+  },
+  heroContent: {
+    gap: 16,
+    zIndex: 1,
+  },
+  heroDetailRow: {
     alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 14,
     flexDirection: "row",
     gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
   },
-  progressFill: {
-    borderRadius: 99,
-    height: "100%",
+  heroDivider: {
+    backgroundColor: HERO_SURFACE_DIVIDER,
+    height: StyleSheet.hairlineWidth,
   },
-  progressTrack: {
-    borderRadius: 99,
-    height: 3,
-    overflow: "hidden",
+  heroEdgeHighlight: {
+    ...StyleSheet.absoluteFillObject,
+    borderColor: HERO_CARD_EDGE,
+    borderRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
+    opacity: 0.9,
+  },
+  heroFooter: {
+    marginTop: 2,
+  },
+  heroGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroInfoRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  heroMetaPill: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  heroPrimaryStack: {
+    flex: 1,
+    gap: 8,
+    paddingTop: 2,
+  },
+  heroShiftTime: {
+    fontSize: 31,
+    lineHeight: 36,
+    marginTop: 2,
+  },
+  heroStatusRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 2,
+  },
+  heroTimerValue: {
+    fontSize: 35,
+    lineHeight: 40,
+    marginTop: 2,
+  },
+  heroTopBloom: {
+    borderRadius: 220,
+    height: 320,
+    opacity: 1,
+    position: "absolute",
+    right: -88,
+    top: -128,
+    width: 360,
+  },
+  heroTopRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
   },
   secondaryAction: {
     alignItems: "center",
@@ -450,78 +521,13 @@ const styles = StyleSheet.create({
   shiftProgressTrack: {
     borderRadius: 999,
     height: 5,
-    marginTop: 10,
     overflow: "hidden",
     width: "100%",
   },
-  shiftTime: {
-    fontSize: 26,
-    lineHeight: 31,
-  },
-  summaryIcon: {
-    alignItems: "center",
-    borderRadius: 15,
-    height: 30,
-    justifyContent: "center",
-    width: 30,
-  },
-  summaryRow: {
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 10,
-    minHeight: 46,
-  },
-  summaryRows: {
-    gap: 0,
-  },
   timerPanel: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-  },
-  weekBar: {
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
-    width: "100%",
-  },
-  weekBarColumn: {
-    flex: 1,
-    height: 56,
-    justifyContent: "flex-end",
-  },
-  weekBars: {
-    alignItems: "flex-end",
-    flexDirection: "row",
-    gap: 4,
-  },
-  weekCard: {
-    borderRadius: 18,
-    gap: 12,
-    padding: 16,
-  },
-  weekHeader: {
     alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  weekLabel: {
-    flex: 1,
-    fontSize: 10,
-    textAlign: "center",
-  },
-  weekLabels: {
-    flexDirection: "row",
-    gap: 4,
-    marginTop: 4,
-  },
-  weekTotal: {
-    alignItems: "flex-end",
-  },
-  weekTotalValue: {
-    fontSize: 20,
-    lineHeight: 24,
+    flexDirection: "column",
+    gap: 10,
+    paddingTop: 4,
   },
 })
