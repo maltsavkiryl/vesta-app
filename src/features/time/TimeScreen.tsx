@@ -10,8 +10,13 @@ import { Text } from "@/components/Text"
 import { getClockSnapshot } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
 import {
-  AppButton,
+  getTimeEntryEarningsLabel,
+  getTimeEntryTimeRangeLabel,
+  getTimeEntryWorkedLabel,
+} from "@/core/timeEntries"
+import {
   AppScrollScreen,
+  InCardActionButton,
   StatusBadge,
   SurfaceCard,
   SectionTitle,
@@ -19,6 +24,8 @@ import {
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession } from "@/providers/app-provider"
 import { formatCurrency } from "@/utils/formatters"
+
+import { captureLocationSnapshot, captureOptionalClockInPhoto } from "./timeCapture"
 
 const weekData = [
   { day: "M", hours: 6 },
@@ -120,7 +127,9 @@ function IdleClockCard({ onClockIn }: { onClockIn: () => void }) {
         />
       </View>
 
-      <AppButton label="Clock in" onPress={onClockIn} />
+      <View style={styles.clockCardAction}>
+        <InCardActionButton label="Clock in" onPress={onClockIn} />
+      </View>
     </SurfaceCard>
   )
 }
@@ -375,115 +384,75 @@ function WeeklySummary({ weekTotal }: { weekTotal: number }) {
 
 function EntryRow({
   entry,
-  expanded,
   onPress,
   showEarnings,
 }: {
   entry: TimeEntry
-  expanded: boolean
   onPress: () => void
   showEarnings?: boolean
 }) {
   const tokens = useDesignTokens()
-  const date = new Date(entry.date)
+  const date = new Date(entry.clockInAt)
   const weekday = format(date, "EEE")
   const day = format(date, "d")
+  const statusColor = entry.status === "approved" ? tokens.success : tokens.warning
 
   return (
-    <View style={{ borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth }}>
-      <Pressable onPress={onPress} style={styles.entryButton}>
-        <View style={styles.entryDate}>
-          <Text text={weekday} size="xxs" style={{ color: tokens.textMuted, fontSize: 10 }} />
-          <Text
-            text={day}
-            weight="semiBold"
-            style={[styles.entryDay, { color: tokens.textPrimary }]}
-          />
-        </View>
-        <View style={[styles.entryDivider, { backgroundColor: tokens.border }]} />
-        <View style={styles.flex}>
-          <Text
-            text={`${entry.clockIn} - ${entry.clockOut}`}
-            size="xs"
-            weight="medium"
-            style={{ color: tokens.textPrimary }}
-          />
-          <Text
-            text={`${entry.shiftLabel} · ${entry.totalHoursLabel}`}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-        </View>
-        <View style={styles.entryStatus}>
-          <Text
-            text={
-              showEarnings
-                ? entry.earningsLabel
-                : entry.status === "approved"
-                  ? "Approved"
-                  : "Review"
-            }
-            size="xxs"
-            weight="semiBold"
-            style={{
-              color: showEarnings
-                ? tokens.textPrimary
-                : entry.status === "approved"
-                  ? tokens.success
-                  : tokens.warning,
-            }}
-          />
-          <Ionicons
-            color={tokens.textMuted}
-            name={expanded ? "chevron-up-outline" : "chevron-down-outline"}
-            size={14}
-          />
-        </View>
-      </Pressable>
-
-      {expanded ? (
-        <View style={styles.entryDetails}>
-          <View style={styles.detailGrid}>
-            <DetailCell label="In" value={entry.clockIn} />
-            <DetailCell label="Out" value={entry.clockOut} />
-            <DetailCell label="Break" value={`${entry.breakMinutes}m`} />
-            <DetailCell label="Total" value={entry.totalHoursLabel} />
-          </View>
-          <View style={[styles.earningsRow, { backgroundColor: `${tokens.success}10` }]}>
-            <Text text="Estimated earnings" size="xxs" style={{ color: tokens.textSecondary }} />
-            <Text
-              text={entry.earningsLabel}
-              size="xs"
-              weight="bold"
-              style={{ color: tokens.success }}
-            />
-          </View>
-        </View>
-      ) : null}
-    </View>
-  )
-}
-
-function DetailCell({ label, value }: { label: string; value: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.detailCell, { backgroundColor: tokens.background }]}>
-      <Text text={label} size="xxs" style={{ color: tokens.textMuted, fontSize: 10 }} />
-      <Text text={value} size="xxs" weight="semiBold" style={{ color: tokens.textPrimary }} />
-    </View>
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.entryButton,
+        { borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth },
+      ]}
+    >
+      <View style={styles.entryDate}>
+        <Text text={weekday} size="xxs" style={{ color: tokens.textMuted, fontSize: 10 }} />
+        <Text
+          text={day}
+          weight="semiBold"
+          style={[styles.entryDay, { color: tokens.textPrimary }]}
+        />
+      </View>
+      <View style={[styles.entryDivider, { backgroundColor: tokens.border }]} />
+      <View style={styles.flex}>
+        <Text
+          text={getTimeEntryTimeRangeLabel(entry)}
+          size="xs"
+          weight="medium"
+          style={{ color: tokens.textPrimary }}
+        />
+        <Text
+          text={`${entry.shiftLabel} · ${getTimeEntryWorkedLabel(entry)}`}
+          size="xxs"
+          style={{ color: tokens.textSecondary }}
+        />
+      </View>
+      <View style={styles.entryStatus}>
+        <Text
+          text={
+            showEarnings
+              ? getTimeEntryEarningsLabel(entry)
+              : entry.status === "approved"
+                ? "Approved"
+                : "Review"
+          }
+          size="xxs"
+          weight="semiBold"
+          style={{ color: showEarnings ? tokens.textPrimary : statusColor }}
+        />
+        <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
+      </View>
+    </Pressable>
   )
 }
 
 function RecentEntries({
   entries,
-  expandedId,
-  onEntryPress,
+  onOpenEntry,
   onViewAll,
 }: {
   entries: TimeEntry[]
-  expandedId: string | null
-  onEntryPress: (entry: TimeEntry) => void
+  onOpenEntry: (entry: TimeEntry) => void
   onViewAll: () => void
 }) {
   const tokens = useDesignTokens()
@@ -506,12 +475,7 @@ function RecentEntries({
         ]}
       >
         {entries.slice(0, 4).map((entry) => (
-          <EntryRow
-            key={entry.id}
-            entry={entry}
-            expanded={expandedId === entry.id}
-            onPress={() => onEntryPress(entry)}
-          />
+          <EntryRow key={entry.id} entry={entry} onPress={() => onOpenEntry(entry)} />
         ))}
       </View>
     </View>
@@ -519,11 +483,9 @@ function RecentEntries({
 }
 
 export function TimeEntriesScreen() {
+  const router = useRouter()
   const tokens = useDesignTokens()
   const { state } = useAppSession()
-  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(
-    state.timeEntries[0]?.id ?? null,
-  )
   const groupedEntries = useMemo(() => {
     return state.timeEntries.reduce<Record<string, TimeEntry[]>>((acc, entry) => {
       const month = format(new Date(entry.date), "MMMM yyyy")
@@ -532,9 +494,10 @@ export function TimeEntriesScreen() {
     }, {})
   }, [state.timeEntries])
 
-  const handleEntryPress = useCallback((entry: TimeEntry) => {
-    setExpandedEntryId((current) => (current === entry.id ? null : entry.id))
-  }, [])
+  const openEntry = useCallback(
+    (entry: TimeEntry) => router.push(`/(app)/time-entry/${entry.id}` as never),
+    [router],
+  )
 
   return (
     <AppScrollScreen
@@ -573,8 +536,7 @@ export function TimeEntriesScreen() {
               <EntryRow
                 key={entry.id}
                 entry={entry}
-                expanded={expandedEntryId === entry.id}
-                onPress={() => handleEntryPress(entry)}
+                onPress={() => openEntry(entry)}
                 showEarnings
               />
             ))}
@@ -589,7 +551,6 @@ export function TimeScreen() {
   const router = useRouter()
   const { endBreak, startBreak, startClock, state } = useAppSession()
   const [now, setNow] = useState(() => new Date())
-  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
 
   useEffect(() => {
     if (state.clockSession.state === "idle") return
@@ -611,9 +572,32 @@ export function TimeScreen() {
     weekData.filter((item) => !item.today).reduce((sum, item) => sum + item.hours, 0) +
     elapsedSeconds / 3600
 
-  const handleEntryPress = useCallback((entry: TimeEntry) => {
-    setExpandedEntryId((current) => (current === entry.id ? null : entry.id))
-  }, [])
+  const openEntry = useCallback(
+    (entry: TimeEntry) => router.push(`/(app)/time-entry/${entry.id}` as never),
+    [router],
+  )
+
+  const handleClockIn = useCallback(async () => {
+    const occurredAt = new Date().toISOString()
+    const location = await captureLocationSnapshot(state.clockSession.venueAddress)
+    const proofPhoto = await captureOptionalClockInPhoto()
+    if (proofPhoto === null) return
+    startClock({ occurredAt, location, proofPhoto })
+  }, [startClock, state.clockSession.venueAddress])
+
+  const handleStartBreak = useCallback(async () => {
+    startBreak({
+      occurredAt: new Date().toISOString(),
+      location: await captureLocationSnapshot(state.clockSession.venueAddress),
+    })
+  }, [startBreak, state.clockSession.venueAddress])
+
+  const handleEndBreak = useCallback(async () => {
+    endBreak({
+      occurredAt: new Date().toISOString(),
+      location: await captureLocationSnapshot(state.clockSession.venueAddress),
+    })
+  }, [endBreak, state.clockSession.venueAddress])
 
   const openClockOut = useCallback(() => router.push("/(app)/clock-out" as never), [router])
 
@@ -622,7 +606,7 @@ export function TimeScreen() {
       <Header status={state.clockSession.state} />
 
       {state.clockSession.state === "idle" ? (
-        <IdleClockCard onClockIn={startClock} />
+        <IdleClockCard onClockIn={handleClockIn} />
       ) : (
         <ActiveClockCard
           breakSeconds={state.clockSession.state === "onBreak" ? snapshot.breakSeconds : 0}
@@ -631,8 +615,8 @@ export function TimeScreen() {
           status={state.clockSession.state}
           totalBreakSeconds={totalBreakSeconds}
           onClockOut={openClockOut}
-          onEndBreak={endBreak}
-          onStartBreak={startBreak}
+          onEndBreak={handleEndBreak}
+          onStartBreak={handleStartBreak}
         />
       )}
 
@@ -640,8 +624,7 @@ export function TimeScreen() {
 
       <RecentEntries
         entries={state.timeEntries}
-        expandedId={expandedEntryId}
-        onEntryPress={handleEntryPress}
+        onOpenEntry={openEntry}
         onViewAll={() => router.push("/(app)/time-entries" as never)}
       />
     </AppScrollScreen>
@@ -685,6 +668,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
   },
+  clockCardAction: {
+    marginTop: 4,
+  },
   dangerAction: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -694,29 +680,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 14,
-  },
-  detailCell: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    flex: 1,
-    gap: 2,
-    paddingHorizontal: 4,
-    paddingVertical: 8,
-  },
-  detailGrid: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  earningsRow: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
   },
   entriesCard: {
     borderCurve: "continuous",
@@ -741,10 +704,6 @@ const styles = StyleSheet.create({
   entryDay: {
     fontSize: 18,
     lineHeight: 21,
-  },
-  entryDetails: {
-    paddingBottom: 14,
-    paddingHorizontal: 16,
   },
   entryDivider: {
     height: 32,

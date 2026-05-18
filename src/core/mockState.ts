@@ -1,13 +1,21 @@
-import { format } from "date-fns"
-
 import type {
   AppStoreState,
   AvailabilityDay,
   Employer,
-  TimeEntry,
   Shift,
+  TimeEntry,
   UserProfile,
 } from "./models"
+import { buildTimeEntryEvent, buildTimeEntryFromClockSession } from "./timeEntries"
+
+function createLocationSnapshot(latitude: number, longitude: number, addressLabel: string) {
+  return {
+    latitude,
+    longitude,
+    addressLabel,
+    accuracyMeters: 18,
+  }
+}
 
 const employerDirectory: Employer[] = [
   {
@@ -210,52 +218,138 @@ const timeEntries: TimeEntry[] = [
     id: "time-1",
     date: "2026-05-16",
     shiftLabel: "Evening",
-    clockIn: "17:03",
-    clockOut: "23:04",
-    breakMinutes: 30,
-    totalHoursLabel: "5h 31m",
-    earningsLabel: "EUR 66.24",
+    venueName: "Bistro Noir",
+    venueAddress: "Rue de la Loi 123, Brussels",
+    clockInAt: "2026-05-16T17:03:00.000Z",
+    clockOutAt: "2026-05-16T23:04:00.000Z",
+    grossSeconds: 21660,
+    workedSeconds: 19860,
+    breakSeconds: 1800,
+    earningsAmount: 66.24,
     status: "approved",
+    events: [
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-16T17:03:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "clockIn",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-16T20:06:00.000Z",
+        location: createLocationSnapshot(50.8456, 4.3674, "Staff terrace, Bistro Noir"),
+        type: "breakStart",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-16T20:36:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "breakEnd",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-16T23:04:00.000Z",
+        location: createLocationSnapshot(50.8458, 4.3677, "Rue de la Loi 123, Brussels"),
+        type: "clockOut",
+      }),
+    ],
+    clockInProofPhoto: {
+      capturedAt: "2026-05-16T17:03:00.000Z",
+      fileName: "clock-in-proof.jpg",
+      mimeType: "image/jpeg",
+      uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
+    },
   },
   {
     id: "time-2",
     date: "2026-05-14",
     shiftLabel: "Lunch",
-    clockIn: "12:03",
-    clockOut: "18:02",
-    breakMinutes: 30,
-    totalHoursLabel: "5h 29m",
-    earningsLabel: "EUR 65.84",
+    venueName: "Bistro Noir",
+    venueAddress: "Rue de la Loi 123, Brussels",
+    clockInAt: "2026-05-14T12:03:00.000Z",
+    clockOutAt: "2026-05-14T18:02:00.000Z",
+    grossSeconds: 21540,
+    workedSeconds: 19740,
+    breakSeconds: 1800,
+    earningsAmount: 65.84,
     status: "approved",
+    events: [
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-14T12:03:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "clockIn",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-14T14:28:00.000Z",
+        location: createLocationSnapshot(50.8455, 4.3672, "Back entrance, Bistro Noir"),
+        type: "breakStart",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-14T14:58:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "breakEnd",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-14T18:02:00.000Z",
+        location: createLocationSnapshot(50.8458, 4.3677, "Rue de la Loi 123, Brussels"),
+        type: "clockOut",
+      }),
+    ],
   },
   {
     id: "time-3",
     date: "2026-05-12",
     shiftLabel: "Evening",
-    clockIn: "17:05",
-    clockOut: "23:15",
-    breakMinutes: 30,
-    totalHoursLabel: "5h 40m",
-    earningsLabel: "EUR 68.00",
+    venueName: "Bistro Noir",
+    venueAddress: "Rue de la Loi 123, Brussels",
+    clockInAt: "2026-05-12T17:05:00.000Z",
+    clockOutAt: "2026-05-12T23:15:00.000Z",
+    grossSeconds: 22200,
+    workedSeconds: 20400,
+    breakSeconds: 1800,
+    earningsAmount: 68,
     status: "approved",
+    events: [
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-12T17:05:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "clockIn",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-12T18:42:00.000Z",
+        location: createLocationSnapshot(50.8454, 4.3671, "Kitchen alley, Bistro Noir"),
+        type: "breakStart",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-12T18:57:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "breakEnd",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-12T21:11:00.000Z",
+        location: createLocationSnapshot(50.8455, 4.3673, "Staff room, Bistro Noir"),
+        type: "breakStart",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-12T21:26:00.000Z",
+        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
+        type: "breakEnd",
+      }),
+      buildTimeEntryEvent({
+        occurredAt: "2026-05-12T23:15:00.000Z",
+        location: createLocationSnapshot(50.8458, 4.3677, "Rue de la Loi 123, Brussels"),
+        type: "clockOut",
+      }),
+    ],
   },
 ]
 
-export function buildNewTimeEntry(payableSeconds: number, breakSeconds: number): TimeEntry {
-  const totalHours = Math.floor(payableSeconds / 3600)
-  const totalMinutes = Math.floor((payableSeconds % 3600) / 60)
-  const earningsAmount = (payableSeconds / 3600) * 12.02
-  return {
-    id: `time-${Date.now()}`,
-    date: format(new Date(), "yyyy-MM-dd"),
-    shiftLabel: "Clocked shift",
-    clockIn: format(new Date(Date.now() - payableSeconds * 1000 - breakSeconds * 1000), "HH:mm"),
-    clockOut: format(new Date(), "HH:mm"),
-    breakMinutes: Math.floor(breakSeconds / 60),
-    totalHoursLabel: `${totalHours}h ${totalMinutes}m`,
-    earningsLabel: `EUR ${earningsAmount.toFixed(2)}`,
-    status: "review",
-  }
+export function buildNewTimeEntry(
+  clockSession: AppStoreState["clockSession"],
+  clockOutAt: string,
+  clockOutLocation = clockSession.events[clockSession.events.length - 1]?.location,
+) {
+  return buildTimeEntryFromClockSession({
+    clockOutAt,
+    clockOutLocation,
+    clockSession,
+  })
 }
 
 export function createInitialState(): AppStoreState {
@@ -320,7 +414,7 @@ export function createInitialState(): AppStoreState {
         body: "Friday May 22 now runs until midnight.",
         relativeTime: "1h ago",
         unread: true,
-        deepLink: "/shift/shift-4",
+        action: { type: "navigate", route: "/(app)/shift/shift-4" },
       },
       {
         id: "notification-2",
@@ -329,7 +423,11 @@ export function createInitialState(): AppStoreState {
         body: "Upload your ID card to keep payroll on track.",
         relativeTime: "4h ago",
         unread: true,
-        deepLink: "/(app)/(tabs)/documents",
+        action: {
+          type: "uploadDocument",
+          documentId: "document-1",
+          title: "ID card verification",
+        },
       },
       {
         id: "notification-3",
@@ -338,7 +436,7 @@ export function createInitialState(): AppStoreState {
         body: "Set your availability for next week before Sunday evening.",
         relativeTime: "2d ago",
         unread: false,
-        deepLink: "/(app)/(tabs)/schedule",
+        action: { type: "editAvailability" },
       },
     ],
     timeEntries,
@@ -350,6 +448,7 @@ export function createInitialState(): AppStoreState {
       role: "Waiter",
       venueName: "Bistro Noir",
       venueAddress: "Rue de la Loi 123, Brussels",
+      events: [],
     },
     earnings: {
       monthLabel: "May 2026",
@@ -386,7 +485,11 @@ export function createInitialState(): AppStoreState {
         subtitle: "Required before the next payroll run",
         urgency: "high",
         actionLabel: "Upload",
-        href: "/(app)/(tabs)/documents",
+        action: {
+          type: "uploadDocument",
+          documentId: "document-1",
+          title: "ID card verification",
+        },
       },
       {
         id: "task-2",
@@ -394,7 +497,7 @@ export function createInitialState(): AppStoreState {
         subtitle: "Kitchen event added 1 extra hour",
         urgency: "medium",
         actionLabel: "Review",
-        href: "/shift/shift-4",
+        action: { type: "navigate", route: "/(app)/shift/shift-4" },
       },
       {
         id: "task-3",
@@ -402,7 +505,7 @@ export function createInitialState(): AppStoreState {
         subtitle: "Help the team finalize rota planning",
         urgency: "low",
         actionLabel: "Set",
-        href: "/(app)/(tabs)/schedule",
+        action: { type: "editAvailability" },
       },
     ],
     signedContractIds: ["contract-1"],

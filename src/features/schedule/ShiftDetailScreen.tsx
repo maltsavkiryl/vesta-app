@@ -86,7 +86,7 @@ function DetailRows({ shift }: { shift: Shift }) {
   ]
 
   return (
-    <View style={[styles.detailRows, { backgroundColor: tokens.background }]}>
+    <View style={[styles.detailRows, { backgroundColor: tokens.surface }]}>
       {rows.map((row) => (
         <View key={row.label} style={[styles.detailRow, { borderBottomColor: tokens.border }]}>
           <Text text={row.label} size="xs" style={{ color: tokens.textSecondary }} />
@@ -101,7 +101,7 @@ function LocationCard({ shift }: { shift: Shift }) {
   const tokens = useDesignTokens()
 
   return (
-    <View style={[styles.locationCard, { backgroundColor: tokens.background }]}>
+    <View style={[styles.locationCard, { backgroundColor: tokens.surface }]}>
       <Ionicons color={tokens.textMuted} name="location-outline" size={17} />
       <View style={styles.flex}>
         <Text
@@ -122,7 +122,7 @@ function Timeline({ shift }: { shift: Shift }) {
   const duration = getDuration(shift)
 
   return (
-    <View style={[styles.timeline, { backgroundColor: tokens.background }]}>
+    <View style={[styles.timeline, { backgroundColor: tokens.surface }]}>
       <Text
         text="TIMELINE"
         size="xxs"
@@ -180,7 +180,7 @@ function ColleaguesCard() {
   const colors = [tokens.accent, tokens.success, tokens.warning]
 
   return (
-    <View style={[styles.colleaguesCard, { backgroundColor: tokens.background }]}>
+    <View style={[styles.colleaguesCard, { backgroundColor: tokens.surface }]}>
       <View style={styles.colleaguesHeader}>
         <Ionicons color={tokens.textMuted} name="people-outline" size={14} />
         <Text
@@ -228,7 +228,7 @@ function ActionCard({
       onPress={onPress}
       style={[
         styles.actionCard,
-        { backgroundColor: tokens.background, borderColor: tokens.border },
+        { backgroundColor: tokens.surface, borderColor: tokens.border },
       ]}
     >
       <Ionicons color={tokens.textPrimary} name={icon} size={19} />
@@ -251,7 +251,7 @@ export function ShiftDetailScreen() {
     return (
       <AppScrollScreen
         contentContainerStyle={styles.screen}
-        style={{ backgroundColor: tokens.surfaceSecondary }}
+        style={{ backgroundColor: tokens.groupedBackground }}
       >
         <Header
           shift={{
@@ -273,7 +273,7 @@ export function ShiftDetailScreen() {
   return (
     <AppScrollScreen
       contentContainerStyle={styles.screen}
-      style={{ backgroundColor: tokens.surfaceSecondary }}
+      style={{ backgroundColor: tokens.groupedBackground }}
     >
       <Header shift={shift} />
       <View style={styles.content}>
@@ -317,7 +317,7 @@ export function ShiftDetailScreen() {
         <Pressable
           style={[
             styles.directionsButton,
-            { backgroundColor: tokens.background, borderColor: tokens.border },
+            { backgroundColor: tokens.surface, borderColor: tokens.border },
           ]}
         >
           <View style={styles.directionsCopy}>

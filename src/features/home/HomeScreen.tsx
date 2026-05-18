@@ -7,16 +7,23 @@ import { Ionicons } from "@expo/vector-icons"
 
 import { Text } from "@/components/Text"
 import { getShiftTimeRange } from "@/core/date"
-import type { HomeTask, NotificationItem, Shift, ShiftStatus } from "@/core/models"
+import type {
+  AppNavigationRoute,
+  HomeTask,
+  NotificationItem,
+  Shift,
+  ShiftStatus,
+} from "@/core/models"
 import {
-  AppButton,
   AppScrollScreen,
+  InCardActionButton,
   StatusBadge,
   SurfaceCard,
   SectionTitle,
 } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
+import { useAppAction } from "@/features/actions/useAppAction"
 import { useAppSession } from "@/providers/app-provider"
 import { formatCurrency } from "@/utils/formatters"
 
@@ -27,7 +34,7 @@ const completedTaskHistory: TaskItem[] = [
     subtitle: "Addendum requires your signature",
     urgency: "medium",
     actionLabel: "Sign",
-    href: "/(app)/(tabs)/documents",
+    action: { type: "navigate", route: "/(app)/(tabs)/documents" },
     completed: true,
     completedDate: "Apr 20",
   },
@@ -37,7 +44,7 @@ const completedTaskHistory: TaskItem[] = [
     subtitle: "Required for payroll",
     urgency: "high",
     actionLabel: "Update",
-    href: "/(app)/(tabs)/profile",
+    action: { type: "navigate", route: "/(app)/(tabs)/profile" },
     completed: true,
     completedDate: "Apr 15",
   },
@@ -47,7 +54,7 @@ const completedTaskHistory: TaskItem[] = [
     subtitle: "Completed on time",
     urgency: "low",
     actionLabel: "Done",
-    href: "/(app)/(tabs)/schedule",
+    action: { type: "navigate", route: "/(app)/(tabs)/schedule" },
     completed: true,
     completedDate: "Apr 1",
   },
@@ -67,13 +74,6 @@ const taskIconByUrgency = {
   low: "calendar-outline",
   medium: "alert-circle-outline",
 } as const
-
-type HomeRoute =
-  | "/(app)/(tabs)/documents"
-  | "/(app)/(tabs)/profile"
-  | "/(app)/(tabs)/schedule"
-  | "/(app)/(tabs)/time"
-  | "/notifications"
 
 type IconName = keyof typeof Ionicons.glyphMap
 type Tone = "accent" | "success" | "warning" | "danger"
@@ -229,7 +229,7 @@ function NextShiftCard({
       </View>
 
       <View style={styles.heroActions}>
-        <AppButton label="Clock in" onPress={onClockIn} />
+        <InCardActionButton label="Clock in" onPress={onClockIn} />
         <Pressable
           onPress={onDetails}
           style={[styles.detailsButton, { backgroundColor: panelColor }]}
@@ -601,8 +601,8 @@ function UpdatesSection({
 
 export function HomeTasksScreen() {
   const tokens = useDesignTokens()
-  const router = useRouter()
   const { state } = useAppSession()
+  const { runAction } = useAppAction()
   const pendingTasks = state.tasks.filter((task) => !task.completed)
 
   return (
@@ -616,7 +616,7 @@ export function HomeTasksScreen() {
         title="Pending"
         tasks={pendingTasks}
         backgroundColor={tokens.surface}
-        onComplete={(task) => router.replace(task.href as never)}
+        onComplete={(task) => void runAction(task.action)}
       />
       <TaskGroup
         title="Completed"
@@ -668,6 +668,7 @@ function TaskGroup({
 export function HomeScreen() {
   const router = useRouter()
   const { selectedEmployer, state, unreadNotifications } = useAppSession()
+  const { runAction } = useAppAction()
   const [greeting, setGreeting] = useState(getGreeting())
   const [hiddenTaskIds, setHiddenTaskIds] = useState<string[]>([])
 
@@ -679,21 +680,18 @@ export function HomeScreen() {
   const nextShift = state.shifts[0]
   const upcomingShifts = state.shifts.slice(1, 7)
   const pendingTasks = useMemo(
-    () => state.tasks.filter((task) => !hiddenTaskIds.includes(task.id)),
+    () => state.tasks.filter((task) => !task.completed && !hiddenTaskIds.includes(task.id)),
     [hiddenTaskIds, state.tasks],
   )
 
-  const navigate = useCallback((route: HomeRoute) => router.push(route as never), [router])
+  const navigate = useCallback((route: AppNavigationRoute) => router.push(route as never), [router])
   const openShift = useCallback(
     (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never),
     [router],
   )
   const completeTask = useCallback(
-    (task: TaskItem) => {
-      setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
-      router.push(task.href as never)
-    },
-    [router],
+    (task: TaskItem) => void runAction(task.action),
+    [runAction],
   )
   const hideTask = useCallback((task: TaskItem) => {
     setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
@@ -726,11 +724,11 @@ export function HomeScreen() {
 
         <UpcomingShifts shifts={upcomingShifts} onShiftPress={openShift} onSeeAll={openSchedule} />
 
-          <EarningsCard
-            earnedAmount={state.earnings.earnedAmount}
-            monthLabel={state.earnings.monthLabel}
-            onPayslipPress={openDocuments}
-          />
+        <EarningsCard
+          earnedAmount={state.earnings.earnedAmount}
+          monthLabel={state.earnings.monthLabel}
+          onPayslipPress={openDocuments}
+        />
 
         <TasksSection
           tasks={pendingTasks}
@@ -741,9 +739,7 @@ export function HomeScreen() {
 
         <UpdatesSection
           notifications={state.notifications}
-          onNotificationPress={(notification) => {
-            if (notification.deepLink) router.push(notification.deepLink as never)
-          }}
+          onNotificationPress={(notification) => void runAction(notification.action)}
           onShowAll={openNotifications}
         />
       </View>

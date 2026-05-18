@@ -56,7 +56,7 @@ export function RequestScreen() {
     return (
       <AppScrollScreen
         contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
-        style={{ backgroundColor: tokens.surfaceSecondary }}
+        style={{ backgroundColor: tokens.groupedBackground }}
       >
         <View style={styles.doneContent}>
           <View style={[styles.successIcon, { backgroundColor: `${tokens.success}1A` }]}>
@@ -74,7 +74,7 @@ export function RequestScreen() {
             size="xs"
             style={{ color: tokens.textSecondary, textAlign: "center" }}
           />
-          <View style={[styles.doneSummary, { backgroundColor: tokens.background }]}>
+          <View style={[styles.doneSummary, { backgroundColor: tokens.surface }]}>
             <Text
               text={`${requestType} · ${requestDates}${reason ? ` · ${reason}` : ""}`}
               size="xs"
@@ -90,31 +90,16 @@ export function RequestScreen() {
   return (
     <AppScrollScreen
       contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
-      style={{ backgroundColor: tokens.surfaceSecondary }}
+      style={{ backgroundColor: tokens.groupedBackground }}
     >
-      <View style={styles.header}>
-        <View style={styles.headerTitleRow}>
-          {step > 1 ? (
-            <Pressable
-              accessibilityLabel="Previous request step"
-              onPress={() => setStep((current) => Math.max(1, current - 1) as Step)}
-              style={[styles.circleButton, { backgroundColor: tokens.background }]}
-            >
-              <Ionicons color={tokens.textPrimary} name="chevron-back-outline" size={18} />
-            </Pressable>
-          ) : null}
-          <View>
-            <Text
-              text="New request"
-              weight="bold"
-              style={{ color: tokens.textPrimary, fontSize: 20, lineHeight: 25 }}
-            />
-            <Text text={`Step ${step} of 3`} size="xxs" style={{ color: tokens.textMuted }} />
-          </View>
-        </View>
-      </View>
+      <Text
+        text={`Step ${step} of 3`}
+        size="xxs"
+        weight="semiBold"
+        style={{ color: tokens.textMuted, paddingHorizontal: 20, paddingTop: 18 }}
+      />
 
-      <View style={[styles.progressTrack, { backgroundColor: tokens.background }]}>
+      <View style={[styles.progressTrack, { backgroundColor: tokens.surface }]}>
         <View
           style={[
             styles.progressFill,
@@ -445,7 +430,7 @@ function ReasonStep({
         />
       </View>
 
-      <View style={[styles.summaryCard, { backgroundColor: tokens.background }]}>
+      <View style={[styles.summaryCard, { backgroundColor: tokens.surface }]}>
         <Text text="SUMMARY" size="xxs" weight="semiBold" style={{ color: tokens.textMuted }} />
         <SummaryRow label="Type" value={type} />
         <SummaryRow label={type === "Shift swap" ? "My shift" : "Dates"} value={dateRange} />
@@ -547,13 +532,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 8,
   },
-  circleButton: {
-    alignItems: "center",
-    borderRadius: 16,
-    height: 32,
-    justifyContent: "center",
-    width: 32,
-  },
   colleagueRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -580,18 +558,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  header: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 18,
-  },
-  headerTitleRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
   },
   initials: {
     alignItems: "center",

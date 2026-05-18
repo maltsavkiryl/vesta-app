@@ -1,0 +1,229 @@
+import { Platform, Pressable, StyleSheet, View } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import type { NativeStackHeaderItem, NativeStackNavigationOptions } from "@react-navigation/native-stack"
+
+import { Text } from "@/components/Text"
+import type { Theme } from "@/theme/types"
+
+const SHEET_DETENTS = {
+  large: 0.98,
+  medium: 0.6,
+} as const
+
+type SheetPreset = "medium" | "resizable"
+type SheetDetent = "medium" | "large"
+type HeaderActionKind = "close" | "confirm"
+
+interface BaseNavigationOptions {
+  backgroundColor?: string
+  headerLeft?: NativeStackNavigationOptions["headerLeft"]
+  headerRight?: NativeStackNavigationOptions["headerRight"]
+  unstable_headerLeftItems?: NativeStackNavigationOptions["unstable_headerLeftItems"]
+  unstable_headerRightItems?: NativeStackNavigationOptions["unstable_headerRightItems"]
+}
+
+interface HeaderActionButtonProps {
+  kind: HeaderActionKind
+  onPress: () => void
+  theme: Theme
+  disabled?: boolean
+}
+
+interface HeaderActionOptions {
+  kind: HeaderActionKind
+  onPress: () => void
+  disabled?: boolean
+}
+
+export function HeaderActionButton({
+  kind,
+  onPress,
+  theme,
+  disabled,
+}: HeaderActionButtonProps) {
+  const isConfirm = kind === "confirm"
+  const backgroundColor = isConfirm
+    ? disabled
+      ? theme.isDark
+        ? "rgba(10, 132, 255, 0.32)"
+        : "rgba(0, 122, 255, 0.32)"
+      : theme.isDark
+        ? "#0A84FF"
+        : "#007AFF"
+    : theme.isDark
+      ? "rgba(58, 58, 60, 0.9)"
+      : "rgba(118, 118, 128, 0.12)"
+  const iconColor = isConfirm
+    ? "white"
+    : disabled
+      ? theme.isDark
+        ? "rgba(255, 255, 255, 0.45)"
+        : "rgba(28, 28, 30, 0.35)"
+      : theme.colors.text
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: Boolean(disabled) }}
+      disabled={disabled}
+      hitSlop={12}
+      onPress={onPress}
+      style={[
+        styles.headerActionButton,
+        {
+          backgroundColor,
+          opacity: disabled ? 0.9 : 1,
+        },
+      ]}
+    >
+      <Ionicons color={iconColor} name={isConfirm ? "checkmark" : "close"} size={20} />
+    </Pressable>
+  )
+}
+
+function createNativeHeaderItem(
+  theme: Theme,
+  { kind, onPress, disabled }: HeaderActionOptions,
+): NativeStackHeaderItem {
+  const isConfirm = kind === "confirm"
+
+  return {
+    accessibilityLabel: isConfirm ? "Confirm" : "Close",
+    disabled,
+    icon: {
+      type: "sfSymbol",
+      name: isConfirm ? "checkmark" : "xmark",
+    },
+    label: isConfirm ? "Done" : "Close",
+    onPress,
+    tintColor: isConfirm ? (theme.isDark ? "#0A84FF" : "#007AFF") : theme.colors.text,
+    type: "button",
+    variant: isConfirm ? "prominent" : "plain",
+  }
+}
+
+export function createHeaderActionOptions(
+  theme: Theme,
+  actions: {
+    left?: HeaderActionOptions
+    right?: HeaderActionOptions
+  },
+): Pick<
+  BaseNavigationOptions,
+  "headerLeft" | "headerRight" | "unstable_headerLeftItems" | "unstable_headerRightItems"
+> {
+  const leftAction = actions.left
+  const rightAction = actions.right
+
+  if (Platform.OS === "ios") {
+    return {
+      unstable_headerLeftItems: leftAction
+        ? () => [createNativeHeaderItem(theme, leftAction)]
+        : undefined,
+      unstable_headerRightItems: rightAction
+        ? () => [createNativeHeaderItem(theme, rightAction)]
+        : undefined,
+    }
+  }
+
+  return {
+    headerLeft: leftAction
+      ? () => (
+          <HeaderActionButton
+            disabled={leftAction.disabled}
+            kind={leftAction.kind}
+            onPress={leftAction.onPress}
+            theme={theme}
+          />
+        )
+      : undefined,
+    headerRight: rightAction
+      ? () => (
+          <HeaderActionButton
+            disabled={rightAction.disabled}
+            kind={rightAction.kind}
+            onPress={rightAction.onPress}
+            theme={theme}
+          />
+        )
+      : undefined,
+  }
+}
+
+function createHeaderBaseOptions(
+  theme: Theme,
+  title?: string,
+  options: BaseNavigationOptions = {},
+) {
+  const backgroundColor = options.backgroundColor ?? (theme.isDark ? "#000000" : "#FFFFFF")
+
+  return {
+    headerShadowVisible: false,
+    headerStyle: { backgroundColor },
+    headerTintColor: theme.colors.text,
+    headerTitle: title
+      ? () => (
+          <View style={styles.titleWrapper}>
+            <Text text={title} size="sm" weight="semiBold" style={{ color: theme.colors.text }} />
+          </View>
+        )
+      : undefined,
+    headerLeft: options.headerLeft,
+    headerRight: options.headerRight,
+  } satisfies Partial<NativeStackNavigationOptions>
+}
+
+export function createSheetOptions(
+  theme: Theme,
+  title?: string,
+  options: BaseNavigationOptions & { initialDetent?: SheetDetent; preset?: SheetPreset } = {},
+) {
+  const preset = options.preset ?? "resizable"
+  const detents =
+    preset === "medium" ? [SHEET_DETENTS.medium] : [SHEET_DETENTS.medium, SHEET_DETENTS.large]
+  const initialDetentIndex =
+    preset === "medium" || options.initialDetent !== "large" ? 0 : detents.length - 1
+
+  return {
+    presentation: "formSheet" as const,
+    sheetAllowedDetents: detents,
+    sheetCornerRadius: 24,
+    sheetGrabberVisible: true,
+    sheetInitialDetentIndex: initialDetentIndex,
+    headerShown: true,
+    headerBackVisible: false,
+    ...createHeaderBaseOptions(theme, title, options),
+  } satisfies NativeStackNavigationOptions
+}
+
+export function createPushDetailOptions(
+  theme: Theme,
+  title?: string,
+  options: BaseNavigationOptions = {},
+) {
+  return {
+    presentation: "card" as const,
+    headerShown: true,
+    headerBackButtonDisplayMode: "minimal" as const,
+    contentStyle: {
+      backgroundColor: options.backgroundColor ?? theme.colors.background,
+    },
+    ...createHeaderBaseOptions(theme, title, options),
+  } satisfies NativeStackNavigationOptions
+}
+
+const styles = StyleSheet.create({
+  headerActionButton: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  titleWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 120,
+  },
+})

@@ -1,27 +1,23 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { Alert, Pressable, StyleSheet, TextInput, View } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import { useMemo, useState } from "react"
+import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/Text"
 import type { DocumentItem, DocumentStatus } from "@/core/models"
 import { AppButton, AppScrollScreen, AppSegmentedControl } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
+import { createHeaderActionOptions } from "@/navigation/native-sheet"
 import { useAppSession } from "@/providers/app-provider"
+import { useAppTheme } from "@/theme/context"
 
-import { showNativeUploadOptions } from "./showUploadOptions"
+import { showDocumentUploadOptions } from "./documentUploadFlow"
 
 type Category = "required" | "payslips" | "contracts"
-type UploadTarget = { id?: string; title: string }
-type SelectedUploadAsset = {
-  fileName: string
-  fileSize?: number
-  mimeType?: string
-  uri: string
-}
 
 interface Payslip {
   id: string
@@ -46,65 +42,6 @@ const categories: { id: Category; label: string }[] = [
   { id: "payslips", label: "Payslips" },
   { id: "contracts", label: "Contracts" },
 ]
-const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
-const ACCEPTED_UPLOAD_TYPES = ["application/pdf", "image/jpeg", "image/png"]
-
-function getUploadValidationError(asset: SelectedUploadAsset) {
-  if (asset.fileSize && asset.fileSize > MAX_UPLOAD_SIZE_BYTES) {
-    return "Choose a file smaller than 10 MB."
-  }
-
-  if (asset.mimeType && !ACCEPTED_UPLOAD_TYPES.includes(asset.mimeType)) {
-    return "Upload a PDF, JPG, or PNG file."
-  }
-
-  return null
-}
-
-async function takeDocumentPhoto() {
-  const ImagePicker = await import("expo-image-picker")
-  const permission = await ImagePicker.requestCameraPermissionsAsync()
-  if (!permission.granted) {
-    Alert.alert("Camera access needed", "Allow camera access to take a document photo.")
-    return null
-  }
-
-  const result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ["images"],
-    quality: 0.85,
-  })
-
-  if (result.canceled) return null
-  const asset = result.assets[0]
-  if (!asset) return null
-
-  return {
-    fileName: asset.fileName ?? "document-photo.jpg",
-    fileSize: asset.fileSize,
-    mimeType: asset.mimeType ?? "image/jpeg",
-    uri: asset.uri,
-  } satisfies SelectedUploadAsset
-}
-
-async function browseDocumentFiles() {
-  const DocumentPicker = await import("expo-document-picker")
-  const result = await DocumentPicker.getDocumentAsync({
-    copyToCacheDirectory: true,
-    multiple: false,
-    type: ACCEPTED_UPLOAD_TYPES,
-  })
-
-  if (result.canceled) return null
-  const asset = result.assets[0]
-  if (!asset) return null
-
-  return {
-    fileName: asset.name,
-    fileSize: asset.size,
-    mimeType: asset.mimeType,
-    uri: asset.uri,
-  } satisfies SelectedUploadAsset
-}
 
 const payslips: Payslip[] = [
   {
@@ -493,274 +430,96 @@ function ContractCard({
   )
 }
 
-export function DocumentUploadScreen() {
-  const router = useRouter()
-  const { id, title = "Uploaded document" } = useLocalSearchParams<{
-    id?: string
-    title?: string
-  }>()
-  const { uploadDocument } = useAppSession()
-  const tokens = useDesignTokens()
-  const documentName = title
-  const [error, setError] = useState<string | null>(null)
-  const [selectedAsset, setSelectedAsset] = useState<SelectedUploadAsset | null>(null)
-  const [uploading, setUploading] = useState(false)
-
-  useEffect(() => {
-    setError(null)
-    setSelectedAsset(null)
-    setUploading(false)
-  }, [documentName])
-
-  const validateAndSelectAsset = (asset: SelectedUploadAsset) => {
-    const validationError = getUploadValidationError(asset)
-    if (validationError) {
-      setError(validationError)
-      return
-    }
-
-    setError(null)
-    setSelectedAsset(asset)
-  }
-
-  const takePhoto = async () => {
-    try {
-      const asset = await takeDocumentPhoto()
-      if (!asset) return
-      validateAndSelectAsset(asset)
-    } catch {
-      Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
-    }
-  }
-
-  const browseFiles = async () => {
-    try {
-      const asset = await browseDocumentFiles()
-      if (!asset) return
-      validateAndSelectAsset(asset)
-    } catch {
-      Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
-    }
-  }
-
-  const submitUpload = () => {
-    if (!selectedAsset) {
-      setError("Choose a file before uploading.")
-      return
-    }
-
-    setUploading(true)
-    setTimeout(() => {
-      uploadDocument({
-        documentId: id,
-        title: documentName,
-        ...selectedAsset,
-      })
-      router.back()
-    }, 500)
-  }
-
-  return (
-    <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={styles.nativeSheetContent}
-      style={{ backgroundColor: tokens.background }}
-      topInset="none"
-    >
-      {uploading ? (
-        <View style={styles.uploadingState}>
-          <View style={[styles.uploadSuccessIcon, { backgroundColor: `${tokens.success}14` }]}>
-            <Ionicons color={tokens.success} name="checkmark-outline" size={32} />
-          </View>
-          <View style={[styles.uploadProgressTrack, { backgroundColor: tokens.background }]}>
-            <View
-              style={[
-                styles.uploadProgressFill,
-                { backgroundColor: tokens.success, width: "100%" },
-              ]}
-            />
-          </View>
-          <Text
-            text="Upload complete!"
-            size="xs"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary }}
-          />
-        </View>
-      ) : (
-        <>
-          <View style={styles.uploadIntro}>
-            <View style={[styles.uploadIntroIcon, { backgroundColor: `${tokens.accent}14` }]}>
-              <Ionicons color={tokens.accent} name="document-text-outline" size={22} />
-            </View>
-            <View style={styles.flex}>
-              <Text
-                text={documentName}
-                size="xs"
-                weight="semiBold"
-                style={{ color: tokens.textPrimary }}
-              />
-              <Text
-                text="PDF, JPG, or PNG up to 10 MB"
-                size="xxs"
-                style={{ color: tokens.textSecondary }}
-              />
-            </View>
-          </View>
-
-          <View style={[styles.uploadSourceCard, { backgroundColor: tokens.background }]}>
-            <Pressable onPress={takePhoto} style={styles.uploadSourceRow}>
-              <View style={[styles.uploadSourceIcon, { backgroundColor: `${tokens.accent}14` }]}>
-                <Ionicons color={tokens.accent} name="camera-outline" size={18} />
-              </View>
-              <View style={styles.flex}>
-                <Text
-                  text="Take photo"
-                  size="xs"
-                  weight="medium"
-                  style={{ color: tokens.textPrimary }}
-                />
-                <Text text="Use your camera" size="xxs" style={{ color: tokens.textSecondary }} />
-              </View>
-              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-            </Pressable>
-            <View style={[styles.uploadSourceDivider, { backgroundColor: tokens.border }]} />
-            <Pressable onPress={browseFiles} style={styles.uploadSourceRow}>
-              <View style={[styles.uploadSourceIcon, { backgroundColor: `${tokens.accent}14` }]}>
-                <Ionicons color={tokens.accent} name="folder-open-outline" size={18} />
-              </View>
-              <View style={styles.flex}>
-                <Text
-                  text="Browse files"
-                  size="xs"
-                  weight="medium"
-                  style={{ color: tokens.textPrimary }}
-                />
-                <Text text="Choose from Files" size="xxs" style={{ color: tokens.textSecondary }} />
-              </View>
-              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-            </Pressable>
-          </View>
-
-          {selectedAsset ? (
-            <View style={[styles.uploadSelectedCard, { backgroundColor: `${tokens.success}10` }]}>
-              <Ionicons color={tokens.success} name="checkmark-circle-outline" size={18} />
-              <View style={styles.flex}>
-                <Text
-                  text={selectedAsset.fileName}
-                  numberOfLines={1}
-                  size="xs"
-                  weight="medium"
-                  style={{ color: tokens.textPrimary }}
-                />
-                <Text
-                  text={
-                    selectedAsset.fileSize
-                      ? `${(selectedAsset.fileSize / 1024 / 1024).toFixed(1)} MB selected`
-                      : "Ready to upload"
-                  }
-                  size="xxs"
-                  style={{ color: tokens.textSecondary }}
-                />
-              </View>
-            </View>
-          ) : null}
-
-          {error ? (
-            <View
-              style={[
-                styles.uploadError,
-                { backgroundColor: `${tokens.danger}10`, borderColor: `${tokens.danger}22` },
-              ]}
-            >
-              <Ionicons color={tokens.danger} name="alert-circle-outline" size={15} />
-              <Text text={error} size="xxs" style={[styles.flex, { color: tokens.danger }]} />
-            </View>
-          ) : null}
-
-          <AppButton label="Upload" disabled={!selectedAsset} onPress={submitUpload} />
-        </>
-      )}
-    </AppScrollScreen>
-  )
-}
-
 export function PayslipDetailScreen() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const tokens = useDesignTokens()
+  const insets = useSafeAreaInsets()
   const payslip = payslips.find((item) => item.id === id)
 
   return (
-    <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={styles.nativeSheetContent}
-      style={{ backgroundColor: tokens.background }}
-      topInset="none"
-    >
-      {payslip ? (
-        <>
-          <View>
+    <View style={[styles.detailScreen, { backgroundColor: tokens.background }]}>
+      <AppScrollScreen
+        contentContainerStyle={styles.nativeSheetContent}
+        style={[styles.flex, { backgroundColor: tokens.background }]}
+      >
+        {payslip ? (
+          <>
+            <View>
+              <Text
+                text={payslip.month}
+                weight="bold"
+                style={[styles.sheetTitle, { color: tokens.textPrimary }]}
+              />
+              <Text text={payslip.period} size="xxs" style={{ color: tokens.textSecondary }} />
+            </View>
+            <View
+              style={[
+                styles.netPayHero,
+                { backgroundColor: `${tokens.success}10`, borderColor: `${tokens.success}22` },
+              ]}
+            >
+              <Text
+                text="NET PAY"
+                size="xxs"
+                weight="semiBold"
+                style={[styles.caps, { color: tokens.success }]}
+              />
+              <Text
+                text={payslip.net}
+                weight="bold"
+                style={[styles.netPayValue, { color: tokens.textPrimary }]}
+              />
+              <Text
+                text={`Paid ${payslip.date}`}
+                size="xxs"
+                style={{ color: tokens.textSecondary }}
+              />
+            </View>
             <Text
-              text={payslip.month}
-              weight="bold"
-              style={[styles.sheetTitle, { color: tokens.textPrimary }]}
-            />
-            <Text text={payslip.period} size="xxs" style={{ color: tokens.textSecondary }} />
-          </View>
-          <View
-            style={[
-              styles.netPayHero,
-              { backgroundColor: `${tokens.success}10`, borderColor: `${tokens.success}22` },
-            ]}
-          >
-            <Text
-              text="NET PAY"
+              text="BREAKDOWN"
               size="xxs"
               weight="semiBold"
-              style={[styles.caps, { color: tokens.success }]}
+              style={[styles.caps, { color: tokens.textMuted }]}
             />
-            <Text
-              text={payslip.net}
-              weight="bold"
-              style={[styles.netPayValue, { color: tokens.textPrimary }]}
-            />
-            <Text
-              text={`Paid ${payslip.date}`}
-              size="xxs"
-              style={{ color: tokens.textSecondary }}
-            />
-          </View>
-          <Text
-            text="BREAKDOWN"
-            size="xxs"
-            weight="semiBold"
-            style={[styles.caps, { color: tokens.textMuted }]}
-          />
-          <View style={[styles.breakdown, { backgroundColor: tokens.background }]}>
-            {payslip.rows.map((row) => (
-              <View
-                key={row.label}
-                style={[styles.breakdownRow, { borderBottomColor: tokens.border }]}
-              >
-                <Text
-                  text={row.label}
-                  size="xxs"
-                  style={[styles.flex, { color: tokens.textSecondary }]}
-                />
-                <Text
-                  text={row.amount}
-                  size="xxs"
-                  weight="semiBold"
-                  style={{ color: row.type === "minus" ? tokens.danger : tokens.success }}
-                />
-              </View>
-            ))}
-          </View>
+            <View style={[styles.breakdown, { backgroundColor: tokens.background }]}>
+              {payslip.rows.map((row) => (
+                <View
+                  key={row.label}
+                  style={[styles.breakdownRow, { borderBottomColor: tokens.border }]}
+                >
+                  <Text
+                    text={row.label}
+                    size="xxs"
+                    style={[styles.flex, { color: tokens.textSecondary }]}
+                  />
+                  <Text
+                    text={row.amount}
+                    size="xxs"
+                    weight="semiBold"
+                    style={{ color: row.type === "minus" ? tokens.danger : tokens.success }}
+                  />
+                </View>
+              ))}
+            </View>
+          </>
+        ) : null}
+      </AppScrollScreen>
+      {payslip ? (
+        <View
+          style={[
+            styles.payslipFooter,
+            {
+              backgroundColor: tokens.background,
+              borderTopColor: tokens.border,
+              paddingBottom: Math.max(insets.bottom, 16),
+            },
+          ]}
+        >
           <AppButton label="Download PDF" onPress={router.back} />
-        </>
+        </View>
       ) : null}
-    </AppScrollScreen>
+    </View>
   )
 }
 
@@ -768,6 +527,7 @@ export function ContractDetailScreen() {
   const router = useRouter()
   const { id, mode = "view" } = useLocalSearchParams<{ id: string; mode?: "view" | "sign" }>()
   const tokens = useDesignTokens()
+  const { theme } = useAppTheme()
   const { signContract, state } = useAppSession()
   const contract = initialContracts
     .map((item) =>
@@ -775,14 +535,34 @@ export function ContractDetailScreen() {
     )
     .find((item) => item.id === id)
   const [signature, setSignature] = useState("")
+  const canSign = Boolean(signature.trim())
+  const signCurrentContract = () => {
+    if (!contract || !canSign) return
+    signContract(contract.id)
+    router.back()
+  }
+  const headerActions = createHeaderActionOptions(theme, {
+    right:
+      mode === "sign"
+        ? {
+            disabled: !canSign,
+            kind: "confirm",
+            onPress: signCurrentContract,
+          }
+        : undefined,
+  })
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={styles.nativeSheetContent}
       style={{ backgroundColor: tokens.background }}
-      topInset="none"
     >
+      <Stack.Screen
+        options={{
+          ...headerActions,
+          title: mode === "sign" ? "Sign contract" : "Contract",
+        }}
+      />
       {contract ? (
         <>
           <View>
@@ -843,14 +623,6 @@ export function ContractDetailScreen() {
                   style={{ color: tokens.warning }}
                 />
               </View>
-              <AppButton
-                label="Sign document"
-                disabled={!signature.trim()}
-                onPress={() => {
-                  signContract(contract.id)
-                  router.back()
-                }}
-              />
             </>
           ) : (
             <View style={styles.contractActions}>
@@ -923,38 +695,8 @@ export function DocumentsScreen() {
   const filteredContracts = contracts.filter((contract) =>
     query ? contract.name.toLowerCase().includes(query.toLowerCase()) : true,
   )
-  const uploadSelectedAsset = useCallback(
-    async (target: UploadTarget, source: "camera" | "files") => {
-      try {
-        const asset = source === "camera" ? await takeDocumentPhoto() : await browseDocumentFiles()
-        if (!asset) return
-
-        const validationError = getUploadValidationError(asset)
-        if (validationError) {
-          Alert.alert("Cannot upload file", validationError)
-          return
-        }
-
-        uploadDocument({
-          documentId: target.id,
-          title: target.title,
-          ...asset,
-        })
-      } catch {
-        Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
-      }
-    },
-    [uploadDocument],
-  )
-  const showUploadOptions = useCallback(
-    (target: UploadTarget = { title: "Uploaded document" }) => {
-      showNativeUploadOptions({
-        onSelect: (source) => void uploadSelectedAsset(target, source),
-        title: target.title,
-      })
-    },
-    [uploadSelectedAsset],
-  )
+  const showUploadOptions = (target: { id?: string; title: string } = { title: "Uploaded document" }) =>
+    showDocumentUploadOptions({ target, uploadDocument })
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
@@ -1128,6 +870,9 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  detailScreen: {
+    flex: 1,
+  },
   header: {
     alignItems: "center",
     flexDirection: "row",
@@ -1177,6 +922,11 @@ const styles = StyleSheet.create({
   },
   payslipTail: {
     alignItems: "flex-end",
+  },
+  payslipFooter: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 22,
+    paddingTop: 14,
   },
   rowTail: {
     alignItems: "center",
@@ -1243,86 +993,5 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 14,
     paddingVertical: 7,
-  },
-  uploadError: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  uploadIntro: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 2,
-  },
-  uploadIntroIcon: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    height: 42,
-    justifyContent: "center",
-    width: 42,
-  },
-  uploadProgressFill: {
-    borderRadius: 99,
-    height: "100%",
-  },
-  uploadProgressTrack: {
-    borderRadius: 99,
-    height: 6,
-    overflow: "hidden",
-    width: "100%",
-  },
-  uploadSelectedCard: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 13,
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  uploadSourceCard: {
-    borderCurve: "continuous",
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  uploadSourceDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginLeft: 58,
-  },
-  uploadSourceIcon: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 10,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
-  },
-  uploadSourceRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-    minHeight: 64,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  uploadSuccessIcon: {
-    alignItems: "center",
-    borderRadius: 34,
-    height: 68,
-    justifyContent: "center",
-    width: 68,
-  },
-  uploadingState: {
-    alignItems: "center",
-    gap: 18,
-    paddingBottom: 8,
-    paddingTop: 16,
   },
 })

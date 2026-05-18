@@ -11,6 +11,7 @@ import {
   View,
   ViewStyle,
 } from "react-native"
+import { isLiquidGlassAvailable } from "expo-glass-effect"
 import SegmentedControl from "@react-native-segmented-control/segmented-control"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -18,6 +19,8 @@ import { Text } from "@/components/Text"
 
 import { useDesignTokens } from "./tokens"
 import type { DesignTokens } from "./tokens"
+
+type AppButtonVariant = "primary" | "secondary" | "danger"
 
 const headerEyebrowStyle = {
   letterSpacing: 0,
@@ -238,12 +241,61 @@ export function AppButton({
 }: {
   label: string
   onPress: () => void
-  variant?: "primary" | "secondary" | "danger"
+  variant?: AppButtonVariant
   disabled?: boolean
 }) {
   const tokens = useDesignTokens()
   const isPrimary = variant === "primary"
   const isDanger = variant === "danger"
+
+  if (Platform.OS === "ios") {
+    const { Button: NativeButton, Host } =
+      require("@expo/ui/swift-ui") as typeof import("@expo/ui/swift-ui")
+    const {
+      buttonStyle,
+      controlSize,
+      disabled: nativeDisabled,
+      frame,
+      tint,
+    } = require("@expo/ui/swift-ui/modifiers") as typeof import("@expo/ui/swift-ui/modifiers")
+
+    const supportsLiquidGlass = isLiquidGlassAvailable()
+    const nativeStyle =
+      variant === "secondary"
+        ? supportsLiquidGlass
+          ? "glass"
+          : "bordered"
+        : supportsLiquidGlass
+          ? "glassProminent"
+          : "borderedProminent"
+    const modifiers = [
+      buttonStyle(nativeStyle),
+      controlSize("large"),
+      frame({ maxWidth: Infinity }),
+      nativeDisabled(Boolean(disabled)),
+    ]
+
+    if (variant === "primary") {
+      modifiers.push(tint(tokens.accent))
+    }
+
+    if (variant === "danger") {
+      modifiers.push(tint(tokens.danger))
+    }
+
+    return (
+      <View style={styles.nativeButtonWrapper}>
+        <Host style={styles.nativeButtonHost}>
+          <NativeButton
+            label={label}
+            modifiers={modifiers}
+            onPress={onPress}
+            role={isDanger ? "destructive" : "default"}
+          />
+        </Host>
+      </View>
+    )
+  }
 
   return (
     <Pressable
@@ -269,6 +321,38 @@ export function AppButton({
         weight="semiBold"
         style={{ color: isPrimary || isDanger ? tokens.accentForeground : tokens.textPrimary }}
       />
+    </Pressable>
+  )
+}
+
+export function InCardActionButton({
+  label,
+  onPress,
+  icon,
+  disabled,
+}: {
+  label: string
+  onPress: () => void
+  icon?: ReactNode
+  disabled?: boolean
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.inCardActionButton,
+        {
+          backgroundColor: tokens.accent,
+          opacity: disabled ? 0.55 : pressed ? 0.88 : 1,
+        },
+      ]}
+    >
+      {icon}
+      <Text text={label} size="xs" weight="semiBold" style={{ color: tokens.accentForeground }} />
     </Pressable>
   )
 }
@@ -607,6 +691,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 34,
   },
+  inCardActionButton: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 16,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 52,
+    paddingHorizontal: 18,
+  },
   inlineAction: {
     alignItems: "center",
     flexDirection: "row",
@@ -645,6 +739,12 @@ const styles = StyleSheet.create({
   metricGrid: {
     flexDirection: "row",
     gap: 8,
+  },
+  nativeButtonHost: {
+    width: "100%",
+  },
+  nativeButtonWrapper: {
+    alignSelf: "stretch",
   },
   pill: {
     alignSelf: "flex-start",

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
-import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { Text } from "@/components/Text"
@@ -10,6 +9,7 @@ import type { NotificationItem, NotificationKind } from "@/core/models"
 import { AppScrollScreen } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
+import { useAppAction } from "@/features/actions/useAppAction"
 import { useAppSession } from "@/providers/app-provider"
 
 const iconByKind: Record<NotificationKind, keyof typeof Ionicons.glyphMap> = {
@@ -117,7 +117,7 @@ function NotificationRow({
             size="xxs"
             style={[styles.bodyText, { color: tokens.textSecondary }]}
           />
-          {item.deepLink ? (
+          {item.action ? (
             <View style={[styles.cta, { backgroundColor: `${tokens.accent}10` }]}>
               <Text text="Open" size="xxs" weight="semiBold" style={{ color: tokens.accent }} />
               <Ionicons color={tokens.accent} name="chevron-forward-outline" size={12} />
@@ -169,8 +169,8 @@ function NotificationGroup({
 }
 
 export function NotificationsScreen() {
-  const router = useRouter()
   const { state, markAllNotificationsRead, markNotificationRead } = useAppSession()
+  const { runAction } = useAppAction()
   const [hiddenIds, setHiddenIds] = useState<string[]>([])
   const tokens = useDesignTokens()
 
@@ -188,12 +188,14 @@ export function NotificationsScreen() {
 
   const handlePress = (notification: NotificationItem) => {
     markNotificationRead(notification.id)
-    if (notification.deepLink) router.push(notification.deepLink as never)
+    void runAction(notification.action)
   }
 
   return (
     <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={styles.screen}
+      topInset="none"
       variant="grouped"
       style={{ backgroundColor: tokens.groupedBackground }}
     >

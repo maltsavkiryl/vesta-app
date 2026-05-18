@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { Text } from "@/components/Text"
@@ -25,6 +25,7 @@ import {
 } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import type { DesignTokens } from "@/design-system/tokens"
+import { createHeaderActionOptions } from "@/navigation/native-sheet"
 import { useAppSession } from "@/providers/app-provider"
 import { useAppTheme } from "@/theme/context"
 import { maskSensitiveId } from "@/utils/formatters"
@@ -147,60 +148,6 @@ function getSection(value?: string): SectionKey {
 const LANGUAGE_OPTIONS = ["English (UK)", "Nederlands", "Français"] as const
 type JoinMode = "code" | "search"
 
-function DetailHeader({
-  isDirty,
-  section,
-  onBack,
-  onSave,
-}: {
-  isDirty?: boolean
-  section: SectionKey
-  onBack: () => void
-  onSave?: () => void
-}) {
-  const tokens = useDesignTokens()
-  const meta = sectionMeta[section]
-
-  return (
-    <View style={styles.header}>
-      <Pressable
-        accessibilityLabel="Back"
-        accessibilityRole="button"
-        hitSlop={12}
-        onPress={onBack}
-        style={styles.navButton}
-      >
-        <Ionicons color={tokens.accent} name="chevron-back" size={28} />
-      </Pressable>
-      <Text
-        text={meta.title}
-        numberOfLines={1}
-        size="sm"
-        weight="semiBold"
-        style={[styles.navTitle, { color: tokens.textPrimary }]}
-      />
-      {onSave ? (
-        <Pressable
-          accessibilityRole="button"
-          disabled={!isDirty}
-          hitSlop={12}
-          onPress={onSave}
-          style={styles.navAction}
-        >
-          <Text
-            text="Save"
-            size="sm"
-            weight="semiBold"
-            style={{ color: isDirty ? tokens.accent : tokens.textMuted }}
-          />
-        </Pressable>
-      ) : (
-        <View style={styles.navAction} />
-      )}
-    </View>
-  )
-}
-
 function SectionFooter({ text }: { text: string }) {
   const tokens = useDesignTokens()
 
@@ -257,6 +204,16 @@ function FieldStack({ children }: { children: React.ReactNode }) {
   const tokens = useDesignTokens()
 
   return <View style={[styles.fieldStack, { backgroundColor: tokens.surface }]}>{children}</View>
+}
+
+function isEditableSection(section: SectionKey) {
+  return (
+    section === "personal" ||
+    section === "contact" ||
+    section === "address" ||
+    section === "banking" ||
+    section === "legal"
+  )
 }
 
 function ThemeOption({
@@ -474,7 +431,7 @@ export function ProfileDetailScreen() {
   const section = getSection(rawSection)
   const tokens = useDesignTokens()
   const { state, joinEmployer, switchEmployer, updateProfile } = useAppSession()
-  const { setThemeContextOverride } = useAppTheme()
+  const { setThemeContextOverride, theme } = useAppTheme()
 
   const [personalState, setPersonalState] = useState({
     bio: state.profile.bio,
@@ -634,32 +591,34 @@ export function ProfileDetailScreen() {
 
   const currentSectionIsDirty =
     section in dirtyState ? dirtyState[section as keyof typeof dirtyState] : false
+  const canSaveCurrentSection = isEditableSection(section)
+  const closeSection = () => {
+    if (section === "switch-employer" || section === "join-employer") {
+      router.replace("/profile/employers")
+      return
+    }
+
+    router.back()
+  }
+  const headerActions = createHeaderActionOptions(theme, {
+    left: { kind: "close", onPress: closeSection },
+    right: canSaveCurrentSection
+      ? {
+          disabled: !currentSectionIsDirty,
+          kind: "confirm",
+          onPress: saveCurrentSection,
+        }
+      : undefined,
+  })
 
   return (
-    <AppScrollScreen
-      variant="grouped"
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={styles.screen}
-    >
-      <DetailHeader
-        section={section}
-        isDirty={currentSectionIsDirty}
-        onBack={() => {
-          if (section === "switch-employer" || section === "join-employer") {
-            router.replace("/profile/employers")
-            return
-          }
-          router.back()
+    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
+      <Stack.Screen
+        options={{
+          headerBackVisible: false,
+          ...headerActions,
+          title: sectionMeta[section].title,
         }}
-        onSave={
-          section === "personal" ||
-          section === "contact" ||
-          section === "address" ||
-          section === "banking" ||
-          section === "legal"
-            ? saveCurrentSection
-            : undefined
-        }
       />
       <SectionFooter text={sectionMeta[section].subtitle} />
 
@@ -1668,12 +1627,6 @@ const styles = StyleSheet.create({
   fieldStack: {
     borderCurve: "continuous",
   },
-  header: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-    height: 44,
-  },
   input: {
     flex: 1,
     fontSize: 16,
@@ -1749,19 +1702,6 @@ const styles = StyleSheet.create({
     minHeight: 86,
     paddingTop: 4,
     textAlignVertical: "top",
-  },
-  navAction: {
-    alignItems: "flex-end",
-    minWidth: 54,
-  },
-  navButton: {
-    alignItems: "flex-start",
-    justifyContent: "center",
-    minWidth: 54,
-  },
-  navTitle: {
-    flex: 1,
-    textAlign: "center",
   },
   ratingRow: {
     alignItems: "center",

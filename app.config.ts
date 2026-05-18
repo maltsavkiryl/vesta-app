@@ -24,6 +24,7 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
       infoPlist: {
         ...(config.ios && config.ios.infoPlist ? config.ios.infoPlist : {}),
         ITSAppUsesNonExemptEncryption: false,
+        NSSupportsLiveActivities: true,
       },
       // This privacyManifests is to get you started.
       // See Expo's guide on apple privacy manifests here:
@@ -53,6 +54,13 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         "expo-local-authentication",
         {
           faceIDPermission: "Allow Vesta to use Face ID to unlock the app.",
+        },
+      ],
+      [
+        "expo-location",
+        {
+          locationWhenInUsePermission:
+            "Allow Vesta to capture your work location for clock-in, breaks, and clock-out.",
         },
       ],
     ],

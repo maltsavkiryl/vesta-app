@@ -76,8 +76,10 @@ export function AvailabilityScreen() {
 
   return (
     <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
       style={{ backgroundColor: tokens.surfaceSecondary }}
+      topInset="none"
     >
       <View style={styles.content}>
         <GroupedSection title="Availability status">

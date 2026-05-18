@@ -13,6 +13,8 @@ export type NotificationKind =
   | "availability"
   | "announcements"
 export type ClockState = "idle" | "working" | "onBreak"
+export type TimeEntryStatus = "approved" | "review"
+export type TimeEntryEventType = "clockIn" | "breakStart" | "breakEnd" | "clockOut"
 
 export interface Employer {
   id: string
@@ -133,19 +135,46 @@ export interface NotificationItem {
   body: string
   relativeTime: string
   unread: boolean
-  deepLink?: string
+  action?: AppActionIntent
+}
+
+export interface LocationSnapshot {
+  latitude: number
+  longitude: number
+  addressLabel: string
+  accuracyMeters?: number
+}
+
+export interface ProofPhoto {
+  uri: string
+  capturedAt: string
+  fileName?: string
+  fileSize?: number
+  mimeType?: string
+}
+
+export interface TimeEntryEvent {
+  id: string
+  type: TimeEntryEventType
+  occurredAt: string
+  location?: LocationSnapshot
 }
 
 export interface TimeEntry {
   id: string
   date: string
   shiftLabel: string
-  clockIn: string
-  clockOut: string
-  breakMinutes: number
-  totalHoursLabel: string
-  earningsLabel: string
-  status: "approved" | "review"
+  venueName: string
+  venueAddress: string
+  clockInAt: string
+  clockOutAt: string
+  grossSeconds: number
+  workedSeconds: number
+  breakSeconds: number
+  earningsAmount: number
+  status: TimeEntryStatus
+  events: TimeEntryEvent[]
+  clockInProofPhoto?: ProofPhoto
 }
 
 export interface ClockSession {
@@ -158,6 +187,9 @@ export interface ClockSession {
   role: string
   venueName: string
   venueAddress: string
+  events: TimeEntryEvent[]
+  clockInLocation?: LocationSnapshot
+  clockInProofPhoto?: ProofPhoto
 }
 
 export interface EarningsSummary {
@@ -169,13 +201,31 @@ export interface EarningsSummary {
   averageHourlyRate: number
 }
 
+export type AppNavigationRoute =
+  | "/(app)/(tabs)/documents"
+  | "/(app)/(tabs)/profile"
+  | "/(app)/(tabs)/schedule"
+  | "/(app)/(tabs)/time"
+  | "/notifications"
+  | "/(app)/tasks"
+  | "/(app)/request"
+  | `/(app)/shift/${string}`
+  | `/(app)/availability/${string}`
+  | `/(app)/document-contract/${string}`
+  | `/(app)/document-payslip/${string}`
+
+export type AppActionIntent =
+  | { type: "navigate"; route: AppNavigationRoute }
+  | { type: "uploadDocument"; title: string; documentId?: string }
+  | { type: "editAvailability"; date?: string }
+
 export interface HomeTask {
   id: string
   title: string
   subtitle: string
   urgency: "high" | "medium" | "low"
   actionLabel: string
-  href: string
+  action: AppActionIntent
   completed?: boolean
 }
 

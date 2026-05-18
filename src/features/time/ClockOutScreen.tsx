@@ -12,6 +12,8 @@ import { AppButton, AppScrollScreen } from "@/design-system/primitives"
 import { useDesignTokens } from "@/design-system/tokens"
 import { useAppSession, useClockSummary } from "@/providers/app-provider"
 
+import { captureLocationSnapshot } from "./timeCapture"
+
 const HOURLY_RATE = 12.02
 
 export function ClockOutScreen() {
@@ -29,16 +31,20 @@ export function ClockOutScreen() {
   const overtime = netSeconds > 6 * 3600 ? netSeconds - 6 * 3600 : 0
   const clockOutTime = formatTimeLabel(new Date())
 
-  const finish = () => {
-    confirmClockOut()
+  const finish = async () => {
+    const occurredAt = new Date().toISOString()
+    const location = await captureLocationSnapshot(state.clockSession.venueAddress)
+    confirmClockOut({ occurredAt, location })
     setConfirmed(true)
     setTimeout(() => router.replace("/(app)/(tabs)/time"), 900)
   }
 
   return (
     <AppScrollScreen
+      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
-      style={{ backgroundColor: tokens.surfaceSecondary }}
+      style={{ backgroundColor: tokens.groupedBackground }}
+      topInset="none"
     >
       {confirmed ? (
         <View style={styles.successContent}>
@@ -108,7 +114,7 @@ export function ClockOutScreen() {
           </View>
 
           <View style={styles.content}>
-            <View style={[styles.summaryCard, { backgroundColor: tokens.background }]}>
+            <View style={[styles.summaryCard, { backgroundColor: tokens.surface }]}>
               <SummaryRow
                 icon="time-outline"
                 label="Clocked in"

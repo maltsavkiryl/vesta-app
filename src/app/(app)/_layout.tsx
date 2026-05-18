@@ -1,14 +1,23 @@
-import { Redirect, Stack } from "expo-router"
+import { Redirect, Stack, useRouter } from "expo-router"
 
-import { createNativeSheetOptions } from "@/navigation/native-sheet"
+import {
+  createHeaderActionOptions,
+  createPushDetailOptions,
+  createSheetOptions,
+} from "@/navigation/native-sheet"
 import { useAppSession } from "@/providers/app-provider"
 import { useAppTheme } from "@/theme/context"
 
 export default function AppLayout() {
   const { isSignedIn, needsOnboarding } = useAppSession()
   const { theme } = useAppTheme()
+  const router = useRouter()
   const groupedSheetBackground = theme.isDark ? "#000000" : "#F2F2F7"
   const secondarySheetBackground = theme.isDark ? "#2C2C2E" : "#F1F1F6"
+  const closeSheet = () => router.back()
+  const closeActions = createHeaderActionOptions(theme, {
+    left: { kind: "close", onPress: closeSheet },
+  })
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />
@@ -30,49 +39,75 @@ export default function AppLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
         name="notifications"
-        options={createNativeSheetOptions(theme, "Notifications", {
+        options={createPushDetailOptions(theme, "Notifications", {
           backgroundColor: groupedSheetBackground,
+          ...closeActions,
         })}
       />
       <Stack.Screen
         name="request"
-        options={createNativeSheetOptions(theme, "New request", {
-          backgroundColor: secondarySheetBackground,
+        options={createPushDetailOptions(theme, "New request", {
+          backgroundColor: groupedSheetBackground,
         })}
       />
       <Stack.Screen
         name="shift/[id]"
-        options={createNativeSheetOptions(theme, "Shift details", {
-          backgroundColor: secondarySheetBackground,
+        options={createPushDetailOptions(theme, "Shift details", {
+          backgroundColor: groupedSheetBackground,
         })}
       />
       <Stack.Screen
         name="availability/[date]"
-        options={createNativeSheetOptions(theme, "Availability", {
+        options={createSheetOptions(theme, "Availability", {
           backgroundColor: secondarySheetBackground,
+          ...closeActions,
         })}
       />
       <Stack.Screen
         name="clock-out"
-        options={createNativeSheetOptions(theme, "End shift", {
-          backgroundColor: secondarySheetBackground,
+        options={createSheetOptions(theme, "End shift", {
+          backgroundColor: groupedSheetBackground,
+          ...closeActions,
+          preset: "medium",
         })}
       />
-      <Stack.Screen name="tasks" options={createNativeSheetOptions(theme, "All tasks")} />
-      <Stack.Screen name="time-entries" options={createNativeSheetOptions(theme, "Time entries")} />
+      <Stack.Screen
+        name="tasks"
+        options={createPushDetailOptions(theme, "All tasks", {
+          backgroundColor: groupedSheetBackground,
+        })}
+      />
+      <Stack.Screen
+        name="time-entries"
+        options={createSheetOptions(theme, "Time entries", { ...closeActions })}
+      />
+      <Stack.Screen
+        name="time-entry/[id]"
+        options={createPushDetailOptions(theme, "Entry details", {
+          backgroundColor: groupedSheetBackground,
+        })}
+      />
       <Stack.Screen
         name="document-upload"
-        options={createNativeSheetOptions(theme, "Upload document")}
+        options={createSheetOptions(theme, "Upload document", {
+          ...closeActions,
+          preset: "medium",
+        })}
       />
       <Stack.Screen
         name="document-payslip/[id]"
-        options={createNativeSheetOptions(theme, "Payslip")}
+        options={createPushDetailOptions(theme, "Payslip")}
       />
       <Stack.Screen
         name="document-contract/[id]"
-        options={createNativeSheetOptions(theme, "Contract")}
+        options={createPushDetailOptions(theme, "Contract")}
       />
-      <Stack.Screen name="profile/[section]" options={{ presentation: "card" }} />
+      <Stack.Screen
+        name="profile/[section]"
+        options={createPushDetailOptions(theme, undefined, {
+          backgroundColor: groupedSheetBackground,
+        })}
+      />
     </Stack>
   )
 }

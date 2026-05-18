@@ -6,6 +6,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from "react"
 import { format } from "date-fns"
 
@@ -17,13 +18,23 @@ import type {
   AvailabilityDay,
   DocumentItem,
   Employer,
+  LocationSnapshot,
+  ProofPhoto,
   RequestItem,
   UserProfile,
 } from "@/core/models"
+import { buildTimeEntryEvent } from "@/core/timeEntries"
+import {
+  createClockLiveActivityPayload,
+  endClockLiveActivity,
+  isClockLiveActivitySupported,
+  startClockLiveActivity,
+  updateClockLiveActivity,
+} from "@/services/liveActivity/clockLiveActivity"
 import { load, save } from "@/utils/storage"
 
 const APP_STATE_STORAGE_KEY = "vesta-mobile.app-state"
-const APP_STATE_STORAGE_VERSION = 1
+const APP_STATE_STORAGE_VERSION = 2
 
 export const DEMO_AUTH_CREDENTIALS = {
   email: "demo.employee@vesta.local",
@@ -43,6 +54,11 @@ type DocumentUploadPayload = {
   title: string
   uri: string
 }
+type ClockActionPayload = {
+  occurredAt?: string
+  location?: LocationSnapshot
+  proofPhoto?: ProofPhoto
+}
 
 type AppAction =
   | { type: "hydrate"; payload: AppStoreState }
@@ -55,10 +71,10 @@ type AppAction =
   | { type: "createRequest"; payload: RequestItem }
   | { type: "markNotificationRead"; payload: { id: string } }
   | { type: "markAllNotificationsRead" }
-  | { type: "startClock" }
-  | { type: "startBreak" }
-  | { type: "endBreak" }
-  | { type: "confirmClockOut" }
+  | { type: "startClock"; payload?: ClockActionPayload }
+  | { type: "startBreak"; payload?: ClockActionPayload }
+  | { type: "endBreak"; payload?: ClockActionPayload }
+  | { type: "confirmClockOut"; payload?: ClockActionPayload }
   | { type: "uploadDocument"; payload: DocumentUploadPayload }
   | { type: "signContract"; payload: { contractId: string } }
   | { type: "switchEmployer"; payload: { employerId: string } }
@@ -125,6 +141,11 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
           ...state.availability,
           [action.payload.date]: action.payload,
         },
+        tasks: state.tasks.map((task) =>
+          task.action.type === "editAvailability"
+            ? { ...task, completed: true, actionLabel: "Done" }
+            : task,
+        ),
       }
     case "createRequest":
       return {
@@ -146,30 +167,55 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
           unread: false,
         })),
       }
-    case "startClock":
+    case "startClock": {
+      const occurredAt = action.payload?.occurredAt ?? new Date().toISOString()
       return {
         ...state,
         clockSession: {
           ...state.clockSession,
           state: "working",
-          startedAt: new Date().toISOString(),
+          startedAt: occurredAt,
           breakStartedAt: undefined,
           accumulatedBreakSeconds: 0,
+          events: [
+            buildTimeEntryEvent({
+              location: action.payload?.location,
+              occurredAt,
+              type: "clockIn",
+            }),
+          ],
+          clockInLocation: action.payload?.location,
+          clockInProofPhoto: action.payload?.proofPhoto,
         },
       }
-    case "startBreak":
+    }
+    case "startBreak": {
+      const occurredAt = action.payload?.occurredAt ?? new Date().toISOString()
       return {
         ...state,
         clockSession: {
           ...state.clockSession,
           state: "onBreak",
-          breakStartedAt: new Date().toISOString(),
+          breakStartedAt: occurredAt,
+          events: [
+            ...state.clockSession.events,
+            buildTimeEntryEvent({
+              location: action.payload?.location,
+              occurredAt,
+              type: "breakStart",
+            }),
+          ],
         },
       }
+    }
     case "endBreak": {
       if (!state.clockSession.breakStartedAt) return state
+      const occurredAt = action.payload?.occurredAt ?? new Date().toISOString()
       const breakDelta = Math.max(
-        Math.floor((Date.now() - new Date(state.clockSession.breakStartedAt).getTime()) / 1000),
+        Math.floor(
+          (new Date(occurredAt).getTime() - new Date(state.clockSession.breakStartedAt).getTime()) /
+            1000,
+        ),
         0,
       )
       return {
@@ -179,12 +225,24 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
           state: "working",
           breakStartedAt: undefined,
           accumulatedBreakSeconds: state.clockSession.accumulatedBreakSeconds + breakDelta,
+          events: [
+            ...state.clockSession.events,
+            buildTimeEntryEvent({
+              location: action.payload?.location,
+              occurredAt,
+              type: "breakEnd",
+            }),
+          ],
         },
       }
     }
     case "confirmClockOut": {
-      const snapshot = getClockSnapshot(state.clockSession, new Date())
-      const newTimeEntry = buildNewTimeEntry(snapshot.payableSeconds, snapshot.breakSeconds)
+      const clockOutAt = action.payload?.occurredAt ?? new Date().toISOString()
+      const newTimeEntry = buildNewTimeEntry(
+        state.clockSession,
+        clockOutAt,
+        action.payload?.location,
+      )
       return {
         ...state,
         timeEntries: [newTimeEntry, ...state.timeEntries],
@@ -194,6 +252,9 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
           startedAt: undefined,
           breakStartedAt: undefined,
           accumulatedBreakSeconds: 0,
+          events: [],
+          clockInLocation: undefined,
+          clockInProofPhoto: undefined,
         },
       }
     }
@@ -232,7 +293,8 @@ function reducer(state: AppStoreState, action: AppAction): AppStoreState {
         ...state,
         documents: updatedDocuments,
         tasks: state.tasks.map((task) =>
-          task.href.includes("documents")
+          task.action.type === "uploadDocument" &&
+          (!task.action.documentId || task.action.documentId === action.payload.documentId)
             ? { ...task, completed: true, actionLabel: "Done" }
             : task,
         ),
@@ -302,10 +364,10 @@ export interface AppContextValue {
   }) => void
   markNotificationRead: (id: string) => void
   markAllNotificationsRead: () => void
-  startClock: () => void
-  startBreak: () => void
-  endBreak: () => void
-  confirmClockOut: () => void
+  startClock: (payload?: ClockActionPayload) => void
+  startBreak: (payload?: ClockActionPayload) => void
+  endBreak: (payload?: ClockActionPayload) => void
+  confirmClockOut: (payload?: ClockActionPayload) => void
   uploadDocument: (payload: DocumentUploadPayload) => void
   signContract: (contractId: string) => void
   switchEmployer: (employerId: string) => void
@@ -373,10 +435,51 @@ function getStoredState() {
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [state, dispatch] = useReducer(reducer, undefined, getStoredState)
+  const lastClockLiveActivitySessionId = useRef<string | null>(null)
 
   useEffect(() => {
     save(APP_STATE_STORAGE_KEY, createStateForPersistence(state))
   }, [state])
+
+  useEffect(() => {
+    const payload = createClockLiveActivityPayload(state.clockSession)
+    const previousSessionId = lastClockLiveActivitySessionId.current
+
+    void (async () => {
+      if (!(await isClockLiveActivitySupported())) {
+        lastClockLiveActivitySessionId.current = payload?.sessionId ?? null
+        return
+      }
+
+      try {
+        if (!payload) {
+          if (previousSessionId) {
+            await endClockLiveActivity(previousSessionId)
+          }
+          return
+        }
+
+        if (!previousSessionId) {
+          await startClockLiveActivity(payload)
+          return
+        }
+
+        if (previousSessionId !== payload.sessionId) {
+          await endClockLiveActivity(previousSessionId)
+          await startClockLiveActivity(payload)
+          return
+        }
+
+        await updateClockLiveActivity(payload)
+      } catch (error) {
+        if (__DEV__) {
+          console.warn("Unable to sync Live Activity", error)
+        }
+      } finally {
+        lastClockLiveActivitySessionId.current = payload?.sessionId ?? null
+      }
+    })()
+  }, [state.clockSession])
 
   const signIn = useCallback(
     ({ email }: { email: string; password: string }): AuthResult => {
@@ -450,10 +553,22 @@ export function AppProvider({ children }: PropsWithChildren) {
     [dispatch],
   )
 
-  const startClock = useCallback(() => dispatch({ type: "startClock" }), [dispatch])
-  const startBreak = useCallback(() => dispatch({ type: "startBreak" }), [dispatch])
-  const endBreak = useCallback(() => dispatch({ type: "endBreak" }), [dispatch])
-  const confirmClockOut = useCallback(() => dispatch({ type: "confirmClockOut" }), [dispatch])
+  const startClock = useCallback(
+    (payload?: ClockActionPayload) => dispatch({ type: "startClock", payload }),
+    [dispatch],
+  )
+  const startBreak = useCallback(
+    (payload?: ClockActionPayload) => dispatch({ type: "startBreak", payload }),
+    [dispatch],
+  )
+  const endBreak = useCallback(
+    (payload?: ClockActionPayload) => dispatch({ type: "endBreak", payload }),
+    [dispatch],
+  )
+  const confirmClockOut = useCallback(
+    (payload?: ClockActionPayload) => dispatch({ type: "confirmClockOut", payload }),
+    [dispatch],
+  )
 
   const uploadDocument = useCallback(
     (payload: DocumentUploadPayload) => dispatch({ type: "uploadDocument", payload }),

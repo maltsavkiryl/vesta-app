@@ -1,11 +1,13 @@
 import { ActionSheetIOS } from "react-native"
 
-type UploadSource = "camera" | "files"
+export type UploadSource = "camera" | "files"
 
 export function showNativeUploadOptions({
+  onCancel,
   onSelect,
   title,
 }: {
+  onCancel?: () => void
   onSelect: (source: UploadSource) => void
   title: string
 }) {
@@ -18,6 +20,7 @@ export function showNativeUploadOptions({
     (buttonIndex) => {
       if (buttonIndex === 0) onSelect("camera")
       if (buttonIndex === 1) onSelect("files")
+      if (buttonIndex === 2) onCancel?.()
     },
   )
 }
