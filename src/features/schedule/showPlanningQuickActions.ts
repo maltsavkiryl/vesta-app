@@ -1,11 +1,13 @@
 import { Alert } from "react-native"
-import type { SFSymbol } from "sf-symbols-typescript"
+import type { ButtonProps } from "@expo/ui/swift-ui"
+
+type SystemImageName = NonNullable<ButtonProps["systemImage"]>
 
 export type PlanningQuickActionOption = {
   label: string
   onPress: () => void | Promise<unknown>
   section?: "primary" | "secondary"
-  systemImage?: SFSymbol
+  systemImage?: SystemImageName
 }
 
 export function showPlanningQuickActions({

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native"
 
 import type { HomeTask, NotificationItem, Shift, TimeEntry } from "@/core/models"
 import { RecentEntries } from "@/features/time/components/TimeEntriesList"
-import { ThemeProvider } from "@/theme/context"
+import { ThemeProvider } from "@/ui"
 
 import { HomeTasksSection, HomeUpdatesSection } from "./HomeTaskSections"
 import { UpcomingShiftsSection } from "./UpcomingShiftsSection"

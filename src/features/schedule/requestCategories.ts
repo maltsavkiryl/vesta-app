@@ -1,15 +1,16 @@
 import { Ionicons } from "@expo/vector-icons"
-import type { SFSymbol } from "sf-symbols-typescript"
+import type { ButtonProps } from "@expo/ui/swift-ui"
 
 import type { RequestCategory, RequestType } from "@/core/models"
 
 type RequestCategoryTone = "accent" | "warning" | "danger"
+type SystemImageName = NonNullable<ButtonProps["systemImage"]>
 
 export type RequestCategoryConfig = {
   description: string
   icon: keyof typeof Ionicons.glyphMap
   reasonPresets: string[]
-  systemImage: SFSymbol
+  systemImage: SystemImageName
   title: string
   tone: RequestCategoryTone
   type: RequestType

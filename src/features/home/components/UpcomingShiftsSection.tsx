@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, View } from "react-native"
+import { Pressable, ScrollView, StyleSheet, View } from "react-native"
 
 import type { Shift } from "@/core/models"
 import { SectionBlock, Text, useDesignTokens } from "@/ui"
@@ -78,16 +78,22 @@ export function UpcomingShiftsSection({
 }) {
   return (
     <SectionBlock title="Upcoming" actionLabel="View all" onAction={onViewAll}>
-      <FlatList
-        data={shifts}
-        horizontal
-        contentContainerStyle={styles.upcomingList}
-        keyExtractor={(shift) => shift.id}
-        renderItem={({ item }) => (
-          <UpcomingShiftCard shift={item} onPress={() => onShiftPress(item)} />
-        )}
-        showsHorizontalScrollIndicator={false}
-      />
+      <View style={styles.upcomingRail}>
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.upcomingList}
+          showsHorizontalScrollIndicator={false}
+        >
+          {shifts.map((shift, index) => (
+            <View
+              key={shift.id}
+              style={index === shifts.length - 1 ? undefined : styles.upcomingSeparator}
+            >
+              <UpcomingShiftCard shift={shift} onPress={() => onShiftPress(shift)} />
+            </View>
+          ))}
+        </ScrollView>
+      </View>
     </SectionBlock>
   )
 }
@@ -129,9 +135,15 @@ const styles = StyleSheet.create({
   upcomingHeader: {
     marginBottom: 2,
   },
+  upcomingRail: {
+    marginHorizontal: -16,
+  },
   upcomingList: {
-    gap: 10,
     paddingBottom: 6,
+    paddingHorizontal: 16,
     paddingTop: 2,
+  },
+  upcomingSeparator: {
+    marginRight: 10,
   },
 })
