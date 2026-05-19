@@ -402,13 +402,7 @@ export function Pill({
   tone?: "neutral" | "accent" | "success" | "warning" | "danger"
 }) {
   const tokens = useDesignTokens()
-  const palette = {
-    accent: { backgroundColor: tokens.accentSoft, color: tokens.accent },
-    danger: { backgroundColor: `${tokens.danger}22`, color: tokens.danger },
-    neutral: { backgroundColor: tokens.surfaceTertiary, color: tokens.textSecondary },
-    success: { backgroundColor: `${tokens.success}22`, color: tokens.success },
-    warning: { backgroundColor: `${tokens.warning}22`, color: tokens.warning },
-  }[tone]
+  const palette = getTonePalette(tokens, tone)
 
   return (
     <View style={[styles.pill, { backgroundColor: palette.backgroundColor }]}>
@@ -787,30 +781,28 @@ export function MetaPill({
   backgroundColor,
   style,
   textStyle,
+  tone = "neutral",
 }: {
   backgroundColor?: string
   label: string
   leading?: ReactNode
   style?: StyleProp<ViewStyle>
   textStyle?: StyleProp<TextStyle>
+  tone?: "neutral" | "accent" | "success" | "warning" | "danger"
 }) {
   const tokens = useDesignTokens()
+  const palette = getTonePalette(tokens, tone)
 
   return (
     <View
       style={[
         styles.metaPill,
-        { backgroundColor: backgroundColor ?? tokens.surfaceSecondary },
+        { backgroundColor: backgroundColor ?? palette.backgroundColor },
         style,
       ]}
     >
       {leading}
-      <Text
-        size="xxs"
-        style={[{ color: tokens.textPrimary }, textStyle]}
-        text={label}
-        weight="medium"
-      />
+      <Text size="xxs" style={[{ color: palette.color }, textStyle]} text={label} weight="medium" />
     </View>
   )
 }

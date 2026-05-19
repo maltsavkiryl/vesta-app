@@ -25,9 +25,8 @@ import {
 } from "@/ui"
 
 import { formatSeconds } from "../time.utils"
-import { TimeHeroCard } from "./TimeHeroCard"
+import { TimeHeroCard, timeHeroColors } from "./TimeHeroCard"
 
-const HERO_SURFACE_DIVIDER = "rgba(255, 255, 255, 0.10)"
 const IOS_CLOSE_EASING = Easing.bezier(0.22, 0.61, 0.36, 1)
 const IOS_OPEN_SPRING = {
   damping: 23,
@@ -108,26 +107,25 @@ function HeroCard({
 function HeroStatusPill({
   icon,
   text,
-  tone = "default",
+  tone = "neutral",
 }: {
   icon: keyof typeof Ionicons.glyphMap
   text: string
-  tone?: "default" | "success" | "warning"
+  tone?: "neutral" | "success" | "warning"
 }) {
-  const tokens = useDesignTokens()
-  const color =
-    tone === "success"
-      ? tokens.success
-      : tone === "warning"
-        ? tokens.warning
-        : `${tokens.accentForeground}D6`
+  // Use semantic tones for success/warning, and a custom semi-transparent white for neutral
+  // to match the hero card aesthetics.
+  const isNeutral = tone === "neutral"
+  const backgroundColor = isNeutral ? timeHeroColors.divider : undefined
+  const color = isNeutral ? timeHeroColors.secondaryText : undefined
 
   return (
     <MetaPill
-      backgroundColor={`${tokens.accentForeground}12`}
+      backgroundColor={backgroundColor}
       label={text}
       leading={<Ionicons color={color} name={icon} size={12} />}
-      textStyle={{ color }}
+      textStyle={color ? { color } : undefined}
+      tone={tone === "neutral" ? "neutral" : tone}
     />
   )
 }
@@ -141,16 +139,14 @@ function HeroDetailRow({
   text: string
   trailing?: ReactNode
 }) {
-  const tokens = useDesignTokens()
-
   return (
     <View style={styles.heroDetailRow}>
-      <Ionicons color={`${tokens.accentForeground}80`} name={icon} size={16} />
+      <Ionicons color={timeHeroColors.tertiaryText} name={icon} size={16} />
       <Text
         numberOfLines={1}
         text={text}
         size="xs"
-        style={[styles.flex, { color: `${tokens.accentForeground}C7` }]}
+        style={[styles.flex, { color: timeHeroColors.secondaryText }]}
       />
       {trailing}
     </View>
@@ -206,6 +202,11 @@ function CollapsibleSection({
   progress: SharedValue<number>
 }) {
   const measuredHeight = useSharedValue(fallbackHeight)
+  const handleLayout = (nextHeight: number) => {
+    if (nextHeight > 0) {
+      measuredHeight.value = nextHeight
+    }
+  }
   const animatedStyle = useAnimatedStyle(() => ({
     height: measuredHeight.value * progress.value,
     marginTop: interpolate(progress.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -222,59 +223,20 @@ function CollapsibleSection({
   }))
 
   return (
-    <Animated.View pointerEvents="box-none" style={animatedStyle}>
+    <View style={styles.animatedSectionHost}>
       <View
-        onLayout={(event) => {
-          const nextHeight = event.nativeEvent.layout.height
-          if (nextHeight > 0) {
-            measuredHeight.value = nextHeight
-          }
-        }}
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+        onLayout={(event) => handleLayout(event.nativeEvent.layout.height)}
+        pointerEvents="none"
+        style={styles.hiddenMeasure}
       >
         {children}
       </View>
-    </Animated.View>
-  )
-}
-
-function CollapsedActionFooter({
-  children,
-  interactive,
-  progress,
-}: {
-  children: ReactNode
-  interactive: boolean
-  progress: SharedValue<number>
-}) {
-  const measuredHeight = useSharedValue(52)
-  const animatedStyle = useAnimatedStyle(() => {
-    const inverseProgress = 1 - progress.value
-
-    return {
-      height: measuredHeight.value * inverseProgress,
-      opacity: interpolate(inverseProgress, [0, 0.45, 1], [0, 0.5, 1], Extrapolation.CLAMP),
-      overflow: "hidden",
-      transform: [
-        {
-          translateY: interpolate(inverseProgress, [0, 1], [-2, 0], Extrapolation.CLAMP),
-        },
-      ],
-    }
-  })
-
-  return (
-    <Animated.View pointerEvents={interactive ? "auto" : "none"} style={animatedStyle}>
-      <View
-        onLayout={(event) => {
-          const nextHeight = event.nativeEvent.layout.height
-          if (nextHeight > 0) {
-            measuredHeight.value = nextHeight
-          }
-        }}
-      >
-        {children}
-      </View>
-    </Animated.View>
+      <Animated.View pointerEvents="box-none" style={animatedStyle}>
+        <View>{children}</View>
+      </Animated.View>
+    </View>
   )
 }
 
@@ -323,7 +285,6 @@ function IdleCardContent({
   clockSession,
   collapsed,
   collapseProgress,
-  collapsedFooterInteractive,
   onClockIn,
   showCollapseToggle = true,
   onToggleCollapsed,
@@ -331,7 +292,6 @@ function IdleCardContent({
   clockSession: TimeOverviewCardController["state"]["clockSession"]
   collapsed: boolean
   collapseProgress: SharedValue<number>
-  collapsedFooterInteractive: boolean
   onClockIn: () => void
   showCollapseToggle?: boolean
   onToggleCollapsed?: () => void
@@ -341,6 +301,24 @@ function IdleCardContent({
     clockSession.scheduledStart,
     clockSession.scheduledEnd,
   )
+  const detailHeight = useSharedValue(96)
+  const idleDetailsAnimatedStyle = useAnimatedStyle(() => ({
+    height: detailHeight.value * collapseProgress.value,
+    marginBottom: interpolate(collapseProgress.value, [0, 1], [0, 12], Extrapolation.CLAMP),
+  }))
+  const detailsContentAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      collapseProgress.value,
+      [0, 0.42, 0.72, 1],
+      [0, 0, 0.72, 1],
+      Extrapolation.CLAMP,
+    ),
+    transform: [
+      {
+        translateY: interpolate(collapseProgress.value, [0, 1], [8, 0], Extrapolation.CLAMP),
+      },
+    ],
+  }))
 
   return (
     <HeroCard>
@@ -350,17 +328,21 @@ function IdleCardContent({
             text="TODAY'S SHIFT"
             size="xxs"
             weight="semiBold"
-            style={[styles.caps, { color: `${tokens.accentForeground}99` }]}
+            style={[styles.caps, { color: timeHeroColors.tertiaryText }]}
           />
           <Text
             text={`${clockSession.scheduledStart} - ${clockSession.scheduledEnd}`}
             weight="bold"
-            style={[styles.heroShiftTime, { color: tokens.accentForeground }]}
+            style={[
+              appTypography.heroLarge,
+              styles.heroValue,
+              { color: timeHeroColors.primaryText },
+            ]}
           />
           <Text
             text={`${clockSession.role} · ${formatDurationHoursLabel(durationHours)} planned`}
             size="xs"
-            style={{ color: `${tokens.accentForeground}BF` }}
+            style={{ color: timeHeroColors.secondaryText }}
           />
         </View>
         <View style={styles.headerActions}>
@@ -375,37 +357,75 @@ function IdleCardContent({
         </View>
       </View>
 
-      <CollapsibleSection fallbackHeight={148} progress={collapseProgress}>
-        <>
-          <HeroDetailRow
-            icon="location-outline"
-            text={`${clockSession.venueName} · ${clockSession.venueAddress}`}
-            trailing={<Ionicons color={tokens.success} name="navigate-circle-outline" size={18} />}
-          />
-
-          <View style={styles.heroDivider} />
-
-          <View style={styles.heroInfoRow}>
-            <Ionicons color={tokens.warning} name="flash-outline" size={13} />
-            <Text
-              text={`Clock-in opens at ${getClockInOpenLabel(clockSession.scheduledStart)}`}
-              size="xxs"
-              weight="medium"
-              style={{ color: tokens.warning }}
+      <View style={styles.idleLowerContent}>
+        <View
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          onLayout={(event) => {
+            const nextHeight = event.nativeEvent.layout.height
+            if (nextHeight > 0) {
+              detailHeight.value = nextHeight
+            }
+          }}
+          pointerEvents="none"
+          style={styles.hiddenMeasure}
+        >
+          <View style={styles.idleDetailsContent}>
+            <HeroDetailRow
+              icon="location-outline"
+              text={`${clockSession.venueName} · ${clockSession.venueAddress}`}
+              trailing={
+                <Ionicons color={tokens.success} name="navigate-circle-outline" size={18} />
+              }
             />
-          </View>
 
-          <View style={styles.heroFooter}>
-            <InCardActionButton label="Clock in" onPress={onClockIn} stopPropagation />
-          </View>
-        </>
-      </CollapsibleSection>
+            <View style={styles.heroDivider} />
 
-      <CollapsedActionFooter interactive={collapsedFooterInteractive} progress={collapseProgress}>
-        <View>
-          <InCardActionButton label="Clock in" onPress={onClockIn} stopPropagation />
+            <View style={styles.heroInfoRow}>
+              <Ionicons color={tokens.warning} name="flash-outline" size={13} />
+              <Text
+                text={`Clock-in opens at ${getClockInOpenLabel(clockSession.scheduledStart)}`}
+                size="xxs"
+                weight="medium"
+                style={{ color: tokens.warning }}
+              />
+            </View>
+          </View>
         </View>
-      </CollapsedActionFooter>
+
+        <Animated.View style={[styles.idleDetailsViewport, idleDetailsAnimatedStyle]}>
+          <Animated.View
+            pointerEvents={collapsed ? "none" : "auto"}
+            style={detailsContentAnimatedStyle}
+          >
+            <View
+              importantForAccessibility={collapsed ? "no-hide-descendants" : "auto"}
+              style={styles.idleDetailsContent}
+            >
+              <HeroDetailRow
+                icon="location-outline"
+                text={`${clockSession.venueName} · ${clockSession.venueAddress}`}
+                trailing={
+                  <Ionicons color={tokens.success} name="navigate-circle-outline" size={18} />
+                }
+              />
+
+              <View style={styles.heroDivider} />
+
+              <View style={styles.heroInfoRow}>
+                <Ionicons color={tokens.warning} name="flash-outline" size={13} />
+                <Text
+                  text={`Clock-in opens at ${getClockInOpenLabel(clockSession.scheduledStart)}`}
+                  size="xxs"
+                  weight="medium"
+                style={{ color: tokens.warning }}
+              />
+            </View>
+          </Animated.View>
+        </Animated.View>
+
+        <InCardActionButton label="Clock in" onPress={onClockIn} stopPropagation />
+      </View>
     </HeroCard>
   )
 }
@@ -456,20 +476,21 @@ function ActiveCardContent({
             text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
             weight="bold"
             style={[
-              styles.heroTimerValue,
-              { color: isOnBreak ? tokens.warning : tokens.accentForeground },
+              appTypography.heroValue,
+              styles.heroValue,
+              { color: isOnBreak ? tokens.warning : timeHeroColors.primaryText },
             ]}
           />
           <Text
             text={`${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${clockSession.role}`}
             numberOfLines={1}
             size="xs"
-            style={{ color: `${tokens.accentForeground}BF` }}
+            style={{ color: timeHeroColors.secondaryText }}
           />
         </View>
         <View style={styles.headerActions}>
           <HeroStatusPill
-            icon={isOnBreak ? "cafe-outline" : "radio-outline"}
+            icon={isOnBreak ? "cafe-outline" : "pulse-outline"}
             text={isOnBreak ? "On break" : "Working"}
             tone={isOnBreak ? "warning" : "success"}
           />
@@ -494,7 +515,7 @@ function ActiveCardContent({
               }
               size="xxs"
               weight="medium"
-              style={{ color: `${tokens.accentForeground}B3` }}
+              style={{ color: timeHeroColors.secondaryText }}
             />
             <Text
               text={
@@ -506,13 +527,13 @@ function ActiveCardContent({
               }
               size="xs"
               weight="semiBold"
-              style={{ color: tokens.accentForeground }}
+              style={{ color: timeHeroColors.primaryText }}
             />
             <ProgressBar
               fillColor={toneColor}
               progress={progress}
               thickness={5}
-              trackColor={`${tokens.accentForeground}14`}
+              trackColor={tokens.border}
             />
           </View>
 
@@ -615,7 +636,6 @@ export function TimeOverviewCard({
   const cardScale = useSharedValue(1)
   const cardLift = useSharedValue(collapsed ? 0 : -1.5)
   const isCollapsed = collapsible && collapsed
-  const collapsedFooterInteractive = isCollapsed
   const { clockSession } = controller.state
 
   useEffect(() => {
@@ -677,7 +697,6 @@ export function TimeOverviewCard({
         clockSession={clockSession}
         collapsed={isCollapsed}
         collapseProgress={collapseProgress}
-        collapsedFooterInteractive={collapsedFooterInteractive}
         onClockIn={controller.handleClockIn}
         showCollapseToggle={showCollapseToggle}
         onToggleCollapsed={collapsible ? handleToggleCollapsed : undefined}
@@ -728,7 +747,6 @@ export function IdleClockCard({ onClockIn }: { onClockIn: () => void }) {
       clockSession={clockSession}
       collapsed={false}
       collapseProgress={collapseProgress}
-      collapsedFooterInteractive={false}
       onClockIn={onClockIn}
     />
   )
@@ -781,6 +799,9 @@ const styles = StyleSheet.create({
   actionSection: {
     paddingTop: 12,
   },
+  animatedSectionHost: {
+    position: "relative",
+  },
   breakButton: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -805,6 +826,9 @@ const styles = StyleSheet.create({
     height: 32,
     justifyContent: "center",
     width: 32,
+  },
+  collapsibleContent: {
+    gap: 12,
   },
   dangerAction: {
     alignItems: "center",
@@ -842,12 +866,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   heroDivider: {
-    backgroundColor: HERO_SURFACE_DIVIDER,
+    backgroundColor: timeHeroColors.divider,
     height: StyleSheet.hairlineWidth,
     marginHorizontal: 4,
-  },
-  heroFooter: {
-    marginTop: 2,
   },
   heroInfoRow: {
     alignItems: "center",
@@ -859,20 +880,10 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingTop: 2,
   },
-  heroShiftTime: {
-    fontSize: 31,
-    lineHeight: 36,
-    marginTop: 2,
-  },
   heroStatusRow: {
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
-    marginTop: 2,
-  },
-  heroTimerValue: {
-    fontSize: 35,
-    lineHeight: 40,
     marginTop: 2,
   },
   heroTopRow: {
@@ -880,6 +891,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     justifyContent: "space-between",
+  },
+  heroValue: {
+    marginTop: 2,
+  },
+  hiddenMeasure: {
+    left: 0,
+    opacity: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    zIndex: -1,
+  },
+  idleBodyLayer: {
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+  },
+  idleBodyViewport: {
+    overflow: "hidden",
+    position: "relative",
+  },
+  idleCollapsedContent: {
+    minHeight: 52,
+  },
+  idleLowerContent: {
+    gap: 0,
+    position: "relative",
   },
   secondaryAction: {
     alignItems: "center",

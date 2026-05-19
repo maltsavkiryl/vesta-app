@@ -6,7 +6,11 @@
   "build": {
     "development": {
       "extends": "production",
+      "environment": "development",
       "distribution": "internal",
+      "env": {
+        "NODE_ENV": "development"
+      },
       "android": {
         "gradleCommand": ":app:assembleDebug"
       },
@@ -25,7 +29,11 @@
     },
     "preview": {
       "extends": "production",
+      "environment": "preview",
       "distribution": "internal",
+      "env": {
+        "NODE_ENV": "production"
+      },
       "ios": { "simulator": true },
       "android": { "buildType": "apk" }
     },
@@ -33,7 +41,12 @@
       "extends": "preview",
       "ios": { "simulator": false }
     },
-    "production": {}
+    "production": {
+      "environment": "production",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
   },
   "submit": {
     "production": {}

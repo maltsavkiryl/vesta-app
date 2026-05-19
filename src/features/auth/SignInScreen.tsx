@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { DEMO_AUTH_CREDENTIALS } from "@/providers/app-provider"
-import { Banner, Button, Text, useDesignTokens } from "@/ui"
+import { Banner, Button, Text, appTypography, useDesignTokens } from "@/ui"
 
 import { AuthTextField } from "./AuthTextField"
 
@@ -57,7 +57,7 @@ export function SignInScreen() {
           <Text
             text="Log in or sign up"
             weight="bold"
-            style={[styles.title, { color: tokens.textPrimary }]}
+            style={[appTypography.authTitle, { color: tokens.textPrimary }]}
           />
         </View>
 
@@ -136,19 +136,19 @@ export function SignInScreen() {
             variant="secondary"
           />
 
-          <Text text="or" style={[styles.dividerText, { color: tokens.textSecondary }]} />
+          <View style={styles.divider}>
+            <Text text="or" size="xs" style={{ color: tokens.textSecondary }} />
+          </View>
 
           <SocialButton
             icon="logo-google"
             label="Continue with Google"
             onPress={handleContinue}
-            tokens={tokens}
           />
           <SocialButton
             icon="logo-apple"
             label="Continue with Apple"
             onPress={handleContinue}
-            tokens={tokens}
           />
         </View>
       </View>
@@ -172,29 +172,31 @@ function SocialButton({
   icon,
   label,
   onPress,
-  tokens,
 }: {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   onPress: () => void
-  tokens: ReturnType<typeof useDesignTokens>
 }) {
+  const tokens = useDesignTokens()
+
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.socialButton,
         {
-          backgroundColor: tokens.background,
+          backgroundColor: tokens.surface,
           borderColor: tokens.border,
+          opacity: pressed ? 0.88 : 1,
         },
       ]}
     >
-      <Ionicons color={tokens.textPrimary} name={icon} size={21} />
+      <Ionicons color={tokens.textPrimary} name={icon} size={20} />
       <Text
         text={label}
-        weight="bold"
-        style={[styles.socialButtonText, { color: tokens.textPrimary }]}
+        weight="semiBold"
+        size="sm"
+        style={{ color: tokens.textPrimary }}
       />
     </Pressable>
   )
@@ -213,11 +215,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 40,
   },
-  dividerText: {
-    fontSize: 18,
-    lineHeight: 22,
-    marginVertical: 2,
-    textAlign: "center",
+  divider: {
+    alignItems: "center",
+    marginVertical: 4,
   },
   form: {
     alignItems: "stretch",
@@ -237,22 +237,14 @@ const styles = StyleSheet.create({
   },
   socialButton: {
     alignItems: "center",
+    borderCurve: "continuous",
     borderRadius: 12,
     borderWidth: 1,
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
     justifyContent: "center",
-    minHeight: 48,
+    minHeight: 52,
     paddingHorizontal: 16,
     width: "100%",
-  },
-  socialButtonText: {
-    fontSize: 17,
-    lineHeight: 22,
-  },
-  title: {
-    fontSize: 28,
-    lineHeight: 34,
-    textAlign: "center",
   },
 })

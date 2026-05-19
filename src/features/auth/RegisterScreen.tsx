@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
-import { Banner, Button, Text, useDesignTokens } from "@/ui"
+import { Banner, Button, Text, appTypography, useDesignTokens } from "@/ui"
 
 import { AuthTextField } from "./AuthTextField"
 
@@ -85,11 +85,11 @@ export function RegisterScreen() {
           <Text
             text="Create account"
             weight="bold"
-            style={[styles.title, { color: tokens.textPrimary }]}
+            style={[appTypography.authTitle, { color: tokens.textPrimary, textAlign: "center" }]}
           />
           <Text
             text="Add your details to continue."
-            style={[styles.subtitle, { color: tokens.textSecondary }]}
+            style={[appTypography.authSubtitle, { color: tokens.textSecondary, marginTop: 6, textAlign: "center" }]}
           />
         </View>
 
@@ -264,16 +264,5 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 21,
-    marginTop: 6,
-    textAlign: "center",
-  },
-  title: {
-    fontSize: 28,
-    lineHeight: 34,
-    textAlign: "center",
   },
 })

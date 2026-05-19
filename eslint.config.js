@@ -17,6 +17,8 @@ module.exports = [
       "android/**",
       ".expo/**",
       ".vscode/**",
+      "coverage/**",
+      "dist/**",
       "vesta_mobile_app/**",
       "eslint.config.js",
       ".eslintrc.js",

@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient"
 
 import { SurfaceCard } from "@/ui"
 
-const HERO_BACKGROUND = "#060912"
+const HERO_BACKGROUND = "#020408"
 const HERO_BORDER = "rgba(83, 145, 255, 0.26)"
 const HERO_EDGE_BORDER = "rgba(255, 255, 255, 0.06)"
 const HERO_SHADOW = "#1A4EA9"
@@ -13,6 +13,7 @@ export const timeHeroColors = {
   primaryText: "#F4F7FF",
   secondaryText: "rgba(231, 238, 255, 0.78)",
   tertiaryText: "rgba(214, 225, 255, 0.66)",
+  divider: "rgba(255, 255, 255, 0.10)",
 } as const
 
 type TimeHeroCardVariant = "default" | "compact"
@@ -39,21 +40,21 @@ export function TimeHeroCard({
       style={[styles.baseCard, isCompact ? styles.compactCard : styles.defaultCard, style]}
     >
       <LinearGradient
-        colors={["#03050B", "#070C16", "#0C1422"]}
-        end={{ x: 0.92, y: 0.12 }}
+        colors={["#020408", "#050919", "#0A1428"]}
+        end={{ x: 0.92, y: 0.08 }}
         pointerEvents="none"
-        start={{ x: 0.1, y: 0.96 }}
+        start={{ x: 0.08, y: 0.98 }}
         style={styles.heroGradient}
       />
       <LinearGradient
         colors={[
-          "rgba(76, 132, 255, 0.18)",
-          "rgba(76, 132, 255, 0.08)",
-          "rgba(76, 132, 255, 0.00)",
+          "rgba(60, 110, 220, 0.14)",
+          "rgba(60, 110, 220, 0.06)",
+          "rgba(60, 110, 220, 0.00)",
         ]}
         end={{ x: 1, y: 0 }}
         pointerEvents="none"
-        start={{ x: 0.56, y: 0.42 }}
+        start={{ x: 0.52, y: 0.48 }}
         style={[
           styles.heroTopBloom,
           usesCompactGradient ? styles.compactTopBloom : styles.defaultTopBloom,
@@ -61,9 +62,9 @@ export function TimeHeroCard({
       />
       <LinearGradient
         colors={[
-          "rgba(146, 184, 255, 0.12)",
-          "rgba(146, 184, 255, 0.05)",
-          "rgba(146, 184, 255, 0.00)",
+          "rgba(100, 140, 220, 0.07)",
+          "rgba(100, 140, 220, 0.03)",
+          "rgba(100, 140, 220, 0.00)",
         ]}
         end={{ x: 0.3, y: 0.62 }}
         pointerEvents="none"
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   compactBottomBloom: {
-    opacity: 0.72,
+    opacity: 0.5,
   },
   compactCard: {
     borderCurve: "continuous",
@@ -112,14 +113,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   compactTopBloom: {
-    opacity: 0.68,
+    opacity: 0.9,
   },
   defaultBottomBloom: {
     borderRadius: 240,
     bottom: -108,
     height: 228,
     left: -92,
-    opacity: 0.72,
+    opacity: 0.5,
     position: "absolute",
     width: 284,
   },
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   defaultTopBloom: {
     borderRadius: 260,
     height: 236,
-    opacity: 0.44,
+    opacity: 0.9,
     position: "absolute",
     right: -34,
     top: -84,

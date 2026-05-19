@@ -111,9 +111,7 @@ export function PlanningMonthCalendar({
                 style={[
                   styles.overrideIndicator,
                   {
-                    backgroundColor: isSelected
-                      ? tokens.accentForeground
-                      : tokens.textSecondary,
+                    backgroundColor: isSelected ? tokens.accentForeground : tokens.textSecondary,
                   },
                 ]}
               />

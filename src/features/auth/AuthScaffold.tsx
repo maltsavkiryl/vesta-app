@@ -2,7 +2,7 @@ import { PropsWithChildren, ReactNode, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { AppScrollScreen, Banner, Text, useDesignTokens } from "@/ui"
+import { AppScrollScreen, Banner, Text, appTypography, useDesignTokens } from "@/ui"
 
 export function AuthScaffold({
   children,
@@ -19,6 +19,7 @@ export function AuthScaffold({
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
   const palette = useMemo(() => getAuthPalette(tokens), [tokens])
+
   const contentContainerStyle = useMemo(
     () => [
       styles.screen,
@@ -29,25 +30,6 @@ export function AuthScaffold({
     ],
     [insets.top, palette.canvas],
   )
-  const screenStyle = useMemo(() => ({ backgroundColor: palette.canvas }), [palette.canvas])
-  const titleStyle = useMemo(() => [styles.title, { color: palette.heroText }], [palette.heroText])
-  const subtitleStyle = useMemo(() => ({ color: palette.heroSubtitle }), [palette.heroSubtitle])
-  const cardStyle = useMemo(
-    () => [styles.card, { backgroundColor: tokens.surfaceSecondary }],
-    [tokens.surfaceSecondary],
-  )
-  const ringLargeStyle = useMemo(
-    () => [styles.ringLarge, { borderColor: palette.ringLarge }],
-    [palette.ringLarge],
-  )
-  const ringMediumStyle = useMemo(
-    () => [styles.ringMedium, { borderColor: palette.ringMedium }],
-    [palette.ringMedium],
-  )
-  const ringSmallStyle = useMemo(
-    () => [styles.ringSmall, { borderColor: palette.ringSmall }],
-    [palette.ringSmall],
-  )
 
   return (
     <AppScrollScreen
@@ -55,20 +37,24 @@ export function AuthScaffold({
       contentContainerStyle={contentContainerStyle}
       scrollEnabled={scrollEnabled}
       showsVerticalScrollIndicator={scrollEnabled}
-      style={screenStyle}
+      style={{ backgroundColor: palette.canvas }}
     >
       <View style={styles.hero}>
-        <View style={ringLargeStyle} />
-        <View style={ringMediumStyle} />
-        <View style={ringSmallStyle} />
+        <View style={[styles.ringLarge, { borderColor: palette.ringLarge }]} />
+        <View style={[styles.ringMedium, { borderColor: palette.ringMedium }]} />
+        <View style={[styles.ringSmall, { borderColor: palette.ringSmall }]} />
         <VestaMark palette={palette} />
         <View style={styles.heroCopy}>
-          <Text text={title} weight="bold" style={titleStyle} />
-          <Text text={subtitle} size="xs" style={subtitleStyle} />
+          <Text
+            text={title}
+            weight="bold"
+            style={[appTypography.authHeroTitle, { color: palette.heroText }]}
+          />
+          <Text text={subtitle} size="xs" style={{ color: palette.heroSubtitle }} />
         </View>
       </View>
 
-      <View style={cardStyle}>
+      <View style={[styles.card, { backgroundColor: tokens.surfaceSecondary }]}>
         {children}
         {footer ? <View style={styles.footer}>{footer}</View> : null}
       </View>
@@ -77,23 +63,10 @@ export function AuthScaffold({
 }
 
 function VestaMark({ palette }: { palette: ReturnType<typeof getAuthPalette> }) {
-  const markStyle = useMemo(
-    () => [styles.mark, { backgroundColor: palette.markBackground }],
-    [palette.markBackground],
-  )
-  const outerLineStyle = useMemo(
-    () => [styles.markLineOuter, { borderColor: palette.heroText }],
-    [palette.heroText],
-  )
-  const innerLineStyle = useMemo(
-    () => [styles.markLineInner, { borderColor: palette.markInner }],
-    [palette.markInner],
-  )
-
   return (
-    <View style={markStyle}>
-      <View style={outerLineStyle} />
-      <View style={innerLineStyle} />
+    <View style={[styles.mark, { backgroundColor: palette.markBackground }]}>
+      <View style={[styles.markLineOuter, { borderColor: palette.heroText }]} />
+      <View style={[styles.markLineInner, { borderColor: palette.markInner }]} />
     </View>
   )
 }
@@ -113,8 +86,8 @@ function getAuthPalette(tokens: ReturnType<typeof useDesignTokens>) {
 
   return {
     canvas: tokens.isDark ? tokens.backgroundMuted : tokens.textPrimary,
-    heroSubtitle: `${heroText}6B`,
-    heroText,
+    heroSubtitle: tokens.isDark ? tokens.heroTextMuted : `${heroText}6B`,
+    heroText: tokens.isDark ? tokens.heroText : heroText,
     markBackground: `${heroText}1F`,
     markInner: `${heroText}8C`,
     ringLarge: `${heroText}08`,
@@ -203,9 +176,5 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 0,
     paddingHorizontal: 0,
-  },
-  title: {
-    fontSize: 34,
-    lineHeight: 39,
   },
 })

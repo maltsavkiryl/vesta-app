@@ -3,6 +3,8 @@ ios
 android
 .expo
 .vscode
+coverage
+dist
 ignite/ignite.json
 package.json
 .eslintignore

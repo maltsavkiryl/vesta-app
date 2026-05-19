@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { Image, StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -28,6 +26,7 @@ import {
   StatusBadge,
   SurfaceCard,
   Text,
+  appTypography,
   useDesignTokens,
 } from "@/ui"
 
@@ -49,6 +48,14 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
         : event.type === "breakStart"
           ? tokens.warning
           : tokens.accent
+  const iconBackgroundColor =
+    event.type === "clockIn"
+      ? tokens.successSoft
+      : event.type === "clockOut"
+        ? tokens.dangerSoft
+        : event.type === "breakStart"
+          ? tokens.warningSoft
+          : tokens.accentSoft
 
   return (
     <View
@@ -60,7 +67,7 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
         },
       ]}
     >
-      <View style={[styles.timelineIcon, { backgroundColor: `${iconColor}14` }]}>
+      <View style={[styles.timelineIcon, { backgroundColor: iconBackgroundColor }]}>
         <Ionicons color={iconColor} name={iconName} size={16} />
       </View>
       <View style={styles.flex}>
@@ -132,7 +139,7 @@ export function TimeEntryDetailScreen() {
         <Text
           text={getTimeEntryTimeRangeLabel(entry)}
           weight="bold"
-          style={[styles.heroTitle, { color: timeHeroColors.primaryText }]}
+          style={[appTypography.pageTitle, { color: timeHeroColors.primaryText }]}
         />
         <Text
           text={`${entry.shiftLabel} · ${entry.venueName}`}
@@ -144,7 +151,7 @@ export function TimeEntryDetailScreen() {
           <Text
             text={primaryLocation?.addressLabel ?? entry.venueAddress}
             size="xxs"
-            style={[styles.flex, { color: timeHeroColors.secondaryText, lineHeight: 20 }]}
+            style={[styles.flex, styles.heroMetaText, { color: timeHeroColors.secondaryText }]}
           />
         </View>
       </TimeHeroCard>
@@ -288,9 +295,8 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 2,
   },
-  heroTitle: {
-    fontSize: 28,
-    lineHeight: 33,
+  heroMetaText: {
+    lineHeight: 20,
   },
   heroTopRow: {
     alignItems: "center",

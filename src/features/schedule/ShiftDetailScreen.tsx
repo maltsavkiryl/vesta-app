@@ -144,7 +144,7 @@ export function ShiftDetailScreen() {
 
       <GroupedSection
         title="Need a change?"
-        bodyStyle={styles.actionSectionBody}
+        bodyStyle={[styles.actionSectionBody, { backgroundColor: tokens.transparent }]}
       >
         <View style={styles.actionStack}>
           <ActionRow
@@ -180,7 +180,6 @@ export function ShiftDetailScreen() {
 
 const styles = StyleSheet.create({
   actionSectionBody: {
-    backgroundColor: "transparent",
     borderWidth: 0,
     elevation: 0,
     shadowOpacity: 0,

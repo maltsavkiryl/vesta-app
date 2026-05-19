@@ -9,20 +9,38 @@ import { ExpoConfig, ConfigContext } from "@expo/config"
 import "tsx/cjs"
 
 /**
- * @param config ExpoConfig coming from the static config app.json if it exists
+ * Single source of truth for Expo app configuration.
  *
- * You can read more about Expo's Configuration Resolution Rules here:
+ * You can read more about Expo's configuration rules here:
  * https://docs.expo.dev/workflow/configuration/#configuration-resolution-rules
  */
-module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
-  const existingPlugins = config.plugins ?? []
-
+module.exports = (_: ConfigContext): ExpoConfig => {
   return {
-    ...config,
+    name: "Vesta",
+    slug: "vesta",
+    scheme: "vesta",
+    version: "1.0.0",
+    orientation: "portrait",
+    userInterfaceStyle: "automatic",
+    icon: "./assets/images/app-icon-all.png",
+    updates: {
+      fallbackToCacheTimeout: 0,
+    },
+    assetBundlePatterns: ["**/*"],
+    android: {
+      icon: "./assets/images/app-icon-android-legacy.png",
+      package: "services.vesta.mobile",
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/app-icon-android-adaptive-foreground.png",
+        backgroundImage: "./assets/images/app-icon-android-adaptive-background.png",
+      },
+      allowBackup: false,
+    },
     ios: {
-      ...config.ios,
+      icon: "./assets/images/app-icon-ios.png",
+      supportsTablet: true,
+      bundleIdentifier: "services.vesta.mobile",
       infoPlist: {
-        ...(config.ios && config.ios.infoPlist ? config.ios.infoPlist : {}),
         ITSAppUsesNonExemptEncryption: false,
         NSLocationWhenInUseUsageDescription:
           "Allow Vesta to capture your work location for clock-in, breaks, and clock-out.",
@@ -43,8 +61,35 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         ],
       },
     },
+    web: {
+      favicon: "./assets/images/app-icon-web-favicon.png",
+      bundler: "metro",
+    },
     plugins: [
-      ...existingPlugins,
+      "expo-localization",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash-logo.png",
+          imageWidth: 300,
+          resizeMode: "contain",
+          backgroundColor: "#FFFFFF",
+        },
+      ],
+      [
+        "react-native-edge-to-edge",
+        {
+          android: {
+            parentTheme: "Light",
+            enforceNavigationBarContrast: false,
+          },
+        },
+      ],
+      "expo-build-properties",
+      "expo-router",
+      "@react-native-community/datetimepicker",
+      "./plugins/withLiveActivity",
       [
         "expo-image-picker",
         {
@@ -66,5 +111,22 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         },
       ],
     ],
+    experiments: {
+      tsconfigPaths: true,
+      typedRoutes: true,
+    },
+    extra: {
+      ignite: {
+        version: "11.5.0",
+      },
+      build: {
+        profile: process.env.EAS_BUILD_PROFILE ?? null,
+      },
+      router: {},
+      eas: {
+        projectId: "3599d2c2-1d60-44a0-991e-062ed8475afd",
+      },
+    },
+    owner: "kirylmaltsav",
   }
 }

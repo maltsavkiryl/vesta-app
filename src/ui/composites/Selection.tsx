@@ -203,6 +203,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
   },
+  groupedRow: {
+    borderRadius: 0,
+    borderWidth: 0,
+  },
   row: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -212,10 +216,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-  },
-  groupedRow: {
-    borderRadius: 0,
-    borderWidth: 0,
   },
   rowCopy: {
     flex: 1,

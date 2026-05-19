@@ -227,10 +227,7 @@ export function RequestScreen() {
         <View style={styles.flatSection}>
           <Text
             size="xxs"
-            style={[
-              styles.flatSectionTitle,
-              { color: tokens.textMuted },
-            ]}
+            style={[styles.flatSectionTitle, { color: tokens.textMuted }]}
             text="Which shift needs help?"
             weight="semiBold"
           />

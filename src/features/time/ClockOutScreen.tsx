@@ -1,15 +1,21 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useClockSummary, useTimeDataQuery } from "@/features/time/data/time.queries"
-import { AppButton, AppScrollScreen, DetailRow, GroupedSection, Text, useDesignTokens } from "@/ui"
+import {
+  AppButton,
+  AppScrollScreen,
+  DetailRow,
+  GroupedSection,
+  SuccessState,
+  Text,
+  appTypography,
+  useDesignTokens,
+} from "@/ui"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
@@ -54,38 +60,18 @@ export function ClockOutScreen() {
       topInset="none"
     >
       {confirmed ? (
-        <View style={styles.successContent}>
-          <View style={[styles.successIcon, { backgroundColor: `${tokens.success}1A` }]}>
-            <Ionicons color={tokens.success} name="checkmark-circle-outline" size={42} />
-          </View>
-          <View style={styles.centerStack}>
-            <Text
-              text="Great shift!"
-              weight="bold"
-              style={{
-                color: tokens.textPrimary,
-                fontSize: 22,
-                lineHeight: 28,
-                textAlign: "center",
-              }}
-            />
-            <Text
-              text="You've clocked out successfully"
-              size="xs"
-              style={{ color: tokens.textSecondary, textAlign: "center" }}
-            />
-          </View>
+        <SuccessState title="Great shift!" subtitle="You've clocked out successfully">
           <View style={styles.successStats}>
             <View style={styles.statBlock}>
               <Text
                 text={workedLabel}
                 weight="bold"
-                style={{ color: tokens.textPrimary, fontSize: 22, lineHeight: 27 }}
+                style={[appTypography.successTitle, { color: tokens.textPrimary }]}
               />
               <Text
                 text="Worked"
                 size="xxs"
-                style={{ color: tokens.textSecondary, textAlign: "center" }}
+                style={[styles.statLabel, { color: tokens.textSecondary }]}
               />
             </View>
             <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
@@ -93,23 +79,23 @@ export function ClockOutScreen() {
               <Text
                 text={`€${earnings}`}
                 weight="bold"
-                style={{ color: tokens.success, fontSize: 22, lineHeight: 27 }}
+                style={[appTypography.successTitle, { color: tokens.success }]}
               />
               <Text
                 text="Estimated"
                 size="xxs"
-                style={{ color: tokens.textSecondary, textAlign: "center" }}
+                style={[styles.statLabel, { color: tokens.textSecondary }]}
               />
             </View>
           </View>
-        </View>
+        </SuccessState>
       ) : (
         <View style={styles.content}>
           <View style={styles.summaryIntro}>
             <Text
               text={workedLabel}
               weight="bold"
-              style={{ color: tokens.textPrimary, fontSize: 40, lineHeight: 44 }}
+              style={[appTypography.heroValue, styles.heroValue, { color: tokens.textPrimary }]}
             />
           </View>
 
@@ -166,7 +152,7 @@ function PaySummary({ earnings, workedLabel }: { earnings: string; workedLabel: 
       <Text
         text={`€${earnings}`}
         weight="bold"
-        style={{ color: tokens.success, fontSize: 24, lineHeight: 28 }}
+        style={[styles.payValue, { color: tokens.success }]}
       />
     </View>
   )
@@ -177,10 +163,6 @@ function rateLabelForDisplay(workedLabel: string) {
 }
 
 const styles = StyleSheet.create({
-  centerStack: {
-    alignItems: "center",
-    gap: 6,
-  },
   content: {
     gap: 20,
     padding: 20,
@@ -195,6 +177,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 4,
   },
+  heroValue: {
+    fontSize: 40,
+  },
   payCopy: {
     flex: 1,
     gap: 2,
@@ -206,6 +191,10 @@ const styles = StyleSheet.create({
     minHeight: 58,
     paddingHorizontal: 16,
     paddingVertical: 14,
+  },
+  payValue: {
+    fontSize: 24,
+    lineHeight: 28,
   },
   screen: {
     flexGrow: 1,
@@ -219,18 +208,8 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
   },
-  successContent: {
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  successIcon: {
-    alignItems: "center",
-    borderRadius: 36,
-    height: 72,
-    justifyContent: "center",
-    width: 72,
+  statLabel: {
+    textAlign: "center",
   },
   successStats: {
     flexDirection: "row",

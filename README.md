@@ -5,7 +5,7 @@ Expo Router React Native app for the Vesta employee mobile experience.
 ## Requirements
 
 - Node.js 20 or newer
-- pnpm
+- pnpm 10.7.1 or newer
 - Xcode or Android Studio for native simulator builds
 - EAS CLI for local native builds
 
@@ -16,12 +16,21 @@ pnpm install
 pnpm start
 ```
 
-The app uses a development client. Build one before running on a simulator or device:
+For local native development, use Expo run commands:
+
+```bash
+pnpm ios
+pnpm android
+```
+
+The app uses a development client. Use the local EAS archive builds when you specifically need installable simulator or device artifacts:
 
 ```bash
 pnpm build:ios:sim
 pnpm build:android:sim
 ```
+
+`pnpm build:ios:device` and `pnpm build:ios:prod` require valid Apple signing credentials that can be imported into the local keychain.
 
 For local Android API access, reverse the common development ports:
 
@@ -44,13 +53,12 @@ Do not put API secrets, signing keys, or private tokens in the JavaScript config
 Run these before opening a PR:
 
 ```bash
-pnpm compile
+pnpm check
 pnpm lint:check
-pnpm test --runInBand
-pnpm depcruise
 ```
 
 `pnpm lint` rewrites files. Use `pnpm lint:check` when you only want validation.
+`pnpm doctor` runs `expo-doctor` directly when you want to validate the Expo/EAS setup surface without running the full check suite.
 
 ## Architecture Notes
 
