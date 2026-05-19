@@ -163,7 +163,11 @@ export function Screen(props: ScreenProps) {
 
   return (
     <View
-      style={[containerStyle, { backgroundColor: backgroundColor || colors.background }, containerInsets]}
+      style={[
+        containerStyle,
+        { backgroundColor: backgroundColor || colors.background },
+        containerInsets,
+      ]}
     >
       <SystemBars
         {...SystemBarsProps}

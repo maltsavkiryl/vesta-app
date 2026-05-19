@@ -13,10 +13,9 @@ import { translate } from "@/i18n/translate"
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
-import { type ExtendedEdge, useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
-
 import { type IconTypes, PressableIcon } from "@/ui/primitives/Icon"
 import { Text, type TextProps } from "@/ui/primitives/Text"
+import { type ExtendedEdge, useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
 
 export interface HeaderProps {
   LeftActionComponent?: ReactElement

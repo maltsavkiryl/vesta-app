@@ -1,56 +1,34 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
+/* eslint-disable react-native/no-inline-styles */
 
-import { useMemo, useState } from "react"
-import { Platform, Pressable, StyleSheet, View } from "react-native"
+import { useCallback, useLayoutEffect, useMemo, useState } from "react"
+import { Platform, Pressable, StyleSheet, TextInput, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker"
+import { useNavigation } from "@react-navigation/native"
 
+import { formatFullDate } from "@/core/date"
 import type { AvailabilityStatus } from "@/core/models"
+import {
+  availabilityStatusOptions,
+  durationLabel,
+  formatTime,
+  nearestMinute,
+  timeValueToDate,
+} from "@/features/schedule/availability.utils"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { getTemplateAvailability, getWeekdayKey } from "@/features/schedule/schedule.utils"
 import {
   AppButton,
   AppScrollScreen,
   GroupedSection,
   ListRow,
   Text,
-  appLayout,
+  createHeaderActionOptions,
+  useAppTheme,
   useDesignTokens,
 } from "@/ui"
-
-const TIME_REFERENCE_DATE = "2026-01-01"
-
-const statusOptions: Record<
-  AvailabilityStatus,
-  { label: string; description: string; tone: "dark" | "success" | "accent" }
-> = {
-  unavailable: { label: "Unavailable", description: "Day off", tone: "dark" },
-  available: { label: "Available", description: "Can work if needed", tone: "success" },
-  preferred: { label: "Preferred", description: "I prefer to work", tone: "accent" },
-}
-
-function nearestMinute(minute: number) {
-  const options = [0, 15, 30, 45]
-  const closest = options.reduce((current, candidate) =>
-    Math.abs(candidate - minute) < Math.abs(current - minute) ? candidate : current,
-  )
-  return String(closest).padStart(2, "0")
-}
-
-function parseTime(value: string): [number, string] {
-  const [hour, minute = "0"] = value.split(":")
-  return [Number.parseInt(hour, 10) || 0, nearestMinute(Number.parseInt(minute, 10) || 0)]
-}
-
-function formatTime(hour: number, minute: string) {
-  return `${String((hour + 24) % 24).padStart(2, "0")}:${minute}`
-}
-
-function timeValueToDate(value: string) {
-  const [hour, minute] = parseTime(value)
-  return new Date(`${TIME_REFERENCE_DATE}T${String(hour).padStart(2, "0")}:${minute}:00`)
-}
 
 function formatTimeLabel(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -59,65 +37,147 @@ function formatTimeLabel(value: string) {
   }).format(timeValueToDate(value))
 }
 
-function durationLabel(startTime: string, endTime: string) {
-  const [startHour, startMinute] = parseTime(startTime)
-  const [endHour, endMinute] = parseTime(endTime)
-  const start = startHour * 60 + Number(startMinute)
-  let end = endHour * 60 + Number(endMinute)
-  if (end <= start) end += 24 * 60
-
-  const minutes = end - start
-  const hours = Math.floor(minutes / 60)
-  const remainder = minutes % 60
-  return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`
+function TimeValue({ value }: { value: string }) {
+  const tokens = useDesignTokens()
+  return (
+    <Text
+      text={formatTimeLabel(value)}
+      size="xs"
+      weight="semiBold"
+      style={{ color: tokens.accent }}
+    />
+  )
 }
 
 export function AvailabilityScreen() {
   const router = useRouter()
-  const { date = new Date().toISOString() } = useLocalSearchParams<{ date: string }>()
+  const navigation = useNavigation()
+  const {
+    date = new Date().toISOString().slice(0, 10),
+    timeField,
+    timeNonce,
+    timeValue,
+  } = useLocalSearchParams<{
+    date: string
+    timeField?: "startTime" | "endTime"
+    timeNonce?: string
+    timeValue?: string
+  }>()
+  const { theme } = useAppTheme()
   const tokens = useDesignTokens()
-  const { updateAvailability } = useScheduleActions()
+  const { saveAvailabilityOverride } = useScheduleActions()
   const { state } = useScheduleStateQuery()
 
-  const day = useMemo(
+  const templateDay = useMemo(
     () =>
-      state?.availability[date] ?? {
-        date,
-        status: "available" as const,
-        startTime: "17:00",
-        endTime: "23:00",
-      },
-    [date, state?.availability],
+      state
+        ? getTemplateAvailability(state.availabilityTemplate, date)
+        : { status: "available" as const, startTime: "17:00", endTime: "23:00" },
+    [date, state],
   )
-  const [status, setStatus] = useState<AvailabilityStatus>(day.status)
-  const [startTime, setStartTime] = useState(day.startTime)
-  const [endTime, setEndTime] = useState(day.endTime)
+  const existingOverride = state?.availabilityOverrides[date]
+  const initialDay = existingOverride ?? { date, ...templateDay }
+
+  const [status, setStatus] = useState<AvailabilityStatus>(initialDay.status)
+  const [startTime, setStartTime] = useState(initialDay.startTime)
+  const [endTime, setEndTime] = useState(initialDay.endTime)
+  const [note, setNote] = useState(initialDay.note ?? "")
   const [activeTimeField, setActiveTimeField] = useState<"startTime" | "endTime" | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   const pickerValue = activeTimeField === "endTime" ? endTime : startTime
+  const weekdayLabel = getWeekdayKey(date)
 
-  const handleTimeChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === "android") {
-      if (event.type !== "set" || !selectedDate || !activeTimeField) {
-        setActiveTimeField(null)
-        return
-      }
-    }
-
-    if (!selectedDate || !activeTimeField) {
+  const handleSave = useCallback(async () => {
+    if (isSaving) {
       return
     }
 
-    const nextValue = formatTime(selectedDate.getHours(), nearestMinute(selectedDate.getMinutes()))
-    if (activeTimeField === "startTime") {
+    setIsSaving(true)
+    try {
+      const result = await saveAvailabilityOverride({
+        date,
+        endTime,
+        note: note.trim() || undefined,
+        startTime,
+        status,
+      })
+      if (!result.ok) return
+      router.back()
+    } finally {
+      setIsSaving(false)
+    }
+  }, [date, endTime, isSaving, note, router, saveAvailabilityOverride, startTime, status])
+
+  const updateTimeValue = useCallback((field: "startTime" | "endTime", nextValue: string) => {
+    if (field === "startTime") {
       setStartTime(nextValue)
     } else {
       setEndTime(nextValue)
     }
+  }, [])
 
-    if (Platform.OS === "android") {
-      setActiveTimeField(null)
+  useLayoutEffect(() => {
+    navigation.setOptions(
+      createHeaderActionOptions(theme, {
+        left: {
+          kind: "close",
+          onPress: () => {
+            router.back()
+          },
+        },
+        right: {
+          label: "Save",
+          kind: "confirm",
+          onPress: () => {
+            void handleSave()
+          },
+          disabled: isSaving,
+        },
+      }),
+    )
+  }, [handleSave, isSaving, navigation, router, theme])
+
+  useLayoutEffect(() => {
+    if (!timeNonce || !timeField || !timeValue) {
+      return
     }
+
+    updateTimeValue(timeField, timeValue)
+    router.setParams({
+      timeField: undefined,
+      timeNonce: undefined,
+      timeValue: undefined,
+    })
+  }, [router, timeField, timeNonce, timeValue, updateTimeValue])
+
+  const handleAndroidTimeChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (event.type !== "set" || !selectedDate || !activeTimeField) {
+      setActiveTimeField(null)
+      return
+    }
+
+    const nextValue = formatTime(selectedDate.getHours(), nearestMinute(selectedDate.getMinutes()))
+    updateTimeValue(activeTimeField, nextValue)
+    setActiveTimeField(null)
+  }
+
+  const handleTimePress = (field: "startTime" | "endTime") => {
+    if (Platform.OS === "ios") {
+      router.push({
+        params: {
+          date,
+          field,
+          returnTo: "availability",
+          title: field === "startTime" ? "Choose start time" : "Choose end time",
+          value: field === "startTime" ? startTime : endTime,
+        },
+        pathname: "/(app)/availability-time-picker",
+      })
+      return
+    }
+
+    setActiveTimeField(field)
   }
 
   return (
@@ -126,218 +186,243 @@ export function AvailabilityScreen() {
       style={{ backgroundColor: tokens.surfaceSecondary }}
     >
       <View style={styles.content}>
-        <GroupedSection title="Availability status">
-          {(Object.keys(statusOptions) as AvailabilityStatus[]).map((candidate, index, items) => {
-            const option = statusOptions[candidate]
-            const active = candidate === status
-            const activeColor =
-              option.tone === "success"
-                ? tokens.success
-                : option.tone === "accent"
-                  ? tokens.accent
-                  : tokens.textSecondary
+        <View style={styles.intro}>
+          <Text
+            text={formatFullDate(date)}
+            weight="bold"
+            style={{ color: tokens.textPrimary, fontSize: 24 }}
+          />
+          <Text
+            text={`Override your ${weekdayLabel} template for this specific date.`}
+            size="xs"
+            style={{ color: tokens.textSecondary }}
+          />
+        </View>
 
-            return (
-              <Pressable
-                key={candidate}
-                onPress={() => setStatus(candidate)}
-                style={({ pressed }) => [
-                  styles.statusRow,
-                  {
-                    backgroundColor: pressed ? tokens.pressed : tokens.transparent,
-                  },
-                ]}
-              >
-                <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
-                  <Ionicons
-                    color={activeColor}
-                    name={
-                      candidate === "preferred"
-                        ? "star-outline"
-                        : candidate === "available"
-                          ? "checkmark-circle-outline"
-                          : "remove-circle-outline"
-                    }
-                    size={18}
-                  />
-                </View>
-                <View style={styles.flex}>
-                  <Text
-                    text={option.label}
-                    size="xs"
-                    weight="medium"
-                    style={{ color: tokens.textPrimary }}
-                  />
-                  <Text text={option.description} size="xxs" style={{ color: tokens.textMuted }} />
-                </View>
-                {active ? (
-                  <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-                ) : null}
-                {index < items.length - 1 ? (
-                  <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
-                ) : null}
-              </Pressable>
-            )
-          })}
+        <GroupedSection title="Default for this weekday">
+          <View style={styles.templateSummary}>
+            <View style={[styles.templateGlyph, { backgroundColor: tokens.accentSoft }]}>
+              <Ionicons color={tokens.accent} name="repeat-outline" size={18} />
+            </View>
+            <View style={styles.flex}>
+              <Text
+                text={`${availabilityStatusOptions[templateDay.status].label} · ${formatTimeLabel(templateDay.startTime)} to ${formatTimeLabel(templateDay.endTime)}`}
+                size="xs"
+                weight="medium"
+                style={{ color: tokens.textPrimary }}
+              />
+              <Text
+                text={
+                  existingOverride
+                    ? "A date-specific override is active."
+                    : "No override yet. Save to customize this date."
+                }
+                size="xxs"
+                style={{ color: tokens.textSecondary }}
+              />
+            </View>
+          </View>
+        </GroupedSection>
+
+        <GroupedSection title="Availability status">
+          {(Object.keys(availabilityStatusOptions) as AvailabilityStatus[]).map(
+            (candidate, index, items) => {
+              const option = availabilityStatusOptions[candidate]
+              const active = candidate === status
+              const activeColor =
+                option.tone === "success"
+                  ? tokens.success
+                  : option.tone === "accent"
+                    ? tokens.accent
+                    : tokens.textSecondary
+
+              return (
+                <Pressable
+                  key={candidate}
+                  onPress={() => setStatus(candidate)}
+                  style={({ pressed }) => [
+                    styles.statusRow,
+                    { backgroundColor: pressed ? tokens.pressed : tokens.transparent },
+                  ]}
+                >
+                  <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
+                    <Ionicons
+                      color={activeColor}
+                      name={
+                        candidate === "preferred"
+                          ? "star-outline"
+                          : candidate === "available"
+                            ? "checkmark-circle-outline"
+                            : "remove-circle-outline"
+                      }
+                      size={18}
+                    />
+                  </View>
+                  <View style={styles.flex}>
+                    <Text
+                      text={option.label}
+                      size="xs"
+                      weight="medium"
+                      style={{ color: tokens.textPrimary }}
+                    />
+                    <Text
+                      text={option.description}
+                      size="xxs"
+                      style={{ color: tokens.textMuted }}
+                    />
+                  </View>
+                  {active ? (
+                    <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+                  ) : null}
+                  {index < items.length - 1 ? (
+                    <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
+                  ) : null}
+                </Pressable>
+              )
+            },
+          )}
         </GroupedSection>
 
         {status !== "unavailable" ? (
-          <GroupedSection title="Working hours">
-            <ListRow
-              title="From"
-              subtitle="When you want to start working"
-              trailing={<TimeValue value={startTime} />}
-              onPress={() =>
-                setActiveTimeField((current) => (current === "startTime" ? null : "startTime"))
-              }
-            />
-            <ListRow
-              title="To"
-              subtitle="When you want to stop working"
-              trailing={<TimeValue value={endTime} />}
-              onPress={() =>
-                setActiveTimeField((current) => (current === "endTime" ? null : "endTime"))
-              }
-              isLast={activeTimeField == null || Platform.OS === "android"}
-            />
-            {activeTimeField && Platform.OS === "ios" ? (
-              <View
-                style={[
-                  styles.pickerCard,
-                  {
-                    backgroundColor: tokens.backgroundMuted,
-                    borderColor: tokens.border,
-                  },
-                ]}
-              >
-                <Text
-                  text={activeTimeField === "startTime" ? "Choose start time" : "Choose end time"}
-                  size="xxs"
-                  weight="semiBold"
-                  style={{ color: tokens.textMuted }}
-                />
+          <View style={styles.timeSection}>
+            <GroupedSection title="Working hours">
+              <ListRow
+                title="From"
+                subtitle="When you can start"
+                trailing={<TimeValue value={startTime} />}
+                onPress={() => handleTimePress("startTime")}
+              />
+              <ListRow
+                title="To"
+                subtitle="When you can finish"
+                trailing={<TimeValue value={endTime} />}
+                onPress={() => handleTimePress("endTime")}
+                isLast
+              />
+              {activeTimeField && Platform.OS === "android" ? (
                 <DateTimePicker
-                  display="spinner"
+                  display="default"
                   mode="time"
                   minuteInterval={15}
-                  onChange={handleTimeChange}
+                  onChange={handleAndroidTimeChange}
                   value={timeValueToDate(pickerValue)}
                 />
-              </View>
-            ) : null}
-            {activeTimeField && Platform.OS === "android" ? (
-              <DateTimePicker
-                display="default"
-                mode="time"
-                minuteInterval={15}
-                onChange={handleTimeChange}
-                value={timeValueToDate(pickerValue)}
-              />
-            ) : null}
+              ) : null}
+            </GroupedSection>
             <Text
-              text={`Duration: ${durationLabel(startTime, endTime)}`}
-              size="xs"
-              style={{ color: tokens.textSecondary, textAlign: "center" }}
+              text={`Total span ${durationLabel(startTime, endTime)}`}
+              size="xxs"
+              weight="medium"
+              style={{ color: tokens.textMuted, textAlign: "center" }}
             />
-          </GroupedSection>
+          </View>
         ) : null}
 
-        <AppButton
-          label="Save availability"
-          onPress={async () => {
-            const result = await updateAvailability({
-              date,
-              status,
-              startTime,
-              endTime,
-            })
-            if (!result.ok) return
-            router.back()
-          }}
-        />
+        <View style={[styles.noteShell, { backgroundColor: tokens.searchBackground }]}>
+          <Text text="NOTE" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
+          <TextInput
+            multiline
+            numberOfLines={3}
+            onChangeText={setNote}
+            placeholder="Optional context for your manager"
+            placeholderTextColor={tokens.textMuted}
+            style={[styles.noteInput, { color: tokens.textPrimary }]}
+            textAlignVertical="top"
+            value={note}
+          />
+        </View>
+
+        {existingOverride ? (
+          <View style={styles.buttonStack}>
+            <AppButton
+              label="Use weekly template instead"
+              onPress={async () => {
+                const result = await saveAvailabilityOverride({
+                  date,
+                  endTime: templateDay.endTime,
+                  note: undefined,
+                  startTime: templateDay.startTime,
+                  status: templateDay.status,
+                })
+                if (!result.ok) return
+                router.back()
+              }}
+              variant="secondary"
+            />
+          </View>
+        ) : null}
       </View>
     </AppScrollScreen>
   )
 }
 
-function TimeValue({ value }: { value: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={styles.timeValue}>
-      <Text
-        text={formatTimeLabel(value)}
-        size="xs"
-        weight="semiBold"
-        style={{ color: tokens.textPrimary }}
-      />
-      <View
-        style={[
-          styles.timeValueBadge,
-          {
-            backgroundColor: tokens.accentSoft,
-          },
-        ]}
-      >
-        <Ionicons color={tokens.accent} name="time-outline" size={14} />
-      </View>
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
+  buttonStack: {
+    gap: 10,
+  },
   content: {
-    gap: appLayout.sheetGap,
-    paddingBottom: appLayout.sheetPaddingBottom,
-    paddingHorizontal: appLayout.sheetPaddingHorizontal,
-    paddingTop: appLayout.sheetPaddingTop,
+    gap: 18,
   },
   flex: {
     flex: 1,
   },
-  pickerCard: {
-    alignItems: "center",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+  intro: {
+    gap: 6,
+  },
+  noteInput: {
+    fontSize: 15,
+    minHeight: 84,
+    paddingVertical: 0,
+  },
+  noteShell: {
+    borderCurve: "continuous",
+    borderRadius: 18,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   rowDivider: {
     bottom: 0,
     height: StyleSheet.hairlineWidth,
-    left: 62,
+    left: 58,
     position: "absolute",
     right: 0,
   },
   screen: {
-    flexGrow: 1,
-    paddingHorizontal: 0,
+    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   statusGlyph: {
     alignItems: "center",
-    borderRadius: 10,
-    height: 34,
+    borderRadius: 12,
+    height: 36,
     justifyContent: "center",
-    width: 34,
+    width: 36,
   },
   statusRow: {
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
-    minHeight: 62,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    minHeight: 66,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
-  timeValue: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-  timeValueBadge: {
+  templateGlyph: {
     alignItems: "center",
     borderRadius: 12,
-    height: 24,
+    height: 38,
     justifyContent: "center",
-    width: 24,
+    width: 38,
+  },
+  templateSummary: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  timeSection: {
+    gap: 8,
   },
 })

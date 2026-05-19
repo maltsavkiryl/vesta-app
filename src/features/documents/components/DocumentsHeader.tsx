@@ -64,16 +64,11 @@ export function DocumentsHeader({
           <Ionicons color={tokens.textSecondary} name="search-outline" size={16} />
         </Pressable>
         <Pressable
+          accessibilityLabel="Upload document"
           onPress={onUploadPress}
-          style={[styles.uploadButton, { backgroundColor: tokens.accent }]}
+          style={[styles.iconButton, styles.uploadIconButton, { backgroundColor: tokens.accent }]}
         >
-          <Ionicons color={tokens.accentForeground} name="cloud-upload-outline" size={14} />
-          <Text
-            text="Upload"
-            size="xxs"
-            weight="medium"
-            style={{ color: tokens.accentForeground }}
-          />
+          <Ionicons color={tokens.accentForeground} name="add" size={18} />
         </Pressable>
       </View>
     </View>
@@ -82,6 +77,7 @@ export function DocumentsHeader({
 
 const styles = StyleSheet.create({
   actions: {
+    alignItems: "center",
     flexDirection: "row",
     gap: 8,
   },
@@ -116,12 +112,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 0,
   },
-  uploadButton: {
-    alignItems: "center",
-    borderRadius: 20,
-    flexDirection: "row",
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+  uploadIconButton: {
+    shadowColor: "#0A84FF",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
   },
 })

@@ -48,7 +48,7 @@ export function ClockOutScreen() {
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
       style={{ backgroundColor: tokens.groupedBackground }}
       topInset="none"

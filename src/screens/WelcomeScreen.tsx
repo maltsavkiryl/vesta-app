@@ -3,8 +3,8 @@ import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
-import { Screen, Text } from "@/ui"
 import type { ThemedStyle } from "@/theme/types"
+import { Screen, Text } from "@/ui"
 import { useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
 
 const vestaLogo = require("@assets/images/app-icon-android-adaptive-foreground.png")

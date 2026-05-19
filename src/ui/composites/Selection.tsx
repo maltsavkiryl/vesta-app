@@ -81,16 +81,20 @@ export function SelectionChip({
 }
 
 export function SelectionRow({
+  backgroundColor,
   leading,
   onPress,
   selected,
+  style,
   subtitle,
   title,
   trailing,
 }: {
+  backgroundColor?: string
   leading?: ReactNode
   onPress: () => void
   selected: boolean
+  style?: StyleProp<ViewStyle>
   subtitle?: string
   title: string
   trailing?: ReactNode
@@ -103,9 +107,10 @@ export function SelectionRow({
       style={[
         styles.row,
         {
-          backgroundColor: selected ? tokens.accentSoft : tokens.surfaceSecondary,
+          backgroundColor: backgroundColor ?? (selected ? tokens.accentSoft : tokens.surfaceSecondary),
           borderColor: selected ? tokens.accent : tokens.border,
         },
+        style,
       ]}
     >
       {leading}

@@ -65,6 +65,32 @@ export default function AppLayout() {
         })}
       />
       <Stack.Screen
+        name="availability-template"
+        options={createPushDetailOptions(theme, "Weekly template", {
+          backgroundColor: groupedSheetBackground,
+          headerBlurEffect: theme.isDark
+            ? "systemUltraThinMaterialDark"
+            : "systemUltraThinMaterialLight",
+        })}
+      />
+      <Stack.Screen
+        name="availability-template/[day]"
+        options={createSheetOptions(theme, "Weekday defaults", {
+          backgroundColor: secondarySheetBackground,
+          ...closeActions,
+          presentation: "pageSheet",
+        })}
+      />
+      <Stack.Screen
+        name="availability-time-picker"
+        options={createSheetOptions(theme, "Choose time", {
+          backgroundColor: secondarySheetBackground,
+          ...closeActions,
+          presentation: "formSheet",
+          preset: "medium",
+        })}
+      />
+      <Stack.Screen
         name="clock-out"
         options={createSheetOptions(theme, "End shift", {
           backgroundColor: groupedSheetBackground,
@@ -80,19 +106,17 @@ export default function AppLayout() {
       />
       <Stack.Screen
         name="time-entries"
-        options={createSheetOptions(theme, "Time entries", { ...closeActions })}
+        options={createPushDetailOptions(theme, "Time entries", {
+          backgroundColor: groupedSheetBackground,
+        })}
       />
       <Stack.Screen
         name="time-entry/[id]"
         options={createPushDetailOptions(theme, "Entry details", {
           backgroundColor: groupedSheetBackground,
-        })}
-      />
-      <Stack.Screen
-        name="document-upload"
-        options={createSheetOptions(theme, "Upload document", {
-          ...closeActions,
-          preset: "medium",
+          headerBlurEffect: theme.isDark
+            ? "systemUltraThinMaterialDark"
+            : "systemUltraThinMaterialLight",
         })}
       />
       <Stack.Screen

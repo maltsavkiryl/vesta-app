@@ -4,7 +4,6 @@ import { ScrollView, type TextStyle, View, type ViewStyle } from "react-native"
 import { translate } from "@/i18n/translate"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
-
 import { AppButton } from "@/ui/composites/AppPrimitives"
 import { Icon } from "@/ui/primitives/Icon"
 import { Screen } from "@/ui/primitives/Screen"
@@ -43,11 +42,7 @@ export function ErrorDetails(props: ErrorDetailsProps) {
         />
       </ScrollView>
 
-      <AppButton
-        label={translate("errorScreen:reset")}
-        onPress={props.onReset}
-        variant="danger"
-      />
+      <AppButton label={translate("errorScreen:reset")} onPress={props.onReset} variant="danger" />
     </Screen>
   )
 }

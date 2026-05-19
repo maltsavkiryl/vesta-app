@@ -20,8 +20,12 @@ type HeaderActionKind = "close" | "confirm"
 
 interface BaseNavigationOptions {
   backgroundColor?: string
+  grabberVisible?: boolean
+  headerBlurEffect?: NativeStackNavigationOptions["headerBlurEffect"]
   headerLeft?: NativeStackNavigationOptions["headerLeft"]
   headerRight?: NativeStackNavigationOptions["headerRight"]
+  sheetCornerRadius?: number
+  sheetAllowedDetents?: NativeStackNavigationOptions["sheetAllowedDetents"]
   unstable_headerLeftItems?: NativeStackNavigationOptions["unstable_headerLeftItems"]
   unstable_headerRightItems?: NativeStackNavigationOptions["unstable_headerRightItems"]
 }
@@ -35,6 +39,7 @@ interface HeaderActionButtonProps {
 
 interface HeaderActionOptions {
   kind: HeaderActionKind
+  label?: string
   onPress: () => void
   disabled?: boolean
 }
@@ -69,10 +74,8 @@ export function HeaderActionButton({ kind, onPress, theme, disabled }: HeaderAct
       onPress={onPress}
       style={[
         styles.headerActionButton,
-        {
-          backgroundColor,
-          opacity: disabled ? 0.9 : 1,
-        },
+        { backgroundColor },
+        disabled ? styles.headerActionButtonDisabled : styles.headerActionButtonEnabled,
       ]}
     >
       <Ionicons color={iconColor} name={isConfirm ? "checkmark" : "close"} size={20} />
@@ -80,24 +83,66 @@ export function HeaderActionButton({ kind, onPress, theme, disabled }: HeaderAct
   )
 }
 
+function HeaderProminentActionButton({
+  label,
+  onPress,
+  theme,
+  disabled,
+}: {
+  label: string
+  onPress: () => void
+  theme: Theme
+  disabled?: boolean
+}) {
+  const backgroundColor = disabled
+    ? theme.isDark
+      ? "rgba(10, 132, 255, 0.42)"
+      : "rgba(0, 122, 255, 0.42)"
+    : theme.isDark
+      ? "#0A84FF"
+      : "#007AFF"
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: Boolean(disabled) }}
+      disabled={disabled}
+      hitSlop={12}
+      onPress={onPress}
+      style={[
+        styles.headerProminentButton,
+        { backgroundColor },
+        disabled ? styles.headerActionButtonDisabled : styles.headerActionButtonEnabled,
+      ]}
+    >
+      <Ionicons color="#FFFFFF" name="checkmark" size={15} />
+      <Text text={label} size="xs" weight="semiBold" style={styles.headerProminentButtonText} />
+    </Pressable>
+  )
+}
+
 function createNativeHeaderItem(
   theme: Theme,
-  { kind, onPress, disabled }: HeaderActionOptions,
+  { kind, label, onPress, disabled }: HeaderActionOptions,
 ): NativeStackHeaderItem {
   const isConfirm = kind === "confirm"
+  const itemLabel = label ?? (isConfirm ? "Save" : "")
+  const accessibilityLabel =
+    label && label.trim().length > 0 ? label : isConfirm ? "Confirm" : "Close"
 
   return {
-    accessibilityLabel: isConfirm ? "Confirm" : "Close",
+    accessibilityLabel,
     disabled,
     icon: {
       type: "sfSymbol",
       name: isConfirm ? "checkmark" : "xmark",
     },
-    label: isConfirm ? "Done" : "Close",
+    label: itemLabel,
     onPress,
     tintColor: isConfirm ? (theme.isDark ? "#0A84FF" : "#007AFF") : theme.colors.text,
     type: "button",
     variant: isConfirm ? "prominent" : "plain",
+    width: itemLabel ? undefined : 36,
   }
 }
 
@@ -137,14 +182,22 @@ export function createHeaderActionOptions(
         )
       : undefined,
     headerRight: rightAction
-      ? () => (
-          <HeaderActionButton
-            disabled={rightAction.disabled}
-            kind={rightAction.kind}
-            onPress={rightAction.onPress}
-            theme={theme}
-          />
-        )
+      ? () =>
+          rightAction.kind === "confirm" ? (
+            <HeaderProminentActionButton
+              disabled={rightAction.disabled}
+              label={rightAction.label ?? "Save"}
+              onPress={rightAction.onPress}
+              theme={theme}
+            />
+          ) : (
+            <HeaderActionButton
+              disabled={rightAction.disabled}
+              kind={rightAction.kind}
+              onPress={rightAction.onPress}
+              theme={theme}
+            />
+          )
       : undefined,
   }
 }
@@ -155,10 +208,13 @@ function createHeaderBaseOptions(
   options: BaseNavigationOptions = {},
 ) {
   const backgroundColor = options.backgroundColor ?? (theme.isDark ? "#000000" : "#FFFFFF")
+  const isIos = Platform.OS === "ios"
 
   return {
     headerShadowVisible: false,
-    headerStyle: { backgroundColor },
+    headerBlurEffect: isIos ? options.headerBlurEffect : undefined,
+    headerStyle: { backgroundColor: isIos ? "transparent" : backgroundColor },
+    headerTransparent: isIos,
     headerTintColor: theme.colors.text,
     headerTitle: title
       ? () => (
@@ -169,6 +225,8 @@ function createHeaderBaseOptions(
       : undefined,
     headerLeft: options.headerLeft,
     headerRight: options.headerRight,
+    unstable_headerLeftItems: options.unstable_headerLeftItems,
+    unstable_headerRightItems: options.unstable_headerRightItems,
   } satisfies Partial<NativeStackNavigationOptions>
 }
 
@@ -183,16 +241,23 @@ export function createSheetOptions(
 ) {
   const preset = options.preset ?? "resizable"
   const presentation = options.presentation ?? "formSheet"
-  const detents =
-    preset === "medium" ? [SHEET_DETENTS.medium] : [SHEET_DETENTS.medium, SHEET_DETENTS.large]
+  const detents = options.sheetAllowedDetents
+    ? options.sheetAllowedDetents
+    : preset === "medium"
+      ? [SHEET_DETENTS.medium]
+      : [SHEET_DETENTS.medium, SHEET_DETENTS.large]
   const initialDetentIndex =
-    preset === "medium" || options.initialDetent !== "large" ? 0 : detents.length - 1
+    Array.isArray(detents) && detents.length > 0
+      ? preset === "medium" || options.initialDetent !== "large"
+        ? 0
+        : detents.length - 1
+      : undefined
 
   return {
     presentation,
     sheetAllowedDetents: detents,
-    sheetCornerRadius: 24,
-    sheetGrabberVisible: true,
+    sheetCornerRadius: options.sheetCornerRadius ?? 24,
+    sheetGrabberVisible: options.grabberVisible ?? true,
     sheetInitialDetentIndex: initialDetentIndex,
     headerShown: true,
     headerBackVisible: false,
@@ -224,6 +289,26 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     width: 36,
+  },
+  headerActionButtonDisabled: {
+    opacity: 0.9,
+  },
+  headerActionButtonEnabled: {
+    opacity: 1,
+  },
+  headerProminentButton: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 16,
+    flexDirection: "row",
+    gap: 6,
+    height: 32,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  headerProminentButtonText: {
+    color: "#FFFFFF",
+    lineHeight: 16,
   },
   titleWrapper: {
     alignItems: "center",

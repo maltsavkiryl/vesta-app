@@ -1,6 +1,7 @@
 import type {
   AppStoreState,
-  AvailabilityDay,
+  AvailabilityOverride,
+  AvailabilityTemplate,
   ClockSession,
   DocumentItem,
   EarningsSummary,
@@ -9,6 +10,7 @@ import type {
   HomeTask,
   LocationSnapshot,
   NotificationItem,
+  PlanningWindow,
   ProofPhoto,
   RequestItem,
   Shift,
@@ -51,8 +53,11 @@ export type AppAction =
   | { type: "signOut" }
   | { type: "completeOnboarding"; payload: { role: string; employerId: string } }
   | { type: "updateProfile"; payload: Partial<UserProfile> }
-  | { type: "updateAvailability"; payload: AvailabilityDay }
+  | { type: "saveAvailabilityOverride"; payload: AvailabilityOverride }
+  | { type: "saveAvailabilityTemplate"; payload: AvailabilityTemplate }
+  | { type: "submitPlanningWindow"; payload: { id: string; submittedAt: string } }
   | { type: "createRequest"; payload: RequestItem }
+  | { type: "respondToShift"; payload: { id: string } }
   | { type: "markNotificationRead"; payload: { id: string } }
   | { type: "markAllNotificationsRead" }
   | { type: "startClock"; payload?: ClockActionPayload }
@@ -77,7 +82,9 @@ export interface ProfileAggregateDto {
 }
 
 export interface ScheduleAggregateDto {
-  availability: Record<string, AvailabilityDay>
+  availabilityOverrides: Record<string, AvailabilityOverride>
+  availabilityTemplate: AvailabilityTemplate
+  planningWindows: PlanningWindow[]
   requests: RequestItem[]
   shifts: Shift[]
   version: 1

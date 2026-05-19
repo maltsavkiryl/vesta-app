@@ -1,23 +1,23 @@
 import { useCallback } from "react"
 import { useRouter } from "expo-router"
 
-import type { AppActionIntent, AvailabilityDay } from "@/core/models"
+import type { AppActionIntent } from "@/core/models"
 import { useDocumentActions } from "@/features/documents/data/documents.mutations"
 import { showDocumentUploadOptions } from "@/features/documents/documentUploadFlow"
+import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import {
+  getActivePlanningWindow,
+  getNextIncompleteAvailabilityDate,
+} from "@/features/schedule/schedule.utils"
 
 type ActionResult = "completed" | "opened" | "cancelled" | "failed"
-
-function getFirstAvailabilityDate(availability: Record<string, AvailabilityDay>) {
-  return Object.values(availability)
-    .map((day) => day.date)
-    .sort((left, right) => left.localeCompare(right))[0]
-}
 
 export function useAppAction() {
   const router = useRouter()
   const { state } = useScheduleStateQuery()
   const { uploadDocument } = useDocumentActions()
+  const { respondToShift } = useScheduleActions()
 
   const runAction = useCallback(
     async (action?: AppActionIntent): Promise<ActionResult> => {
@@ -35,18 +35,43 @@ export function useAppAction() {
             },
             uploadDocument,
           })
-        case "editAvailability": {
-          const date = action.date ?? getFirstAvailabilityDate(state?.availability ?? {})
+        case "editAvailabilityTemplate":
+          router.push("/(app)/availability-template" as never)
+          return "opened"
+        case "editAvailabilityOverride": {
+          const planningWindow = state ? getActivePlanningWindow(state) : undefined
+          const date =
+            action.date ??
+            (state
+              ? getNextIncompleteAvailabilityDate(
+                  planningWindow,
+                  state.availabilityTemplate,
+                  state.availabilityOverrides,
+                )
+              : undefined)
+
           if (!date) {
             router.push("/(app)/(tabs)/schedule" as never)
             return "opened"
           }
+
           router.push(`/(app)/availability/${date}` as never)
           return "opened"
         }
+        case "createScheduleRequest":
+          router.push(
+            `/(app)/request?category=${action.category ?? ""}&shiftId=${action.shiftId ?? ""}` as never,
+          )
+          return "opened"
+        case "respondToShift": {
+          const result = await respondToShift(action.shiftId)
+          if (!result.ok) return "failed"
+          router.push(`/(app)/shift/${action.shiftId}` as never)
+          return "completed"
+        }
       }
     },
-    [router, state?.availability, uploadDocument],
+    [respondToShift, router, state, uploadDocument],
   )
 
   return { runAction }

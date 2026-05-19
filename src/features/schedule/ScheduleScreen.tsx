@@ -4,599 +4,742 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
-import type { AvailabilityDay, AvailabilityStatus, RequestItem, Shift } from "@/core/models"
+import type { RequestItem, Shift } from "@/core/models"
+import { useAppAction } from "@/features/actions/useAppAction"
+import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { PlanningMonthCalendar } from "@/features/schedule/PlanningMonthCalendar"
 import {
-  AppButton,
-  AppScrollScreen,
-  AppSegmentedControl,
-  DateBadge,
-  ListCard,
-  ListCardItem,
-  MetricGrid,
-  PageHeader,
-  Pill,
-  SectionBlock,
-  SurfaceCard,
-  Text,
-  useDesignTokens,
-} from "@/ui"
+  buildMonthGrid,
+  getActivePlanningWindow,
+  getCalendarDayState,
+  getEffectiveAvailability,
+  getMonthAnchor,
+  getPlanningWindowCoverage,
+  getRequestsForDate,
+  getShiftsForDate,
+  isDateWithinRange,
+} from "@/features/schedule/schedule.utils"
+import { AppScrollScreen, PageHeader, SectionBlock, SurfaceCard, Text, useDesignTokens } from "@/ui"
 
-type Segment = "shifts" | "availability" | "requests"
-
-const segmentOptions: { label: string; value: Segment }[] = [
-  { label: "Shifts", value: "shifts" },
-  { label: "Availability", value: "availability" },
-  { label: "Requests", value: "requests" },
-]
-
-const availabilityCopy: Record<
-  AvailabilityStatus,
-  {
-    icon: keyof typeof Ionicons.glyphMap
-    label: string
-    tone: "accent" | "success" | "neutral"
-  }
-> = {
-  available: {
-    icon: "checkmark-circle-outline",
-    label: "Available",
-    tone: "success",
-  },
-  preferred: {
-    icon: "star-outline",
-    label: "Preferred",
-    tone: "accent",
-  },
-  unavailable: {
-    icon: "remove-circle-outline",
-    label: "Unavailable",
-    tone: "neutral",
-  },
-}
-
-function getRequestTone(status: RequestItem["status"]) {
-  return status === "approved" ? "success" : status === "denied" ? "danger" : "warning"
-}
-
-function SummaryCard({
-  selectedDate,
-  selectedShiftCount,
-  totalRequestCount,
-  weeklyAvailabilityCount,
+function ActionRow({
+  icon,
+  onPress,
+  subtitle,
+  title,
 }: {
-  selectedDate: string
-  selectedShiftCount: number
-  totalRequestCount: number
-  weeklyAvailabilityCount: number
+  icon: keyof typeof Ionicons.glyphMap
+  onPress: () => void
+  subtitle: string
+  title: string
 }) {
   const tokens = useDesignTokens()
 
   return (
-    <SectionBlock title={formatFullDate(selectedDate)}>
-      <SurfaceCard style={styles.summaryCard}>
-        <View style={styles.summaryBody}>
-          <View style={styles.summaryHeader}>
-            <View style={styles.flex}>
-              <Text
-                text={`${selectedShiftCount} shift${selectedShiftCount === 1 ? "" : "s"} scheduled`}
-                size="xs"
-                weight="semiBold"
-                style={{ color: tokens.textPrimary }}
-              />
-              <Text text="Weekly overview" size="xxs" style={{ color: tokens.textSecondary }} />
-            </View>
-            <Ionicons color={tokens.textMuted} name="calendar-outline" size={20} />
-          </View>
-          <MetricGrid
-            items={[
-              { label: "Available", value: `${weeklyAvailabilityCount}d` },
-              { label: "Requests", value: String(totalRequestCount) },
-              { label: "This week", value: "23.5h" },
-            ]}
-          />
-        </View>
-      </SurfaceCard>
-    </SectionBlock>
-  )
-}
-
-function DateStrip({
-  dates,
-  selectedDate,
-  shiftsByDate,
-  onSelectDate,
-}: {
-  dates: string[]
-  selectedDate: string
-  shiftsByDate: Map<string, Shift[]>
-  onSelectDate: (date: string) => void
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={styles.dateStrip}>
-      {dates.map((date) => {
-        const active = selectedDate === date
-        const shiftCount = shiftsByDate.get(date)?.length ?? 0
-        const dayNumber = new Date(date).getDate()
-        const dayLabel = new Date(date).toLocaleDateString("en", { weekday: "short" })
-
-        return (
-          <Pressable
-            key={date}
-            onPress={() => onSelectDate(date)}
-            style={[
-              styles.dateButton,
-              {
-                backgroundColor: active ? tokens.accent : tokens.surface,
-                borderColor: active ? tokens.accent : tokens.border,
-              },
-            ]}
-          >
-            <Text
-              text={dayLabel}
-              size="xxs"
-              weight="medium"
-              style={{ color: active ? tokens.accentForeground : tokens.textMuted }}
-            />
-            <Text
-              text={String(dayNumber)}
-              size="sm"
-              weight="semiBold"
-              style={{ color: active ? tokens.accentForeground : tokens.textPrimary }}
-            />
-            <View
-              style={[
-                styles.shiftDot,
-                {
-                  backgroundColor:
-                    shiftCount > 0
-                      ? active
-                        ? tokens.accentForeground
-                        : tokens.accent
-                      : tokens.transparent,
-                },
-              ]}
-            />
-          </Pressable>
-        )
-      })}
-    </View>
+    <Pressable
+      onPress={onPress}
+      style={[styles.actionRow, { backgroundColor: tokens.surface, borderColor: tokens.border }]}
+    >
+      <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
+        <Ionicons color={tokens.accent} name={icon} size={16} />
+      </View>
+      <View style={styles.flex}>
+        <Text text={title} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
+        <Text text={subtitle} size="xxs" style={{ color: tokens.textSecondary }} />
+      </View>
+      <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+    </Pressable>
   )
 }
 
 function ShiftRow({ shift, onPress }: { shift: Shift; onPress: () => void }) {
   const tokens = useDesignTokens()
-  const statusColor = {
-    changed: tokens.warning,
-    confirmed: tokens.success,
-    pending: tokens.textMuted,
-  }[shift.status]
+  const tone = shift.requiresResponse
+    ? tokens.warning
+    : shift.status === "confirmed"
+      ? tokens.success
+      : shift.status === "changed"
+        ? tokens.warning
+        : tokens.textMuted
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.shiftPressable,
-        { opacity: pressed ? 0.78 : 1, transform: [{ scale: pressed ? 0.99 : 1 }] },
-      ]}
-    >
-      <SurfaceCard style={styles.shiftCard}>
-        <DateBadge
-          label={shift.dayLabel}
-          value={formatShortDate(shift.date).replace("May ", "")}
-          variant="muted"
+    <Pressable onPress={onPress} style={[styles.shiftRow, { backgroundColor: tokens.surface }]}>
+      <View style={styles.shiftRowDate}>
+        <View style={[styles.shiftDot, { backgroundColor: tone }]} />
+      </View>
+      <View style={styles.flex}>
+        <Text
+          text={getShiftTimeRange(shift)}
+          size="xs"
+          weight="semiBold"
+          style={{ color: tokens.textPrimary }}
         />
-        <View style={styles.shiftBody}>
-          <View style={styles.shiftPrimaryRow}>
-            <Text
-              text={getShiftTimeRange(shift)}
-              numberOfLines={1}
-              size="xs"
-              weight="semiBold"
-              style={[styles.shiftTime, { color: tokens.textPrimary }]}
-            />
-            <View style={styles.shiftTrailing}>
-              <View style={styles.shiftStatus}>
-                <View style={[styles.shiftStatusDot, { backgroundColor: statusColor }]} />
-                <Text
-                  text={shift.status}
-                  numberOfLines={1}
-                  size="xxs"
-                  weight="medium"
-                  style={{ color: statusColor }}
-                />
-              </View>
-              <Ionicons color={tokens.textMuted} name="chevron-forward" size={17} />
-            </View>
-          </View>
-          <Text
-            text={`${shift.role} - ${shift.venueName}`}
-            numberOfLines={1}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-          <View style={styles.shiftFooter}>
-            <Ionicons color={tokens.textMuted} name="location-outline" size={13} />
-            <Text
-              text={shift.venueAddress}
-              numberOfLines={1}
-              size="xxs"
-              style={[styles.flex, { color: tokens.textMuted }]}
-            />
-          </View>
-        </View>
-      </SurfaceCard>
+        <Text
+          text={`${shift.role} · ${shift.venueName}`}
+          size="xxs"
+          style={{ color: tokens.textSecondary }}
+        />
+        {shift.changeSummary ? (
+          <Text text={shift.changeSummary} size="xxs" style={{ color: tone }} />
+        ) : null}
+      </View>
+      <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
     </Pressable>
   )
 }
 
-function EmptyPanel({
-  icon,
-  title,
-  subtitle,
-}: {
-  icon: keyof typeof Ionicons.glyphMap
-  title: string
-  subtitle: string
-}) {
+function RequestSummaryRow({ isLast, request }: { isLast?: boolean; request: RequestItem }) {
   const tokens = useDesignTokens()
+  const tone =
+    request.status === "approved"
+      ? tokens.success
+      : request.status === "denied"
+        ? tokens.danger
+        : tokens.warning
 
   return (
-    <SurfaceCard style={styles.emptyPanel}>
-      <View style={[styles.emptyIcon, { backgroundColor: tokens.surfaceSecondary }]}>
-        <Ionicons color={tokens.textMuted} name={icon} size={24} />
+    <View
+      style={[
+        styles.requestRow,
+        !isLast && {
+          borderBottomColor: tokens.border,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        },
+      ]}
+    >
+      <View style={[styles.requestGlyph, { backgroundColor: `${tone}14` }]}>
+        <Ionicons color={tone} name="document-text-outline" size={16} />
       </View>
-      <Text text={title} size="sm" weight="semiBold" style={{ color: tokens.textPrimary }} />
-      <Text
-        text={subtitle}
-        size="xxs"
-        style={[styles.emptySubtitle, { color: tokens.textSecondary }]}
-      />
-    </SurfaceCard>
-  )
-}
-
-function AvailabilityRow({
-  day,
-  isLast,
-  onPress,
-}: {
-  day: AvailabilityDay
-  isLast?: boolean
-  onPress: () => void
-}) {
-  const tokens = useDesignTokens()
-  const copy = availabilityCopy[day.status]
-
-  return (
-    <ListCardItem
-      isLast={isLast}
-      leading={
-        <View style={[styles.availabilityIcon, { backgroundColor: tokens.surfaceSecondary }]}>
-          <Ionicons color={tokens.textSecondary} name={copy.icon} size={19} />
-        </View>
-      }
-      onPress={onPress}
-      subtitle={`${day.startTime} - ${day.endTime}`}
-      subtitleStyle={{ color: tokens.textSecondary }}
-      title={formatFullDate(day.date)}
-      titleStyle={{ color: tokens.textPrimary }}
-      trailing={
-        <View style={styles.rowTrailing}>
-          <Pill label={copy.label} tone={copy.tone} />
-          <Ionicons color={tokens.textMuted} name="chevron-forward" size={16} />
-        </View>
-      }
-    />
-  )
-}
-
-function RequestRow({ request, isLast }: { request: RequestItem; isLast?: boolean }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <ListCardItem
-      isLast={isLast}
-      leading={
-        <View style={[styles.requestIcon, { backgroundColor: tokens.surfaceSecondary }]}>
-          <Ionicons color={tokens.accent} name="swap-horizontal-outline" size={19} />
-        </View>
-      }
-      subtitle={`${request.dateRange} - ${request.reason}`}
-      subtitleStyle={{ color: tokens.textSecondary }}
-      title={request.type}
-      titleStyle={{ color: tokens.textPrimary }}
-      trailing={<Pill label={request.status} tone={getRequestTone(request.status)} />}
-    />
+      <View style={styles.flex}>
+        <Text
+          text={request.type}
+          size="xs"
+          weight="semiBold"
+          style={{ color: tokens.textPrimary }}
+        />
+        <Text text={request.target.label} size="xxs" style={{ color: tokens.textSecondary }} />
+        <Text text={request.statusDetail} size="xxs" style={{ color: tone }} />
+      </View>
+    </View>
   )
 }
 
 export function ScheduleScreen() {
   const router = useRouter()
   const tokens = useDesignTokens()
+  const { runAction } = useAppAction()
+  const { submitPlanningWindow } = useScheduleActions()
   const { selectedEmployer, state } = useScheduleStateQuery()
-  const [segment, setSegment] = useState<Segment>("shifts")
-  const [selectedDate, setSelectedDate] = useState(
-    state?.shifts[0]?.date ?? new Date().toISOString(),
+
+  const today = new Date().toISOString().slice(0, 10)
+  const [selectedDate, setSelectedDate] = useState(today)
+  const [monthAnchor, setMonthAnchor] = useState(() => getMonthAnchor(today))
+
+  const monthCells = useMemo(() => buildMonthGrid(monthAnchor), [monthAnchor])
+  const activePlanningWindow = state ? getActivePlanningWindow(state) : undefined
+  const planningCoverage =
+    state && activePlanningWindow
+      ? getPlanningWindowCoverage(
+          activePlanningWindow,
+          state.availabilityTemplate,
+          state.availabilityOverrides,
+        )
+      : undefined
+  const selectedDayState =
+    state?.availabilityTemplate && state.availabilityOverrides
+      ? getCalendarDayState(state, selectedDate)
+      : {
+          availabilityStatus: "available" as const,
+          hasOverride: false,
+          hasShift: false,
+          isInPlanningWindow: false,
+          needsResponse: false,
+          shiftCount: 0,
+        }
+  const selectedDayAvailability = state
+    ? getEffectiveAvailability(
+        state.availabilityTemplate,
+        state.availabilityOverrides,
+        selectedDate,
+      )
+    : {
+        date: selectedDate,
+        status: "available" as const,
+        startTime: "09:00",
+        endTime: "17:00",
+      }
+  const selectedDayShifts = useMemo(
+    () => (state ? getShiftsForDate(state.shifts, selectedDate) : []),
+    [selectedDate, state],
   )
+  const selectedShiftIds = useMemo(
+    () => new Set(selectedDayShifts.map((shift) => shift.id)),
+    [selectedDayShifts],
+  )
+  const selectedDayRequests = useMemo(() => {
+    const dateRequests = state ? getRequestsForDate(state.requests, selectedDate) : []
+    const shiftRequests =
+      state?.requests.filter(
+        (request) =>
+          request.target.kind === "shift" &&
+          Boolean(request.target.shiftId && selectedShiftIds.has(request.target.shiftId)),
+      ) ?? []
 
-  const shiftsByDate = useMemo(() => {
-    return (state?.shifts ?? []).reduce((result, shift) => {
-      const shifts = result.get(shift.date) ?? []
-      result.set(shift.date, [...shifts, shift])
-      return result
-    }, new Map<string, Shift[]>())
-  }, [state?.shifts])
+    return [...dateRequests, ...shiftRequests]
+  }, [selectedDate, selectedShiftIds, state])
+  const pendingRequests = (state?.requests ?? []).filter((request) => request.status === "pending")
+  const selectedShiftNeedingResponse = selectedDayShifts.find((shift) => shift.requiresResponse)
+  const isSelectedDateInPlanningWindow = activePlanningWindow
+    ? isDateWithinRange(selectedDate, activePlanningWindow.startDate, activePlanningWindow.endDate)
+    : false
 
-  const dateStripDates = useMemo(() => {
-    const sourceDates = Array.from(new Set((state?.shifts ?? []).map((shift) => shift.date))).slice(
-      0,
-      7,
-    )
-
-    return sourceDates.length > 0 ? sourceDates : [selectedDate]
-  }, [selectedDate, state?.shifts])
-
-  const selectedDayShifts = shiftsByDate.get(selectedDate) ?? []
-  const upcomingShifts = (state?.shifts ?? [])
-    .filter((shift) => shift.date > selectedDate)
-    .slice(0, 6)
-  const weeklyAvailability = Object.values(state?.availability ?? {}).slice(0, 7)
-  const weeklyAvailabilityCount = weeklyAvailability.filter(
-    (day) => day.status === "available" || day.status === "preferred",
-  ).length
-
-  const openShift = (shift: Shift) => router.push(`/(app)/shift/${shift.id}` as never)
+  const selectedDateLabel = selectedDayShifts.length
+    ? `${selectedDayShifts.length} shift${selectedDayShifts.length === 1 ? "" : "s"} scheduled`
+    : selectedDayAvailability.status === "unavailable"
+      ? "Unavailable"
+      : selectedDayAvailability.status === "preferred"
+        ? "Preferred to work"
+        : "Available"
+  const selectedDateSubtitle = selectedDayShifts.length
+    ? selectedShiftNeedingResponse
+      ? "A shift on this date still needs your response."
+      : "Everything scheduled for this date is shown below."
+    : selectedDayAvailability.status === "unavailable"
+      ? "You marked this date as unavailable."
+      : "No shift is assigned yet for this date."
+  const availabilitySourceLabel = selectedDayState.hasOverride
+    ? "Using a date override"
+    : "Using your weekly template"
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-      <PageHeader eyebrow={selectedEmployer?.name ?? "Schedule"} title="Schedule" />
-      <SummaryCard
-        selectedDate={selectedDate}
-        selectedShiftCount={selectedDayShifts.length}
-        totalRequestCount={state?.requests.length ?? 0}
-        weeklyAvailabilityCount={weeklyAvailabilityCount}
-      />
+      <PageHeader eyebrow={selectedEmployer?.name ?? "Planning"} title="Planning" />
 
-      <DateStrip
-        dates={dateStripDates}
-        selectedDate={selectedDate}
-        shiftsByDate={shiftsByDate}
+      <PlanningMonthCalendar
+        anchorDate={monthAnchor}
+        cells={monthCells}
+        getDayState={(dateString) =>
+          state
+            ? getCalendarDayState(state, dateString)
+            : {
+                availabilityStatus: "available",
+                hasOverride: false,
+                hasShift: false,
+                isInPlanningWindow: false,
+                needsResponse: false,
+                shiftCount: 0,
+              }
+        }
+        onNextMonth={() => {
+          const nextAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 1, 12)
+          setMonthAnchor(nextAnchor)
+          setSelectedDate(nextAnchor.toISOString().slice(0, 10))
+        }}
+        onPrevMonth={() => {
+          const previousAnchor = new Date(
+            monthAnchor.getFullYear(),
+            monthAnchor.getMonth() - 1,
+            1,
+            12,
+          )
+          setMonthAnchor(previousAnchor)
+          setSelectedDate(previousAnchor.toISOString().slice(0, 10))
+        }}
         onSelectDate={setSelectedDate}
+        selectedDate={selectedDate}
       />
 
-      <AppSegmentedControl options={segmentOptions} value={segment} onChange={setSegment} />
-
-      {segment === "shifts" ? (
-        <View style={styles.stack}>
-          <SectionBlock
-            title={formatFullDate(selectedDate)}
-            trailing={
+      <SectionBlock title={formatFullDate(selectedDate)}>
+        <SurfaceCard style={styles.selectedDateCard}>
+          <View style={styles.selectedDateHeader}>
+            <View style={styles.flex}>
               <Text
-                text={`${upcomingShifts.length} upcoming`}
+                text={selectedDateLabel}
+                size="sm"
+                weight="semiBold"
+                style={{ color: tokens.textPrimary }}
+              />
+              <Text
+                text={selectedDateSubtitle}
                 size="xxs"
-                style={{ color: tokens.textMuted }}
+                style={{ color: tokens.textSecondary }}
               />
-            }
-          >
-            <View style={styles.stack}>
-              {selectedDayShifts.length > 0 ? (
-                selectedDayShifts.map((shift) => (
-                  <ShiftRow key={shift.id} shift={shift} onPress={() => openShift(shift)} />
-                ))
-              ) : (
-                <EmptyPanel
-                  icon="bed-outline"
-                  title="Day off"
-                  subtitle="No shift is scheduled for this date."
-                />
-              )}
             </View>
-          </SectionBlock>
-
-          {upcomingShifts.length > 0 ? (
-            <SectionBlock title="Upcoming">
-              <View style={styles.stack}>
-                {upcomingShifts.map((shift) => (
-                  <ShiftRow
-                    key={`upcoming-${shift.id}`}
-                    shift={shift}
-                    onPress={() => openShift(shift)}
-                  />
-                ))}
-              </View>
-            </SectionBlock>
-          ) : null}
-        </View>
-      ) : null}
-
-      {segment === "availability" ? (
-        <View style={styles.stack}>
-          <SectionBlock
-            actionLabel="Set"
-            title="This week"
-            onAction={() => router.push(`/(app)/availability/${selectedDate}` as never)}
-          >
-            <ListCard>
-              {weeklyAvailability.map((day, index) => (
-                <AvailabilityRow
-                  key={day.date}
-                  day={day}
-                  isLast={index === weeklyAvailability.length - 1}
-                  onPress={() => router.push(`/(app)/availability/${day.date}` as never)}
-                />
-              ))}
-            </ListCard>
-          </SectionBlock>
-        </View>
-      ) : null}
-
-      {segment === "requests" ? (
-        <View style={styles.stack}>
-          {(state?.requests.length ?? 0) > 0 ? (
-            <SectionBlock
-              actionLabel="New"
-              title="Requests"
-              onAction={() => router.push("/(app)/request" as never)}
+            <View
+              style={[
+                styles.selectedDateBadge,
+                {
+                  backgroundColor: selectedDayState.needsResponse
+                    ? `${tokens.warning}14`
+                    : `${tokens.accent}10`,
+                },
+              ]}
             >
-              <ListCard>
-                {(state?.requests ?? []).map((request, index) => (
-                  <RequestRow
-                    key={request.id}
-                    isLast={index === (state?.requests.length ?? 0) - 1}
-                    request={request}
-                  />
-                ))}
-              </ListCard>
-            </SectionBlock>
+              <Text
+                text={
+                  selectedDayState.needsResponse
+                    ? "Needs response"
+                    : selectedDayState.hasShift
+                      ? "Working"
+                      : selectedDayAvailability.status === "unavailable"
+                        ? "Off"
+                        : "Open"
+                }
+                size="xxs"
+                weight="semiBold"
+                style={{
+                  color: selectedDayState.needsResponse ? tokens.warning : tokens.textPrimary,
+                }}
+              />
+            </View>
+          </View>
+
+          <View style={styles.selectedDateMeta}>
+            <View style={[styles.metaPill, { backgroundColor: tokens.surfaceSecondary }]}>
+              <Ionicons color={tokens.textSecondary} name="time-outline" size={13} />
+              <Text
+                text={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}
+                size="xxs"
+                weight="medium"
+                style={{ color: tokens.textPrimary }}
+              />
+            </View>
+            <View style={[styles.metaPill, { backgroundColor: tokens.surfaceSecondary }]}>
+              <Ionicons
+                color={
+                  selectedDayAvailability.status === "preferred"
+                    ? tokens.accent
+                    : selectedDayAvailability.status === "available"
+                      ? tokens.success
+                      : tokens.textMuted
+                }
+                name="ellipse"
+                size={11}
+              />
+              <Text
+                text={availabilitySourceLabel}
+                size="xxs"
+                weight="medium"
+                style={{ color: tokens.textPrimary }}
+              />
+            </View>
+          </View>
+
+          {selectedDayRequests.length > 0 ? (
+            <View
+              style={[
+                styles.inlineNotice,
+                { backgroundColor: `${tokens.warning}12`, borderColor: `${tokens.warning}22` },
+              ]}
+            >
+              <Ionicons color={tokens.warning} name="document-text-outline" size={14} />
+              <Text
+                text={`${selectedDayRequests.length} request${selectedDayRequests.length === 1 ? "" : "s"} already touch this date.`}
+                size="xxs"
+                weight="medium"
+                style={{ color: tokens.warning }}
+              />
+            </View>
+          ) : null}
+        </SurfaceCard>
+      </SectionBlock>
+
+      <SectionBlock title="Actions for this date">
+        <View style={styles.stack}>
+          {selectedShiftNeedingResponse ? (
+            <ActionRow
+              icon="flash-outline"
+              onPress={() =>
+                router.push(`/(app)/shift/${selectedShiftNeedingResponse.id}` as never)
+              }
+              subtitle="Review the updated shift and confirm it from the detail view."
+              title="Review shift change"
+            />
+          ) : selectedDayShifts[0] ? (
+            <ActionRow
+              icon="calendar-outline"
+              onPress={() => router.push(`/(app)/shift/${selectedDayShifts[0].id}` as never)}
+              subtitle="Open the assigned shift details for this day."
+              title="View shift details"
+            />
+          ) : null}
+
+          <ActionRow
+            icon="create-outline"
+            onPress={() =>
+              void runAction({
+                type: "editAvailabilityOverride",
+                date: selectedDate,
+              })
+            }
+            subtitle="Change availability just for this date."
+            title="Edit date availability"
+          />
+
+          <ActionRow
+            icon={
+              selectedDayShifts.length > 0 ? "swap-horizontal-outline" : "document-text-outline"
+            }
+            onPress={() =>
+              void runAction({
+                type: "createScheduleRequest",
+                category: selectedDayShifts.length > 0 ? "shift_change" : "time_off",
+                shiftId: selectedDayShifts[0]?.id,
+              })
+            }
+            subtitle={
+              selectedDayShifts.length > 0
+                ? "Ask for a replacement or flag a conflict for this shift."
+                : "Request time off or explain a conflict on this day."
+            }
+            title={selectedDayShifts.length > 0 ? "Request a change" : "Create request"}
+          />
+        </View>
+      </SectionBlock>
+
+      <SectionBlock title="Shifts on this date">
+        <View style={styles.stack}>
+          {selectedDayShifts.length > 0 ? (
+            selectedDayShifts.map((shift) => (
+              <ShiftRow
+                key={shift.id}
+                shift={shift}
+                onPress={() => router.push(`/(app)/shift/${shift.id}` as never)}
+              />
+            ))
           ) : (
-            <>
-              <AppButton
-                label="New request"
-                onPress={() => router.push("/(app)/request" as never)}
+            <SurfaceCard style={styles.emptyCard}>
+              <Text
+                text="No shift scheduled"
+                size="sm"
+                weight="semiBold"
+                style={{ color: tokens.textPrimary }}
               />
-              <EmptyPanel
-                icon="file-tray-outline"
-                title="No requests"
-                subtitle="Time off and shift swap requests will appear here."
+              <Text
+                text={
+                  selectedDayAvailability.status === "unavailable"
+                    ? "This date is blocked off in your availability."
+                    : "You are free on this date unless a new shift is assigned later."
+                }
+                size="xxs"
+                style={{ color: tokens.textSecondary }}
               />
-            </>
+            </SurfaceCard>
           )}
         </View>
-      ) : null}
+      </SectionBlock>
+
+      <SectionBlock
+        actionLabel="Template"
+        title="Availability"
+        onAction={() => void runAction({ type: "editAvailabilityTemplate" })}
+      >
+        <SurfaceCard style={styles.availabilityCard}>
+          <View style={styles.availabilityHeader}>
+            <View style={styles.flex}>
+              <Text
+                text={
+                  selectedDayAvailability.status === "preferred"
+                    ? "Preferred to work"
+                    : selectedDayAvailability.status === "available"
+                      ? "Available"
+                      : "Unavailable"
+                }
+                size="sm"
+                weight="semiBold"
+                style={{ color: tokens.textPrimary }}
+              />
+              <Text
+                text={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}
+                size="xxs"
+                style={{ color: tokens.textSecondary }}
+              />
+            </View>
+            <View style={[styles.progressBadge, { backgroundColor: tokens.surfaceSecondary }]}>
+              <Text
+                text={selectedDayState.hasOverride ? "Override" : "Template"}
+                size="xxs"
+                weight="semiBold"
+                style={{ color: tokens.textPrimary }}
+              />
+            </View>
+          </View>
+
+          {selectedDayAvailability.note ? (
+            <Text
+              text={selectedDayAvailability.note}
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+            />
+          ) : null}
+
+          {isSelectedDateInPlanningWindow && activePlanningWindow ? (
+            <Text
+              text={`This date belongs to ${activePlanningWindow.label.toLowerCase()} and is due by ${formatShortDate(activePlanningWindow.deadline)}.`}
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+            />
+          ) : null}
+
+          <Pressable
+            onPress={() =>
+              void runAction({
+                type: "editAvailabilityOverride",
+                date: selectedDate,
+              })
+            }
+            style={({ pressed }) => [
+              styles.availabilityPrimaryButton,
+              {
+                backgroundColor: tokens.accent,
+                opacity: pressed ? 0.9 : 1,
+              },
+            ]}
+          >
+            <Text
+              text="Edit availability"
+              size="xs"
+              weight="semiBold"
+              style={{ color: tokens.accentForeground }}
+            />
+          </Pressable>
+
+          {activePlanningWindow && planningCoverage?.isComplete ? (
+            <View
+              style={[
+                styles.availabilityFooter,
+                { borderTopColor: tokens.border, backgroundColor: tokens.transparent },
+              ]}
+            >
+              <View style={styles.flex}>
+                <Text
+                  text={
+                    activePlanningWindow.status === "submitted"
+                      ? "Your availability for this planning window has already been submitted."
+                      : "When you are done, submit this planning window to confirm your availability."
+                  }
+                  size="xxs"
+                  style={{ color: tokens.textSecondary }}
+                />
+              </View>
+
+              {activePlanningWindow.status === "submitted" ? (
+                <View style={[styles.progressBadge, { backgroundColor: tokens.surfaceSecondary }]}>
+                  <Text
+                    text="Submitted"
+                    size="xxs"
+                    weight="semiBold"
+                    style={{ color: tokens.textPrimary }}
+                  />
+                </View>
+              ) : (
+                <Pressable
+                  onPress={async () => {
+                    const result = await submitPlanningWindow(activePlanningWindow.id)
+                    if (!result.ok) return
+                  }}
+                  style={[
+                    styles.compactActionButton,
+                    {
+                      backgroundColor: tokens.accentSoft,
+                      borderColor: `${tokens.accent}26`,
+                    },
+                  ]}
+                >
+                  <Text
+                    text="Submit window"
+                    size="xxs"
+                    weight="semiBold"
+                    style={{ color: tokens.accent }}
+                  />
+                </Pressable>
+              )}
+            </View>
+          ) : null}
+        </SurfaceCard>
+      </SectionBlock>
+
+      <SectionBlock title="Planning tools">
+        <View style={styles.stack}>
+          <ActionRow
+            icon="repeat-outline"
+            onPress={() => void runAction({ type: "editAvailabilityTemplate" })}
+            subtitle="Update the pattern that fills most of your month."
+            title="Edit weekly template"
+          />
+          <ActionRow
+            icon="document-text-outline"
+            onPress={() => void runAction({ type: "createScheduleRequest", category: "time_off" })}
+            subtitle="Create a general time-off or availability request."
+            title="New request"
+          />
+        </View>
+      </SectionBlock>
+
+      <SectionBlock
+        actionLabel="New"
+        title="Pending requests"
+        onAction={() => void runAction({ type: "createScheduleRequest", category: "time_off" })}
+      >
+        <SurfaceCard style={styles.requestCard}>
+          {(pendingRequests.length > 0 ? pendingRequests : (state?.requests ?? []))
+            .slice(0, 4)
+            .map((request, index, items) => (
+              <RequestSummaryRow
+                key={request.id}
+                isLast={index === items.length - 1}
+                request={request}
+              />
+            ))}
+        </SurfaceCard>
+      </SectionBlock>
     </AppScrollScreen>
   )
 }
 
 const styles = StyleSheet.create({
-  availabilityIcon: {
+  actionGlyph: {
     alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 8,
-    height: 38,
-    justifyContent: "center",
-    width: 38,
-  },
-  dateButton: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 13,
-    borderWidth: StyleSheet.hairlineWidth,
-    gap: 2,
-    height: 68,
-    justifyContent: "center",
-    width: 46,
-  },
-  dateStrip: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  emptyIcon: {
-    alignItems: "center",
-    borderCurve: "continuous",
     borderRadius: 12,
-    height: 52,
+    height: 36,
     justifyContent: "center",
-    width: 52,
+    width: 36,
   },
-  emptyPanel: {
+  actionRow: {
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 28,
+    borderCurve: "continuous",
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
-  emptySubtitle: {
-    textAlign: "center",
+  availabilityCard: {
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  availabilityFooter: {
+    alignItems: "center",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 12,
+    paddingTop: 12,
+  },
+  availabilityHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  availabilityPrimaryButton: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 18,
+    justifyContent: "center",
+    minHeight: 56,
+    paddingHorizontal: 18,
+  },
+  compactActionButton: {
+    borderCurve: "continuous",
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  emptyCard: {
+    gap: 6,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
   },
   flex: {
     flex: 1,
   },
-  requestIcon: {
+  inlineNotice: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 8,
-    height: 38,
-    justifyContent: "center",
-    width: 38,
-  },
-  rowTrailing: {
-    alignItems: "center",
+    borderRadius: 12,
+    borderWidth: 1,
     flexDirection: "row",
     gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  screen: {
-    paddingHorizontal: 16,
-  },
-  shiftBody: {
-    flex: 1,
-    gap: 2,
-    minWidth: 0,
-  },
-  shiftCard: {
+  metaPill: {
     alignItems: "center",
-    borderRadius: 18,
-    flexDirection: "row",
-    gap: 13,
-    minHeight: 92,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-  },
-  shiftDot: {
-    borderRadius: 3,
-    height: 6,
-    marginTop: 1,
-    width: 6,
-  },
-  shiftFooter: {
-    alignItems: "center",
+    borderRadius: 999,
     flexDirection: "row",
     gap: 6,
-    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
-  shiftPressable: {
-    borderCurve: "continuous",
-    borderRadius: 18,
+  progressBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
   },
-  shiftPrimaryRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-  shiftStatus: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 5,
-  },
-  shiftStatusDot: {
-    borderRadius: 4,
-    height: 7,
-    width: 7,
-  },
-  shiftTime: {
-    fontSize: 18,
-    lineHeight: 23,
-  },
-  shiftTrailing: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 7,
-  },
-  stack: {
-    gap: 14,
-  },
-  summaryBody: {
-    gap: 12,
-    padding: 14,
-  },
-  summaryCard: {
-    borderRadius: 16,
+  requestCard: {
     paddingHorizontal: 0,
     paddingVertical: 0,
   },
-  summaryHeader: {
+  requestGlyph: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 32,
+    justifyContent: "center",
+    width: 32,
+  },
+  requestRow: {
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  screen: {
+    gap: 22,
+    paddingBottom: 32,
+  },
+  selectedDateBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  selectedDateCard: {
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  selectedDateHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+  },
+  selectedDateMeta: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  shiftDot: {
+    borderRadius: 999,
+    height: 8,
+    width: 8,
+  },
+  shiftRow: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 18,
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  shiftRowDate: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 18,
+  },
+  stack: {
+    gap: 10,
   },
 })

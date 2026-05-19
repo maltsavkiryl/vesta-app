@@ -1,6 +1,4 @@
-/* eslint-disable react-native/no-inline-styles */
-
-import { Alert, StyleSheet, View } from "react-native"
+import { Alert, StyleSheet } from "react-native"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -192,6 +190,7 @@ export function ProfileDetailScreen() {
       ? {
           disabled: !currentSectionIsDirty,
           kind: "confirm",
+          label: "Save",
           onPress: saveCurrentSection,
         }
       : undefined,

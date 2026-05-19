@@ -1,19 +1,15 @@
 import type { ReactNode } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatDurationLabel, formatTimeValue } from "@/core/date"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
-import { InCardActionButton, SurfaceCard, Text, appTypography, useDesignTokens } from "@/ui"
+import { InCardActionButton, Text, appTypography, useDesignTokens } from "@/ui"
 
 import { formatHours, formatSeconds } from "../time.utils"
+import { TimeHeroCard } from "./TimeHeroCard"
 
 const HERO_SURFACE_DIVIDER = "rgba(255, 255, 255, 0.10)"
-const HERO_CARD_BACKGROUND = "#060A12"
-const HERO_CARD_BORDER = "rgba(186, 210, 255, 0.28)"
-const HERO_CARD_EDGE = "rgba(227, 237, 255, 0.18)"
-const HERO_CARD_SHADOW = "#9EBEFF"
 
 function timeToMinutes(time: string) {
   const [hours, minutes] = time.split(":").map(Number)
@@ -42,41 +38,19 @@ function getClockInOpenLabel(start: string) {
   return `${hours}:${minuteValue}`
 }
 
-function HeroCard({ children, style }: { children: ReactNode; style?: object }) {
+function HeroCard({
+  children,
+  gradientVariant = "compact",
+  style,
+}: {
+  children: ReactNode
+  gradientVariant?: "default" | "compact"
+  style?: object
+}) {
   return (
-    <SurfaceCard elevated style={[styles.heroCard, style]}>
-      <LinearGradient
-        colors={["#02050B", "#090E18", "#1C294A"]}
-        end={{ x: 0.94, y: 0.06 }}
-        pointerEvents="none"
-        start={{ x: 0.06, y: 0.92 }}
-        style={styles.heroGradient}
-      />
-      <LinearGradient
-        colors={[
-          "rgba(124, 154, 219, 0.00)",
-          "rgba(124, 154, 219, 0.08)",
-          "rgba(124, 154, 219, 0.18)",
-        ]}
-        end={{ x: 0.88, y: 0.2 }}
-        pointerEvents="none"
-        start={{ x: 0.42, y: 0.96 }}
-        style={styles.heroTopBloom}
-      />
-      <LinearGradient
-        colors={[
-          "rgba(165, 186, 234, 0.18)",
-          "rgba(165, 186, 234, 0.04)",
-          "rgba(165, 186, 234, 0.00)",
-        ]}
-        end={{ x: 0.7, y: 0.34 }}
-        pointerEvents="none"
-        start={{ x: 0.02, y: 1 }}
-        style={styles.heroBottomBloom}
-      />
-      <View pointerEvents="none" style={styles.heroEdgeHighlight} />
-      <View style={styles.heroContent}>{children}</View>
-    </SurfaceCard>
+    <TimeHeroCard contentStyle={styles.heroContent} gradientVariant={gradientVariant} style={style}>
+      {children}
+    </TimeHeroCard>
   )
 }
 
@@ -237,7 +211,7 @@ export function ActiveClockCard({
   const remainingSeconds = Math.max(shiftDurationSeconds - elapsedSeconds, 0)
 
   return (
-    <HeroCard>
+    <HeroCard gradientVariant="compact">
       <View style={styles.heroTopRow}>
         <View style={styles.heroPrimaryStack}>
           <Text
@@ -403,29 +377,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 4,
   },
-  heroBottomBloom: {
-    borderRadius: 220,
-    bottom: -132,
-    height: 280,
-    left: -128,
-    opacity: 0.95,
-    position: "absolute",
-    width: 360,
-  },
-  heroCard: {
-    backgroundColor: HERO_CARD_BACKGROUND,
-    borderColor: HERO_CARD_BORDER,
-    borderRadius: 24,
-    borderWidth: 1,
-    elevation: 18,
-    gap: 16,
-    overflow: "hidden",
-    padding: 20,
-    shadowColor: HERO_CARD_SHADOW,
-    shadowOffset: { width: 0, height: 22 },
-    shadowOpacity: 0.22,
-    shadowRadius: 32,
-  },
   heroContent: {
     gap: 16,
     zIndex: 1,
@@ -439,18 +390,8 @@ const styles = StyleSheet.create({
     backgroundColor: HERO_SURFACE_DIVIDER,
     height: StyleSheet.hairlineWidth,
   },
-  heroEdgeHighlight: {
-    ...StyleSheet.absoluteFillObject,
-    borderColor: HERO_CARD_EDGE,
-    borderRadius: 24,
-    borderWidth: StyleSheet.hairlineWidth,
-    opacity: 0.9,
-  },
   heroFooter: {
     marginTop: 2,
-  },
-  heroGradient: {
-    ...StyleSheet.absoluteFillObject,
   },
   heroInfoRow: {
     alignItems: "center",
@@ -486,15 +427,6 @@ const styles = StyleSheet.create({
     fontSize: 35,
     lineHeight: 40,
     marginTop: 2,
-  },
-  heroTopBloom: {
-    borderRadius: 220,
-    height: 320,
-    opacity: 1,
-    position: "absolute",
-    right: -88,
-    top: -128,
-    width: 360,
   },
   heroTopRow: {
     alignItems: "flex-start",

@@ -1,7 +1,9 @@
 import type {
   AppStoreState,
-  AvailabilityDay,
+  AvailabilityOverride,
+  AvailabilityTemplate,
   Employer,
+  PlanningWindow,
   Shift,
   TimeEntry,
   UserProfile,
@@ -145,6 +147,7 @@ const shifts: Shift[] = [
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "confirmed",
     note: "Arrive 15 minutes early for team briefing.",
+    coworkers: ["Emma D.", "Lucas M.", "Yasmine K."],
   },
   {
     id: "shift-2",
@@ -156,6 +159,7 @@ const shifts: Shift[] = [
     venueName: "Bistro Noir",
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "confirmed",
+    coworkers: ["Emma D.", "Noah P."],
   },
   {
     id: "shift-3",
@@ -168,6 +172,10 @@ const shifts: Shift[] = [
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "changed",
     note: "Kitchen closes later due to event service.",
+    coworkers: ["Emma D.", "Lucas M.", "Yasmine K."],
+    changeSummary: "End time moved from 23:00 to 23:30 for the event service.",
+    requiresResponse: true,
+    responseStatus: "pending",
   },
   {
     id: "shift-4",
@@ -179,6 +187,10 @@ const shifts: Shift[] = [
     venueName: "Bistro Noir",
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "pending",
+    coworkers: ["Mila R.", "Jonas T."],
+    changeSummary: "Manager asked you to confirm this extra Friday bar shift.",
+    requiresResponse: true,
+    responseStatus: "pending",
   },
   {
     id: "shift-5",
@@ -190,6 +202,7 @@ const shifts: Shift[] = [
     venueName: "Bistro Noir",
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "confirmed",
+    coworkers: ["Emma D.", "Nina B."],
   },
   {
     id: "shift-6",
@@ -201,17 +214,54 @@ const shifts: Shift[] = [
     venueName: "Bistro Noir",
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "confirmed",
+    coworkers: ["Lara C.", "Noah P."],
   },
 ]
 
-const availability: Record<string, AvailabilityDay> = {
+const availabilityTemplate: AvailabilityTemplate = {
+  monday: { status: "available", startTime: "12:00", endTime: "22:00" },
+  tuesday: { status: "preferred", startTime: "17:00", endTime: "23:00" },
+  wednesday: { status: "available", startTime: "17:00", endTime: "23:30" },
+  thursday: { status: "unavailable", startTime: "09:00", endTime: "17:00" },
+  friday: { status: "preferred", startTime: "17:00", endTime: "00:00" },
+  saturday: { status: "preferred", startTime: "12:00", endTime: "23:00" },
+  sunday: { status: "available", startTime: "11:00", endTime: "18:00" },
+}
+
+const availabilityOverrides: Record<string, AvailabilityOverride> = {
   "2026-05-18": { date: "2026-05-18", status: "available", startTime: "12:00", endTime: "23:00" },
   "2026-05-19": { date: "2026-05-19", status: "preferred", startTime: "17:00", endTime: "23:00" },
   "2026-05-20": { date: "2026-05-20", status: "available", startTime: "17:00", endTime: "23:30" },
-  "2026-05-21": { date: "2026-05-21", status: "unavailable", startTime: "09:00", endTime: "17:00" },
+  "2026-05-21": {
+    date: "2026-05-21",
+    status: "unavailable",
+    startTime: "09:00",
+    endTime: "17:00",
+    note: "Exam evening",
+  },
   "2026-05-22": { date: "2026-05-22", status: "preferred", startTime: "17:00", endTime: "00:00" },
   "2026-05-23": { date: "2026-05-23", status: "preferred", startTime: "12:00", endTime: "23:00" },
 }
+
+const planningWindows: PlanningWindow[] = [
+  {
+    id: "planning-window-1",
+    label: "Next week",
+    startDate: "2026-05-18",
+    endDate: "2026-05-24",
+    deadline: "2026-05-18T18:00:00.000Z",
+    status: "open",
+  },
+  {
+    id: "planning-window-2",
+    label: "May 25 - May 31",
+    startDate: "2026-05-25",
+    endDate: "2026-05-31",
+    deadline: "2026-05-24T18:00:00.000Z",
+    submittedAt: "2026-05-15T10:30:00.000Z",
+    status: "submitted",
+  },
+]
 
 const timeEntries: TimeEntry[] = [
   {
@@ -363,21 +413,40 @@ export function createInitialState(): AppStoreState {
     })),
     employerDirectory,
     shifts,
-    availability,
+    availabilityOverrides,
+    availabilityTemplate,
+    planningWindows,
     requests: [
       {
         id: "request-1",
+        category: "time_off",
         type: "Time off",
         status: "pending",
-        dateRange: "May 26 - May 27",
+        submittedAt: "2026-05-15T09:12:00.000Z",
+        target: {
+          kind: "dates",
+          label: "May 26 - May 27",
+          startDate: "2026-05-26",
+          endDate: "2026-05-27",
+        },
         reason: "Personal",
+        statusDetail: "Waiting for manager review",
+        nextStep: "Manager approval expected before Thursday",
       },
       {
         id: "request-2",
+        category: "shift_change",
         type: "Shift swap",
         status: "approved",
-        dateRange: "May 12",
+        submittedAt: "2026-05-10T14:45:00.000Z",
+        target: {
+          kind: "shift",
+          label: "May 12 evening shift",
+          shiftId: "shift-1",
+        },
         reason: "Swap evening shift with Lara",
+        statusDetail: "Approved by Lara and manager",
+        nextStep: "No further action needed",
       },
     ],
     documents: [
@@ -436,7 +505,7 @@ export function createInitialState(): AppStoreState {
         body: "Set your availability for next week before Sunday evening.",
         relativeTime: "2d ago",
         unread: false,
-        action: { type: "editAvailability" },
+        action: { type: "editAvailabilityOverride", date: "2026-05-18" },
       },
     ],
     timeEntries,
@@ -493,11 +562,11 @@ export function createInitialState(): AppStoreState {
       },
       {
         id: "task-2",
-        title: "Review updated Friday shift",
-        subtitle: "Kitchen event added 1 extra hour",
+        title: "Review updated Wednesday shift",
+        subtitle: "Your end time changed due to event service",
         urgency: "medium",
         actionLabel: "Review",
-        action: { type: "navigate", route: "/(app)/shift/shift-4" },
+        action: { type: "respondToShift", shiftId: "shift-3" },
       },
       {
         id: "task-3",
@@ -505,7 +574,7 @@ export function createInitialState(): AppStoreState {
         subtitle: "Help the team finalize rota planning",
         urgency: "low",
         actionLabel: "Set",
-        action: { type: "editAvailability" },
+        action: { type: "editAvailabilityOverride", date: "2026-05-18" },
       },
     ],
     signedContractIds: ["contract-1"],

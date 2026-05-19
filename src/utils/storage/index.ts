@@ -1,6 +1,6 @@
-import { MMKV } from "react-native-mmkv"
+import { createMMKV } from "react-native-mmkv"
 
-export const storage = new MMKV({
+export const storage = createMMKV({
   id: "vesta-mobile.storage",
 })
 
@@ -69,7 +69,7 @@ export function save(key: string, value: unknown): boolean {
  */
 export function remove(key: string): void {
   try {
-    storage.delete(key)
+    storage.remove(key)
   } catch {}
 }
 

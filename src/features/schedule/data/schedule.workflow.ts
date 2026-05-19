@@ -8,12 +8,12 @@ export function createRequestWorkflow(
   accountId: string,
   input: CreateRequestInput,
 ): ReturnType<ScheduleRepository["createRequest"]> | Promise<Result<never, ScheduleError>> {
-  if (!input.dateRange.trim() || !input.reason.trim()) {
+  if (!input.target.label.trim() || !input.reason.trim()) {
     return Promise.resolve({
       ok: false,
       error: {
         type: "validation",
-        message: "Add dates and a reason before sending the request.",
+        message: "Choose what the request is for and add a reason before sending it.",
       },
     })
   }

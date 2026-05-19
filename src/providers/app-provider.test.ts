@@ -4,6 +4,7 @@ import {
   migrateLegacyPersistedState,
   toAccountSnapshotDto,
   toAppStoreState,
+  toAppStoreStateFromAggregates,
   DEMO_AUTH_CREDENTIALS,
 } from "@/services/app/app.transformer"
 
@@ -43,5 +44,37 @@ describe("mock backend persistence", () => {
     expect(migrated?.accounts).toHaveLength(1)
     expect(migrated?.accounts[0].email).toBe("legacy.employee@vesta.local")
     expect(migrated?.session.accountId).toBe(migrated?.accounts[0].id)
+  })
+
+  it("fills missing aggregate sections from defaults", () => {
+    const state = createInitialState()
+    state.profile.role = undefined
+
+    const aggregates = createMockBackendDb().accounts[0].aggregates
+    const restored = toAppStoreStateFromAggregates(
+      {
+        ...aggregates,
+        home: {
+          ...aggregates.home,
+          highlights: undefined as never,
+          tasks: undefined as never,
+        },
+        profile: {
+          ...aggregates.profile,
+          profile: state.profile,
+        },
+        schedule: {
+          ...aggregates.schedule,
+          planningWindows: undefined as never,
+        },
+      },
+      "signedIn",
+    )
+
+    expect(restored.authStatus).toBe("signedIn")
+    expect(restored.profile.role).toBeUndefined()
+    expect(restored.highlights).toEqual(createInitialState().highlights)
+    expect(restored.tasks).toEqual(createInitialState().tasks)
+    expect(restored.planningWindows).toEqual(createInitialState().planningWindows)
   })
 })

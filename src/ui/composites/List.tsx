@@ -87,7 +87,8 @@ export function ListCardItem({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderCurve: "continuous",
+    borderRadius: 16,
     gap: 0,
     overflow: "hidden",
     paddingHorizontal: 0,

@@ -28,7 +28,18 @@ export const MOCK_BACKEND_STORAGE_KEY = "vesta-mobile.mock-backend"
 export const MOCK_BACKEND_VERSION = 2
 
 function cloneValue<T>(value: T): T {
+  if (value === undefined || value === null) {
+    return value
+  }
+
   return JSON.parse(JSON.stringify(value)) as T
+}
+
+function createDefaultAggregates(): MockAccountAggregatesDto {
+  return toPersistedAggregates({
+    ...createInitialState(),
+    authStatus: "signedOut",
+  })
 }
 
 export function createAccountId(email: string) {
@@ -63,7 +74,9 @@ export function toPersistedAggregates(state: AppStoreState): MockAccountAggregat
     version: 1,
   }
   const schedule: ScheduleAggregateDto = {
-    availability: cloneValue(snapshot.availability),
+    availabilityOverrides: cloneValue(snapshot.availabilityOverrides),
+    availabilityTemplate: cloneValue(snapshot.availabilityTemplate),
+    planningWindows: cloneValue(snapshot.planningWindows),
     requests: cloneValue(snapshot.requests),
     shifts: cloneValue(snapshot.shifts),
     version: 1,
@@ -103,24 +116,44 @@ export function toAppStoreStateFromAggregates(
   aggregates: MockAccountAggregatesDto,
   authStatus: AppStoreState["authStatus"],
 ): AppStoreState {
+  const defaults = createDefaultAggregates()
+  const profile = aggregates.profile ?? defaults.profile
+  const schedule = aggregates.schedule ?? defaults.schedule
+  const time = aggregates.time ?? defaults.time
+  const documents = aggregates.documents ?? defaults.documents
+  const notifications = aggregates.notifications ?? defaults.notifications
+  const home = aggregates.home ?? defaults.home
+
   return withStateAuthStatus(
     {
-      activeEmployerId: aggregates.profile.activeEmployerId,
-      availability: cloneValue(aggregates.schedule.availability),
-      clockSession: cloneValue(aggregates.time.clockSession),
-      documents: cloneValue(aggregates.documents.documents),
-      earnings: cloneValue(aggregates.time.earnings),
-      employerDirectory: cloneValue(aggregates.profile.employerDirectory),
-      employers: cloneValue(aggregates.profile.employers),
-      highlights: cloneValue(aggregates.home.highlights),
-      lastPasswordResetEmail: aggregates.profile.lastPasswordResetEmail,
-      notifications: cloneValue(aggregates.notifications.notifications),
-      profile: cloneValue(aggregates.profile.profile),
-      requests: cloneValue(aggregates.schedule.requests),
-      shifts: cloneValue(aggregates.schedule.shifts),
-      signedContractIds: cloneValue(aggregates.documents.signedContractIds),
-      tasks: cloneValue(aggregates.home.tasks),
-      timeEntries: cloneValue(aggregates.time.timeEntries),
+      activeEmployerId: profile.activeEmployerId ?? defaults.profile.activeEmployerId,
+      availabilityOverrides: cloneValue(
+        schedule.availabilityOverrides ?? defaults.schedule.availabilityOverrides,
+      ),
+      availabilityTemplate: cloneValue(
+        schedule.availabilityTemplate ?? defaults.schedule.availabilityTemplate,
+      ),
+      clockSession: cloneValue(time.clockSession ?? defaults.time.clockSession),
+      documents: cloneValue(documents.documents ?? defaults.documents.documents),
+      earnings: cloneValue(time.earnings ?? defaults.time.earnings),
+      employerDirectory: cloneValue(
+        profile.employerDirectory ?? defaults.profile.employerDirectory,
+      ),
+      employers: cloneValue(profile.employers ?? defaults.profile.employers),
+      highlights: cloneValue(home.highlights ?? defaults.home.highlights),
+      lastPasswordResetEmail: profile.lastPasswordResetEmail,
+      notifications: cloneValue(
+        notifications.notifications ?? defaults.notifications.notifications,
+      ),
+      profile: cloneValue(profile.profile ?? defaults.profile.profile),
+      planningWindows: cloneValue(schedule.planningWindows ?? defaults.schedule.planningWindows),
+      requests: cloneValue(schedule.requests ?? defaults.schedule.requests),
+      shifts: cloneValue(schedule.shifts ?? defaults.schedule.shifts),
+      signedContractIds: cloneValue(
+        documents.signedContractIds ?? defaults.documents.signedContractIds,
+      ),
+      tasks: cloneValue(home.tasks ?? defaults.home.tasks),
+      timeEntries: cloneValue(time.timeEntries ?? defaults.time.timeEntries),
     },
     authStatus,
   )

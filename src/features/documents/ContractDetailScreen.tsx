@@ -26,6 +26,7 @@ export function ContractDetailScreen() {
         ? {
             disabled: !canSign,
             kind: "confirm",
+            label: "Sign",
             onPress: signCurrentContract,
           }
         : undefined,

@@ -1,5 +1,5 @@
 import Config from "@/config"
-import type { RequestItem } from "@/core/models"
+import type { AppStoreState, HomeTask, RequestItem } from "@/core/models"
 import type { AuthError } from "@/features/auth/data/auth.errors"
 import type {
   AuthRepository,
@@ -53,8 +53,58 @@ function getUpdatedRequestPayload(input: CreateRequestInput): RequestItem {
   return {
     id: `request-${Date.now()}`,
     status: "pending",
+    submittedAt: new Date().toISOString(),
+    nextStep:
+      input.category === "shift_change"
+        ? "Waiting for colleague and manager approval"
+        : "Waiting for manager review",
     ...input,
   }
+}
+
+function getHomeTasks(state: AppStoreState): HomeTask[] {
+  const tasks: HomeTask[] = []
+  const nextShiftToReview = state.shifts.find((shift) => shift.requiresResponse)
+  const nextPlanningWindow = state.planningWindows.find((window) => window.status === "open")
+
+  if (state.documents.some((document) => document.status === "action_required")) {
+    tasks.push({
+      id: "task-upload-id-card",
+      title: "Upload your ID card",
+      subtitle: "Required before the next payroll run",
+      urgency: "high",
+      actionLabel: "Upload",
+      action: {
+        type: "uploadDocument",
+        documentId: "document-1",
+        title: "ID card verification",
+      },
+    })
+  }
+
+  if (nextShiftToReview) {
+    tasks.push({
+      id: `task-review-${nextShiftToReview.id}`,
+      title: `Review ${nextShiftToReview.dayLabel} shift update`,
+      subtitle: nextShiftToReview.changeSummary ?? "Your manager needs a response on this shift",
+      urgency: "medium",
+      actionLabel: "Review",
+      action: { type: "respondToShift", shiftId: nextShiftToReview.id },
+    })
+  }
+
+  if (nextPlanningWindow) {
+    tasks.push({
+      id: `task-availability-${nextPlanningWindow.id}`,
+      title: `Set availability for ${nextPlanningWindow.label.toLowerCase()}`,
+      subtitle: "Help the team finalize rota planning",
+      urgency: "low",
+      actionLabel: "Set",
+      action: { type: "editAvailabilityOverride", date: nextPlanningWindow.startDate },
+    })
+  }
+
+  return tasks
 }
 
 function toProfileError(error: ProfileError["type"], message: string): ProfileError {
@@ -239,29 +289,62 @@ function createMockScheduleRepository(): ScheduleRepository {
       )
       return success(lastItem(nextState.requests))
     },
-    async getAvailability(accountId) {
-      return getSignedInState(accountId).availability
-    },
-    async getRequests(accountId) {
-      return getSignedInState(accountId).requests
-    },
     async getSchedule(accountId) {
       const state = getSignedInState(accountId)
       return {
         activeEmployerId: state.activeEmployerId,
-        availability: state.availability,
+        availabilityOverrides: state.availabilityOverrides,
+        availabilityTemplate: state.availabilityTemplate,
         employers: state.employers,
+        planningWindows: state.planningWindows,
         requests: state.requests,
         shifts: state.shifts,
       }
     },
-    async saveAvailability(accountId, day) {
+    async respondToShift(accountId, shiftId) {
       const nextState = commitAccountAction(
         accountId,
-        { type: "updateAvailability", payload: day },
+        { type: "respondToShift", payload: { id: shiftId } },
         applyAppAction,
       )
-      return success(nextState.availability[day.date] ?? day)
+      const shift = nextState.shifts.find((candidate) => candidate.id === shiftId)
+      if (!shift) {
+        return failure({ type: "not-found", message: "Shift not found." })
+      }
+      return success(shift)
+    },
+    async saveAvailabilityOverride(accountId, day) {
+      const nextState = commitAccountAction(
+        accountId,
+        { type: "saveAvailabilityOverride", payload: day },
+        applyAppAction,
+      )
+      return success(nextState.availabilityOverrides[day.date] ?? day)
+    },
+    async saveAvailabilityTemplate(accountId, template) {
+      const nextState = commitAccountAction(
+        accountId,
+        { type: "saveAvailabilityTemplate", payload: template },
+        applyAppAction,
+      )
+      return success(nextState.availabilityTemplate ?? template)
+    },
+    async submitPlanningWindow(accountId, planningWindowId) {
+      const nextState = commitAccountAction(
+        accountId,
+        {
+          type: "submitPlanningWindow",
+          payload: { id: planningWindowId, submittedAt: new Date().toISOString() },
+        },
+        applyAppAction,
+      )
+      const planningWindow = nextState.planningWindows.find(
+        (window) => window.id === planningWindowId,
+      )
+      if (!planningWindow) {
+        return failure({ type: "not-found", message: "Planning window not found." })
+      }
+      return success(planningWindow)
     },
   }
 }
@@ -430,7 +513,7 @@ function createMockHomeRepository(): HomeRepository {
           (employer) => employer.id === state.activeEmployerId,
         ),
         shifts: state.shifts,
-        tasks: state.tasks,
+        tasks: getHomeTasks(state),
         unreadNotifications: state.notifications.filter((notification) => notification.unread)
           .length,
       }
@@ -501,16 +584,19 @@ function createApiRepositories() {
       createRequest: async () => {
         throw createApiNotReadyError()
       },
-      getAvailability: async () => {
-        throw createApiNotReadyError()
-      },
-      getRequests: async () => {
-        throw createApiNotReadyError()
-      },
       getSchedule: async () => {
         throw createApiNotReadyError()
       },
-      saveAvailability: async () => {
+      respondToShift: async () => {
+        throw createApiNotReadyError()
+      },
+      saveAvailabilityOverride: async () => {
+        throw createApiNotReadyError()
+      },
+      saveAvailabilityTemplate: async () => {
+        throw createApiNotReadyError()
+      },
+      submitPlanningWindow: async () => {
         throw createApiNotReadyError()
       },
     } satisfies ScheduleRepository,

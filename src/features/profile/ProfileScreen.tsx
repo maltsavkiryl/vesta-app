@@ -22,7 +22,6 @@ import {
   useAppTheme,
   useDesignTokens,
 } from "@/ui"
-import type { DesignTokens } from "@/ui"
 import { maskIban } from "@/utils/formatters"
 
 type ProfileSection = "personal" | "employment" | "settings" | "support"
@@ -250,39 +249,7 @@ function VersionFooter() {
   )
 }
 
-function createRightLabel(label: string, tokens: DesignTokens) {
-  return (
-    <View style={styles.rightLabel}>
-      <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
-    </View>
-  )
-}
-
-function TogglePill({ active }: { active: boolean }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View
-      style={[
-        styles.togglePill,
-        { backgroundColor: active ? tokens.success : tokens.surfaceTertiary },
-      ]}
-    >
-      <View
-        style={[
-          styles.toggleKnob,
-          {
-            backgroundColor: "#FFFFFF",
-            transform: [{ translateX: active ? 20 : 0 }],
-          },
-        ]}
-      />
-    </View>
-  )
-}
-
 export function ProfileScreen() {
-  const tokens = useDesignTokens()
   const router = useRouter()
   const { themeContext } = useAppTheme()
   const { signOut } = useAuthActions()
@@ -383,7 +350,6 @@ export function ProfileScreen() {
         icon: themeContext === "dark" ? "moon-outline" : "sunny-outline",
         label: "Appearance",
         route: "/profile/appearance",
-        rightAccessory: createRightLabel(themeContext === "dark" ? "Dark" : "Light", tokens),
         value: themeContext === "dark" ? "Dark" : "Light",
       },
       {
@@ -391,7 +357,6 @@ export function ProfileScreen() {
         label: "Notifications",
         route: "/profile/preferences",
         value: `${notificationCount} enabled`,
-        rightAccessory: <TogglePill active={notificationCount > 0} />,
       },
       {
         icon: "globe-outline",
@@ -536,11 +501,6 @@ const styles = StyleSheet.create({
     height: 4,
     overflow: "hidden",
   },
-  rightLabel: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
   rowIcon: {
     width: 17,
   },
@@ -556,21 +516,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     height: 6,
     width: 6,
-  },
-  toggleKnob: {
-    borderRadius: 13.5,
-    height: 27,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    width: 27,
-  },
-  togglePill: {
-    borderRadius: 15.5,
-    height: 31,
-    justifyContent: "center",
-    paddingHorizontal: 2,
-    width: 51,
   },
   versionLabel: {
     marginBottom: 4,

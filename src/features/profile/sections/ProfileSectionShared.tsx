@@ -3,7 +3,7 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { GroupedSection, SelectionCard, Text, useDesignTokens } from "@/ui"
+import { SelectionRow, Text, useDesignTokens } from "@/ui"
 
 export type SectionKey =
   | "personal"
@@ -40,17 +40,33 @@ export function ThemeOption({
   selected: boolean
 }) {
   const tokens = useDesignTokens()
+  const backgroundColor = selected ? tokens.accentSoft : tokens.surface
 
   return (
-    <SelectionCard
-      icon={
-        <Ionicons color={selected ? tokens.accent : tokens.textSecondary} name={icon} size={21} />
+    <SelectionRow
+      leading={
+        <View
+          style={[
+            styles.themeOptionIcon,
+            { backgroundColor: selected ? tokens.accentSoft : tokens.surfaceSecondary },
+          ]}
+        >
+          <Ionicons
+            color={selected ? tokens.accent : tokens.textSecondary}
+            name={icon}
+            size={21}
+          />
+        </View>
       }
       onPress={onPress}
       selected={selected}
       style={styles.themeOption}
-      subtitle={selected ? "Selected" : undefined}
+      subtitle={selected ? "Selected" : "Use this appearance"}
       title={label}
+      trailing={
+        selected ? <Ionicons color={tokens.accent} name="checkmark-outline" size={18} /> : null
+      }
+      backgroundColor={backgroundColor}
     />
   )
 }
@@ -62,9 +78,17 @@ export function AppearanceSection({
   onSelectTheme: (themePreference: "system" | "light" | "dark") => void
   selectedTheme: "system" | "light" | "dark"
 }) {
+  const tokens = useDesignTokens()
+
   return (
-    <GroupedSection title="Appearance">
-      <View style={styles.themeGrid}>
+    <View style={styles.appearanceSection}>
+      <Text
+        text="Appearance"
+        size="xxs"
+        weight="semiBold"
+        style={[styles.sectionLabel, { color: tokens.textMuted }]}
+      />
+      <View style={styles.themeList}>
         {(
           [
             { icon: "phone-portrait-outline", label: "System", value: "system" },
@@ -85,28 +109,33 @@ export function AppearanceSection({
           />
         ))}
       </View>
-    </GroupedSection>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  appearanceSection: {
+    gap: 10,
+  },
   sectionFooter: {
     paddingHorizontal: 4,
   },
-  themeGrid: {
-    flexDirection: "row",
-    gap: 8,
-    padding: 12,
+  sectionLabel: {
+    letterSpacing: 0,
   },
   themeOption: {
+    borderRadius: 16,
+    minHeight: 72,
+  },
+  themeOptionIcon: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderRadius: 14,
-    borderWidth: 1,
-    flex: 1,
-    gap: 8,
-    minHeight: 84,
-    paddingHorizontal: 8,
-    paddingVertical: 14,
+    borderRadius: 12,
+    height: 38,
+    justifyContent: "center",
+    width: 38,
+  },
+  themeList: {
+    gap: 10,
   },
 })

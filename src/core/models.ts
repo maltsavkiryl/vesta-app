@@ -4,6 +4,15 @@ export type ShiftStatus = "confirmed" | "changed" | "pending"
 export type AvailabilityStatus = "available" | "preferred" | "unavailable"
 export type RequestStatus = "pending" | "approved" | "denied"
 export type RequestType = "Time off" | "Shift swap" | "Unavailability"
+export type RequestCategory = "time_off" | "shift_change" | "availability_issue"
+export type AvailabilityWeekday =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday"
 export type DocumentStatus = "action_required" | "processing" | "available" | "verified"
 export type NotificationKind =
   | "schedule"
@@ -96,6 +105,10 @@ export interface Shift {
   venueAddress: string
   status: ShiftStatus
   note?: string
+  coworkers?: string[]
+  changeSummary?: string
+  requiresResponse?: boolean
+  responseStatus?: "pending" | "acknowledged"
 }
 
 export interface AvailabilityDay {
@@ -105,13 +118,45 @@ export interface AvailabilityDay {
   endTime: string
 }
 
+export interface AvailabilityTemplateDay {
+  status: AvailabilityStatus
+  startTime: string
+  endTime: string
+}
+
+export type AvailabilityTemplate = Record<AvailabilityWeekday, AvailabilityTemplateDay>
+
+export interface AvailabilityOverride extends AvailabilityDay {
+  note?: string
+}
+
+export interface PlanningWindow {
+  id: string
+  label: string
+  startDate: string
+  endDate: string
+  deadline: string
+  submittedAt?: string
+  status: "open" | "submitted" | "closed"
+}
+
 export interface RequestItem {
   id: string
+  category: RequestCategory
   type: RequestType
   status: RequestStatus
-  dateRange: string
+  submittedAt: string
+  target: {
+    endDate?: string
+    kind: "dates" | "shift"
+    label: string
+    shiftId?: string
+    startDate?: string
+  }
   reason: string
   note?: string
+  statusDetail: string
+  nextStep?: string
 }
 
 export interface DocumentItem {
@@ -209,6 +254,7 @@ export type AppNavigationRoute =
   | "/notifications"
   | "/(app)/tasks"
   | "/(app)/request"
+  | "/(app)/availability-template"
   | `/(app)/shift/${string}`
   | `/(app)/availability/${string}`
   | `/(app)/document-contract/${string}`
@@ -217,7 +263,10 @@ export type AppNavigationRoute =
 export type AppActionIntent =
   | { type: "navigate"; route: AppNavigationRoute }
   | { type: "uploadDocument"; title: string; documentId?: string }
-  | { type: "editAvailability"; date?: string }
+  | { type: "editAvailabilityTemplate" }
+  | { type: "editAvailabilityOverride"; date?: string }
+  | { type: "createScheduleRequest"; category?: RequestCategory; shiftId?: string }
+  | { type: "respondToShift"; shiftId: string }
 
 export interface HomeTask {
   id: string
@@ -243,7 +292,9 @@ export interface AppStoreState {
   employers: Employer[]
   employerDirectory: Employer[]
   shifts: Shift[]
-  availability: Record<string, AvailabilityDay>
+  availabilityTemplate: AvailabilityTemplate
+  availabilityOverrides: Record<string, AvailabilityOverride>
+  planningWindows: PlanningWindow[]
   requests: RequestItem[]
   documents: DocumentItem[]
   notifications: NotificationItem[]

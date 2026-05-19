@@ -1,6 +1,7 @@
 import { ReactNode, forwardRef, type ForwardedRef } from "react"
 import {
   type StyleProp,
+  // eslint-disable-next-line no-restricted-imports
   Text as RNText,
   type TextProps as RNTextProps,
   type TextStyle,
@@ -10,8 +11,8 @@ import { type TOptions } from "i18next"
 import { isRTL, type TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import { useAppTheme } from "@/theme/context"
-import { typography } from "@/theme/typography"
 import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
+import { typography } from "@/theme/typography"
 
 type Sizes = keyof typeof sizeStyles
 type Weights = keyof typeof typography.primary

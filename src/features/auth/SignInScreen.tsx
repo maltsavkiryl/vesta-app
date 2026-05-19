@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   form: {
+    alignItems: "stretch",
     gap: 9,
   },
   header: {
@@ -199,9 +200,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   logo: {
-    height: 76,
+    height: 53,
     marginBottom: 18,
-    width: 76,
+    width: 53,
   },
   screen: {
     backgroundColor: "#F9F9FA",
@@ -218,6 +219,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 16,
+    width: "100%",
   },
   socialButtonText: {
     color: "#000000",

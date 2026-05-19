@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { format } from "date-fns"
 
@@ -13,6 +13,7 @@ import {
   AppScrollScreen,
   DateBadge,
   ListCard,
+  ListCardItem,
   SectionBlock,
   Text,
   appLayout,
@@ -57,9 +58,9 @@ export function TimeEntriesListScreen({
 
   return (
     <AppScrollScreen
-      contentContainerStyle={styles.sheetContent}
-      style={{ backgroundColor: tokens.background }}
-      topInset="none"
+      contentContainerStyle={styles.screen}
+      style={{ backgroundColor: tokens.groupedBackground }}
+      variant="grouped"
     >
       <Text
         text={`${totalEntries} entries total`}
@@ -111,79 +112,43 @@ function EntryRow({
   const weekday = date ? format(date, "EEE") : "--"
   const day = date ? format(date, "d") : "--"
   const statusColor = entry.status === "approved" ? tokens.success : tokens.warning
+  const trailingLabel = showEarnings
+    ? getTimeEntryEarningsLabel(entry)
+    : entry.status === "approved"
+      ? "Approved"
+      : "Review"
+  const trailingTone = showEarnings ? tokens.textPrimary : statusColor
 
   return (
-    <Pressable
+    <ListCardItem
+      isLast={isLast}
+      leading={<DateBadge label={weekday} value={day} variant="plain" />}
       onPress={onPress}
-      style={[
-        styles.entryButton,
-        !isLast && {
-          borderBottomColor: tokens.border,
-          borderBottomWidth: StyleSheet.hairlineWidth,
-        },
-      ]}
-    >
-      <DateBadge label={weekday} value={day} variant="plain" />
-      <View style={[styles.entryDivider, { backgroundColor: tokens.border }]} />
-      <View style={styles.flex}>
-        <Text
-          text={getTimeEntryTimeRangeLabel(entry)}
-          size="xs"
-          weight="medium"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text
-          text={`${entry.shiftLabel} · ${getTimeEntryWorkedLabel(entry)}`}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
-      <View style={styles.entryStatus}>
-        <Text
-          text={
-            showEarnings
-              ? getTimeEntryEarningsLabel(entry)
-              : entry.status === "approved"
-                ? "Approved"
-                : "Review"
-          }
-          size="xxs"
-          weight="semiBold"
-          style={{ color: showEarnings ? tokens.textPrimary : statusColor }}
-        />
-        <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
-      </View>
-    </Pressable>
+      subtitle={`${entry.shiftLabel} · ${getTimeEntryWorkedLabel(entry)}`}
+      subtitleStyle={{ color: tokens.textSecondary }}
+      title={getTimeEntryTimeRangeLabel(entry)}
+      titleStyle={{ color: tokens.textPrimary }}
+      trailing={
+        <View style={styles.entryStatus}>
+          <Text text={trailingLabel} size="xs" weight="semiBold" style={{ color: trailingTone }} />
+          <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+        </View>
+      }
+    />
   )
 }
 
 const styles = StyleSheet.create({
   entriesCard: {
-    borderRadius: 18,
-  },
-  entryButton: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: appLayout.rowGap,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  entryDivider: {
-    height: 32,
-    width: StyleSheet.hairlineWidth,
+    borderRadius: 20,
   },
   entryStatus: {
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
   },
-  flex: {
-    flex: 1,
-  },
-  sheetContent: {
-    gap: appLayout.sheetGap,
-    paddingBottom: appLayout.sheetPaddingBottom,
-    paddingHorizontal: appLayout.sheetPaddingHorizontal,
-    paddingTop: appLayout.sheetPaddingTop,
+  screen: {
+    gap: appLayout.screenGap,
+    paddingHorizontal: appLayout.screenPaddingHorizontal,
   },
 })

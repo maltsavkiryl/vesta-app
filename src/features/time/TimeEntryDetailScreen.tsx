@@ -19,6 +19,7 @@ import {
   getTimeEntryTimeRangeLabel,
   getTimeEntryWorkedLabel,
 } from "@/core/timeEntries"
+import { TimeHeroCard, timeHeroColors } from "@/features/time/components/TimeHeroCard"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import {
   AppScrollScreen,
@@ -84,22 +85,6 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
   )
 }
 
-function MetricCard({ label, value }: { label: string; value: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View
-      style={[
-        styles.metricRow,
-        { borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth },
-      ]}
-    >
-      <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
-      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
-    </View>
-  )
-}
-
 function DetailRow({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
   const tokens = useDesignTokens()
 
@@ -149,7 +134,7 @@ export function TimeEntryDetailScreen() {
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
       <Stack.Screen options={{ title: formatShortDate(entry.clockInAt) }} />
 
-      <SurfaceCard elevated style={styles.heroCard}>
+      <TimeHeroCard contentStyle={styles.heroContent} variant="compact">
         <View style={styles.heroTopRow}>
           <StatusBadge
             label={entry.status === "approved" ? "Approved" : "Needs review"}
@@ -158,28 +143,28 @@ export function TimeEntryDetailScreen() {
           <Text
             text={formatFullDate(entry.date)}
             size="xs"
-            style={{ color: tokens.textSecondary }}
+            style={{ color: timeHeroColors.secondaryText }}
           />
         </View>
         <Text
           text={getTimeEntryTimeRangeLabel(entry)}
           weight="bold"
-          style={[styles.heroTitle, { color: tokens.textPrimary }]}
+          style={[styles.heroTitle, { color: timeHeroColors.primaryText }]}
         />
         <Text
           text={`${entry.shiftLabel} · ${entry.venueName}`}
           size="xs"
-          style={{ color: tokens.textSecondary }}
+          style={{ color: timeHeroColors.secondaryText }}
         />
         <View style={styles.heroMetaRow}>
-          <Ionicons color={tokens.textMuted} name="location-outline" size={16} />
+          <Ionicons color={timeHeroColors.tertiaryText} name="location-outline" size={16} />
           <Text
             text={primaryLocation?.addressLabel ?? entry.venueAddress}
             size="xxs"
-            style={[styles.flex, { color: tokens.textSecondary, lineHeight: 20 }]}
+            style={[styles.flex, { color: timeHeroColors.secondaryText, lineHeight: 20 }]}
           />
         </View>
-      </SurfaceCard>
+      </TimeHeroCard>
 
       <GroupedSection title="Summary">
         <DetailRow label="Worked" value={getTimeEntryWorkedLabel(entry)} />
@@ -223,12 +208,32 @@ export function TimeEntryDetailScreen() {
         <GroupedSection title="Clock-in proof photo">
           <View style={styles.photoWrapper}>
             <Image source={{ uri: entry.clockInProofPhoto.uri }} style={styles.photo} />
+            <View
+              style={[
+                styles.photoMetaRow,
+                {
+                  backgroundColor: tokens.surface,
+                  borderTopColor: tokens.border,
+                },
+              ]}
+            >
+              <View style={styles.photoMetaLabel}>
+                <Ionicons color={tokens.textMuted} name="camera-outline" size={14} />
+                <Text
+                  text="Proof captured"
+                  size="xxs"
+                  weight="medium"
+                  style={{ color: tokens.textSecondary }}
+                />
+              </View>
+              <Text
+                text={formatTimeValue(entry.clockInProofPhoto.capturedAt)}
+                size="xxs"
+                weight="semiBold"
+                style={{ color: tokens.textPrimary }}
+              />
+            </View>
           </View>
-          <Text
-            text={`Captured at ${formatTimeValue(entry.clockInProofPhoto.capturedAt)}`}
-            size="xxs"
-            style={[styles.photoCaption, { color: tokens.textSecondary }]}
-          />
         </GroupedSection>
       ) : null}
 
@@ -302,9 +307,8 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  heroCard: {
-    gap: 10,
-    padding: 18,
+  heroContent: {
+    gap: 12,
   },
   heroMetaRow: {
     alignItems: "center",
@@ -340,9 +344,18 @@ const styles = StyleSheet.create({
     height: 280,
     width: "100%",
   },
-  photoCaption: {
+  photoMetaLabel: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+  photoMetaRow: {
+    alignItems: "center",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingVertical: 12,
   },
   photoWrapper: {
     overflow: "hidden",

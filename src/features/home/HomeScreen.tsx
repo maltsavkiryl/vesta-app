@@ -20,7 +20,7 @@ export function HomeTasksScreen() {
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.nativeSheetContent}
       style={{ backgroundColor: tokens.background }}
       topInset="none"

@@ -59,23 +59,49 @@ export function applyAppAction(state: AppStoreState, action: AppAction): AppStor
           ...action.payload,
         },
       }
-    case "updateAvailability":
+    case "saveAvailabilityOverride":
       return {
         ...state,
-        availability: {
-          ...state.availability,
+        availabilityOverrides: {
+          ...state.availabilityOverrides,
           [action.payload.date]: action.payload,
         },
-        tasks: state.tasks.map((task) =>
-          task.action.type === "editAvailability"
-            ? { ...task, completed: true, actionLabel: "Done" }
-            : task,
+      }
+    case "saveAvailabilityTemplate":
+      return {
+        ...state,
+        availabilityTemplate: action.payload,
+      }
+    case "submitPlanningWindow":
+      return {
+        ...state,
+        planningWindows: state.planningWindows.map((window) =>
+          window.id === action.payload.id
+            ? {
+                ...window,
+                status: "submitted",
+                submittedAt: action.payload.submittedAt,
+              }
+            : window,
         ),
       }
     case "createRequest":
       return {
         ...state,
         requests: [action.payload, ...state.requests],
+      }
+    case "respondToShift":
+      return {
+        ...state,
+        shifts: state.shifts.map((shift) =>
+          shift.id === action.payload.id
+            ? {
+                ...shift,
+                requiresResponse: false,
+                responseStatus: "acknowledged",
+              }
+            : shift,
+        ),
       }
     case "markNotificationRead":
       return {

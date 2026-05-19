@@ -12,13 +12,16 @@ import {
   type ViewStyle,
 } from "react-native"
 import { isLiquidGlassAvailable } from "expo-glass-effect"
+import { LinearGradient } from "expo-linear-gradient"
 import SegmentedControl from "@react-native-segmented-control/segmented-control"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { Text } from "@/ui/primitives/Text"
 import { useDesignTokens, type DesignTokens } from "@/ui/foundations/tokens"
+import { Text } from "@/ui/primitives/Text"
 
 type AppButtonVariant = "primary" | "secondary" | "danger"
+type AppScrollScreenVariant = "default" | "grouped"
+type TopEdgeTreatment = "auto" | "none"
 
 const headerEyebrowStyle = {
   letterSpacing: 0,
@@ -34,34 +37,66 @@ export function AppScrollScreen({
   children,
   contentInsetAdjustmentBehavior = "automatic",
   contentContainerStyle,
+  topEdgeTreatment = "auto",
   topInset = "safe",
   variant = "default",
   ...props
 }: PropsWithChildren<
-  ScrollViewProps & { topInset?: "safe" | "none"; variant?: "default" | "grouped" }
+  ScrollViewProps & {
+    topEdgeTreatment?: TopEdgeTreatment
+    topInset?: "safe" | "none"
+    variant?: AppScrollScreenVariant
+  }
 >) {
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
   const backgroundColor = variant === "grouped" ? tokens.groupedBackground : tokens.background
+  const shouldShowTopEdgeTreatment = topInset === "safe" && topEdgeTreatment === "auto"
 
   return (
-    <ScrollView
-      {...props}
-      contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
-      contentContainerStyle={[
-        styles.screenContent,
-        {
-          paddingBottom: insets.bottom + 28,
-          paddingTop: topInset === "safe" ? 18 : 0,
-        },
-        contentContainerStyle,
-      ]}
-      keyboardShouldPersistTaps="handled"
-      style={[styles.flex, { backgroundColor }, props.style]}
-    >
-      {children}
-    </ScrollView>
+    <View style={[styles.flex, { backgroundColor }]}>
+      <ScrollView
+        {...props}
+        contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
+        contentContainerStyle={[
+          styles.screenContent,
+          {
+            paddingBottom: insets.bottom + 28,
+            paddingTop: topInset === "safe" ? 18 : 0,
+          },
+          contentContainerStyle,
+        ]}
+        keyboardShouldPersistTaps="handled"
+        style={[styles.flex, props.style]}
+      >
+        {children}
+      </ScrollView>
+      {shouldShowTopEdgeTreatment ? <TopEdgeOverlay insetTop={insets.top} tokens={tokens} /> : null}
+    </View>
   )
+}
+
+function TopEdgeOverlay({ insetTop, tokens }: { insetTop: number; tokens: DesignTokens }) {
+  const overlayHeight = insetTop + 24
+
+  return (
+    <View pointerEvents="none" style={[styles.topEdgeOverlay, { height: overlayHeight }]}>
+      <LinearGradient
+        colors={getTopEdgeGradientColors(tokens)}
+        end={{ x: 0.5, y: 1 }}
+        start={{ x: 0.5, y: 0 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+    </View>
+  )
+}
+
+function getTopEdgeGradientColors(tokens: DesignTokens): readonly [string, string, string] {
+  if (tokens.isDark) {
+    return ["rgba(0, 0, 0, 0.42)", "rgba(0, 0, 0, 0.10)", "rgba(0, 0, 0, 0.00)"]
+  }
+
+  return ["rgba(255, 255, 255, 0.62)", "rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 0.00)"]
 }
 
 export function PageHeader({
@@ -114,7 +149,10 @@ export function AppSegmentedControl<T extends string>({
   value: T
 }) {
   const tokens = useDesignTokens()
-  const selectedIndex = Math.max(options.findIndex((option) => option.value === value), 0)
+  const selectedIndex = Math.max(
+    options.findIndex((option) => option.value === value),
+    0,
+  )
   const fontStyle = useMemo(
     () => ({
       color: tokens.textSecondary,
@@ -213,12 +251,7 @@ export function SectionTitle({
       <View style={styles.sectionHeaderActions}>
         {badgeLabel ? (
           <View style={[styles.sectionBadge, { backgroundColor: `${tokens.danger}14` }]}>
-            <Text
-              size="xxs"
-              style={{ color: tokens.danger }}
-              text={badgeLabel}
-              weight="semiBold"
-            />
+            <Text size="xxs" style={{ color: tokens.danger }} text={badgeLabel} weight="semiBold" />
           </View>
         ) : null}
         {actionLabel && actionHandler ? (
@@ -562,7 +595,10 @@ export function MetricGrid({
   return (
     <View style={styles.metricGrid}>
       {items.map((item) => (
-        <View key={item.label} style={[styles.metricCell, { backgroundColor: tokens.backgroundMuted }]}>
+        <View
+          key={item.label}
+          style={[styles.metricCell, { backgroundColor: tokens.backgroundMuted }]}
+        >
           <Text
             numberOfLines={1}
             size="xs"
@@ -589,7 +625,11 @@ export function EmptyState({ title, subtitle }: { subtitle: string; title: strin
     <SurfaceCard>
       <View style={styles.emptyState}>
         <Text size="sm" style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
-        <Text size="xs" style={{ color: tokens.textSecondary, textAlign: "center" }} text={subtitle} />
+        <Text
+          size="xs"
+          style={{ color: tokens.textSecondary, textAlign: "center" }}
+          text={subtitle}
+        />
       </View>
     </SurfaceCard>
   )
@@ -618,7 +658,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderCurve: "continuous",
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     elevation: 0,
     gap: 12,
@@ -783,5 +823,11 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     height: 6,
     width: 6,
+  },
+  topEdgeOverlay: {
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
   },
 })

@@ -193,7 +193,7 @@ export function NotificationsScreen() {
 
   return (
     <AppScrollScreen
-      contentInsetAdjustmentBehavior="never"
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.screen}
       topInset="none"
       variant="grouped"
