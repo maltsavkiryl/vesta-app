@@ -142,7 +142,10 @@ export function ShiftDetailScreen() {
         </GroupedSection>
       ) : null}
 
-      <GroupedSection title="Need a change?">
+      <GroupedSection
+        title="Need a change?"
+        bodyStyle={styles.actionSectionBody}
+      >
         <View style={styles.actionStack}>
           <ActionRow
             onPress={() =>
@@ -176,6 +179,12 @@ export function ShiftDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  actionSectionBody: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
   actionStack: {
     gap: 10,
   },

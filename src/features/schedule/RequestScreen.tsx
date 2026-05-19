@@ -224,10 +224,20 @@ export function RequestScreen() {
       </GroupedSection>
 
       {category === "shift_change" ? (
-        <GroupedSection title="Which shift needs help?">
+        <View style={styles.flatSection}>
+          <Text
+            size="xxs"
+            style={[
+              styles.flatSectionTitle,
+              { color: tokens.textMuted },
+            ]}
+            text="Which shift needs help?"
+            weight="semiBold"
+          />
           <View style={styles.shiftList}>
             {upcomingShifts.map((shift) => (
               <SelectionRow
+                backgroundColor={tokens.surface}
                 key={shift.id}
                 onPress={() => setSelectedShiftId(shift.id)}
                 selected={selectedShiftId === shift.id}
@@ -242,7 +252,7 @@ export function RequestScreen() {
               />
             ))}
           </View>
-        </GroupedSection>
+        </View>
       ) : (
         <GroupedSection
           title={category === "time_off" ? "Which dates?" : "Which days are affected?"}
@@ -389,6 +399,14 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     gap: 10,
   },
+  flatSection: {
+    gap: 8,
+  },
+  flatSectionTitle: {
+    letterSpacing: 0.6,
+    paddingHorizontal: 4,
+    textTransform: "uppercase",
+  },
   intro: {
     gap: 6,
   },
@@ -414,8 +432,6 @@ const styles = StyleSheet.create({
   },
   shiftList: {
     gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
   },
   shiftRow: {
     minHeight: 84,

@@ -494,10 +494,12 @@ export function StatusBadge({
 export function GroupedSection({
   children,
   actionLabel,
+  bodyStyle,
   title,
   onAction,
 }: PropsWithChildren<{
   actionLabel?: string
+  bodyStyle?: StyleProp<ViewStyle>
   onAction?: () => void
   title?: string
 }>) {
@@ -532,6 +534,7 @@ export function GroupedSection({
             borderColor: tokens.border,
             shadowColor: tokens.shadow,
           },
+          bodyStyle,
         ]}
       >
         {children}
