@@ -8,13 +8,10 @@ import { Ionicons } from "@expo/vector-icons"
 import { createInitialState } from "@/core/mockState"
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
-import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
-import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import {
   AppScrollScreen,
   ListCard,
   ListCardItem,
-  MetricGrid,
   Pill,
   SectionBlock,
   SurfaceCard,
@@ -65,10 +62,6 @@ function getInitials(firstName: string, lastName: string) {
 function capitalize(value?: string) {
   if (!value) return "Waiter"
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
-}
-
-function formatWorkedHours(hours: number) {
-  return `${Math.round(hours)}h`
 }
 
 function ProfileAvatar({ initials }: { initials: string }) {
@@ -130,17 +123,6 @@ function ProfileHeader({
       </View>
     </View>
   )
-}
-
-function StatCard({
-  stats,
-}: {
-  stats: Array<{
-    label: string
-    value: string
-  }>
-}) {
-  return <MetricGrid items={stats} />
 }
 
 function CompletenessCard({ progress }: { progress: number }) {
@@ -254,30 +236,16 @@ export function ProfileScreen() {
   const { themeContext } = useAppTheme()
   const { signOut } = useAuthActions()
   const { selectedEmployer, state: profileState } = useProfileStateQuery()
-  const { state: scheduleState } = useScheduleStateQuery()
-  const timeQuery = useTimeDataQuery()
   const fallbackState = createInitialState()
   const state = {
     ...fallbackState,
     ...profileState,
-    earnings: timeQuery.data?.earnings ?? fallbackState.earnings,
-    shifts: scheduleState?.shifts ?? fallbackState.shifts,
-    timeEntries: timeQuery.data?.timeEntries ?? fallbackState.timeEntries,
   }
 
   const fullName = `${state.profile.firstName} ${state.profile.lastName}`
   const role = capitalize(state.profile.role)
   const employerName = selectedEmployer?.name ?? "No employer"
   const profileCompleteness = 95
-
-  const stats = useMemo(
-    () => [
-      { label: "Shifts", value: String(state.shifts.length + state.timeEntries.length) },
-      { label: "Worked", value: formatWorkedHours(state.earnings.hoursWorked) },
-      { label: "Tenure", value: "8mo" },
-    ],
-    [state.earnings.hoursWorked, state.shifts.length, state.timeEntries.length],
-  )
 
   const notificationCount = useMemo(
     () =>
@@ -396,10 +364,6 @@ export function ProfileScreen() {
         initials={getInitials(state.profile.firstName, state.profile.lastName)}
         role={role}
       />
-
-      <SurfaceCard style={styles.statsWrapper}>
-        <StatCard stats={stats} />
-      </SurfaceCard>
       <CompletenessCard progress={profileCompleteness} />
 
       {Object.entries(sections).map(([section, items]) => (
@@ -507,10 +471,6 @@ const styles = StyleSheet.create({
   screenContent: {
     gap: 16,
     paddingHorizontal: 16,
-  },
-  statsWrapper: {
-    borderRadius: 16,
-    padding: 10,
   },
   statusDot: {
     borderRadius: 3,
