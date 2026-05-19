@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { ReactNode } from "react"
 import {
   StyleProp,
@@ -42,6 +40,7 @@ export function TextField({
 }: TextFieldProps) {
   const tokens = useDesignTokens()
   const normalizedLabel = labelCase === "uppercase" && label ? label.toUpperCase() : label
+  const hasSupportingCopy = Boolean(normalizedLabel || caption)
   const tonePalette =
     variant === "outline"
       ? getTonePalette(tokens, tone, "outline")
@@ -64,6 +63,7 @@ export function TextField({
     <View
       style={[
         styles.field,
+        !hasSupportingCopy ? styles.fieldBare : null,
         {
           backgroundColor: tonePalette.backgroundColor,
           borderColor: tonePalette.borderColor,
@@ -86,7 +86,13 @@ export function TextField({
           placeholderTextColor={tokens.textMuted}
           selectionColor={tokens.accent}
           {...props}
-          style={[styles.input, { color: tokens.textPrimary }, inputStyle, style]}
+          style={[
+            styles.input,
+            !hasSupportingCopy ? styles.inputBare : null,
+            { color: tokens.textPrimary },
+            inputStyle,
+            style,
+          ]}
         />
         {rightAccessory}
       </View>
@@ -104,12 +110,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 11,
   },
+  fieldBare: {
+    justifyContent: "center",
+    minHeight: 56,
+    paddingVertical: 0,
+  },
   input: {
     flex: 1,
     fontSize: 16,
     lineHeight: 22,
     minHeight: 26,
     padding: 0,
+  },
+  inputBare: {
+    minHeight: 22,
   },
   inputRow: {
     alignItems: "center",

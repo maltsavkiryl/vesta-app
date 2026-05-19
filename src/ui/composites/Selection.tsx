@@ -57,12 +57,20 @@ export function SelectionChip({
   label,
   onPress,
   selected,
+  selectedVariant = "soft",
 }: {
   label: string
   onPress: () => void
   selected: boolean
+  selectedVariant?: "soft" | "solid"
 }) {
   const tokens = useDesignTokens()
+  const selectedBackgroundColor = selectedVariant === "solid" ? tokens.accent : tokens.accentSoft
+  const textColor = selected
+    ? selectedVariant === "solid"
+      ? tokens.accentForeground
+      : tokens.textPrimary
+    : tokens.textPrimary
 
   return (
     <Pressable
@@ -70,18 +78,20 @@ export function SelectionChip({
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? tokens.accentSoft : tokens.surfaceSecondary,
+          backgroundColor: selected ? selectedBackgroundColor : tokens.surfaceSecondary,
           borderColor: selected ? tokens.accent : tokens.border,
         },
       ]}
     >
-      <Text text={label} size="xxs" weight="medium" style={{ color: tokens.textPrimary }} />
+      <Text text={label} size="xxs" weight="medium" style={{ color: textColor }} />
     </Pressable>
   )
 }
 
 export function SelectionRow({
   backgroundColor,
+  dividerInset = 14,
+  isLast = false,
   leading,
   onPress,
   selected,
@@ -91,6 +101,8 @@ export function SelectionRow({
   trailing,
 }: {
   backgroundColor?: string
+  dividerInset?: number
+  isLast?: boolean
   leading?: ReactNode
   onPress: () => void
   selected: boolean
@@ -100,14 +112,16 @@ export function SelectionRow({
   trailing?: ReactNode
 }) {
   const tokens = useDesignTokens()
+  const baseBackgroundColor =
+    backgroundColor ?? (selected ? tokens.accentSoft : tokens.surfaceSecondary)
 
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.row,
         {
-          backgroundColor: backgroundColor ?? (selected ? tokens.accentSoft : tokens.surfaceSecondary),
+          backgroundColor: pressed ? tokens.pressed : baseBackgroundColor,
           borderColor: selected ? tokens.accent : tokens.border,
         },
         style,
@@ -121,6 +135,11 @@ export function SelectionRow({
         ) : null}
       </View>
       {trailing}
+      {!isLast ? (
+        <View
+          style={[styles.rowDivider, { backgroundColor: tokens.separator, left: dividerInset }]}
+        />
+      ) : null}
     </Pressable>
   )
 }
@@ -193,6 +212,12 @@ const styles = StyleSheet.create({
   },
   rowCopy: {
     flex: 1,
+  },
+  rowDivider: {
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    position: "absolute",
+    right: 0,
   },
   toggleThumb: {
     borderRadius: 13.5,

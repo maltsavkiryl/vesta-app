@@ -150,8 +150,8 @@ const styles = StyleSheet.create({
   pickerWrap: {
     alignItems: "center",
     flex: 1,
-    minHeight: 232,
     justifyContent: "center",
+    minHeight: 232,
   },
   screen: {
     flex: 1,

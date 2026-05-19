@@ -1,5 +1,4 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
-
+import { useMemo } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -16,44 +15,40 @@ export function EarningsSummaryCard({
   onPayslipPress: () => void
 }) {
   const tokens = useDesignTokens()
+  const cardStyle = useMemo(
+    () => ({
+      backgroundColor: tokens.surface,
+      borderColor: tokens.border,
+      shadowColor: tokens.shadow,
+    }),
+    [tokens.border, tokens.shadow, tokens.surface],
+  )
+  const amountStyle = useMemo(
+    () => [styles.earningsAmount, { color: tokens.textPrimary }],
+    [tokens.textPrimary],
+  )
+  const labelStyle = useMemo(() => ({ color: tokens.textSecondary }), [tokens.textSecondary])
+  const trendIconStyle = useMemo(
+    () => [styles.trendIcon, { backgroundColor: `${tokens.accent}14` }],
+    [tokens.accent],
+  )
+  const linkStyle = useMemo(() => ({ color: tokens.accent }), [tokens.accent])
 
   return (
-    <View
-      style={[
-        styles.earningsCard,
-        {
-          backgroundColor: tokens.surface,
-          borderColor: tokens.isDark ? tokens.border : "#DCDDE4",
-          shadowColor: tokens.shadow,
-        },
-      ]}
-    >
+    <View style={[styles.earningsCard, cardStyle]}>
       <View style={styles.earningsTop}>
         <View style={styles.flex}>
-          <Text
-            text={`${monthLabel} earnings`}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-          <Text
-            text={formatCurrency(earnedAmount)}
-            weight="bold"
-            style={[styles.earningsAmount, { color: tokens.textPrimary }]}
-          />
+          <Text text={`${monthLabel} earnings`} size="xxs" style={labelStyle} />
+          <Text text={formatCurrency(earnedAmount)} weight="bold" style={amountStyle} />
         </View>
-        <View style={[styles.trendIcon, { backgroundColor: `${tokens.accent}14` }]}>
+        <View style={trendIconStyle}>
           <Ionicons color={tokens.accent} name="trending-up-outline" size={19} />
         </View>
       </View>
 
       <Pressable onPress={onPayslipPress} style={styles.payslipLink}>
         <Ionicons color={tokens.accent} name="card-outline" size={14} />
-        <Text
-          text="View latest payslip"
-          size="xxs"
-          weight="medium"
-          style={{ color: tokens.accent }}
-        />
+        <Text text="View latest payslip" size="xxs" weight="medium" style={linkStyle} />
         <Ionicons color={tokens.accent} name="chevron-forward-outline" size={14} />
       </Pressable>
     </View>

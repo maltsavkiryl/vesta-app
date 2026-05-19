@@ -1,4 +1,4 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
+/* eslint-disable react-native/no-inline-styles */
 
 import { useMemo, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"

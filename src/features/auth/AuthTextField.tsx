@@ -8,6 +8,7 @@ interface AuthTextFieldProps extends TextInputProps {
   containerStyle?: StyleProp<ViewStyle>
   label: string
   labelCase?: "default" | "uppercase"
+  showLabel?: boolean
   tone?: Tone
   rightAccessory?: ReactNode
   variant?: "default" | "muted" | "outline"
@@ -18,6 +19,7 @@ export function AuthTextField({
   label,
   labelCase,
   rightAccessory,
+  showLabel = true,
   style,
   tone,
   variant = "muted",
@@ -25,11 +27,11 @@ export function AuthTextField({
 }: AuthTextFieldProps) {
   return (
     <TextField
-      accessibilityLabel={label}
+      accessibilityLabel={props.accessibilityLabel ?? label}
       autoCorrect={false}
       containerStyle={containerStyle}
       inputStyle={style}
-      label={label}
+      label={showLabel ? label : undefined}
       labelCase={labelCase}
       rightAccessory={rightAccessory}
       tone={tone}

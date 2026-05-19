@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
-
 import { StyleSheet, View } from "react-native"
 
 import { EarningsSummaryCard } from "@/features/home/components/EarningsSummaryCard"
@@ -9,7 +7,7 @@ import {
   HomeTasksSection,
   HomeUpdatesSection,
 } from "@/features/home/components/HomeTaskSections"
-import { NextShiftHeroCard } from "@/features/home/components/NextShiftHeroCard"
+import { HomeTimeCard } from "@/features/home/components/HomeTimeCard"
 import { UpcomingShiftsSection } from "@/features/home/components/UpcomingShiftsSection"
 import { useHomeScreen } from "@/features/home/useHomeScreen"
 import { AppScrollScreen, useDesignTokens } from "@/ui"
@@ -40,8 +38,6 @@ export function HomeScreen() {
     greeting,
     hideTask,
     home,
-    nextShift,
-    openClock,
     openDocuments,
     openNotifications,
     openProfile,
@@ -66,13 +62,7 @@ export function HomeScreen() {
       />
 
       <View style={styles.stack}>
-        {nextShift ? (
-          <NextShiftHeroCard
-            shift={nextShift}
-            onClockIn={openClock}
-            onDetails={() => openShift(nextShift)}
-          />
-        ) : null}
+        <HomeTimeCard />
 
         <UpcomingShiftsSection
           shifts={upcomingShifts}

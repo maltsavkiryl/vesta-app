@@ -11,12 +11,12 @@ jest.doMock("react-native", () => {
     {
       Image: {
         ...ReactNative.Image,
-        resolveAssetSource: jest.fn((_source) => mockFile), // eslint-disable-line @typescript-eslint/no-unused-vars
+        resolveAssetSource: jest.fn(() => mockFile),
         getSize: jest.fn(
           (
-            uri: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+            _uri: string,
             success: (width: number, height: number) => void,
-            failure?: (_error: any) => void, // eslint-disable-line @typescript-eslint/no-unused-vars
+            _failure?: (_error: any) => void,
           ) => success(100, 100),
         ),
       },
@@ -51,7 +51,7 @@ jest.mock("react-native-mmkv", () => {
           setValue(getter(instance, key))
         }
       }).remove
-    }, [instance, key])
+    }, [getter, instance, key])
 
     const setStoredValue = (
       nextValue: T | ((current: T | undefined) => T | undefined) | undefined,

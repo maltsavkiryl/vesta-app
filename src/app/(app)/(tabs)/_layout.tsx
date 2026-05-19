@@ -1,61 +1,51 @@
-import { DynamicColorIOS } from "react-native"
-import { NativeTabs } from "expo-router/unstable-native-tabs"
+import { Tabs } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 
-const labelStyle = {
-  fontSize: 11,
-  fontWeight: "600",
-} as const
-
-const liquidGlassColor = DynamicColorIOS({
-  dark: "#FFFFFF",
-  light: "#000000",
-})
-
-const brandBlue = "#007AFF"
+import { useDesignTokens } from "@/ui"
 
 export default function TabLayout() {
+  const tokens = useDesignTokens()
+
+  const tabBarIcon = (routeName: string, focused: boolean) => {
+    const iconName = {
+      documents: focused ? "document-text" : "document-text-outline",
+      home: focused ? "home" : "home-outline",
+      profile: focused ? "person-circle" : "person-circle-outline",
+      schedule: focused ? "calendar" : "calendar-outline",
+      time: focused ? "time" : "time-outline",
+    }[routeName] as keyof typeof Ionicons.glyphMap
+
+    return (
+      <Ionicons color={focused ? tokens.accent : tokens.textSecondary} name={iconName} size={20} />
+    )
+  }
+
   return (
-    <NativeTabs
-      iconColor={{ default: liquidGlassColor, selected: brandBlue }}
-      labelStyle={{
-        default: { ...labelStyle, color: liquidGlassColor },
-        selected: { ...labelStyle, color: brandBlue },
-      }}
-      tintColor={brandBlue}
+    <Tabs
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: tokens.accent,
+        tabBarInactiveTintColor: tokens.textSecondary,
+        tabBarLabelStyle: styles.label,
+        tabBarStyle: {
+          backgroundColor: tokens.surface,
+          borderTopColor: tokens.border,
+        },
+        tabBarIcon: ({ focused }) => tabBarIcon(route.name, focused),
+      })}
     >
-      <NativeTabs.Trigger name="home">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="schedule">
-        <NativeTabs.Trigger.Label>Planning</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "calendar", selected: "calendar.circle.fill" }}
-          md="calendar_today"
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="time">
-        <NativeTabs.Trigger.Label>Time</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: "clock", selected: "clock.fill" }} md="schedule" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="documents">
-        <NativeTabs.Trigger.Label>Docs</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "doc.text", selected: "doc.text.fill" }}
-          md="description"
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }}
-          md="account_circle"
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      <Tabs.Screen name="home" options={{ title: "Home" }} />
+      <Tabs.Screen name="schedule" options={{ title: "Planning" }} />
+      <Tabs.Screen name="time" options={{ title: "Time" }} />
+      <Tabs.Screen name="documents" options={{ title: "Docs" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+    </Tabs>
   )
 }
+
+const styles = {
+  label: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+} as const

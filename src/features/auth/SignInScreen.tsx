@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-color-literals */
-
 import { useState } from "react"
 import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
@@ -43,7 +41,7 @@ export function SignInScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}
+      style={[styles.screen, { backgroundColor: tokens.backgroundMuted }]}
     >
       <View
         style={[
@@ -56,7 +54,11 @@ export function SignInScreen() {
       >
         <View style={styles.header}>
           <VestaLogo />
-          <Text text="Log in or sign up" weight="bold" style={styles.title} />
+          <Text
+            text="Log in or sign up"
+            weight="bold"
+            style={[styles.title, { color: tokens.textPrimary }]}
+          />
         </View>
 
         <View style={styles.form}>
@@ -71,8 +73,9 @@ export function SignInScreen() {
               if (error) setError(undefined)
             }}
             onSubmitEditing={handleContinue}
-            placeholder="you@email.com"
+            placeholder="Email"
             returnKeyType="next"
+            showLabel={false}
             textContentType="username"
             value={email}
             rightAccessory={
@@ -81,7 +84,7 @@ export function SignInScreen() {
                   accessibilityLabel="Clear email"
                   hitSlop={10}
                   onPress={() => setEmail("")}
-                  style={styles.clearButton}
+                  style={[styles.clearButton, { backgroundColor: tokens.textMuted }]}
                 >
                   <Ionicons color={tokens.accentForeground} name="close" size={12} />
                 </Pressable>
@@ -102,6 +105,7 @@ export function SignInScreen() {
             placeholder="Password"
             returnKeyType="done"
             secureTextEntry
+            showLabel={false}
             textContentType="password"
             value={password}
             rightAccessory={
@@ -110,7 +114,7 @@ export function SignInScreen() {
                   accessibilityLabel="Clear password"
                   hitSlop={10}
                   onPress={() => setPassword("")}
-                  style={styles.clearButton}
+                  style={[styles.clearButton, { backgroundColor: tokens.textMuted }]}
                 >
                   <Ionicons color={tokens.accentForeground} name="close" size={12} />
                 </Pressable>
@@ -124,17 +128,28 @@ export function SignInScreen() {
             </Banner>
           ) : null}
 
-          <Button label="Continue" onPress={handleContinue} />
+          <Button fullWidth label="Continue" onPress={handleContinue} />
           <Button
+            fullWidth
             label="Register"
             onPress={() => router.replace("/(auth)/register")}
             variant="secondary"
           />
 
-          <Text text="or" style={styles.dividerText} />
+          <Text text="or" style={[styles.dividerText, { color: tokens.textSecondary }]} />
 
-          <SocialButton icon="logo-google" label="Continue with Google" onPress={handleContinue} />
-          <SocialButton icon="logo-apple" label="Continue with Apple" onPress={handleContinue} />
+          <SocialButton
+            icon="logo-google"
+            label="Continue with Google"
+            onPress={handleContinue}
+            tokens={tokens}
+          />
+          <SocialButton
+            icon="logo-apple"
+            label="Continue with Apple"
+            onPress={handleContinue}
+            tokens={tokens}
+          />
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -157,15 +172,30 @@ function SocialButton({
   icon,
   label,
   onPress,
+  tokens,
 }: {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   onPress: () => void
+  tokens: ReturnType<typeof useDesignTokens>
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.socialButton}>
-      <Ionicons color="#000000" name={icon} size={21} />
-      <Text text={label} weight="bold" style={styles.socialButtonText} />
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.socialButton,
+        {
+          backgroundColor: tokens.background,
+          borderColor: tokens.border,
+        },
+      ]}
+    >
+      <Ionicons color={tokens.textPrimary} name={icon} size={21} />
+      <Text
+        text={label}
+        weight="bold"
+        style={[styles.socialButtonText, { color: tokens.textPrimary }]}
+      />
     </Pressable>
   )
 }
@@ -173,7 +203,6 @@ function SocialButton({
 const styles = StyleSheet.create({
   clearButton: {
     alignItems: "center",
-    backgroundColor: "#B7B7BA",
     borderRadius: 10,
     height: 20,
     justifyContent: "center",
@@ -185,7 +214,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   dividerText: {
-    color: "#6C6C70",
     fontSize: 18,
     lineHeight: 22,
     marginVertical: 2,
@@ -205,13 +233,10 @@ const styles = StyleSheet.create({
     width: 53,
   },
   screen: {
-    backgroundColor: "#F9F9FA",
     flex: 1,
   },
   socialButton: {
     alignItems: "center",
-    backgroundColor: "#F9F9FA",
-    borderColor: "#C9C9CC",
     borderRadius: 12,
     borderWidth: 1,
     flexDirection: "row",
@@ -222,12 +247,10 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   socialButtonText: {
-    color: "#000000",
     fontSize: 17,
     lineHeight: 22,
   },
   title: {
-    color: "#000000",
     fontSize: 28,
     lineHeight: 34,
     textAlign: "center",

@@ -27,7 +27,6 @@ export function useHomeScreen() {
     return () => clearInterval(interval)
   }, [])
 
-  const nextShift = home?.shifts[0]
   const upcomingShifts = home?.shifts.slice(1, 7) ?? []
   const pendingTasks = useMemo(
     () => (home?.tasks ?? []).filter((task) => !task.completed && !hiddenTaskIds.includes(task.id)),
@@ -49,8 +48,6 @@ export function useHomeScreen() {
     greeting,
     hideTask,
     home,
-    nextShift,
-    openClock: () => navigate("/(app)/(tabs)/time"),
     openDocuments: () => navigate("/(app)/(tabs)/documents"),
     openNotifications: () => navigate("/notifications"),
     openProfile: () => navigate("/(app)/(tabs)/profile"),

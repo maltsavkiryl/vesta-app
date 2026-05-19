@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -51,11 +49,7 @@ export function ThemeOption({
             { backgroundColor: selected ? tokens.accentSoft : tokens.surfaceSecondary },
           ]}
         >
-          <Ionicons
-            color={selected ? tokens.accent : tokens.textSecondary}
-            name={icon}
-            size={21}
-          />
+          <Ionicons color={selected ? tokens.accent : tokens.textSecondary} name={icon} size={21} />
         </View>
       }
       onPress={onPress}
@@ -123,6 +117,9 @@ const styles = StyleSheet.create({
   sectionLabel: {
     letterSpacing: 0,
   },
+  themeList: {
+    gap: 10,
+  },
   themeOption: {
     borderRadius: 16,
     minHeight: 72,
@@ -134,8 +131,5 @@ const styles = StyleSheet.create({
     height: 38,
     justifyContent: "center",
     width: 38,
-  },
-  themeList: {
-    gap: 10,
   },
 })

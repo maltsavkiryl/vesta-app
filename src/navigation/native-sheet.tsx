@@ -101,6 +101,7 @@ function HeaderProminentActionButton({
     : theme.isDark
       ? "#0A84FF"
       : "#007AFF"
+  const foregroundColor = theme.isDark ? theme.colors.text : theme.colors.background
 
   return (
     <Pressable
@@ -115,8 +116,13 @@ function HeaderProminentActionButton({
         disabled ? styles.headerActionButtonDisabled : styles.headerActionButtonEnabled,
       ]}
     >
-      <Ionicons color="#FFFFFF" name="checkmark" size={15} />
-      <Text text={label} size="xs" weight="semiBold" style={styles.headerProminentButtonText} />
+      <Ionicons color={foregroundColor} name="checkmark" size={15} />
+      <Text
+        text={label}
+        size="xs"
+        weight="semiBold"
+        style={[styles.headerProminentButtonText, { color: foregroundColor }]}
+      />
     </Pressable>
   )
 }
@@ -307,7 +313,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   headerProminentButtonText: {
-    color: "#FFFFFF",
     lineHeight: 16,
   },
   titleWrapper: {

@@ -8,6 +8,9 @@ import {
   type ScrollViewProps,
   type StyleProp,
   StyleSheet,
+  TextInput,
+  type TextStyle,
+  type TextInputProps,
   View,
   type ViewStyle,
 } from "react-native"
@@ -267,12 +270,14 @@ export function SectionTitle({
 }
 
 export function AppButton({
+  fullWidth = false,
   label,
   onPress,
   variant = "primary",
   disabled,
 }: {
   disabled?: boolean
+  fullWidth?: boolean
   label: string
   onPress: () => void
   variant?: AppButtonVariant
@@ -281,14 +286,13 @@ export function AppButton({
   const isPrimary = variant === "primary"
   const isDanger = variant === "danger"
 
-  if (Platform.OS === "ios") {
+  if (Platform.OS === "ios" && !fullWidth) {
     const { Button: NativeButton, Host } =
       require("@expo/ui/swift-ui") as typeof import("@expo/ui/swift-ui")
     const {
       buttonStyle,
       controlSize,
       disabled: nativeDisabled,
-      frame,
       tint,
     } = require("@expo/ui/swift-ui/modifiers") as typeof import("@expo/ui/swift-ui/modifiers")
 
@@ -304,7 +308,6 @@ export function AppButton({
     const modifiers = [
       buttonStyle(nativeStyle),
       controlSize("large"),
-      frame({ maxWidth: Infinity }),
       nativeDisabled(Boolean(disabled)),
     ]
 
@@ -332,6 +335,7 @@ export function AppButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        fullWidth ? styles.buttonFullWidth : null,
         {
           backgroundColor: isPrimary
             ? tokens.accent
@@ -358,11 +362,13 @@ export function InCardActionButton({
   onPress,
   icon,
   disabled,
+  stopPropagation = false,
 }: {
   disabled?: boolean
   icon?: ReactNode
   label: string
   onPress: () => void
+  stopPropagation?: boolean
 }) {
   const tokens = useDesignTokens()
 
@@ -370,7 +376,10 @@ export function InCardActionButton({
     <Pressable
       accessibilityRole="button"
       disabled={disabled}
-      onPress={onPress}
+      onPress={(event) => {
+        if (stopPropagation) event.stopPropagation()
+        onPress()
+      }}
       style={({ pressed }) => [
         styles.inCardActionButton,
         {
@@ -425,13 +434,18 @@ export function IconButton({
   children,
   accessibilityLabel,
   onPress,
+  tone = "neutral",
+  variant = "surface",
   style,
 }: PropsWithChildren<{
   accessibilityLabel: string
   onPress: () => void
+  tone?: "neutral" | "accent" | "success" | "warning" | "danger"
+  variant?: "surface" | "soft"
   style?: StyleProp<ViewStyle>
 }>) {
   const tokens = useDesignTokens()
+  const palette = getTonePalette(tokens, tone)
 
   return (
     <Pressable
@@ -441,8 +455,15 @@ export function IconButton({
       style={({ pressed }) => [
         styles.iconButton,
         {
-          backgroundColor: pressed ? tokens.pressed : tokens.surface,
-          borderColor: tokens.border,
+          backgroundColor:
+            variant === "soft"
+              ? pressed
+                ? palette.backgroundColor
+                : palette.backgroundColor
+              : pressed
+                ? tokens.pressed
+                : tokens.surface,
+          borderColor: variant === "soft" ? palette.backgroundColor : tokens.border,
         },
         style,
       ]}
@@ -582,6 +603,48 @@ export function ListRow({
   return <View style={styles.listRow}>{content}</View>
 }
 
+export function DetailRow({
+  label,
+  value,
+  isLast = false,
+  valueTone = "default",
+  valueTextAlign = "right",
+}: {
+  isLast?: boolean
+  label: string
+  value: string
+  valueTextAlign?: "left" | "right"
+  valueTone?: "default" | "accent" | "success" | "warning" | "danger"
+}) {
+  const tokens = useDesignTokens()
+  const valueColor =
+    valueTone === "accent"
+      ? tokens.accent
+      : valueTone === "success"
+        ? tokens.success
+        : valueTone === "warning"
+          ? tokens.warning
+          : valueTone === "danger"
+            ? tokens.danger
+            : tokens.textPrimary
+
+  return (
+    <View style={styles.detailRow}>
+      <Text size="xs" style={{ color: tokens.textSecondary }} text={label} />
+      <Text
+        numberOfLines={2}
+        size="xs"
+        style={[styles.detailRowValue, { color: valueColor, textAlign: valueTextAlign }]}
+        text={value}
+        weight="semiBold"
+      />
+      {!isLast ? (
+        <View style={[styles.detailRowDivider, { backgroundColor: tokens.separator }]} />
+      ) : null}
+    </View>
+  )
+}
+
 export function MetricGrid({
   items,
 }: {
@@ -635,7 +698,175 @@ export function EmptyState({ title, subtitle }: { subtitle: string; title: strin
   )
 }
 
+export function SearchField({
+  inputStyle,
+  leftAccessory,
+  onChangeText,
+  onClear,
+  placeholder = "Search",
+  rightAccessory,
+  style,
+  value,
+  ...props
+}: Omit<TextInputProps, "style"> & {
+  inputStyle?: TextInputProps["style"]
+  leftAccessory?: ReactNode
+  onClear?: () => void
+  rightAccessory?: ReactNode
+  style?: StyleProp<ViewStyle>
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <View style={[styles.searchField, { backgroundColor: tokens.surface }, style]}>
+      {leftAccessory}
+      <TextInput
+        {...props}
+        autoCorrect={false}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={tokens.textMuted}
+        selectionColor={tokens.accent}
+        style={[styles.searchFieldInput, { color: tokens.textPrimary }, inputStyle]}
+        value={value}
+      />
+      {value && onClear ? (
+        <Pressable accessibilityRole="button" hitSlop={10} onPress={onClear}>
+          {rightAccessory}
+        </Pressable>
+      ) : onClear ? null : (
+        rightAccessory
+      )}
+    </View>
+  )
+}
+
+export function ActionRow({
+  leading,
+  onPress,
+  subtitle,
+  title,
+  trailing,
+}: {
+  leading?: ReactNode
+  onPress: () => void
+  subtitle: string
+  title: string
+  trailing?: ReactNode
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.actionRow,
+        {
+          backgroundColor: pressed ? tokens.pressed : tokens.surface,
+          borderColor: tokens.border,
+        },
+      ]}
+    >
+      {leading}
+      <View style={styles.actionRowCopy}>
+        <Text size="xs" style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
+        <Text size="xxs" style={{ color: tokens.textSecondary }} text={subtitle} />
+      </View>
+      {trailing}
+    </Pressable>
+  )
+}
+
+export function MetaPill({
+  label,
+  leading,
+  backgroundColor,
+  style,
+  textStyle,
+}: {
+  backgroundColor?: string
+  label: string
+  leading?: ReactNode
+  style?: StyleProp<ViewStyle>
+  textStyle?: StyleProp<TextStyle>
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <View
+      style={[
+        styles.metaPill,
+        { backgroundColor: backgroundColor ?? tokens.surfaceSecondary },
+        style,
+      ]}
+    >
+      {leading}
+      <Text
+        size="xxs"
+        style={[{ color: tokens.textPrimary }, textStyle]}
+        text={label}
+        weight="medium"
+      />
+    </View>
+  )
+}
+
+export function ProgressBar({
+  progress,
+  fillColor,
+  trackColor,
+  thickness = 4,
+  style,
+}: {
+  fillColor?: string
+  progress: number
+  style?: StyleProp<ViewStyle>
+  thickness?: number
+  trackColor?: string
+}) {
+  const tokens = useDesignTokens()
+  const width = `${Math.max(0, Math.min(progress, 100))}%` as `${number}%`
+
+  return (
+    <View
+      style={[
+        styles.progressTrack,
+        {
+          backgroundColor: trackColor ?? tokens.backgroundMuted,
+          height: thickness,
+        },
+        style,
+      ]}
+    >
+      <View
+        style={[
+          styles.progressFill,
+          {
+            backgroundColor: fillColor ?? tokens.accent,
+            width,
+          },
+        ]}
+      />
+    </View>
+  )
+}
+
 const styles = StyleSheet.create({
+  actionRow: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  actionRowCopy: {
+    flex: 1,
+    gap: 2,
+  },
   avatarShell: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -656,6 +887,9 @@ const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 18,
   },
+  buttonFullWidth: {
+    alignSelf: "stretch",
+  },
   card: {
     borderCurve: "continuous",
     borderRadius: 16,
@@ -666,6 +900,25 @@ const styles = StyleSheet.create({
     shadowOffset: { height: 8, width: 0 },
     shadowOpacity: Platform.select({ android: 0, default: 0.04 }),
     shadowRadius: 14,
+  },
+  detailRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 54,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  detailRowDivider: {
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    left: 16,
+    position: "absolute",
+    right: 0,
+  },
+  detailRowValue: {
+    flex: 1,
+    minWidth: 0,
   },
   emptyState: {
     alignItems: "center",
@@ -754,6 +1007,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
   },
+  metaPill: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    borderCurve: "continuous",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
   metricCell: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -784,9 +1047,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
+  progressFill: {
+    borderRadius: 999,
+    height: "100%",
+  },
+  progressTrack: {
+    borderCurve: "continuous",
+    borderRadius: 999,
+    height: 4,
+    overflow: "hidden",
+  },
   screenContent: {
     gap: 18,
     paddingHorizontal: 24,
+  },
+  searchField: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+  },
+  searchFieldInput: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 20,
+    minHeight: 20,
+    padding: 0,
   },
   sectionBadge: {
     borderRadius: 20,

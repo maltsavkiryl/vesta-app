@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
-
 import { useMemo } from "react"
 import { Alert, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
@@ -13,6 +11,7 @@ import {
   ListCard,
   ListCardItem,
   Pill,
+  ProgressBar,
   SectionBlock,
   SurfaceCard,
   Text,
@@ -139,17 +138,7 @@ function CompletenessCard({ progress }: { progress: number }) {
         />
         <Text text={`${progress}%`} size="xs" weight="semiBold" style={{ color: tokens.accent }} />
       </View>
-      <View style={[styles.progressTrack, { backgroundColor: tokens.backgroundMuted }]}>
-        <View
-          style={[
-            styles.progressFill,
-            {
-              backgroundColor: tokens.accent,
-              width: `${progress}%`,
-            },
-          ]}
-        />
-      </View>
+      <ProgressBar progress={progress} />
       <Text
         text="Add an emergency contact to complete your profile."
         size="xxs"
@@ -450,20 +439,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 28,
   },
-  progressFill: {
-    borderRadius: 999,
-    height: "100%",
-  },
   progressHeader: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  progressTrack: {
-    borderCurve: "continuous",
-    borderRadius: 999,
-    height: 4,
-    overflow: "hidden",
   },
   rowIcon: {
     width: 17,

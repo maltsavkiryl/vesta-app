@@ -1,41 +1,24 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatFullDate, getShiftTimeRange } from "@/core/date"
-import type { Shift } from "@/core/models"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import {
+  ActionRow,
   AppButton,
   AppScrollScreen,
+  DetailRow,
   GroupedSection,
+  MetaPill,
+  StatusBadge,
   SurfaceCard,
   Text,
   useDesignTokens,
 } from "@/ui"
-
-function getStatusColor(tokens: ReturnType<typeof useDesignTokens>, shift: Shift) {
-  if (shift.requiresResponse) return tokens.warning
-  return shift.status === "confirmed"
-    ? tokens.success
-    : shift.status === "changed"
-      ? tokens.warning
-      : tokens.textMuted
-}
-
-function InfoPill({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={[styles.infoPill, { backgroundColor: tokens.surfaceSecondary }]}>
-      <Ionicons color={tokens.textSecondary} name={icon} size={13} />
-      <Text text={text} size="xxs" weight="medium" style={{ color: tokens.textPrimary }} />
-    </View>
-  )
-}
 
 export function ShiftDetailScreen() {
   const router = useRouter()
@@ -60,8 +43,6 @@ export function ShiftDetailScreen() {
     )
   }
 
-  const statusColor = getStatusColor(tokens, shift)
-
   return (
     <AppScrollScreen
       contentContainerStyle={styles.screen}
@@ -69,15 +50,16 @@ export function ShiftDetailScreen() {
     >
       <SurfaceCard style={styles.heroCard}>
         <View style={styles.heroHeader}>
-          <View style={[styles.statusBadge, { backgroundColor: `${statusColor}16` }]}>
-            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-            <Text
-              text={shift.requiresResponse ? "Needs response" : shift.status}
-              size="xxs"
-              weight="semiBold"
-              style={{ color: statusColor }}
-            />
-          </View>
+          <StatusBadge
+            label={shift.requiresResponse ? "Needs response" : shift.status}
+            tone={
+              shift.requiresResponse
+                ? "warning"
+                : shift.status === "confirmed"
+                  ? "success"
+                  : "neutral"
+            }
+          />
           <Text
             text={shift.role}
             size="xxs"
@@ -95,8 +77,14 @@ export function ShiftDetailScreen() {
         />
         <Text text={formatFullDate(shift.date)} size="xs" style={{ color: tokens.textSecondary }} />
         <View style={styles.infoRow}>
-          <InfoPill icon="business-outline" text={shift.venueName} />
-          <InfoPill icon="location-outline" text="Open in Maps" />
+          <MetaPill
+            label={shift.venueName}
+            leading={<Ionicons color={tokens.textSecondary} name="business-outline" size={13} />}
+          />
+          <MetaPill
+            label="Open in Maps"
+            leading={<Ionicons color={tokens.textSecondary} name="location-outline" size={13} />}
+          />
         </View>
         {shift.changeSummary ? (
           <View
@@ -140,33 +128,9 @@ export function ShiftDetailScreen() {
 
       <GroupedSection title="Plan for this shift">
         <View style={styles.groupBody}>
-          <View style={styles.detailRow}>
-            <Text text="Venue" size="xs" style={{ color: tokens.textSecondary }} />
-            <Text
-              text={`${shift.venueName} · ${shift.venueAddress}`}
-              size="xs"
-              weight="medium"
-              style={{ color: tokens.textPrimary, flex: 1, textAlign: "right" }}
-            />
-          </View>
-          <View style={styles.detailRow}>
-            <Text text="Duration" size="xs" style={{ color: tokens.textSecondary }} />
-            <Text
-              text={getShiftTimeRange(shift)}
-              size="xs"
-              weight="medium"
-              style={{ color: tokens.textPrimary }}
-            />
-          </View>
-          <View style={styles.detailRow}>
-            <Text text="Team" size="xs" style={{ color: tokens.textSecondary }} />
-            <Text
-              text={shift.coworkers?.join(", ") ?? "To be confirmed"}
-              size="xs"
-              weight="medium"
-              style={{ color: tokens.textPrimary, flex: 1, textAlign: "right" }}
-            />
-          </View>
+          <DetailRow label="Venue" value={`${shift.venueName} · ${shift.venueAddress}`} />
+          <DetailRow label="Duration" value={getShiftTimeRange(shift)} />
+          <DetailRow isLast label="Team" value={shift.coworkers?.join(", ") ?? "To be confirmed"} />
         </View>
       </GroupedSection>
 
@@ -180,55 +144,27 @@ export function ShiftDetailScreen() {
 
       <GroupedSection title="Need a change?">
         <View style={styles.actionStack}>
-          <Pressable
+          <ActionRow
             onPress={() =>
               router.push(`/(app)/request?category=shift_change&shiftId=${shift.id}` as never)
             }
-            style={[
-              styles.actionCard,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ]}
-          >
-            <Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />
-            <View style={styles.flex}>
-              <Text
-                text="Need replacement help"
-                size="xs"
-                weight="semiBold"
-                style={{ color: tokens.textPrimary }}
-              />
-              <Text
-                text="Start a shift change request from this shift"
-                size="xxs"
-                style={{ color: tokens.textSecondary }}
-              />
-            </View>
-            <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-          </Pressable>
+            subtitle="Start a shift change request from this shift"
+            title="Need replacement help"
+            leading={<Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />}
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
+          />
 
-          <Pressable
+          <ActionRow
             onPress={() => router.push("/(app)/request?category=time_off" as never)}
-            style={[
-              styles.actionCard,
-              { backgroundColor: tokens.surface, borderColor: tokens.border },
-            ]}
-          >
-            <Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />
-            <View style={styles.flex}>
-              <Text
-                text="Request time off"
-                size="xs"
-                weight="semiBold"
-                style={{ color: tokens.textPrimary }}
-              />
-              <Text
-                text="Use this if the whole day no longer works for you"
-                size="xxs"
-                style={{ color: tokens.textSecondary }}
-              />
-            </View>
-            <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-          </Pressable>
+            subtitle="Use this if the whole day no longer works for you"
+            title="Request time off"
+            leading={<Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />}
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
+          />
         </View>
       </GroupedSection>
 
@@ -240,16 +176,6 @@ export function ShiftDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  actionCard: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 16,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
   actionStack: {
     gap: 10,
   },
@@ -262,11 +188,6 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-  },
-  detailRow: {
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between",
   },
   flex: {
     flex: 1,
@@ -291,14 +212,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 34,
   },
-  infoPill: {
-    alignItems: "center",
-    borderRadius: 999,
-    flexDirection: "row",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
   infoRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -309,18 +222,5 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     paddingHorizontal: 20,
     paddingTop: 20,
-  },
-  statusBadge: {
-    alignItems: "center",
-    borderRadius: 999,
-    flexDirection: "row",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  statusDot: {
-    borderRadius: 999,
-    height: 6,
-    width: 6,
   },
 })

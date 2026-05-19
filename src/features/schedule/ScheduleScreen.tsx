@@ -20,37 +20,16 @@ import {
   getShiftsForDate,
   isDateWithinRange,
 } from "@/features/schedule/schedule.utils"
-import { AppScrollScreen, PageHeader, SectionBlock, SurfaceCard, Text, useDesignTokens } from "@/ui"
-
-function ActionRow({
-  icon,
-  onPress,
-  subtitle,
-  title,
-}: {
-  icon: keyof typeof Ionicons.glyphMap
-  onPress: () => void
-  subtitle: string
-  title: string
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.actionRow, { backgroundColor: tokens.surface, borderColor: tokens.border }]}
-    >
-      <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
-        <Ionicons color={tokens.accent} name={icon} size={16} />
-      </View>
-      <View style={styles.flex}>
-        <Text text={title} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
-        <Text text={subtitle} size="xxs" style={{ color: tokens.textSecondary }} />
-      </View>
-      <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-    </Pressable>
-  )
-}
+import {
+  ActionRow,
+  AppScrollScreen,
+  MetaPill,
+  PageHeader,
+  SectionBlock,
+  SurfaceCard,
+  Text,
+  useDesignTokens,
+} from "@/ui"
 
 function ShiftRow({ shift, onPress }: { shift: Shift; onPress: () => void }) {
   const tokens = useDesignTokens()
@@ -210,6 +189,7 @@ export function ScheduleScreen() {
   const availabilitySourceLabel = selectedDayState.hasOverride
     ? "Using a date override"
     : "Using your weekly template"
+  const showsAvailabilityTime = selectedDayAvailability.status !== "unavailable"
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
@@ -265,64 +245,73 @@ export function ScheduleScreen() {
                 style={{ color: tokens.textSecondary }}
               />
             </View>
-            <View
-              style={[
-                styles.selectedDateBadge,
+            <Pressable
+              onPress={() =>
+                void runAction({
+                  type: "editAvailabilityOverride",
+                  date: selectedDate,
+                })
+              }
+              style={({ pressed }) => [
+                styles.selectedDateActionButton,
                 {
-                  backgroundColor: selectedDayState.needsResponse
-                    ? `${tokens.warning}14`
-                    : `${tokens.accent}10`,
+                  backgroundColor: `${tokens.accent}10`,
+                  borderColor: `${tokens.accent}20`,
+                  opacity: pressed ? 0.88 : 1,
                 },
               ]}
             >
+              <Ionicons color={tokens.accent} name="create-outline" size={14} />
               <Text
-                text={
-                  selectedDayState.needsResponse
-                    ? "Needs response"
-                    : selectedDayState.hasShift
-                      ? "Working"
-                      : selectedDayAvailability.status === "unavailable"
-                        ? "Off"
-                        : "Open"
-                }
+                text="Edit"
                 size="xxs"
                 weight="semiBold"
-                style={{
-                  color: selectedDayState.needsResponse ? tokens.warning : tokens.textPrimary,
-                }}
+                style={{ color: tokens.accent }}
               />
-            </View>
+            </Pressable>
           </View>
 
           <View style={styles.selectedDateMeta}>
-            <View style={[styles.metaPill, { backgroundColor: tokens.surfaceSecondary }]}>
-              <Ionicons color={tokens.textSecondary} name="time-outline" size={13} />
-              <Text
-                text={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}
-                size="xxs"
-                weight="medium"
-                style={{ color: tokens.textPrimary }}
+            <MetaPill
+              label={
+                selectedDayState.needsResponse
+                  ? "Needs response"
+                  : selectedDayState.hasShift
+                    ? "Working"
+                    : selectedDayAvailability.status === "unavailable"
+                      ? "Off"
+                      : "Open"
+              }
+              leading={
+                <Ionicons
+                  color={selectedDayState.needsResponse ? tokens.warning : tokens.textSecondary}
+                  name={selectedDayState.needsResponse ? "alert-circle-outline" : "ellipse"}
+                  size={selectedDayState.needsResponse ? 13 : 11}
+                />
+              }
+            />
+            {showsAvailabilityTime ? (
+              <MetaPill
+                label={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}
+                leading={<Ionicons color={tokens.textSecondary} name="time-outline" size={13} />}
               />
-            </View>
-            <View style={[styles.metaPill, { backgroundColor: tokens.surfaceSecondary }]}>
-              <Ionicons
-                color={
-                  selectedDayAvailability.status === "preferred"
-                    ? tokens.accent
-                    : selectedDayAvailability.status === "available"
-                      ? tokens.success
-                      : tokens.textMuted
-                }
-                name="ellipse"
-                size={11}
-              />
-              <Text
-                text={availabilitySourceLabel}
-                size="xxs"
-                weight="medium"
-                style={{ color: tokens.textPrimary }}
-              />
-            </View>
+            ) : null}
+            <MetaPill
+              label={availabilitySourceLabel}
+              leading={
+                <Ionicons
+                  color={
+                    selectedDayAvailability.status === "preferred"
+                      ? tokens.accent
+                      : selectedDayAvailability.status === "available"
+                        ? tokens.success
+                        : tokens.textMuted
+                  }
+                  name="ellipse"
+                  size={11}
+                />
+              }
+            />
           </View>
 
           {selectedDayRequests.length > 0 ? (
@@ -348,38 +337,23 @@ export function ScheduleScreen() {
         <View style={styles.stack}>
           {selectedShiftNeedingResponse ? (
             <ActionRow
-              icon="flash-outline"
               onPress={() =>
                 router.push(`/(app)/shift/${selectedShiftNeedingResponse.id}` as never)
               }
               subtitle="Review the updated shift and confirm it from the detail view."
               title="Review shift change"
-            />
-          ) : selectedDayShifts[0] ? (
-            <ActionRow
-              icon="calendar-outline"
-              onPress={() => router.push(`/(app)/shift/${selectedDayShifts[0].id}` as never)}
-              subtitle="Open the assigned shift details for this day."
-              title="View shift details"
+              leading={
+                <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
+                  <Ionicons color={tokens.accent} name="flash-outline" size={16} />
+                </View>
+              }
+              trailing={
+                <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+              }
             />
           ) : null}
 
           <ActionRow
-            icon="create-outline"
-            onPress={() =>
-              void runAction({
-                type: "editAvailabilityOverride",
-                date: selectedDate,
-              })
-            }
-            subtitle="Change availability just for this date."
-            title="Edit date availability"
-          />
-
-          <ActionRow
-            icon={
-              selectedDayShifts.length > 0 ? "swap-horizontal-outline" : "document-text-outline"
-            }
             onPress={() =>
               void runAction({
                 type: "createScheduleRequest",
@@ -393,6 +367,22 @@ export function ScheduleScreen() {
                 : "Request time off or explain a conflict on this day."
             }
             title={selectedDayShifts.length > 0 ? "Request a change" : "Create request"}
+            leading={
+              <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
+                <Ionicons
+                  color={tokens.accent}
+                  name={
+                    selectedDayShifts.length > 0
+                      ? "swap-horizontal-outline"
+                      : "document-text-outline"
+                  }
+                  size={16}
+                />
+              </View>
+            }
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
           />
         </View>
       </SectionBlock>
@@ -449,20 +439,15 @@ export function ScheduleScreen() {
                 weight="semiBold"
                 style={{ color: tokens.textPrimary }}
               />
-              <Text
-                text={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}
-                size="xxs"
-                style={{ color: tokens.textSecondary }}
-              />
+              {showsAvailabilityTime ? (
+                <Text
+                  text={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}
+                  size="xxs"
+                  style={{ color: tokens.textSecondary }}
+                />
+              ) : null}
             </View>
-            <View style={[styles.progressBadge, { backgroundColor: tokens.surfaceSecondary }]}>
-              <Text
-                text={selectedDayState.hasOverride ? "Override" : "Template"}
-                size="xxs"
-                weight="semiBold"
-                style={{ color: tokens.textPrimary }}
-              />
-            </View>
+            <MetaPill label={selectedDayState.hasOverride ? "Override" : "Template"} />
           </View>
 
           {selectedDayAvailability.note ? (
@@ -524,14 +509,7 @@ export function ScheduleScreen() {
               </View>
 
               {activePlanningWindow.status === "submitted" ? (
-                <View style={[styles.progressBadge, { backgroundColor: tokens.surfaceSecondary }]}>
-                  <Text
-                    text="Submitted"
-                    size="xxs"
-                    weight="semiBold"
-                    style={{ color: tokens.textPrimary }}
-                  />
-                </View>
+                <MetaPill label="Submitted" />
               ) : (
                 <Pressable
                   onPress={async () => {
@@ -562,16 +540,30 @@ export function ScheduleScreen() {
       <SectionBlock title="Planning tools">
         <View style={styles.stack}>
           <ActionRow
-            icon="repeat-outline"
             onPress={() => void runAction({ type: "editAvailabilityTemplate" })}
             subtitle="Update the pattern that fills most of your month."
             title="Edit weekly template"
+            leading={
+              <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
+                <Ionicons color={tokens.accent} name="repeat-outline" size={16} />
+              </View>
+            }
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
           />
           <ActionRow
-            icon="document-text-outline"
             onPress={() => void runAction({ type: "createScheduleRequest", category: "time_off" })}
             subtitle="Create a general time-off or availability request."
             title="New request"
+            leading={
+              <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
+                <Ionicons color={tokens.accent} name="document-text-outline" size={16} />
+              </View>
+            }
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
           />
         </View>
       </SectionBlock>
@@ -604,16 +596,6 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     width: 36,
-  },
-  actionRow: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 18,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
   },
   availabilityCard: {
     gap: 12,
@@ -665,19 +647,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  metaPill: {
-    alignItems: "center",
-    borderRadius: 999,
-    flexDirection: "row",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  progressBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
   requestCard: {
     paddingHorizontal: 0,
     paddingVertical: 0,
@@ -700,10 +669,15 @@ const styles = StyleSheet.create({
     gap: 22,
     paddingBottom: 32,
   },
-  selectedDateBadge: {
+  selectedDateActionButton: {
+    alignItems: "center",
+    borderCurve: "continuous",
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   selectedDateCard: {
     gap: 12,

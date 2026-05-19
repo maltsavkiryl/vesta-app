@@ -1,4 +1,4 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
+/* eslint-disable react-native/no-inline-styles */
 
 import { Image, StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams } from "expo-router"
@@ -23,6 +23,7 @@ import { TimeHeroCard, timeHeroColors } from "@/features/time/components/TimeHer
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import {
   AppScrollScreen,
+  DetailRow,
   GroupedSection,
   StatusBadge,
   SurfaceCard,
@@ -81,24 +82,6 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
         weight="medium"
         style={{ color: tokens.textPrimary }}
       />
-    </View>
-  )
-}
-
-function DetailRow({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View
-      style={[
-        styles.metricRow,
-        !isLast
-          ? { borderBottomColor: tokens.border, borderBottomWidth: StyleSheet.hairlineWidth }
-          : null,
-      ]}
-    >
-      <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
-      <Text text={value} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
     </View>
   )
 }
@@ -205,36 +188,25 @@ export function TimeEntryDetailScreen() {
       ) : null}
 
       {entry.clockInProofPhoto ? (
-        <GroupedSection title="Clock-in proof photo">
+        <View style={styles.photoSection}>
+          <View style={styles.photoSectionHeader}>
+            <Text
+              size="xxs"
+              style={[styles.photoSectionTitle, { color: tokens.textMuted }]}
+              text="Clock-in proof photo"
+              weight="semiBold"
+            />
+            <Text
+              text={formatTimeValue(entry.clockInProofPhoto.capturedAt)}
+              size="xxs"
+              weight="semiBold"
+              style={{ color: tokens.textPrimary }}
+            />
+          </View>
           <View style={styles.photoWrapper}>
             <Image source={{ uri: entry.clockInProofPhoto.uri }} style={styles.photo} />
-            <View
-              style={[
-                styles.photoMetaRow,
-                {
-                  backgroundColor: tokens.surface,
-                  borderTopColor: tokens.border,
-                },
-              ]}
-            >
-              <View style={styles.photoMetaLabel}>
-                <Ionicons color={tokens.textMuted} name="camera-outline" size={14} />
-                <Text
-                  text="Proof captured"
-                  size="xxs"
-                  weight="medium"
-                  style={{ color: tokens.textSecondary }}
-                />
-              </View>
-              <Text
-                text={formatTimeValue(entry.clockInProofPhoto.capturedAt)}
-                size="xxs"
-                weight="semiBold"
-                style={{ color: tokens.textPrimary }}
-              />
-            </View>
           </View>
-        </GroupedSection>
+        </View>
       ) : null}
 
       {breakSegments.length > 0 ? (
@@ -332,32 +304,27 @@ const styles = StyleSheet.create({
     height: 220,
     overflow: "hidden",
   },
-  metricRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    minHeight: 54,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
   photo: {
     height: 280,
     width: "100%",
   },
-  photoMetaLabel: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 6,
+  photoSection: {
+    gap: 8,
   },
-  photoMetaRow: {
+  photoSectionHeader: {
     alignItems: "center",
-    borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    minHeight: 22,
+    paddingHorizontal: 4,
+  },
+  photoSectionTitle: {
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   photoWrapper: {
+    borderCurve: "continuous",
+    borderRadius: 24,
     overflow: "hidden",
   },
   screen: {

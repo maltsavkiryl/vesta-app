@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 
 import { useCallback, useLayoutEffect, useMemo, useState } from "react"
-import { Platform, Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Platform, StyleSheet, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker"
@@ -24,7 +24,9 @@ import {
   AppScrollScreen,
   GroupedSection,
   ListRow,
+  SelectionRow,
   Text,
+  TextField,
   createHeaderActionOptions,
   useAppTheme,
   useDesignTokens,
@@ -237,47 +239,37 @@ export function AvailabilityScreen() {
                     : tokens.textSecondary
 
               return (
-                <Pressable
+                <SelectionRow
                   key={candidate}
+                  backgroundColor={tokens.transparent}
+                  dividerInset={58}
+                  isLast={index === items.length - 1}
+                  leading={
+                    <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
+                      <Ionicons
+                        color={activeColor}
+                        name={
+                          candidate === "preferred"
+                            ? "star-outline"
+                            : candidate === "available"
+                              ? "checkmark-circle-outline"
+                              : "remove-circle-outline"
+                        }
+                        size={18}
+                      />
+                    </View>
+                  }
                   onPress={() => setStatus(candidate)}
-                  style={({ pressed }) => [
-                    styles.statusRow,
-                    { backgroundColor: pressed ? tokens.pressed : tokens.transparent },
-                  ]}
-                >
-                  <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
-                    <Ionicons
-                      color={activeColor}
-                      name={
-                        candidate === "preferred"
-                          ? "star-outline"
-                          : candidate === "available"
-                            ? "checkmark-circle-outline"
-                            : "remove-circle-outline"
-                      }
-                      size={18}
-                    />
-                  </View>
-                  <View style={styles.flex}>
-                    <Text
-                      text={option.label}
-                      size="xs"
-                      weight="medium"
-                      style={{ color: tokens.textPrimary }}
-                    />
-                    <Text
-                      text={option.description}
-                      size="xxs"
-                      style={{ color: tokens.textMuted }}
-                    />
-                  </View>
-                  {active ? (
-                    <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-                  ) : null}
-                  {index < items.length - 1 ? (
-                    <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
-                  ) : null}
-                </Pressable>
+                  selected={active}
+                  style={styles.statusRow}
+                  subtitle={option.description}
+                  title={option.label}
+                  trailing={
+                    active ? (
+                      <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+                    ) : null
+                  }
+                />
               )
             },
           )}
@@ -318,19 +310,18 @@ export function AvailabilityScreen() {
           </View>
         ) : null}
 
-        <View style={[styles.noteShell, { backgroundColor: tokens.searchBackground }]}>
-          <Text text="NOTE" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
-          <TextInput
-            multiline
-            numberOfLines={3}
-            onChangeText={setNote}
-            placeholder="Optional context for your manager"
-            placeholderTextColor={tokens.textMuted}
-            style={[styles.noteInput, { color: tokens.textPrimary }]}
-            textAlignVertical="top"
-            value={note}
-          />
-        </View>
+        <TextField
+          containerStyle={styles.noteShell}
+          inputStyle={styles.noteInput}
+          label="Note"
+          multiline
+          numberOfLines={3}
+          onChangeText={setNote}
+          placeholder="Optional context for your manager"
+          textAlignVertical="top"
+          value={note}
+          variant="muted"
+        />
 
         {existingOverride ? (
           <View style={styles.buttonStack}>
@@ -371,22 +362,11 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     fontSize: 15,
-    minHeight: 84,
-    paddingVertical: 0,
+    minHeight: 72,
+    paddingTop: 2,
   },
   noteShell: {
-    borderCurve: "continuous",
-    borderRadius: 18,
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  rowDivider: {
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-    left: 58,
-    position: "absolute",
-    right: 0,
+    minHeight: 116,
   },
   screen: {
     paddingBottom: 32,
@@ -401,12 +381,8 @@ const styles = StyleSheet.create({
     width: 36,
   },
   statusRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 66,
+    borderWidth: 0,
     paddingHorizontal: 14,
-    paddingVertical: 14,
   },
   templateGlyph: {
     alignItems: "center",

@@ -1,4 +1,4 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
+/* eslint-disable react-native/no-inline-styles */
 
 import { useState } from "react"
 import { StyleSheet, View } from "react-native"
@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useClockSummary, useTimeDataQuery } from "@/features/time/data/time.queries"
-import { AppButton, AppScrollScreen, GroupedSection, Text, useDesignTokens } from "@/ui"
+import { AppButton, AppScrollScreen, DetailRow, GroupedSection, Text, useDesignTokens } from "@/ui"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
@@ -114,18 +114,18 @@ export function ClockOutScreen() {
           </View>
 
           <GroupedSection title="Shift summary">
-            <SummaryItem label="Clocked in" value={summary.startedAtLabel ?? "--:--"} />
-            <SummaryItem label="Clocked out" value={clockOutTime} />
-            <SummaryItem label="Break time" tone="warning" value={breakLabel} />
+            <DetailRow label="Clocked in" value={summary.startedAtLabel ?? "--:--"} />
+            <DetailRow label="Clocked out" value={clockOutTime} />
+            <DetailRow label="Break time" value={breakLabel} valueTone="warning" />
             {overtime > 0 ? (
-              <SummaryItem
+              <DetailRow
                 isLast
                 label="Overtime"
-                tone="warning"
                 value={formatDurationLabel(overtime)}
+                valueTone="warning"
               />
             ) : (
-              <SummaryItem isLast label="Hourly rate" value={rateLabel} />
+              <DetailRow isLast label="Hourly rate" value={rateLabel} />
             )}
           </GroupedSection>
 
@@ -142,40 +142,6 @@ export function ClockOutScreen() {
         </View>
       )}
     </AppScrollScreen>
-  )
-}
-
-function SummaryItem({
-  isLast,
-  label,
-  tone,
-  value,
-}: {
-  isLast?: boolean
-  label: string
-  tone?: "warning"
-  value: string
-}) {
-  const tokens = useDesignTokens()
-  const valueColor = tone === "warning" ? tokens.warning : tokens.textPrimary
-
-  return (
-    <View
-      style={[
-        styles.summaryItem,
-        !isLast
-          ? {
-              borderBottomColor: tokens.separator,
-              borderBottomWidth: StyleSheet.hairlineWidth,
-            }
-          : null,
-      ]}
-    >
-      <View style={styles.summaryItemCopy}>
-        <Text text={label} size="xs" style={{ color: tokens.textSecondary }} />
-      </View>
-      <Text text={value} size="xs" weight="semiBold" style={{ color: valueColor }} />
-    </View>
   )
 }
 
@@ -276,17 +242,5 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 20,
     paddingTop: 8,
-  },
-  summaryItem: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    minHeight: 54,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  summaryItemCopy: {
-    flex: 1,
-    minWidth: 0,
   },
 })

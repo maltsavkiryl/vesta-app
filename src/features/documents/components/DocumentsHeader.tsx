@@ -1,7 +1,7 @@
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text, appTypography, useDesignTokens } from "@/ui"
+import { IconButton, SearchField, Text, appTypography, useDesignTokens } from "@/ui"
 
 type DocumentsHeaderProps = {
   isSearching: boolean
@@ -25,23 +25,17 @@ export function DocumentsHeader({
   if (isSearching) {
     return (
       <View style={styles.searchHeader}>
-        <View style={[styles.searchBox, { backgroundColor: tokens.surface }]}>
-          <Ionicons color={tokens.textMuted} name="search-outline" size={15} />
-          <TextInput
-            autoFocus
-            onChangeText={onQueryChange}
-            onSubmitEditing={onSearchPress}
-            placeholder="Search documents..."
-            placeholderTextColor={tokens.textMuted}
-            style={[styles.searchInput, appTypography.searchInput, { color: tokens.textPrimary }]}
-            value={query}
-          />
-          {query ? (
-            <Pressable onPress={() => onQueryChange("")}>
-              <Ionicons color={tokens.textMuted} name="close-outline" size={15} />
-            </Pressable>
-          ) : null}
-        </View>
+        <SearchField
+          autoFocus
+          inputStyle={[styles.searchInput, appTypography.searchInput]}
+          leftAccessory={<Ionicons color={tokens.textMuted} name="search-outline" size={15} />}
+          onChangeText={onQueryChange}
+          onClear={() => onQueryChange("")}
+          onSubmitEditing={onSearchPress}
+          placeholder="Search documents..."
+          rightAccessory={<Ionicons color={tokens.textMuted} name="close-outline" size={15} />}
+          value={query}
+        />
         <Pressable onPress={onCancelSearch}>
           <Text text="Cancel" size="xs" weight="medium" style={{ color: tokens.accent }} />
         </Pressable>
@@ -57,19 +51,18 @@ export function DocumentsHeader({
         style={[appTypography.pageTitle, { color: tokens.textPrimary }]}
       />
       <View style={styles.actions}>
-        <Pressable
-          onPress={onSearchPress}
-          style={[styles.iconButton, { backgroundColor: tokens.surface }]}
-        >
+        <IconButton accessibilityLabel="Search documents" onPress={onSearchPress}>
           <Ionicons color={tokens.textSecondary} name="search-outline" size={16} />
-        </Pressable>
-        <Pressable
+        </IconButton>
+        <IconButton
           accessibilityLabel="Upload document"
           onPress={onUploadPress}
-          style={[styles.iconButton, styles.uploadIconButton, { backgroundColor: tokens.accent }]}
+          style={[styles.uploadIconButton, { shadowColor: tokens.accent }]}
+          tone="accent"
+          variant="soft"
         >
           <Ionicons color={tokens.accentForeground} name="add" size={18} />
-        </Pressable>
+        </IconButton>
       </View>
     </View>
   )
@@ -86,23 +79,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  iconButton: {
-    alignItems: "center",
-    borderRadius: 17,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
-  },
-  searchBox: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    flex: 1,
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 13,
-    paddingVertical: 9,
-  },
   searchHeader: {
     alignItems: "center",
     flexDirection: "row",
@@ -113,7 +89,6 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   uploadIconButton: {
-    shadowColor: "#0A84FF",
     shadowOffset: { height: 8, width: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 16,

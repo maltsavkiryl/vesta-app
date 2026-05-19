@@ -102,4 +102,40 @@ module.exports = {
     ],
     "import/newline-after-import": 1,
   },
+  overrides: [
+    {
+      files: ["src/app/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}", "src/navigation/**/*.{ts,tsx}"],
+      excludedFiles: ["src/ui/**/*.{ts,tsx}"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "react",
+                importNames: ["default"],
+                message: "Import named exports from 'react' instead.",
+              },
+              {
+                name: "react-native",
+                importNames: ["SafeAreaView"],
+                message: "Use the SafeAreaView from 'react-native-safe-area-context' instead.",
+              },
+              {
+                name: "react-native",
+                importNames: ["Text", "Button"],
+                message: "Use the app Text component instead of the raw native text primitives.",
+              },
+            ],
+            patterns: [
+              {
+                group: ["@/theme/*"],
+                message: "Use the shared UI/tokens surface from '@/ui' instead of importing theme internals directly.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
 }

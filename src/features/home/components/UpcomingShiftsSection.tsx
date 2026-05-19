@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
-
 import { FlatList, Pressable, StyleSheet, View } from "react-native"
 
 import type { Shift, ShiftStatus } from "@/core/models"

@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-color-literals */
-
 import { useState } from "react"
 import {
   Image,
@@ -69,7 +67,7 @@ export function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}
+      style={[styles.screen, { backgroundColor: tokens.backgroundMuted }]}
     >
       <ScrollView
         contentContainerStyle={[
@@ -84,8 +82,15 @@ export function RegisterScreen() {
       >
         <View style={styles.header}>
           <VestaLogo />
-          <Text text="Create account" weight="bold" style={styles.title} />
-          <Text text="Add your details to continue." style={styles.subtitle} />
+          <Text
+            text="Create account"
+            weight="bold"
+            style={[styles.title, { color: tokens.textPrimary }]}
+          />
+          <Text
+            text="Add your details to continue."
+            style={[styles.subtitle, { color: tokens.textSecondary }]}
+          />
         </View>
 
         <View style={styles.form}>
@@ -101,7 +106,9 @@ export function RegisterScreen() {
               }}
               label="First name"
               labelCase="default"
+              placeholder="First name"
               returnKeyType="next"
+              showLabel={false}
               textContentType="givenName"
               value={firstName}
             />
@@ -116,7 +123,9 @@ export function RegisterScreen() {
               }}
               label="Last name"
               labelCase="default"
+              placeholder="Last name"
               returnKeyType="next"
+              showLabel={false}
               textContentType="familyName"
               value={lastName}
             />
@@ -133,8 +142,9 @@ export function RegisterScreen() {
               setEmail(value)
               clearError()
             }}
-            placeholder="you@email.com"
+            placeholder="Email"
             returnKeyType="next"
+            showLabel={false}
             textContentType="username"
             value={email}
           />
@@ -149,8 +159,10 @@ export function RegisterScreen() {
               setPassword(value)
               clearError()
             }}
+            placeholder="Password"
             returnKeyType="next"
             secureTextEntry={!showPassword}
+            showLabel={false}
             textContentType="newPassword"
             value={password}
             rightAccessory={
@@ -180,8 +192,10 @@ export function RegisterScreen() {
               clearError()
             }}
             onSubmitEditing={handleSubmit}
+            placeholder="Confirm password"
             returnKeyType="done"
             secureTextEntry={!showPassword}
+            showLabel={false}
             textContentType="newPassword"
             value={confirmPassword}
           />
@@ -192,8 +206,9 @@ export function RegisterScreen() {
             </Banner>
           ) : null}
 
-          <Button label="Create account" onPress={handleSubmit} />
+          <Button fullWidth label="Create account" onPress={handleSubmit} />
           <Button
+            fullWidth
             label="Sign in instead"
             onPress={() => router.replace("/(auth)/sign-in")}
             variant="secondary"
@@ -248,18 +263,15 @@ const styles = StyleSheet.create({
     gap: 9,
   },
   screen: {
-    backgroundColor: "#F9F9FA",
     flex: 1,
   },
   subtitle: {
-    color: "#6C6C70",
     fontSize: 16,
     lineHeight: 21,
     marginTop: 6,
     textAlign: "center",
   },
   title: {
-    color: "#000000",
     fontSize: 28,
     lineHeight: 34,
     textAlign: "center",

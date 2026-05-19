@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 

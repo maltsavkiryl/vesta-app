@@ -1,7 +1,7 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
+/* eslint-disable react-native/no-inline-styles */
 
 import { useMemo, useState } from "react"
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -11,7 +11,19 @@ import type { RequestCategory, RequestType } from "@/core/models"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { enumerateDateRange } from "@/features/schedule/schedule.utils"
-import { AppButton, AppScrollScreen, GroupedSection, Text, useDesignTokens } from "@/ui"
+import {
+  AppButton,
+  AppScrollScreen,
+  DetailRow,
+  GroupedSection,
+  SelectionCard,
+  SelectionChip,
+  SelectionRow,
+  SurfaceCard,
+  Text,
+  TextField,
+  useDesignTokens,
+} from "@/ui"
 
 const requestTypeConfig: Record<
   RequestCategory,
@@ -73,38 +85,27 @@ function CategoryTile({
   const config = requestTypeConfig[category]
 
   return (
-    <Pressable
+    <SelectionCard
+      icon={
+        <View
+          style={[
+            styles.categoryGlyph,
+            { backgroundColor: active ? `${tokens.accent}20` : tokens.surfaceSecondary },
+          ]}
+        >
+          <Ionicons
+            color={active ? tokens.accent : tokens.textSecondary}
+            name={config.icon}
+            size={18}
+          />
+        </View>
+      }
       onPress={onPress}
-      style={[
-        styles.categoryTile,
-        {
-          backgroundColor: active ? tokens.accentSoft : tokens.surface,
-          borderColor: active ? tokens.accent : tokens.border,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.categoryGlyph,
-          { backgroundColor: active ? `${tokens.accent}20` : tokens.surfaceSecondary },
-        ]}
-      >
-        <Ionicons
-          color={active ? tokens.accent : tokens.textSecondary}
-          name={config.icon}
-          size={18}
-        />
-      </View>
-      <View style={styles.flex}>
-        <Text
-          text={config.title}
-          size="xs"
-          weight="semiBold"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text text={config.description} size="xxs" style={{ color: tokens.textSecondary }} />
-      </View>
-    </Pressable>
+      selected={active}
+      style={styles.categoryTile}
+      subtitle={config.description}
+      title={config.title}
+    />
   )
 }
 
@@ -166,7 +167,7 @@ export function RequestScreen() {
             size="xs"
             style={{ color: tokens.textSecondary, textAlign: "center" }}
           />
-          <View style={[styles.summaryCard, { backgroundColor: tokens.surface }]}>
+          <SurfaceCard style={styles.summaryCard}>
             <Text
               text={config.type}
               size="xs"
@@ -175,7 +176,7 @@ export function RequestScreen() {
             />
             <Text text={summaryTarget} size="xxs" style={{ color: tokens.textSecondary }} />
             <Text text={reason} size="xxs" style={{ color: tokens.textSecondary }} />
-          </View>
+          </SurfaceCard>
           <AppButton label="Done" onPress={() => router.back()} />
         </View>
       </AppScrollScreen>
@@ -218,34 +219,20 @@ export function RequestScreen() {
       {category === "shift_change" ? (
         <GroupedSection title="Which shift needs help?">
           {upcomingShifts.map((shift, index) => (
-            <Pressable
+            <SelectionRow
               key={shift.id}
+              dividerInset={14}
+              isLast={index === upcomingShifts.length - 1}
               onPress={() => setSelectedShiftId(shift.id)}
-              style={({ pressed }) => [
-                styles.selectionRow,
-                { backgroundColor: pressed ? tokens.pressed : tokens.transparent },
-              ]}
-            >
-              <View style={styles.flex}>
-                <Text
-                  text={`${shift.dayLabel} · ${formatShortDate(shift.date)}`}
-                  size="xs"
-                  weight="medium"
-                  style={{ color: tokens.textPrimary }}
-                />
-                <Text
-                  text={`${getShiftTimeRange(shift)} · ${shift.role}`}
-                  size="xxs"
-                  style={{ color: tokens.textSecondary }}
-                />
-              </View>
-              {selectedShiftId === shift.id ? (
-                <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-              ) : null}
-              {index < upcomingShifts.length - 1 ? (
-                <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
-              ) : null}
-            </Pressable>
+              selected={selectedShiftId === shift.id}
+              subtitle={`${getShiftTimeRange(shift)} · ${shift.role}`}
+              title={`${shift.dayLabel} · ${formatShortDate(shift.date)}`}
+              trailing={
+                selectedShiftId === shift.id ? (
+                  <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+                ) : null
+              }
+            />
           ))}
         </GroupedSection>
       ) : (
@@ -256,7 +243,7 @@ export function RequestScreen() {
             {requestDates.map((date) => {
               const selected = selectedDates.includes(date)
               return (
-                <Pressable
+                <SelectionChip
                   key={date}
                   onPress={() =>
                     setSelectedDates((current) =>
@@ -265,20 +252,10 @@ export function RequestScreen() {
                         : [...current, date].sort((left, right) => left.localeCompare(right)),
                     )
                   }
-                  style={[
-                    styles.dateChip,
-                    {
-                      backgroundColor: selected ? tokens.accent : tokens.surfaceSecondary,
-                    },
-                  ]}
-                >
-                  <Text
-                    text={formatShortDate(date)}
-                    size="xxs"
-                    weight="medium"
-                    style={{ color: selected ? tokens.accentForeground : tokens.textPrimary }}
-                  />
-                </Pressable>
+                  label={formatShortDate(date)}
+                  selected={selected}
+                  selectedVariant="solid"
+                />
               )
             })}
           </View>
@@ -301,77 +278,40 @@ export function RequestScreen() {
           {reasonPresets[category].map((option) => {
             const selected = option === reason
             return (
-              <Pressable
+              <SelectionChip
                 key={option}
                 onPress={() => setReason(selected ? "" : option)}
-                style={[
-                  styles.reasonChip,
-                  {
-                    backgroundColor: selected ? tokens.accent : tokens.surfaceSecondary,
-                    borderColor: selected ? tokens.accent : tokens.transparent,
-                  },
-                ]}
-              >
-                <Text
-                  text={option}
-                  size="xxs"
-                  weight="medium"
-                  style={{ color: selected ? tokens.accentForeground : tokens.textPrimary }}
-                />
-              </Pressable>
+                label={option}
+                selected={selected}
+                selectedVariant="solid"
+              />
             )
           })}
         </View>
       </GroupedSection>
 
-      <View style={[styles.noteShell, { backgroundColor: tokens.searchBackground }]}>
-        <Text text="NOTE" size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
-        <TextInput
-          multiline
-          numberOfLines={3}
-          onChangeText={setNote}
-          placeholder="Add anything your manager should know"
-          placeholderTextColor={tokens.textMuted}
-          style={[styles.noteInput, { color: tokens.textPrimary }]}
-          textAlignVertical="top"
-          value={note}
-        />
-      </View>
+      <TextField
+        containerStyle={styles.noteShell}
+        inputStyle={styles.noteInput}
+        label="Note"
+        multiline
+        numberOfLines={3}
+        onChangeText={setNote}
+        placeholder="Add anything your manager should know"
+        textAlignVertical="top"
+        value={note}
+        variant="muted"
+      />
 
-      <View style={[styles.summaryCard, { backgroundColor: tokens.surface }]}>
+      <SurfaceCard style={styles.summaryCard}>
         <Text text="Summary" size="xxs" weight="semiBold" style={{ color: tokens.textMuted }} />
-        <View style={styles.summaryRow}>
-          <Text text="Type" size="xs" style={{ color: tokens.textSecondary }} />
-          <Text
-            text={config.type}
-            size="xs"
-            weight="medium"
-            style={{ color: tokens.textPrimary }}
-          />
-        </View>
-        <View style={styles.summaryRow}>
-          <Text
-            text={category === "shift_change" ? "Shift" : "Dates"}
-            size="xs"
-            style={{ color: tokens.textSecondary }}
-          />
-          <Text
-            text={summaryTarget || "Choose one first"}
-            size="xs"
-            weight="medium"
-            style={{ color: tokens.textPrimary, textAlign: "right", flex: 1 }}
-          />
-        </View>
-        <View style={styles.summaryRow}>
-          <Text text="Reason" size="xs" style={{ color: tokens.textSecondary }} />
-          <Text
-            text={reason || "Choose one"}
-            size="xs"
-            weight="medium"
-            style={{ color: tokens.textPrimary, textAlign: "right", flex: 1 }}
-          />
-        </View>
-      </View>
+        <DetailRow label="Type" value={config.type} />
+        <DetailRow
+          label={category === "shift_change" ? "Shift" : "Dates"}
+          value={summaryTarget || "Choose one first"}
+        />
+        <DetailRow isLast label="Reason" value={reason || "Choose one"} />
+      </SurfaceCard>
 
       <AppButton
         disabled={!canSubmit}
@@ -420,20 +360,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   categoryTile: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 18,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  dateChip: {
-    borderCurve: "continuous",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    minHeight: 92,
   },
   dateWrap: {
     flexDirection: "row",
@@ -453,30 +380,16 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     paddingHorizontal: 20,
   },
-  flex: {
-    flex: 1,
-  },
   intro: {
     gap: 6,
   },
   noteInput: {
     fontSize: 15,
-    minHeight: 84,
-    paddingVertical: 0,
+    minHeight: 72,
+    paddingTop: 2,
   },
   noteShell: {
-    borderCurve: "continuous",
-    borderRadius: 18,
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  reasonChip: {
-    borderCurve: "continuous",
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    minHeight: 116,
   },
   reasonWrap: {
     flexDirection: "row",
@@ -485,25 +398,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
-  rowDivider: {
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-    left: 14,
-    position: "absolute",
-    right: 0,
-  },
   screen: {
     gap: 18,
     paddingHorizontal: 20,
     paddingTop: 20,
-  },
-  selectionRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 66,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
   },
   successIcon: {
     alignItems: "center",
@@ -513,15 +411,7 @@ const styles = StyleSheet.create({
     width: 72,
   },
   summaryCard: {
-    borderCurve: "continuous",
-    borderRadius: 18,
     gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "space-between",
+    padding: 0,
   },
 })

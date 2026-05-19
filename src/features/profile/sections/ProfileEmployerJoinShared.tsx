@@ -1,5 +1,4 @@
-/* eslint-disable react-native/no-inline-styles */
-
+import { useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -11,36 +10,32 @@ import type { DesignTokens } from "@/ui"
 
 import type { JoinMode } from "./ProfileSectionShared"
 
-export function JoinModeHero({
-  joinMode,
-  tokens: _tokens,
-}: {
-  joinMode: JoinMode
-  tokens: DesignTokens
-}) {
+export function JoinModeHero({ joinMode, tokens }: { joinMode: JoinMode; tokens: DesignTokens }) {
   const mutedText = timeHeroColors.secondaryText
   const faintText = timeHeroColors.tertiaryText
-  const panelColor = "rgba(255, 255, 255, 0.08)"
+  const panelColor = `${timeHeroColors.primaryText}14`
+  const eyebrowStyle = useMemo(() => [styles.joinModeEyebrow, { color: faintText }], [faintText])
+  const titleStyle = useMemo(() => ({ color: timeHeroColors.primaryText }), [])
+  const subtitleStyle = useMemo(() => ({ color: mutedText }), [mutedText])
+  const iconContainerStyle = useMemo(
+    () => [styles.joinModeIcon, { backgroundColor: panelColor }],
+    [panelColor],
+  )
+  const cardStyle = useMemo(
+    () => [styles.joinModeCard, { borderColor: tokens.border }],
+    [tokens.border],
+  )
 
   return (
-    <TimeHeroCard
-      contentStyle={styles.joinModeContent}
-      gradientVariant="compact"
-      style={styles.joinModeCard}
-    >
+    <TimeHeroCard contentStyle={styles.joinModeContent} gradientVariant="compact" style={cardStyle}>
       <View style={styles.joinModeTop}>
         <View style={styles.joinModeCopy}>
-          <Text
-            text="JOIN WORKPLACE"
-            size="xxs"
-            weight="semiBold"
-            style={[styles.joinModeEyebrow, { color: faintText }]}
-          />
+          <Text text="JOIN WORKPLACE" size="xxs" weight="semiBold" style={eyebrowStyle} />
           <Text
             text={joinMode === "code" ? "Enter an invite code" : "Find your next employer"}
             size="lg"
             weight="bold"
-            style={{ color: timeHeroColors.primaryText }}
+            style={titleStyle}
           />
           <Text
             text={
@@ -49,10 +44,10 @@ export function JoinModeHero({
                 : "Browse open workplaces and choose the one you want to join."
             }
             size="xs"
-            style={{ color: mutedText }}
+            style={subtitleStyle}
           />
         </View>
-        <View style={[styles.joinModeIcon, { backgroundColor: panelColor }]}>
+        <View style={iconContainerStyle}>
           <Ionicons
             color={timeHeroColors.primaryText}
             name={joinMode === "code" ? "key-outline" : "search-outline"}
@@ -103,26 +98,36 @@ export function JoinSuccessCard({
   router: ReturnType<typeof useRouter>
   tokens: DesignTokens
 }) {
+  const successCardStyle = useMemo(
+    () => [
+      styles.joinSuccess,
+      { backgroundColor: tokens.successSoft, borderColor: `${tokens.success}33` },
+    ],
+    [tokens.success, tokens.successSoft],
+  )
+  const successIconStyle = useMemo(
+    () => [styles.joinSuccessIcon, { backgroundColor: tokens.successSoft }],
+    [tokens.successSoft],
+  )
+  const titleStyle = useMemo(
+    () => ({ color: tokens.textPrimary, textAlign: "center" as const }),
+    [tokens.textPrimary],
+  )
+  const bodyStyle = useMemo(
+    () => ({ color: tokens.textSecondary, textAlign: "center" as const }),
+    [tokens.textSecondary],
+  )
+
   return (
-    <View
-      style={[
-        styles.joinSuccess,
-        { backgroundColor: tokens.successSoft, borderColor: `${tokens.success}33` },
-      ]}
-    >
-      <View style={[styles.joinSuccessIcon, { backgroundColor: tokens.successSoft }]}>
+    <View style={successCardStyle}>
+      <View style={successIconStyle}>
         <Ionicons color={tokens.success} name="checkmark-circle-outline" size={34} />
       </View>
-      <Text
-        text="Request sent"
-        size="sm"
-        weight="bold"
-        style={{ color: tokens.textPrimary, textAlign: "center" }}
-      />
+      <Text text="Request sent" size="sm" weight="bold" style={titleStyle} />
       <Text
         text={`You'll be notified when ${joinedEmployer.name} approves your request.`}
         size="xs"
-        style={{ color: tokens.textSecondary, textAlign: "center" }}
+        style={bodyStyle}
       />
       <AppButton
         label="Done"

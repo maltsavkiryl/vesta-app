@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native"
 import { AppScrollScreen, appLayout } from "@/ui"
 
 import { TimeEntriesListScreen, RecentEntries } from "./components/TimeEntriesList"
-import { ActiveClockCard, IdleClockCard, TimeHeader } from "./components/TimeOverview"
+import { TimeHeader, TimeOverviewCard } from "./components/TimeOverview"
 import { useTimeEntriesScreen } from "./useTimeEntriesScreen"
 import { useTimeScreen } from "./useTimeScreen"
 
@@ -37,19 +37,18 @@ export function TimeScreen() {
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
       <TimeHeader status={state.clockSession.state} />
 
-      {state.clockSession.state === "idle" ? (
-        <IdleClockCard onClockIn={handleClockIn} />
-      ) : (
-        <ActiveClockCard
-          breakSeconds={state.clockSession.state === "onBreak" ? snapshot.breakSeconds : 0}
-          elapsedSeconds={elapsedSeconds}
-          onClockOut={openClockOut}
-          onEndBreak={handleEndBreak}
-          onStartBreak={handleStartBreak}
-          status={state.clockSession.state}
-          totalBreakSeconds={totalBreakSeconds}
-        />
-      )}
+      <TimeOverviewCard
+        controller={{
+          elapsedSeconds,
+          handleClockIn,
+          handleEndBreak,
+          handleStartBreak,
+          openClockOut,
+          snapshot,
+          state,
+          totalBreakSeconds,
+        }}
+      />
       <RecentEntries
         entries={state.timeEntries}
         onOpenEntry={openEntry}

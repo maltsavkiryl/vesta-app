@@ -68,9 +68,6 @@ export default function AppLayout() {
         name="availability-template"
         options={createPushDetailOptions(theme, "Weekly template", {
           backgroundColor: groupedSheetBackground,
-          headerBlurEffect: theme.isDark
-            ? "systemUltraThinMaterialDark"
-            : "systemUltraThinMaterialLight",
         })}
       />
       <Stack.Screen
@@ -114,9 +111,6 @@ export default function AppLayout() {
         name="time-entry/[id]"
         options={createPushDetailOptions(theme, "Entry details", {
           backgroundColor: groupedSheetBackground,
-          headerBlurEffect: theme.isDark
-            ? "systemUltraThinMaterialDark"
-            : "systemUltraThinMaterialLight",
         })}
       />
       <Stack.Screen

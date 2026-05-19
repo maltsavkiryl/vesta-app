@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 
 import { useCallback, useLayoutEffect, useState } from "react"
-import { Platform, Pressable, StyleSheet, View } from "react-native"
+import { Platform, StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker"
@@ -22,6 +22,7 @@ import {
   AppScrollScreen,
   GroupedSection,
   ListRow,
+  SelectionRow,
   Text,
   createHeaderActionOptions,
   useAppTheme,
@@ -123,46 +124,38 @@ export function AvailabilityTemplateScreen() {
             const statusSummary = getAvailabilitySummary(day)
 
             return (
-              <Pressable
+              <SelectionRow
                 key={weekday}
+                backgroundColor={tokens.transparent}
+                dividerInset={58}
+                isLast={index === availabilityWeekdays.length - 1}
+                leading={
+                  <View style={styles.weekdayLeading}>
+                    <View
+                      style={[
+                        styles.weekdayStatusDot,
+                        {
+                          backgroundColor: statusColor,
+                          opacity: day.status === "unavailable" ? 0.7 : 1,
+                        },
+                      ]}
+                    />
+                  </View>
+                }
                 onPress={() =>
                   router.push({
                     pathname: "/(app)/availability-template/[day]",
                     params: { day: weekday },
                   })
                 }
-                style={({ pressed }) => [
-                  styles.weekdayRow,
-                  {
-                    backgroundColor: pressed ? tokens.pressed : tokens.transparent,
-                  },
-                ]}
-              >
-                <View style={styles.weekdayLeading}>
-                  <View
-                    style={[
-                      styles.weekdayStatusDot,
-                      {
-                        backgroundColor: statusColor,
-                        opacity: day.status === "unavailable" ? 0.7 : 1,
-                      },
-                    ]}
-                  />
-                </View>
-                <View style={styles.flex}>
-                  <Text
-                    text={availabilityWeekdayLabels[weekday]}
-                    size="xs"
-                    weight="semiBold"
-                    style={{ color: tokens.textPrimary }}
-                  />
-                  <Text text={statusSummary} size="xxs" style={{ color: statusColor }} />
-                </View>
-                <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-                {index < availabilityWeekdays.length - 1 ? (
-                  <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
-                ) : null}
-              </Pressable>
+                selected={false}
+                style={styles.weekdayRow}
+                subtitle={statusSummary}
+                title={availabilityWeekdayLabels[weekday]}
+                trailing={
+                  <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+                }
+              />
             )
           })}
         </GroupedSection>
@@ -324,47 +317,37 @@ export function AvailabilityTemplateDayScreen() {
                     : tokens.textSecondary
 
               return (
-                <Pressable
+                <SelectionRow
                   key={candidate}
+                  backgroundColor={tokens.transparent}
+                  dividerInset={58}
+                  isLast={index === items.length - 1}
+                  leading={
+                    <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
+                      <Ionicons
+                        color={activeColor}
+                        name={
+                          candidate === "preferred"
+                            ? "star-outline"
+                            : candidate === "available"
+                              ? "checkmark-circle-outline"
+                              : "remove-circle-outline"
+                        }
+                        size={18}
+                      />
+                    </View>
+                  }
                   onPress={() => updateRule((current) => ({ ...current, status: candidate }))}
-                  style={({ pressed }) => [
-                    styles.statusRow,
-                    { backgroundColor: pressed ? tokens.pressed : tokens.transparent },
-                  ]}
-                >
-                  <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>
-                    <Ionicons
-                      color={activeColor}
-                      name={
-                        candidate === "preferred"
-                          ? "star-outline"
-                          : candidate === "available"
-                            ? "checkmark-circle-outline"
-                            : "remove-circle-outline"
-                      }
-                      size={18}
-                    />
-                  </View>
-                  <View style={styles.flex}>
-                    <Text
-                      text={option.label}
-                      size="xs"
-                      weight="medium"
-                      style={{ color: tokens.textPrimary }}
-                    />
-                    <Text
-                      text={option.description}
-                      size="xxs"
-                      style={{ color: tokens.textMuted }}
-                    />
-                  </View>
-                  {active ? (
-                    <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-                  ) : null}
-                  {index < items.length - 1 ? (
-                    <View style={[styles.rowDivider, { backgroundColor: tokens.separator }]} />
-                  ) : null}
-                </Pressable>
+                  selected={active}
+                  style={styles.statusRow}
+                  subtitle={option.description}
+                  title={option.label}
+                  trailing={
+                    active ? (
+                      <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+                    ) : null
+                  }
+                />
               )
             },
           )}
@@ -413,18 +396,8 @@ const styles = StyleSheet.create({
   content: {
     gap: 18,
   },
-  flex: {
-    flex: 1,
-  },
   intro: {
     gap: 6,
-  },
-  rowDivider: {
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-    left: 58,
-    position: "absolute",
-    right: 0,
   },
   screen: {
     paddingBottom: 32,
@@ -439,12 +412,8 @@ const styles = StyleSheet.create({
     width: 36,
   },
   statusRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 66,
+    borderWidth: 0,
     paddingHorizontal: 14,
-    paddingVertical: 14,
   },
   timeSection: {
     gap: 8,
@@ -455,12 +424,9 @@ const styles = StyleSheet.create({
     width: 10,
   },
   weekdayRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    minHeight: 78,
+    borderWidth: 0,
+    minHeight: 72,
     paddingHorizontal: 14,
-    paddingVertical: 12,
   },
   weekdayStatusDot: {
     borderRadius: 999,

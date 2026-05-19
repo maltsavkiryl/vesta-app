@@ -34,7 +34,7 @@ const sectionMeta: Record<
   {
     icon: keyof typeof Ionicons.glyphMap
     title: string
-    subtitle: string
+    subtitle?: string
   }
 > = {
   "address": {
@@ -64,7 +64,6 @@ const sectionMeta: Record<
   },
   "join-employer": {
     icon: "add-circle-outline",
-    subtitle: "Join another workplace with an invite code or by searching the directory.",
     title: "Join employer",
   },
   "legal": {
@@ -205,7 +204,9 @@ export function ProfileDetailScreen() {
           title: sectionMeta[section].title,
         }}
       />
-      <SectionFooter text={sectionMeta[section].subtitle} />
+      {sectionMeta[section].subtitle ? (
+        <SectionFooter text={sectionMeta[section].subtitle} />
+      ) : null}
 
       {section === "personal" ? (
         <>
