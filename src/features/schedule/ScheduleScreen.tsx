@@ -261,35 +261,17 @@ export function ScheduleScreen() {
                 },
               ]}
             >
-              <Ionicons color={tokens.accent} name="create-outline" size={14} />
-              <Text
-                text="Edit"
-                size="xxs"
-                weight="semiBold"
-                style={{ color: tokens.accent }}
-              />
+              <Text text="Edit" size="xxs" weight="semiBold" style={{ color: tokens.accent }} />
             </Pressable>
           </View>
 
           <View style={styles.selectedDateMeta}>
-            <MetaPill
-              label={
-                selectedDayState.needsResponse
-                  ? "Needs response"
-                  : selectedDayState.hasShift
-                    ? "Working"
-                    : selectedDayAvailability.status === "unavailable"
-                      ? "Off"
-                      : "Open"
-              }
-              leading={
-                <Ionicons
-                  color={selectedDayState.needsResponse ? tokens.warning : tokens.textSecondary}
-                  name={selectedDayState.needsResponse ? "alert-circle-outline" : "ellipse"}
-                  size={selectedDayState.needsResponse ? 13 : 11}
-                />
-              }
-            />
+            {selectedDayState.needsResponse ? (
+              <MetaPill
+                label="Need response"
+                leading={<Ionicons color={tokens.warning} name="alert-circle-outline" size={13} />}
+              />
+            ) : null}
             {showsAvailabilityTime ? (
               <MetaPill
                 label={`${selectedDayAvailability.startTime} - ${selectedDayAvailability.endTime}`}

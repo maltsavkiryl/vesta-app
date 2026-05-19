@@ -16,7 +16,6 @@ import {
   AppScrollScreen,
   DetailRow,
   GroupedSection,
-  SelectionCard,
   SelectionChip,
   SelectionRow,
   SurfaceCard,
@@ -30,6 +29,7 @@ const requestTypeConfig: Record<
   {
     description: string
     icon: keyof typeof Ionicons.glyphMap
+    tone: "accent" | "warning" | "danger"
     title: string
     type: RequestType
   }
@@ -37,18 +37,21 @@ const requestTypeConfig: Record<
   time_off: {
     description: "Request one or more days off",
     icon: "calendar-clear-outline",
+    tone: "accent",
     title: "Time off",
     type: "Time off",
   },
   shift_change: {
     description: "Ask for help with a scheduled shift",
     icon: "swap-horizontal-outline",
+    tone: "warning",
     title: "Shift change",
     type: "Shift swap",
   },
   availability_issue: {
     description: "Flag an availability conflict or exception",
     icon: "alert-circle-outline",
+    tone: "danger",
     title: "Availability issue",
     type: "Unavailability",
   },
@@ -75,36 +78,42 @@ function formatDateListLabel(dates: string[]) {
 function CategoryTile({
   active,
   category,
+  isLast,
   onPress,
 }: {
   active: boolean
   category: RequestCategory
+  isLast: boolean
   onPress: () => void
 }) {
   const tokens = useDesignTokens()
   const config = requestTypeConfig[category]
+  const activeColor =
+    config.tone === "warning"
+      ? tokens.warning
+      : config.tone === "danger"
+        ? tokens.danger
+        : tokens.accent
 
   return (
-    <SelectionCard
-      icon={
-        <View
-          style={[
-            styles.categoryGlyph,
-            { backgroundColor: active ? `${tokens.accent}20` : tokens.surfaceSecondary },
-          ]}
-        >
-          <Ionicons
-            color={active ? tokens.accent : tokens.textSecondary}
-            name={config.icon}
-            size={18}
-          />
+    <SelectionRow
+      backgroundColor={tokens.transparent}
+      dividerInset={58}
+      grouped
+      isLast={isLast}
+      leading={
+        <View style={[styles.categoryGlyph, { backgroundColor: `${activeColor}1A` }]}>
+          <Ionicons color={activeColor} name={config.icon} size={18} />
         </View>
       }
       onPress={onPress}
       selected={active}
-      style={styles.categoryTile}
+      style={styles.categoryRow}
       subtitle={config.description}
       title={config.title}
+      trailing={
+        active ? <Ionicons color={tokens.accent} name="checkmark-outline" size={18} /> : null
+      }
     />
   )
 }
@@ -167,7 +176,7 @@ export function RequestScreen() {
             size="xs"
             style={{ color: tokens.textSecondary, textAlign: "center" }}
           />
-          <SurfaceCard style={styles.summaryCard}>
+          <SurfaceCard style={styles.doneSummaryCard}>
             <Text
               text={config.type}
               size="xs"
@@ -190,50 +199,49 @@ export function RequestScreen() {
     >
       <View style={styles.intro}>
         <Text
-          text="New request"
-          weight="bold"
-          style={{ color: tokens.textPrimary, fontSize: 24 }}
-        />
-        <Text
           text="Start with the type of help you need, then add just enough context for a quick decision."
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
       </View>
 
-      <View style={styles.categoryGrid}>
-        {(["time_off", "shift_change", "availability_issue"] as RequestCategory[]).map((item) => (
-          <CategoryTile
-            key={item}
-            active={category === item}
-            category={item}
-            onPress={() => {
-              setCategory(item)
-              setReason("")
-              setNote("")
-            }}
-          />
-        ))}
-      </View>
+      <GroupedSection>
+        {(["time_off", "shift_change", "availability_issue"] as RequestCategory[]).map(
+          (item, index, items) => (
+            <CategoryTile
+              key={item}
+              active={category === item}
+              category={item}
+              isLast={index === items.length - 1}
+              onPress={() => {
+                setCategory(item)
+                setReason("")
+                setNote("")
+              }}
+            />
+          ),
+        )}
+      </GroupedSection>
 
       {category === "shift_change" ? (
         <GroupedSection title="Which shift needs help?">
-          {upcomingShifts.map((shift, index) => (
-            <SelectionRow
-              key={shift.id}
-              dividerInset={14}
-              isLast={index === upcomingShifts.length - 1}
-              onPress={() => setSelectedShiftId(shift.id)}
-              selected={selectedShiftId === shift.id}
-              subtitle={`${getShiftTimeRange(shift)} · ${shift.role}`}
-              title={`${shift.dayLabel} · ${formatShortDate(shift.date)}`}
-              trailing={
-                selectedShiftId === shift.id ? (
-                  <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-                ) : null
-              }
-            />
-          ))}
+          <View style={styles.shiftList}>
+            {upcomingShifts.map((shift) => (
+              <SelectionRow
+                key={shift.id}
+                onPress={() => setSelectedShiftId(shift.id)}
+                selected={selectedShiftId === shift.id}
+                style={styles.shiftRow}
+                subtitle={`${getShiftTimeRange(shift)} · ${shift.role}`}
+                title={`${shift.dayLabel} · ${formatShortDate(shift.date)}`}
+                trailing={
+                  selectedShiftId === shift.id ? (
+                    <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
+                  ) : null
+                }
+              />
+            ))}
+          </View>
         </GroupedSection>
       ) : (
         <GroupedSection
@@ -303,15 +311,14 @@ export function RequestScreen() {
         variant="muted"
       />
 
-      <SurfaceCard style={styles.summaryCard}>
-        <Text text="Summary" size="xxs" weight="semiBold" style={{ color: tokens.textMuted }} />
+      <GroupedSection title="Summary">
         <DetailRow label="Type" value={config.type} />
         <DetailRow
           label={category === "shift_change" ? "Shift" : "Dates"}
           value={summaryTarget || "Choose one first"}
         />
         <DetailRow isLast label="Reason" value={reason || "Choose one"} />
-      </SurfaceCard>
+      </GroupedSection>
 
       <AppButton
         disabled={!canSubmit}
@@ -356,11 +363,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 36,
   },
-  categoryGrid: {
-    gap: 10,
-  },
-  categoryTile: {
-    minHeight: 92,
+  categoryRow: {
+    minHeight: 72,
+    paddingHorizontal: 14,
   },
   dateWrap: {
     flexDirection: "row",
@@ -379,6 +384,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: "100%",
     paddingHorizontal: 20,
+  },
+  doneSummaryCard: {
+    alignSelf: "stretch",
+    gap: 10,
   },
   intro: {
     gap: 6,
@@ -403,15 +412,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
+  shiftList: {
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  shiftRow: {
+    minHeight: 84,
+  },
   successIcon: {
     alignItems: "center",
     borderRadius: 999,
     height: 72,
     justifyContent: "center",
     width: 72,
-  },
-  summaryCard: {
-    gap: 10,
-    padding: 0,
   },
 })

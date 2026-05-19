@@ -128,6 +128,7 @@ export function AvailabilityTemplateScreen() {
                 key={weekday}
                 backgroundColor={tokens.transparent}
                 dividerInset={58}
+                grouped
                 isLast={index === availabilityWeekdays.length - 1}
                 leading={
                   <View style={styles.weekdayLeading}>
@@ -321,6 +322,7 @@ export function AvailabilityTemplateDayScreen() {
                   key={candidate}
                   backgroundColor={tokens.transparent}
                   dividerInset={58}
+                  grouped
                   isLast={index === items.length - 1}
                   leading={
                     <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>

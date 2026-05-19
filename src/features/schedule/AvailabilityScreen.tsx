@@ -243,6 +243,7 @@ export function AvailabilityScreen() {
                   key={candidate}
                   backgroundColor={tokens.transparent}
                   dividerInset={58}
+                  grouped
                   isLast={index === items.length - 1}
                   leading={
                     <View style={[styles.statusGlyph, { backgroundColor: `${activeColor}1A` }]}>

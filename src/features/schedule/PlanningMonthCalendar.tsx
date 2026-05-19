@@ -82,6 +82,43 @@ export function PlanningMonthCalendar({
           const isToday = dateString === today
           const isCurrentMonth = date.getMonth() === currentMonth
           const availabilityColor = getAvailabilityColor(dayState.availabilityStatus, tokens)
+          const indicators = [
+            dayState.hasShift ? (
+              <View
+                key="shift"
+                style={[
+                  styles.shiftIndicator,
+                  { backgroundColor: isSelected ? tokens.accentForeground : tokens.accent },
+                ]}
+              />
+            ) : null,
+            <View
+              key="availability"
+              style={[
+                styles.availabilityIndicator,
+                {
+                  backgroundColor: isSelected
+                    ? tokens.accentForeground
+                    : dayState.availabilityStatus === "unavailable"
+                      ? tokens.textMuted
+                      : availabilityColor,
+                },
+              ]}
+            />,
+            dayState.hasOverride ? (
+              <View
+                key="override"
+                style={[
+                  styles.overrideIndicator,
+                  {
+                    backgroundColor: isSelected
+                      ? tokens.accentForeground
+                      : tokens.textSecondary,
+                  },
+                ]}
+              />
+            ) : null,
+          ].filter(Boolean)
           const containerColor = dayState.needsResponse
             ? `${tokens.warning}12`
             : dayState.hasShift
@@ -135,40 +172,9 @@ export function PlanningMonthCalendar({
               </View>
 
               <View style={styles.indicatorRow}>
-                {dayState.hasShift ? (
-                  <View
-                    style={[
-                      styles.shiftIndicator,
-                      { backgroundColor: isSelected ? tokens.accentForeground : tokens.accent },
-                    ]}
-                  />
-                ) : (
-                  <View style={styles.placeholderIndicator} />
-                )}
-                <View
-                  style={[
-                    styles.availabilityIndicator,
-                    {
-                      backgroundColor: isSelected
-                        ? tokens.accentForeground
-                        : dayState.availabilityStatus === "unavailable"
-                          ? tokens.textMuted
-                          : availabilityColor,
-                    },
-                  ]}
-                />
-                {dayState.hasOverride ? (
-                  <View
-                    style={[
-                      styles.overrideIndicator,
-                      {
-                        backgroundColor: isSelected
-                          ? tokens.accentForeground
-                          : tokens.textSecondary,
-                      },
-                    ]}
-                  />
-                ) : null}
+                {indicators.map((indicator, indicatorIndex) => (
+                  <View key={indicatorIndex}>{indicator}</View>
+                ))}
               </View>
             </Pressable>
           )
@@ -233,6 +239,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 4,
+    justifyContent: "center",
     minHeight: 6,
   },
   monthButton: {
@@ -245,9 +252,6 @@ const styles = StyleSheet.create({
   overrideIndicator: {
     borderRadius: 999,
     height: 4,
-    width: 4,
-  },
-  placeholderIndicator: {
     width: 4,
   },
   shiftIndicator: {

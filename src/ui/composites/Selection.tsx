@@ -91,6 +91,7 @@ export function SelectionChip({
 export function SelectionRow({
   backgroundColor,
   dividerInset = 14,
+  grouped = false,
   isLast = false,
   leading,
   onPress,
@@ -102,6 +103,7 @@ export function SelectionRow({
 }: {
   backgroundColor?: string
   dividerInset?: number
+  grouped?: boolean
   isLast?: boolean
   leading?: ReactNode
   onPress: () => void
@@ -120,6 +122,7 @@ export function SelectionRow({
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
+        grouped && styles.groupedRow,
         {
           backgroundColor: pressed ? tokens.pressed : baseBackgroundColor,
           borderColor: selected ? tokens.accent : tokens.border,
@@ -209,6 +212,10 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
+  },
+  groupedRow: {
+    borderRadius: 0,
+    borderWidth: 0,
   },
   rowCopy: {
     flex: 1,
