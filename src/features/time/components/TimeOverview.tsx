@@ -252,7 +252,6 @@ function CollapsedActionFooter({
 
     return {
       height: measuredHeight.value * inverseProgress,
-      marginTop: interpolate(inverseProgress, [0, 1], [0, 1], Extrapolation.CLAMP),
       opacity: interpolate(inverseProgress, [0, 0.45, 1], [0, 0.5, 1], Extrapolation.CLAMP),
       overflow: "hidden",
       transform: [
@@ -403,7 +402,7 @@ function IdleCardContent({
       </CollapsibleSection>
 
       <CollapsedActionFooter interactive={collapsedFooterInteractive} progress={collapseProgress}>
-        <View style={styles.heroFooter}>
+        <View>
           <InCardActionButton label="Clock in" onPress={onClockIn} stopPropagation />
         </View>
       </CollapsedActionFooter>
@@ -528,69 +527,72 @@ function ActiveCardContent({
             <Text text="On site" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
           </View>
 
-          {isOnBreak ? (
-            <Pressable
-              onPress={(event) => {
-                event.stopPropagation()
-                onEndBreak()
-              }}
-              style={[
-                styles.breakButton,
-                { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}24` },
-              ]}
-            >
-              <Ionicons color={tokens.warning} name="play-outline" size={17} />
-              <Text
-                text="End break"
-                size="xs"
-                weight="semiBold"
-                style={{ color: tokens.warning }}
-              />
-            </Pressable>
-          ) : (
-            <View style={styles.actionGrid}>
+          <View style={styles.actionSection}>
+            {isOnBreak ? (
               <Pressable
                 onPress={(event) => {
                   event.stopPropagation()
-                  onStartBreak()
+                  onEndBreak()
                 }}
                 style={[
-                  styles.secondaryAction,
-                  {
-                    backgroundColor: tokens.isDark
-                      ? `${tokens.accentForeground}0D`
-                      : `${tokens.accentForeground}10`,
-                    borderColor: `${tokens.accentForeground}12`,
-                  },
+                  styles.breakButton,
+                  { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}24` },
                 ]}
               >
-                <Ionicons color={`${tokens.accentForeground}BF`} name="cafe-outline" size={16} />
+                <Ionicons color={tokens.warning} name="play-outline" size={17} />
                 <Text
-                  text="Start break"
-                  size="xs"
-                  weight="medium"
-                  style={{ color: tokens.accentForeground }}
-                />
-              </Pressable>
-              <Pressable
-                onPress={(event) => {
-                  event.stopPropagation()
-                  onClockOut()
-                }}
-                style={[
-                  styles.dangerAction,
-                  { backgroundColor: `${tokens.danger}10`, borderColor: `${tokens.danger}24` },
-                ]}
-              >
-                <Text
-                  text="Clock out"
+                  text="End break"
                   size="xs"
                   weight="semiBold"
-                  style={{ color: tokens.danger }}
+                  style={{ color: tokens.warning }}
                 />
               </Pressable>
-            </View>
-          )}
+            ) : (
+              <View style={styles.actionGrid}>
+                <Pressable
+                  onPress={(event) => {
+                    event.stopPropagation()
+                    onStartBreak()
+                  }}
+                  style={[
+                    styles.secondaryAction,
+                    {
+                      backgroundColor: tokens.isDark
+                        ? `${tokens.accentForeground}0D`
+                        : `${tokens.accentForeground}10`,
+                      borderColor: `${tokens.accentForeground}12`,
+                    },
+                  ]}
+                >
+                  <Ionicons color={`${tokens.accentForeground}BF`} name="cafe-outline" size={16} />
+                  <Text
+                    text="Start break"
+                    size="xs"
+                    weight="medium"
+                    style={{ color: tokens.accentForeground }}
+                  />
+                </Pressable>
+                <Pressable
+                  onPress={(event) => {
+                    event.stopPropagation()
+                    onClockOut()
+                  }}
+                  style={[
+                    styles.dangerAction,
+                    { backgroundColor: tokens.danger, borderColor: `${tokens.danger}D9` },
+                  ]}
+                >
+                  <Ionicons color={tokens.accentForeground} name="log-out-outline" size={17} />
+                  <Text
+                    text="Clock out"
+                    size="xs"
+                    weight="semiBold"
+                    style={{ color: tokens.accentForeground }}
+                  />
+                </Pressable>
+              </View>
+            )}
+          </View>
         </>
       </CollapsibleSection>
     </HeroCard>
@@ -775,7 +777,9 @@ const styles = StyleSheet.create({
   actionGrid: {
     flexDirection: "row",
     gap: 8,
-    marginTop: 4,
+  },
+  actionSection: {
+    paddingTop: 12,
   },
   breakButton: {
     alignItems: "center",
@@ -785,7 +789,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
-    marginTop: 4,
     minHeight: 48,
     paddingHorizontal: 14,
   },
@@ -809,6 +812,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     flex: 1,
+    flexDirection: "row",
+    gap: 8,
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 14,
