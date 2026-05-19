@@ -10,6 +10,7 @@ import { clockInWorkflow, clockOutWorkflow } from "./time.workflow"
 function invalidateTimeQueries(queryClient: ReturnType<typeof useQueryClient>, accountId: string) {
   void queryClient.invalidateQueries({ queryKey: timeQueryKeys.overview(accountId) })
   void queryClient.invalidateQueries({ queryKey: ["home", accountId] })
+  void queryClient.invalidateQueries({ queryKey: ["app-shell", accountId, "clock-session"] })
 }
 
 export function useStartClockMutation() {

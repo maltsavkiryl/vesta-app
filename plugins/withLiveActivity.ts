@@ -6,9 +6,44 @@ import path from "path"
 const WIDGET_NAME = "VestaClockWidget"
 
 const withLiveActivity: ConfigPlugin = (config) => {
+  config = withExtensionDeclaration(config)
   config = withCopyNativeFiles(config)
   config = withXcodeChanges(config)
   return config
+}
+
+const withExtensionDeclaration: ConfigPlugin = (config) => {
+  const appBundleId = config.ios?.bundleIdentifier ?? "services.vesta.mobile"
+  const widgetBundleId = `${appBundleId}.${WIDGET_NAME}`
+  const existingAppExtensions = config.extra?.eas?.build?.experimental?.ios?.appExtensions ?? []
+  const nextAppExtensions = [
+    ...existingAppExtensions.filter((extension: any) => extension?.targetName !== WIDGET_NAME),
+    {
+      targetName: WIDGET_NAME,
+      bundleIdentifier: widgetBundleId,
+      entitlements: {},
+    },
+  ]
+
+  return {
+    ...config,
+    extra: {
+      ...config.extra,
+      eas: {
+        ...config.extra?.eas,
+        build: {
+          ...config.extra?.eas?.build,
+          experimental: {
+            ...config.extra?.eas?.build?.experimental,
+            ios: {
+              ...config.extra?.eas?.build?.experimental?.ios,
+              appExtensions: nextAppExtensions,
+            },
+          },
+        },
+      },
+    },
+  }
 }
 
 // ─── File copy step ─────────────────────────────────────────────────────────
@@ -133,6 +168,7 @@ const withXcodeChanges: ConfigPlugin = (config) =>
       widgetBundleId,
     )
     const widgetTargetUuid = widgetTarget.uuid
+    project.addTargetAttribute("ProvisioningStyle", "Automatic", widgetTarget)
 
     // ── 4. Build phases for widget target ─────────────────────────────────
 
@@ -159,6 +195,7 @@ const withXcodeChanges: ConfigPlugin = (config) =>
       cfg2.buildSettings.IPHONEOS_DEPLOYMENT_TARGET = '"16.2"'
       cfg2.buildSettings.INFOPLIST_FILE = `"${WIDGET_NAME}/Info.plist"`
       cfg2.buildSettings.CODE_SIGN_ENTITLEMENTS = `"${WIDGET_NAME}/${WIDGET_NAME}.entitlements"`
+      cfg2.buildSettings.CODE_SIGN_STYLE = '"Automatic"'
       cfg2.buildSettings.TARGETED_DEVICE_FAMILY = '"1,2"'
       cfg2.buildSettings.CLANG_ENABLE_MODULES = '"YES"'
     }
