@@ -20,13 +20,5 @@ export function useScheduleQuery() {
 export function useScheduleStateQuery() {
   const query = useScheduleQuery()
 
-  return useMemo(
-    () => ({
-      selectedEmployer: query.data?.employers.find(
-        (employer) => employer.id === query.data?.activeEmployerId,
-      ),
-      state: query.data,
-    }),
-    [query.data],
-  )
+  return useMemo(() => ({ state: query.data }), [query.data])
 }

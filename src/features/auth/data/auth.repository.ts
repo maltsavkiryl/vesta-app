@@ -21,6 +21,11 @@ export interface CompleteOnboardingInput {
 }
 
 export interface AuthRepository {
+  changePassword(
+    accountId: string,
+    currentPassword: string,
+    nextPassword: string,
+  ): Promise<Result<{ changedAt: string }, AuthError>>
   completeOnboarding(
     accountId: string,
     input: CompleteOnboardingInput,
@@ -28,6 +33,10 @@ export interface AuthRepository {
   getSession(): Promise<AppSession>
   register(input: RegisterPayload): Promise<Result<AppSession, AuthError>>
   requestPasswordReset(email: string): Promise<Result<{ email: string }, AuthError>>
+  resetPassword(
+    email: string,
+    nextPassword: string,
+  ): Promise<Result<{ changedAt: string; email: string }, AuthError>>
   signIn(input: SignInPayload): Promise<Result<AppSession, AuthError>>
   signOut(): Promise<AppSession>
 }

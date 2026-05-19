@@ -1,6 +1,7 @@
 import type { AvailabilityStatus } from "@/core/models"
 
 export const TIME_REFERENCE_DATE = "2026-01-01"
+export type AvailabilityTimeField = "startTime" | "endTime"
 
 export const availabilityStatusOptions: Record<
   AvailabilityStatus,
@@ -26,6 +27,17 @@ export function parseTime(value: string): [number, string] {
 
 export function formatTime(hour: number, minute: string) {
   return `${String((hour + 24) % 24).padStart(2, "0")}:${minute}`
+}
+
+export function formatTimeLabel(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(timeValueToDate(value))
+}
+
+export function isAvailabilityTimeField(value?: string): value is AvailabilityTimeField {
+  return value === "startTime" || value === "endTime"
 }
 
 export function timeValueToDate(value: string) {

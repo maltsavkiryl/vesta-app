@@ -1,5 +1,7 @@
 import { StyleSheet, View } from "react-native"
+
 import { useDesignTokens } from "@/ui"
+
 import { ONBOARDING_TOTAL_STEPS } from "./types"
 
 export interface ProgressDotsProps {
@@ -16,10 +18,10 @@ export function ProgressDots({ step }: ProgressDotsProps) {
           key={index}
           style={[
             styles.progressDot,
+            index === step ? styles.progressDotActive : styles.progressDotInactive,
             {
               backgroundColor:
                 index === step ? tokens.accent : index < step ? tokens.accentSoft : tokens.border,
-              width: index === step ? 20 : 6,
             },
           ]}
         />
@@ -32,6 +34,12 @@ const styles = StyleSheet.create({
   progressDot: {
     borderRadius: 3,
     height: 6,
+  },
+  progressDotActive: {
+    width: 20,
+  },
+  progressDotInactive: {
+    width: 6,
   },
   progressDots: {
     alignItems: "center",

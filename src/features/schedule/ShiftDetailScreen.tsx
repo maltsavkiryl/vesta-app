@@ -11,7 +11,6 @@ import {
   ActionRow,
   AppButton,
   AppScrollScreen,
-  DetailRow,
   GroupedSection,
   MetaPill,
   StatusBadge,
@@ -19,6 +18,7 @@ import {
   Text,
   useDesignTokens,
 } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 export function ShiftDetailScreen() {
   const router = useRouter()
@@ -27,6 +27,20 @@ export function ShiftDetailScreen() {
   const { state } = useScheduleStateQuery()
   const { respondToShift } = useScheduleActions()
   const shift = state?.shifts.find((item) => item.id === id)
+  const changeSummaryCallout = shift?.changeSummary ? (
+    <View
+      style={[
+        styles.callout,
+        { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}25` },
+      ]}
+    >
+      <Ionicons color={tokens.warning} name="sparkles-outline" size={16} />
+      <View style={styles.flex}>
+        <Text text="What changed" size="xxs" weight="semiBold" style={{ color: tokens.warning }} />
+        <Text text={shift.changeSummary} size="xxs" style={{ color: tokens.textPrimary }} />
+      </View>
+    </View>
+  ) : null
 
   if (!shift) {
     return (
@@ -86,29 +100,10 @@ export function ShiftDetailScreen() {
             leading={<Ionicons color={tokens.textSecondary} name="location-outline" size={13} />}
           />
         </View>
-        {shift.changeSummary ? (
-          <View
-            style={[
-              styles.callout,
-              { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}25` },
-            ]}
-          >
-            <Ionicons color={tokens.warning} name="sparkles-outline" size={16} />
-            <View style={styles.flex}>
-              <Text
-                text="What changed"
-                size="xxs"
-                weight="semiBold"
-                style={{ color: tokens.warning }}
-              />
-              <Text text={shift.changeSummary} size="xxs" style={{ color: tokens.textPrimary }} />
-            </View>
-          </View>
-        ) : null}
       </SurfaceCard>
 
       {shift.requiresResponse ? (
-        <GroupedSection title="Action needed">
+        <GroupedSection headerContent={changeSummaryCallout} title="Action needed">
           <View style={styles.groupBody}>
             <Text
               text="Your manager is waiting for a response on this update before the rota is locked."
@@ -116,22 +111,33 @@ export function ShiftDetailScreen() {
               style={{ color: tokens.textSecondary }}
             />
             <AppButton
+              fullWidth
               label="Acknowledge update"
               onPress={async () => {
                 const result = await respondToShift(shift.id)
-                if (!result.ok) return
+                if (!result.ok) {
+                  fireHaptic("error")
+                  return
+                }
+
+                fireHaptic("success")
               }}
+              pressHaptic="none"
             />
           </View>
         </GroupedSection>
-      ) : null}
+      ) : (
+        changeSummaryCallout
+      )}
 
       <GroupedSection title="Plan for this shift">
-        <View style={styles.groupBody}>
-          <DetailRow label="Venue" value={`${shift.venueName} · ${shift.venueAddress}`} />
-          <DetailRow label="Duration" value={getShiftTimeRange(shift)} />
-          <DetailRow isLast label="Team" value={shift.coworkers?.join(", ") ?? "To be confirmed"} />
-        </View>
+        <ShiftPlanRow label="Venue" value={`${shift.venueName} · ${shift.venueAddress}`} />
+        <ShiftPlanRow label="Duration" value={getShiftTimeRange(shift)} />
+        <ShiftPlanRow
+          isLast
+          label="Team"
+          value={shift.coworkers?.join(", ") ?? "To be confirmed"}
+        />
       </GroupedSection>
 
       {shift.note ? (
@@ -175,6 +181,33 @@ export function ShiftDetailScreen() {
         <AppButton label="Open Time" onPress={() => router.push("/(app)/(tabs)/time" as never)} />
       ) : null}
     </AppScrollScreen>
+  )
+}
+
+function ShiftPlanRow({
+  isLast = false,
+  label,
+  value,
+}: {
+  isLast?: boolean
+  label: string
+  value: string
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <View style={styles.planRow}>
+      <Text size="xs" style={[styles.planLabel, { color: tokens.textSecondary }]} text={label} />
+      <Text
+        size="xs"
+        style={[styles.planValue, { color: tokens.textPrimary }]}
+        text={value}
+        weight="semiBold"
+      />
+      {!isLast ? (
+        <View style={[styles.planDivider, { backgroundColor: tokens.separator }]} />
+      ) : null}
+    </View>
   )
 }
 
@@ -224,6 +257,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
+  },
+  planDivider: {
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    left: 18,
+    position: "absolute",
+    right: 18,
+  },
+  planLabel: {
+    width: 84,
+  },
+  planRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 68,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    position: "relative",
+  },
+  planValue: {
+    flex: 1,
+    minWidth: 0,
   },
   screen: {
     gap: 18,

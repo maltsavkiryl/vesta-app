@@ -9,6 +9,7 @@ import {
   LEGACY_APP_STATE_STORAGE_KEY,
   MOCK_BACKEND_STORAGE_KEY,
   MOCK_BACKEND_VERSION,
+  migrateMockBackendDb,
   migrateLegacyPersistedState,
   toAppStoreStateFromAggregates,
   toPersistedAggregates,
@@ -32,6 +33,12 @@ export function ensureDb(): MockBackendDbDto {
   const existing = readDb()
   if (existing?.version === MOCK_BACKEND_VERSION && existing.accounts.length > 0) {
     return existing
+  }
+
+  if (existing && existing.version < MOCK_BACKEND_VERSION && existing.accounts.length > 0) {
+    const migratedDb = migrateMockBackendDb(existing)
+    writeDb(migratedDb)
+    return migratedDb
   }
 
   const migrated =
@@ -65,6 +72,10 @@ export function findAccountOrThrow(db: MockBackendDbDto, accountId: string) {
     throw new Error(`Missing account ${accountId}`)
   }
   return account
+}
+
+export function findAccountByEmail(db: MockBackendDbDto, email: string) {
+  return db.accounts.find((candidate) => candidate.email === email)
 }
 
 export function buildAccountState(
@@ -139,5 +150,32 @@ export function prependAccount(account: MockAccountDto, session: MockBackendSess
   return {
     session: nextDb.session,
     state: buildAccountState(account, "signedIn"),
+  }
+}
+
+export function commitAccountPasswordChange(
+  accountId: string,
+  nextPassword: string,
+  applyAction: (state: AppStoreState, action: AppAction) => AppStoreState,
+) {
+  const changedAt = new Date().toISOString()
+  const db = ensureDb()
+  const currentAccount = findAccountOrThrow(db, accountId)
+  const currentState = buildAccountState(currentAccount, "signedIn")
+  const nextState = applyAction(currentState, {
+    type: "updatePasswordMetadata",
+    payload: { changedAt },
+  })
+  const nextDb = withUpdatedAccount(db, accountId, (account) => ({
+    ...account,
+    password: nextPassword,
+    aggregates: toPersistedAggregates(nextState),
+    updatedAt: changedAt,
+  }))
+
+  writeDb(nextDb)
+  return {
+    changedAt,
+    state: buildAccountState(findAccountOrThrow(nextDb, accountId), "signedIn"),
   }
 }

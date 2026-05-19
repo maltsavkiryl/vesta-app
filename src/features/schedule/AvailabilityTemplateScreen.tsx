@@ -11,6 +11,7 @@ import type { AvailabilityStatus, AvailabilityTemplate, AvailabilityWeekday } fr
 import {
   availabilityStatusOptions,
   durationLabel,
+  formatTimeLabel,
   formatTime,
   nearestMinute,
   timeValueToDate,
@@ -22,12 +23,14 @@ import {
   AppScrollScreen,
   GroupedSection,
   ListRow,
+  SelectionIndicator,
   SelectionRow,
   Text,
   createHeaderActionOptions,
   useAppTheme,
   useDesignTokens,
 } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 function getFallbackTemplate(): AvailabilityTemplate {
   return {
@@ -39,13 +42,6 @@ function getFallbackTemplate(): AvailabilityTemplate {
     saturday: { status: "available", startTime: "09:00", endTime: "17:00" },
     sunday: { status: "available", startTime: "09:00", endTime: "17:00" },
   }
-}
-
-function formatTimeLabel(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(timeValueToDate(value))
 }
 
 function getAvailabilityColor(
@@ -228,7 +224,12 @@ export function AvailabilityTemplateDayScreen() {
         ...template,
         [day]: editedRule,
       })
-      if (!result.ok) return
+      if (!result.ok) {
+        fireHaptic("error")
+        return
+      }
+
+      fireHaptic("success")
       router.back()
     } finally {
       setIsSaving(false)
@@ -247,6 +248,7 @@ export function AvailabilityTemplateDayScreen() {
         right: {
           disabled: isSaving,
           kind: "confirm",
+          haptic: "none",
           onPress: () => {
             void handleSave()
           },
@@ -344,11 +346,7 @@ export function AvailabilityTemplateDayScreen() {
                   style={styles.statusRow}
                   subtitle={option.description}
                   title={option.label}
-                  trailing={
-                    active ? (
-                      <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-                    ) : null
-                  }
+                  trailing={active ? <SelectionIndicator /> : null}
                 />
               )
             },

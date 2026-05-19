@@ -1,4 +1,5 @@
 import { createInitialState } from "@/core/mockState"
+import type { TimeEntry } from "@/core/models"
 import type { AppStoreState } from "@/core/models"
 
 import { normalizeEmail, withStateAuthStatus } from "./app-state.reducer"
@@ -25,7 +26,8 @@ export const DEMO_AUTH_CREDENTIALS = {
 
 export const LEGACY_APP_STATE_STORAGE_KEY = "vesta-mobile.app-state"
 export const MOCK_BACKEND_STORAGE_KEY = "vesta-mobile.mock-backend"
-export const MOCK_BACKEND_VERSION = 2
+export const MOCK_BACKEND_VERSION = 3
+const SEEDED_TIME_ENTRY_IDS = new Set(["time-1", "time-2", "time-3"])
 
 function cloneValue<T>(value: T): T {
   if (value === undefined || value === null) {
@@ -35,11 +37,51 @@ function cloneValue<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
 
+function sanitizeEmployers<T>(employers: T[]): T[] {
+  return employers.map((employer) => {
+    if (!employer || typeof employer !== "object" || !("active" in employer)) {
+      return employer
+    }
+
+    const { active: _active, ...sanitizedEmployer } = employer as T & { active?: boolean }
+    return sanitizedEmployer as T
+  })
+}
+
 function createDefaultAggregates(): MockAccountAggregatesDto {
   return toPersistedAggregates({
     ...createInitialState(),
     authStatus: "signedOut",
   })
+}
+
+function roundTo(value: number, decimals: number) {
+  const factor = 10 ** decimals
+  return Math.round(value * factor) / factor
+}
+
+function buildEarningsFromTimeEntries(
+  timeEntries: TimeEntry[],
+  fallback: TimeAggregateDto["earnings"],
+): TimeAggregateDto["earnings"] {
+  const earnedAmount = roundTo(
+    timeEntries.reduce((sum, entry) => sum + entry.earningsAmount, 0),
+    2,
+  )
+  const hoursWorked = roundTo(
+    timeEntries.reduce((sum, entry) => sum + entry.workedSeconds, 0) / 3600,
+    1,
+  )
+
+  return {
+    averageHourlyRate:
+      hoursWorked > 0 ? roundTo(earnedAmount / hoursWorked, 2) : fallback.averageHourlyRate,
+    earnedAmount,
+    hoursWorked,
+    monthLabel: fallback.monthLabel,
+    shiftsWorked: timeEntries.length,
+    targetAmount: fallback.targetAmount,
+  }
 }
 
 export function createAccountId(email: string) {
@@ -66,9 +108,8 @@ export function toPersistedAggregates(state: AppStoreState): MockAccountAggregat
   const snapshot = toAccountSnapshotDto(state)
 
   const profile: ProfileAggregateDto = {
-    activeEmployerId: snapshot.activeEmployerId,
-    employerDirectory: cloneValue(snapshot.employerDirectory),
-    employers: cloneValue(snapshot.employers),
+    employerDirectory: sanitizeEmployers(cloneValue(snapshot.employerDirectory)),
+    employers: sanitizeEmployers(cloneValue(snapshot.employers)),
     lastPasswordResetEmail: snapshot.lastPasswordResetEmail,
     profile: cloneValue(snapshot.profile),
     version: 1,
@@ -126,7 +167,6 @@ export function toAppStoreStateFromAggregates(
 
   return withStateAuthStatus(
     {
-      activeEmployerId: profile.activeEmployerId ?? defaults.profile.activeEmployerId,
       availabilityOverrides: cloneValue(
         schedule.availabilityOverrides ?? defaults.schedule.availabilityOverrides,
       ),
@@ -136,16 +176,19 @@ export function toAppStoreStateFromAggregates(
       clockSession: cloneValue(time.clockSession ?? defaults.time.clockSession),
       documents: cloneValue(documents.documents ?? defaults.documents.documents),
       earnings: cloneValue(time.earnings ?? defaults.time.earnings),
-      employerDirectory: cloneValue(
-        profile.employerDirectory ?? defaults.profile.employerDirectory,
+      employerDirectory: sanitizeEmployers(
+        cloneValue(profile.employerDirectory ?? defaults.profile.employerDirectory),
       ),
-      employers: cloneValue(profile.employers ?? defaults.profile.employers),
+      employers: sanitizeEmployers(cloneValue(profile.employers ?? defaults.profile.employers)),
       highlights: cloneValue(home.highlights ?? defaults.home.highlights),
       lastPasswordResetEmail: profile.lastPasswordResetEmail,
       notifications: cloneValue(
         notifications.notifications ?? defaults.notifications.notifications,
       ),
-      profile: cloneValue(profile.profile ?? defaults.profile.profile),
+      profile: {
+        ...cloneValue(defaults.profile.profile),
+        ...cloneValue(profile.profile ?? defaults.profile.profile),
+      },
       planningWindows: cloneValue(schedule.planningWindows ?? defaults.schedule.planningWindows),
       requests: cloneValue(schedule.requests ?? defaults.schedule.requests),
       shifts: cloneValue(schedule.shifts ?? defaults.schedule.shifts),
@@ -225,6 +268,48 @@ export function createMockBackendDb(): MockBackendDbDto {
     session: {
       accountId: null,
     },
+    version: MOCK_BACKEND_VERSION,
+  }
+}
+
+export function migrateMockBackendDb(db: MockBackendDbDto): MockBackendDbDto {
+  const defaults = createDefaultAggregates()
+  const migratedAccounts = db.accounts.map((account) => {
+    const currentTime = account.aggregates.time ?? defaults.time
+    const timeEntries = currentTime.timeEntries ?? defaults.time.timeEntries
+    const filteredTimeEntries = timeEntries.filter((entry) => !SEEDED_TIME_ENTRY_IDS.has(entry.id))
+
+    if (filteredTimeEntries.length === timeEntries.length) {
+      return account
+    }
+
+    return {
+      ...account,
+      aggregates: {
+        ...account.aggregates,
+        home: {
+          ...(account.aggregates.home ?? defaults.home),
+          highlights:
+            filteredTimeEntries.length === 0
+              ? cloneValue(defaults.home.highlights)
+              : cloneValue((account.aggregates.home ?? defaults.home).highlights),
+        },
+        time: {
+          ...currentTime,
+          earnings:
+            filteredTimeEntries.length === 0
+              ? cloneValue(defaults.time.earnings)
+              : buildEarningsFromTimeEntries(filteredTimeEntries, currentTime.earnings),
+          timeEntries: cloneValue(filteredTimeEntries),
+        },
+      },
+      updatedAt: new Date().toISOString(),
+    }
+  })
+
+  return {
+    ...db,
+    accounts: migratedAccounts,
     version: MOCK_BACKEND_VERSION,
   }
 }

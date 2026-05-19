@@ -13,8 +13,10 @@ import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
-import { Banner, Button, Text, appTypography, useDesignTokens } from "@/ui"
+import { Button, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
+import { AuthError } from "./AuthScaffold"
 import { AuthTextField } from "./AuthTextField"
 
 const vestaLogo = require("@assets/images/vesta-logo.png")
@@ -39,18 +41,22 @@ export function RegisterScreen() {
 
   const handleSubmit = async () => {
     if (!firstName.trim() || !lastName.trim()) {
+      fireHaptic("warning")
       setError("Please enter your full name.")
       return
     }
     if (!email.includes("@")) {
+      fireHaptic("warning")
       setError("Please enter a valid email address.")
       return
     }
     if (password.length < 8) {
+      fireHaptic("warning")
       setError("Password must be at least 8 characters.")
       return
     }
     if (password !== confirmPassword) {
+      fireHaptic("warning")
       setError("Passwords don't match.")
       return
     }
@@ -58,9 +64,11 @@ export function RegisterScreen() {
     setError(undefined)
     const result = await register({ firstName, lastName, email, password })
     if (!result.ok) {
+      fireHaptic("error")
       setError(result.error.message)
       return
     }
+    fireHaptic("success")
     router.replace("/(auth)/onboarding")
   }
 
@@ -80,20 +88,25 @@ export function RegisterScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <MotionView style={styles.header}>
           <VestaLogo />
           <Text
             text="Create account"
             weight="bold"
-            style={[appTypography.authTitle, { color: tokens.textPrimary, textAlign: "center" }]}
+            style={[appTypography.authTitle, styles.centerText, { color: tokens.textPrimary }]}
           />
           <Text
             text="Add your details to continue."
-            style={[appTypography.authSubtitle, { color: tokens.textSecondary, marginTop: 6, textAlign: "center" }]}
+            style={[
+              appTypography.authSubtitle,
+              styles.subtitle,
+              styles.centerText,
+              { color: tokens.textSecondary },
+            ]}
           />
-        </View>
+        </MotionView>
 
-        <View style={styles.form}>
+        <MotionView delay={70} style={styles.form}>
           <View style={styles.nameRow}>
             <AuthTextField
               accessibilityLabel="First name"
@@ -200,20 +213,16 @@ export function RegisterScreen() {
             value={confirmPassword}
           />
 
-          {error ? (
-            <Banner tone="danger">
-              <Text text={error} size="xxs" />
-            </Banner>
-          ) : null}
+          <AuthError message={error} />
 
-          <Button fullWidth label="Create account" onPress={handleSubmit} />
+          <Button fullWidth label="Create account" onPress={handleSubmit} pressHaptic="none" />
           <Button
             fullWidth
             label="Sign in instead"
             onPress={() => router.replace("/(auth)/sign-in")}
             variant="secondary"
           />
-        </View>
+        </MotionView>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -232,6 +241,9 @@ function VestaLogo() {
 }
 
 const styles = StyleSheet.create({
+  centerText: {
+    textAlign: "center",
+  },
   content: {
     flexGrow: 1,
     justifyContent: "center",
@@ -264,5 +276,8 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
+  },
+  subtitle: {
+    marginTop: 6,
   },
 })

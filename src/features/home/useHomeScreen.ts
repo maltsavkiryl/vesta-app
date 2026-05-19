@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "expo-router"
 
 import type { AppNavigationRoute, Shift } from "@/core/models"
+import { payslips } from "@/features/documents/documents.data"
 import { useAppAction } from "@/features/actions/useAppAction"
 import { useHomeQuery } from "@/features/home/data/home.queries"
 
@@ -20,7 +21,7 @@ export function useHomeScreen() {
   const home = useHomeQuery()
   const { runAction } = useAppAction()
   const [greeting, setGreeting] = useState(getGreeting())
-  const [hiddenTaskIds, setHiddenTaskIds] = useState<string[]>([])
+  const latestPayslip = payslips[0]
 
   useEffect(() => {
     const interval = setInterval(() => setGreeting(getGreeting()), 60_000)
@@ -29,8 +30,8 @@ export function useHomeScreen() {
 
   const upcomingShifts = home?.shifts.slice(1, 7) ?? []
   const pendingTasks = useMemo(
-    () => (home?.tasks ?? []).filter((task) => !task.completed && !hiddenTaskIds.includes(task.id)),
-    [hiddenTaskIds, home?.tasks],
+    () => (home?.tasks ?? []).filter((task) => !task.completed),
+    [home?.tasks],
   )
 
   const navigate = useCallback((route: AppNavigationRoute) => router.push(route as never), [router])
@@ -39,18 +40,16 @@ export function useHomeScreen() {
     [router],
   )
   const completeTask = useCallback((task: TaskItem) => void runAction(task.action), [runAction])
-  const hideTask = useCallback((task: TaskItem) => {
-    setHiddenTaskIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]))
-  }, [])
 
   return {
     completeTask,
     greeting,
-    hideTask,
     home,
-    openDocuments: () => navigate("/(app)/(tabs)/documents"),
     openNotifications: () => navigate("/notifications"),
-    openProfile: () => navigate("/(app)/(tabs)/profile"),
+    openLatestPayslip: () => {
+      if (!latestPayslip) return
+      router.push(`/(app)/document-payslip/${latestPayslip.id}` as never)
+    },
     openSchedule: () => navigate("/(app)/(tabs)/schedule"),
     openShift,
     pendingTasks,

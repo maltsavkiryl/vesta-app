@@ -7,9 +7,13 @@ type DocumentsHeaderProps = {
   isSearching: boolean
   onCancelSearch: () => void
   onQueryChange: (query: string) => void
-  onSearchPress: () => void
-  onUploadPress: () => void
+  onSearchPress?: () => void
+  onUploadPress?: () => void
   query: string
+  searchPlaceholder?: string
+  showSearchButton?: boolean
+  showTitle?: boolean
+  showUploadButton?: boolean
 }
 
 export function DocumentsHeader({
@@ -19,6 +23,10 @@ export function DocumentsHeader({
   onSearchPress,
   onUploadPress,
   query,
+  searchPlaceholder = "Search documents...",
+  showSearchButton = true,
+  showTitle = true,
+  showUploadButton = true,
 }: DocumentsHeaderProps) {
   const tokens = useDesignTokens()
 
@@ -32,7 +40,7 @@ export function DocumentsHeader({
           onChangeText={onQueryChange}
           onClear={() => onQueryChange("")}
           onSubmitEditing={onSearchPress}
-          placeholder="Search documents..."
+          placeholder={searchPlaceholder}
           rightAccessory={<Ionicons color={tokens.textMuted} name="close-outline" size={15} />}
           value={query}
         />
@@ -45,24 +53,32 @@ export function DocumentsHeader({
 
   return (
     <View style={styles.header}>
-      <Text
-        text="Documents"
-        weight="bold"
-        style={[appTypography.pageTitle, { color: tokens.textPrimary }]}
-      />
+      {showTitle ? (
+        <Text
+          text="Documents"
+          weight="bold"
+          style={[appTypography.pageTitle, { color: tokens.textPrimary }]}
+        />
+      ) : (
+        <View style={styles.headerSpacer} />
+      )}
       <View style={styles.actions}>
-        <IconButton accessibilityLabel="Search documents" onPress={onSearchPress}>
-          <Ionicons color={tokens.textSecondary} name="search-outline" size={16} />
-        </IconButton>
-        <IconButton
-          accessibilityLabel="Upload document"
-          onPress={onUploadPress}
-          style={[styles.uploadIconButton, { shadowColor: tokens.accent }]}
-          tone="accent"
-          variant="soft"
-        >
-          <Ionicons color={tokens.accentForeground} name="add" size={18} />
-        </IconButton>
+        {showSearchButton && onSearchPress ? (
+          <IconButton accessibilityLabel="Search documents" onPress={onSearchPress}>
+            <Ionicons color={tokens.textSecondary} name="search-outline" size={16} />
+          </IconButton>
+        ) : null}
+        {showUploadButton && onUploadPress ? (
+          <IconButton
+            accessibilityLabel="Upload document"
+            onPress={onUploadPress}
+            tone="accent"
+            variant="solid"
+            style={[styles.uploadIconButton, { shadowColor: tokens.accent }]}
+          >
+            <Ionicons color={tokens.accentForeground} name="add" size={18} />
+          </IconButton>
+        ) : null}
       </View>
     </View>
   )
@@ -78,6 +94,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  headerSpacer: {
+    flex: 1,
   },
   searchHeader: {
     alignItems: "center",

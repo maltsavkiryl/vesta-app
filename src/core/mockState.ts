@@ -5,19 +5,9 @@ import type {
   Employer,
   PlanningWindow,
   Shift,
-  TimeEntry,
   UserProfile,
 } from "./models"
-import { buildTimeEntryEvent, buildTimeEntryFromClockSession } from "./timeEntries"
-
-function createLocationSnapshot(latitude: number, longitude: number, addressLabel: string) {
-  return {
-    latitude,
-    longitude,
-    addressLabel,
-    accuracyMeters: 18,
-  }
-}
+import { buildTimeEntryFromClockSession } from "./timeEntries"
 
 const employerDirectory: Employer[] = [
   {
@@ -28,7 +18,6 @@ const employerDirectory: Employer[] = [
     city: "Brussels",
     teamSize: 12,
     rating: 4.8,
-    active: true,
   },
   {
     id: "grand-cafe",
@@ -102,6 +91,7 @@ const profile: UserProfile = {
   onboardingComplete: true,
   bio: "Front-of-house employee balancing hospitality, availability planning, and shift swaps.",
   language: "English (UK)",
+  motionPreference: "system",
   themePreference: "system",
   security: {
     faceIdEnabled: false,
@@ -263,133 +253,6 @@ const planningWindows: PlanningWindow[] = [
   },
 ]
 
-const timeEntries: TimeEntry[] = [
-  {
-    id: "time-1",
-    date: "2026-05-16",
-    shiftLabel: "Evening",
-    venueName: "Bistro Noir",
-    venueAddress: "Rue de la Loi 123, Brussels",
-    clockInAt: "2026-05-16T17:03:00.000Z",
-    clockOutAt: "2026-05-16T23:04:00.000Z",
-    grossSeconds: 21660,
-    workedSeconds: 19860,
-    breakSeconds: 1800,
-    earningsAmount: 66.24,
-    status: "approved",
-    events: [
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-16T17:03:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "clockIn",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-16T20:06:00.000Z",
-        location: createLocationSnapshot(50.8456, 4.3674, "Staff terrace, Bistro Noir"),
-        type: "breakStart",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-16T20:36:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "breakEnd",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-16T23:04:00.000Z",
-        location: createLocationSnapshot(50.8458, 4.3677, "Rue de la Loi 123, Brussels"),
-        type: "clockOut",
-      }),
-    ],
-    clockInProofPhoto: {
-      capturedAt: "2026-05-16T17:03:00.000Z",
-      fileName: "clock-in-proof.jpg",
-      mimeType: "image/jpeg",
-      uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
-    },
-  },
-  {
-    id: "time-2",
-    date: "2026-05-14",
-    shiftLabel: "Lunch",
-    venueName: "Bistro Noir",
-    venueAddress: "Rue de la Loi 123, Brussels",
-    clockInAt: "2026-05-14T12:03:00.000Z",
-    clockOutAt: "2026-05-14T18:02:00.000Z",
-    grossSeconds: 21540,
-    workedSeconds: 19740,
-    breakSeconds: 1800,
-    earningsAmount: 65.84,
-    status: "approved",
-    events: [
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-14T12:03:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "clockIn",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-14T14:28:00.000Z",
-        location: createLocationSnapshot(50.8455, 4.3672, "Back entrance, Bistro Noir"),
-        type: "breakStart",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-14T14:58:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "breakEnd",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-14T18:02:00.000Z",
-        location: createLocationSnapshot(50.8458, 4.3677, "Rue de la Loi 123, Brussels"),
-        type: "clockOut",
-      }),
-    ],
-  },
-  {
-    id: "time-3",
-    date: "2026-05-12",
-    shiftLabel: "Evening",
-    venueName: "Bistro Noir",
-    venueAddress: "Rue de la Loi 123, Brussels",
-    clockInAt: "2026-05-12T17:05:00.000Z",
-    clockOutAt: "2026-05-12T23:15:00.000Z",
-    grossSeconds: 22200,
-    workedSeconds: 20400,
-    breakSeconds: 1800,
-    earningsAmount: 68,
-    status: "approved",
-    events: [
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-12T17:05:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "clockIn",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-12T18:42:00.000Z",
-        location: createLocationSnapshot(50.8454, 4.3671, "Kitchen alley, Bistro Noir"),
-        type: "breakStart",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-12T18:57:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "breakEnd",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-12T21:11:00.000Z",
-        location: createLocationSnapshot(50.8455, 4.3673, "Staff room, Bistro Noir"),
-        type: "breakStart",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-12T21:26:00.000Z",
-        location: createLocationSnapshot(50.8457, 4.3676, "Rue de la Loi 123, Brussels"),
-        type: "breakEnd",
-      }),
-      buildTimeEntryEvent({
-        occurredAt: "2026-05-12T23:15:00.000Z",
-        location: createLocationSnapshot(50.8458, 4.3677, "Rue de la Loi 123, Brussels"),
-        type: "clockOut",
-      }),
-    ],
-  },
-]
-
 export function buildNewTimeEntry(
   clockSession: AppStoreState["clockSession"],
   clockOutAt: string,
@@ -406,11 +269,7 @@ export function createInitialState(): AppStoreState {
   return {
     authStatus: "signedOut",
     profile,
-    activeEmployerId: "bistro-noir",
-    employers: employerDirectory.map((employer) => ({
-      ...employer,
-      active: employer.id === "bistro-noir",
-    })),
+    employers: employerDirectory,
     employerDirectory,
     shifts,
     availabilityOverrides,
@@ -508,7 +367,7 @@ export function createInitialState(): AppStoreState {
         action: { type: "editAvailabilityOverride", date: "2026-05-18" },
       },
     ],
-    timeEntries,
+    timeEntries: [],
     clockSession: {
       state: "idle",
       accumulatedBreakSeconds: 0,
@@ -522,23 +381,23 @@ export function createInitialState(): AppStoreState {
     earnings: {
       monthLabel: "May 2026",
       targetAmount: 2400,
-      earnedAmount: 847.2,
-      shiftsWorked: 7,
-      hoursWorked: 41.5,
+      earnedAmount: 0,
+      shiftsWorked: 0,
+      hoursWorked: 0,
       averageHourlyRate: 12.02,
     },
     highlights: [
       {
         id: "highlight-1",
         title: "Earned this month",
-        value: "EUR 847.20",
-        subtitle: "35% of your monthly target",
+        value: "EUR 0.00",
+        subtitle: "0% of your monthly target",
       },
       {
         id: "highlight-2",
-        title: "Hours this week",
-        value: "23.5h",
-        subtitle: "2 more shifts scheduled",
+        title: "Today's shift",
+        value: "17:00 - 23:00",
+        subtitle: "Clock in at Bistro Noir to start tracking hours",
       },
       {
         id: "highlight-3",

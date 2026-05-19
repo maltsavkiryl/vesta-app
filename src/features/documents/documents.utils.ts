@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons"
 
+import type { DocumentItem } from "@/core/models"
 import type { DesignTokens } from "@/ui"
 
 import { initialContracts } from "./documents.data"
@@ -63,6 +64,10 @@ export function shouldShowDocumentRowStatus(status: DisplayDocumentStatus) {
   return status === "processing"
 }
 
+export function isRequiredDocument(document: DocumentItem) {
+  return document.status === "action_required" || document.status === "processing"
+}
+
 export function getContracts(signedContractIds: string[]) {
   return initialContracts.map((contract) =>
     signedContractIds.includes(contract.id) ? { ...contract, status: "signed" as const } : contract,
@@ -71,4 +76,8 @@ export function getContracts(signedContractIds: string[]) {
 
 export function findContract(contracts: Contract[], id?: string) {
   return contracts.find((contract) => contract.id === id)
+}
+
+export function findDocument(documents: DocumentItem[], id?: string) {
+  return documents.find((document) => document.id === id)
 }

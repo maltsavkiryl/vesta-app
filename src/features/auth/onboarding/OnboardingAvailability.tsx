@@ -1,6 +1,15 @@
 import { StyleSheet, View } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
-import { SelectionChip, SelectionRow, Text, appTypography, useDesignTokens } from "@/ui"
+
+import {
+  SelectionChip,
+  SelectionIndicator,
+  SelectionRow,
+  Text,
+  appTypography,
+  useDesignTokens,
+} from "@/ui"
+
+import { onboardingStyles } from "./onboarding.styles"
 import { ONBOARDING_DAYS, ONBOARDING_TIME_SLOTS } from "./types"
 
 export interface OnboardingAvailabilityProps {
@@ -19,8 +28,8 @@ export function OnboardingAvailability({
   const tokens = useDesignTokens()
 
   return (
-    <View style={styles.stackLarge}>
-      <View style={styles.titleBlock}>
+    <View style={onboardingStyles.section}>
+      <View style={onboardingStyles.titleBlock}>
         <Text
           text="Your availability"
           weight="bold"
@@ -71,21 +80,13 @@ function ChoiceRow({
   title: string
   onPress: () => void
 }) {
-  const tokens = useDesignTokens()
-
   return (
     <SelectionRow
       onPress={onPress}
       selected={selected}
       subtitle={subtitle}
       title={title}
-      trailing={
-        selected ? (
-          <View style={[styles.smallCheck, { backgroundColor: tokens.accent }]}>
-            <Ionicons color={tokens.accentForeground} name="checkmark-outline" size={13} />
-          </View>
-        ) : null
-      }
+      trailing={selected ? <SelectionIndicator /> : null}
     />
   )
 }
@@ -95,18 +96,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-  },
-  smallCheck: {
-    alignItems: "center",
-    borderRadius: 11,
-    height: 22,
-    justifyContent: "center",
-    width: 22,
-  },
-  stackLarge: {
-    gap: 20,
-  },
-  titleBlock: {
-    gap: 6,
   },
 })

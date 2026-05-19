@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -168,26 +168,29 @@ function NotificationGroup({
 }
 
 export function NotificationsScreen() {
-  const { markAllNotificationsRead, markNotificationRead } = useNotificationActions()
+  const {
+    archiveAllNotifications,
+    archiveNotification,
+    markAllNotificationsRead,
+    markNotificationRead,
+  } = useNotificationActions()
   const { notifications } = useNotificationsStateQuery()
   const { runAction } = useAppAction()
-  const [hiddenIds, setHiddenIds] = useState<string[]>([])
   const tokens = useDesignTokens()
 
-  const visibleNotifications = notifications.filter((item) => !hiddenIds.includes(item.id))
   const grouped = useMemo(() => {
-    return visibleNotifications.reduce<Record<GroupKey, NotificationItem[]>>(
+    return notifications.reduce<Record<GroupKey, NotificationItem[]>>(
       (acc, notification) => {
         acc[groupNotification(notification)].push(notification)
         return acc
       },
       { earlier: [], today: [], yesterday: [] },
     )
-  }, [visibleNotifications])
-  const unreadCount = visibleNotifications.filter((item) => item.unread).length
+  }, [notifications])
+  const unreadCount = notifications.filter((item) => item.unread).length
 
   const handlePress = (notification: NotificationItem) => {
-    markNotificationRead(notification.id)
+    void markNotificationRead(notification.id)
     void runAction(notification.action)
   }
 
@@ -199,7 +202,7 @@ export function NotificationsScreen() {
       variant="grouped"
       style={{ backgroundColor: tokens.groupedBackground }}
     >
-      {visibleNotifications.length === 0 ? (
+      {notifications.length === 0 ? (
         <EmptyState />
       ) : (
         <View style={styles.groups}>
@@ -228,13 +231,17 @@ export function NotificationsScreen() {
               key={group}
               label={groupLabels[group]}
               items={grouped[group]}
-              onDismiss={(id) => setHiddenIds((current) => [...current, id])}
+              onDismiss={(id) => {
+                void archiveNotification(id)
+              }}
               onPress={handlePress}
             />
           ))}
-          {visibleNotifications.length > 2 ? (
+          {notifications.length > 2 ? (
             <Pressable
-              onPress={() => setHiddenIds(notifications.map((item) => item.id))}
+              onPress={() => {
+                void archiveAllNotifications()
+              }}
               style={[
                 styles.clearAllButton,
                 { backgroundColor: `${tokens.danger}08`, borderColor: `${tokens.danger}18` },

@@ -1,5 +1,4 @@
-import { Alert, Pressable, StyleSheet, View } from "react-native"
-import { useRouter } from "expo-router"
+import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { Employer } from "@/core/models"
@@ -8,72 +7,31 @@ import type { DesignTokens } from "@/ui"
 
 import { EmployerInitialBadge } from "./ProfileEmployerShared"
 
-export function switchEmployerWithConfirmation({
-  employerId,
-  employers,
-  router,
-  switchEmployer,
-}: {
-  employerId: string
-  employers: Employer[]
-  router: ReturnType<typeof useRouter>
-  switchEmployer: (employerId: string) => void
-}) {
-  const employer = employers.find((candidate) => candidate.id === employerId)
-  if (!employer || employer.active) return
-
-  Alert.alert(
-    `Switch to ${employer.name}?`,
-    "Your schedule and time tracking will update accordingly.",
-    [
-      { style: "cancel", text: "Cancel" },
-      {
-        text: "Switch",
-        onPress: () => {
-          switchEmployer(employerId)
-          router.replace("/profile/employers")
-        },
-      },
-    ],
-  )
-}
-
 export function EmployerSwitchCard({
-  active,
   city,
   name,
-  onPress,
   rating,
   tokens,
   type,
 }: {
-  active: boolean
   city: string
   name: string
-  onPress: () => void
   rating: number
   tokens: DesignTokens
   type: string
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={active}
-      onPress={onPress}
-      style={({ pressed }) => [
+    <View
+      style={[
         styles.employerSwitchCard,
         {
           backgroundColor: tokens.surface,
-          borderColor: active ? tokens.accent : tokens.transparent,
-          opacity: pressed ? 0.72 : 1,
+          borderColor: tokens.transparent,
           shadowColor: tokens.shadow,
         },
       ]}
     >
-      <EmployerInitialBadge
-        backgroundColor={active ? tokens.accent : tokens.textPrimary}
-        name={name}
-      />
+      <EmployerInitialBadge backgroundColor={tokens.textPrimary} name={name} />
       <View style={styles.employerCopy}>
         <Text text={name} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
         <Text text={`${type} - ${city}`} size="xxs" style={{ color: tokens.textSecondary }} />
@@ -82,22 +40,11 @@ export function EmployerSwitchCard({
           <Text text={String(rating)} size="xxs" style={{ color: tokens.textSecondary }} />
         </View>
       </View>
-      {active ? (
-        <View style={styles.activeStatus}>
-          <View style={[styles.activeDot, { backgroundColor: tokens.success }]} />
-          <Text text="Active" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
-        </View>
-      ) : (
-        <View
-          style={[
-            styles.switchPill,
-            { backgroundColor: tokens.backgroundMuted, borderColor: tokens.border },
-          ]}
-        >
-          <Text text="Switch" size="xxs" weight="medium" style={{ color: tokens.textSecondary }} />
-        </View>
-      )}
-    </Pressable>
+      <View style={styles.activeStatus}>
+        <View style={[styles.activeDot, { backgroundColor: tokens.success }]} />
+        <Text text="Linked" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
+      </View>
+    </View>
   )
 }
 
@@ -106,14 +53,12 @@ export function EmployersSection({
   employers,
   onJoinEmployer,
   onOpenJoinEmployer,
-  onSwitchEmployer,
   tokens,
 }: {
   availableEmployers: Employer[]
   employers: Employer[]
   onJoinEmployer: (employerId: string) => void
   onOpenJoinEmployer: () => void
-  onSwitchEmployer: (employerId: string) => void
   tokens: DesignTokens
 }) {
   return (
@@ -125,14 +70,8 @@ export function EmployersSection({
             title={employer.name}
             subtitle={`${employer.type} - ${employer.city} - ${employer.teamSize} people`}
             isLast={index === employers.length - 1}
-            onPress={() => onSwitchEmployer(employer.id)}
             leading={<Ionicons color={tokens.accent} name="business-outline" size={18} />}
-            trailing={
-              <StatusBadge
-                label={employer.active ? "Active" : "Linked"}
-                tone={employer.active ? "success" : "neutral"}
-              />
-            }
+            trailing={<StatusBadge label="Linked" tone="success" />}
           />
         ))}
       </GroupedSection>
@@ -199,12 +138,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 3,
     marginTop: 3,
-  },
-  switchPill: {
-    borderCurve: "continuous",
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
   },
 })

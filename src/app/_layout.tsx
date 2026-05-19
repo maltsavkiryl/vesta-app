@@ -9,6 +9,7 @@ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-c
 import Config from "@/config"
 import { initI18n } from "@/i18n"
 import { AppProvider } from "@/providers/app-provider"
+import { MotionProvider } from "@/providers/motion-provider"
 import { createAppQueryClient } from "@/services/app/app.queries"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { initCrashReporting } from "@/utils/crashReporting"
@@ -34,11 +35,13 @@ function AppShell() {
       <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
         <QueryClientProvider client={queryClient}>
           <AppProvider>
-            <KeyboardProvider>
-              <ErrorBoundary catchErrors={Config.catchErrors}>
-                <Slot />
-              </ErrorBoundary>
-            </KeyboardProvider>
+            <MotionProvider>
+              <KeyboardProvider>
+                <ErrorBoundary catchErrors={Config.catchErrors}>
+                  <Slot />
+                </ErrorBoundary>
+              </KeyboardProvider>
+            </MotionProvider>
           </AppProvider>
         </QueryClientProvider>
       </View>

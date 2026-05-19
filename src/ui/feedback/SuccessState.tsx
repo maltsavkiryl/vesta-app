@@ -45,7 +45,11 @@ export function SuccessState({
   const tokens = useDesignTokens()
 
   const backgroundColor =
-    tone === "accent" ? tokens.accentSoft : tone === "warning" ? tokens.warningSoft : tokens.successSoft
+    tone === "accent"
+      ? tokens.accentSoft
+      : tone === "warning"
+        ? tokens.warningSoft
+        : tokens.successSoft
   const iconColor =
     tone === "accent" ? tokens.accent : tone === "warning" ? tokens.warning : tokens.success
 

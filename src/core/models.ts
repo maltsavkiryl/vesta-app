@@ -33,7 +33,6 @@ export interface Employer {
   city: string
   teamSize: number
   rating: number
-  active?: boolean
 }
 
 export interface UserProfile {
@@ -61,6 +60,7 @@ export interface UserProfile {
   onboardingComplete: boolean
   bio: string
   language: string
+  motionPreference: "system" | "reduced" | "full"
   themePreference: "system" | "light" | "dark"
   security: {
     faceIdEnabled: boolean
@@ -174,6 +174,7 @@ export interface DocumentItem {
 }
 
 export interface NotificationItem {
+  archivedAt?: string
   id: string
   kind: NotificationKind
   title: string
@@ -247,7 +248,9 @@ export interface EarningsSummary {
 }
 
 export type AppNavigationRoute =
-  | "/(app)/(tabs)/documents"
+  | "/profile/legal-documents"
+  | "/profile/contracts"
+  | "/profile/payslips"
   | "/(app)/(tabs)/profile"
   | "/(app)/(tabs)/schedule"
   | "/(app)/(tabs)/time"
@@ -257,6 +260,7 @@ export type AppNavigationRoute =
   | "/(app)/availability-template"
   | `/(app)/shift/${string}`
   | `/(app)/availability/${string}`
+  | `/(app)/document-upload/${string}`
   | `/(app)/document-contract/${string}`
   | `/(app)/document-payslip/${string}`
 
@@ -288,7 +292,6 @@ export interface HomeHighlight {
 export interface AppStoreState {
   authStatus: AuthStatus
   profile: UserProfile
-  activeEmployerId: string
   employers: Employer[]
   employerDirectory: Employer[]
   shifts: Shift[]

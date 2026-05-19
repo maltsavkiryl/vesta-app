@@ -5,41 +5,35 @@ import { useRouter } from "expo-router"
 import { createInitialState } from "@/core/mockState"
 import { useProfileActions } from "@/features/profile/data/profile.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
-import { useAppTheme } from "@/ui"
+import { useAppTheme, useDesignTokens } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
-import type { JoinMode, SectionKey } from "./ProfileDetailSections"
+import {
+  createDirtyProfileState,
+  createProfileFormState,
+  saveProfileSection,
+} from "./profileDetailFormState"
+import type { JoinMode, SectionKey } from "./profileSections"
 
 export function useProfileDetailScreen(section: SectionKey) {
   const router = useRouter()
   const { state: profileState } = useProfileStateQuery()
-  const { joinEmployer, switchEmployer, updateProfile } = useProfileActions()
+  const { joinEmployer: joinEmployerMutation, updateProfile } = useProfileActions()
   const { setThemeContextOverride, theme } = useAppTheme()
+  const tokens = useDesignTokens()
   const state = profileState
     ? {
         ...createInitialState(),
         ...profileState,
       }
     : createInitialState()
+  const formState = createProfileFormState(state.profile)
 
-  const [personalState, setPersonalState] = useState({
-    bio: state.profile.bio,
-    dateOfBirth: state.profile.dateOfBirth,
-    firstName: state.profile.firstName,
-    lastName: state.profile.lastName,
-    nationality: state.profile.nationality,
-    preferredName: state.profile.preferredName,
-  })
-  const [contactState, setContactState] = useState({
-    email: state.profile.email,
-    emergencyContact: state.profile.emergencyContact,
-    phone: state.profile.phone,
-  })
-  const [addressState, setAddressState] = useState({
-    address: state.profile.address,
-    homeCity: state.profile.homeCity,
-  })
-  const [bankState, setBankState] = useState(state.profile.bankAccount)
-  const [legalState, setLegalState] = useState(state.profile.legal)
+  const [personalState, setPersonalState] = useState(formState.personalState)
+  const [contactState, setContactState] = useState(formState.contactState)
+  const [addressState, setAddressState] = useState(formState.addressState)
+  const [bankState, setBankState] = useState(formState.bankState)
+  const [legalState, setLegalState] = useState(formState.legalState)
   const [joinMode, setJoinMode] = useState<JoinMode>("code")
   const [joinCode, setJoinCode] = useState("")
   const [joinSearch, setJoinSearch] = useState("")
@@ -71,61 +65,43 @@ export function useProfileDetailScreen(section: SectionKey) {
   const joinedEmployer = state.employers.find((employer) => employer.id === joinedEmployerId)
 
   const dirtyState = useMemo(
-    () => ({
-      address:
-        JSON.stringify(addressState) !==
-        JSON.stringify({
-          address: state.profile.address,
-          homeCity: state.profile.homeCity,
-        }),
-      banking: JSON.stringify(bankState) !== JSON.stringify(state.profile.bankAccount),
-      contact:
-        JSON.stringify(contactState) !==
-        JSON.stringify({
-          email: state.profile.email,
-          emergencyContact: state.profile.emergencyContact,
-          phone: state.profile.phone,
-        }),
-      legal: JSON.stringify(legalState) !== JSON.stringify(state.profile.legal),
-      personal:
-        JSON.stringify(personalState) !==
-        JSON.stringify({
-          bio: state.profile.bio,
-          dateOfBirth: state.profile.dateOfBirth,
-          firstName: state.profile.firstName,
-          lastName: state.profile.lastName,
-          nationality: state.profile.nationality,
-          preferredName: state.profile.preferredName,
-        }),
-    }),
+    () =>
+      createDirtyProfileState({
+        addressState,
+        bankState,
+        contactState,
+        legalState,
+        personalState,
+        profile: state.profile,
+      }),
     [addressState, bankState, contactState, legalState, personalState, state.profile],
   )
 
-  const saveCurrentSection = () => {
-    if (section === "personal" && dirtyState.personal) {
-      updateProfile(personalState)
-      router.back()
+  const saveCurrentSection = () =>
+    saveProfileSection({
+      addressState,
+      bankState,
+      contactState,
+      dirtyState,
+      legalState,
+      onSaved: () => {
+        fireHaptic("success")
+        router.back()
+      },
+      personalState,
+      section,
+      updateProfile,
+    })
+
+  const joinEmployer = async (employerId: string) => {
+    const result = await joinEmployerMutation(employerId)
+    if (!result.ok) {
+      fireHaptic("error")
+      return result
     }
 
-    if (section === "contact" && dirtyState.contact) {
-      updateProfile(contactState)
-      router.back()
-    }
-
-    if (section === "address" && dirtyState.address) {
-      updateProfile(addressState)
-      router.back()
-    }
-
-    if (section === "banking" && dirtyState.banking) {
-      updateProfile({ bankAccount: bankState })
-      router.back()
-    }
-
-    if (section === "legal" && dirtyState.legal) {
-      updateProfile({ legal: legalState })
-      router.back()
-    }
+    fireHaptic("success")
+    return result
   }
 
   const updateFaceId = async (enabled: boolean) => {
@@ -145,6 +121,7 @@ export function useProfileDetailScreen(section: SectionKey) {
       const isEnrolled = await LocalAuthentication.isEnrolledAsync()
 
       if (!hasHardware || !isEnrolled) {
+        fireHaptic("warning")
         Alert.alert(
           "Face ID unavailable",
           "Set up Face ID or another biometric unlock method on this device first.",
@@ -164,6 +141,7 @@ export function useProfileDetailScreen(section: SectionKey) {
       })
 
       if (result.success) {
+        fireHaptic("success")
         updateProfile({
           security: {
             ...state.profile.security,
@@ -171,8 +149,12 @@ export function useProfileDetailScreen(section: SectionKey) {
             faceIdEnabled: true,
           },
         })
+        return
       }
+
+      fireHaptic("warning")
     } catch {
+      fireHaptic("error")
       Alert.alert("Face ID unavailable", "Rebuild the development app to enable Face ID.")
     }
   }
@@ -210,9 +192,11 @@ export function useProfileDetailScreen(section: SectionKey) {
     setSelectedJoinEmployerId,
     setThemeContextOverride,
     state,
-    switchEmployer,
     theme,
+    tokens,
     updateFaceId,
     updateProfile,
   }
 }
+
+export type ProfileDetailScreenState = ReturnType<typeof useProfileDetailScreen>

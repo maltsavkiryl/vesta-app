@@ -336,7 +336,6 @@ const styles = StyleSheet.create({
   screen: {
     gap: 16,
     paddingHorizontal: 16,
-    paddingTop: 16,
   },
   timelineIcon: {
     alignItems: "center",

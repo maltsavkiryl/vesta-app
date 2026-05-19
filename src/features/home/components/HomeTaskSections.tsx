@@ -27,7 +27,7 @@ export type TaskItem = HomeTask & { completedDate?: string }
 
 const completedTaskHistory: TaskItem[] = [
   {
-    action: { route: "/(app)/(tabs)/documents", type: "navigate" },
+    action: { route: "/profile/contracts", type: "navigate" },
     actionLabel: "Sign",
     completed: true,
     completedDate: "Apr 20",
@@ -82,12 +82,10 @@ const TaskRow = memo(function TaskRow({
   isLast,
   item,
   onComplete,
-  onDismiss,
 }: {
   isLast?: boolean
   item: TaskItem
   onComplete: () => void
-  onDismiss?: () => void
 }) {
   const tokens = useDesignTokens()
   const tone = item.urgency === "high" ? "danger" : item.urgency === "medium" ? "warning" : "accent"
@@ -101,6 +99,7 @@ const TaskRow = memo(function TaskRow({
           tone={item.completed ? "success" : tone}
         />
       }
+      style={{ backgroundColor: tokens.surface }}
       subtitle={item.completed ? `Done ${item.completedDate}` : item.subtitle}
       subtitleStyle={{ color: item.completed ? tokens.textMuted : tokens.textSecondary }}
       title={item.title}
@@ -124,14 +123,6 @@ const TaskRow = memo(function TaskRow({
                 style={{ color: tokens.accent }}
               />
             </Pressable>
-            {onDismiss ? (
-              <Pressable
-                onPress={onDismiss}
-                style={[styles.dismissButton, { backgroundColor: tokens.background }]}
-              >
-                <Ionicons color={tokens.textMuted} name="checkmark-outline" size={14} />
-              </Pressable>
-            ) : null}
           </View>
         )
       }
@@ -141,13 +132,11 @@ const TaskRow = memo(function TaskRow({
 
 export function HomeTasksSection({
   onComplete,
-  onDismiss,
-  onShowAll,
+  onViewAll,
   tasks,
 }: {
   onComplete: (task: TaskItem) => void
-  onDismiss: (task: TaskItem) => void
-  onShowAll: () => void
+  onViewAll: () => void
   tasks: TaskItem[]
 }) {
   const tokens = useDesignTokens()
@@ -174,7 +163,7 @@ export function HomeTasksSection({
             style={{ color: tokens.textSecondary }}
           />
         </View>
-        <Pressable onPress={onShowAll}>
+        <Pressable onPress={onViewAll}>
           <Text text="History" size="xxs" weight="medium" style={{ color: tokens.accent }} />
         </Pressable>
       </View>
@@ -186,7 +175,7 @@ export function HomeTasksSection({
       actionLabel="View all"
       badgeLabel={`${tasks.length} pending`}
       title="Tasks"
-      onAction={onShowAll}
+      onAction={onViewAll}
     >
       <ListCard>
         {tasks.map((task, index) => (
@@ -195,7 +184,6 @@ export function HomeTasksSection({
             isLast={index === tasks.length - 1}
             item={task}
             onComplete={() => onComplete(task)}
-            onDismiss={() => onDismiss(task)}
           />
         ))}
       </ListCard>
@@ -237,14 +225,14 @@ function UpdateRow({
 export function HomeUpdatesSection({
   notifications,
   onNotificationPress,
-  onShowAll,
+  onViewAll,
 }: {
   notifications: NotificationItem[]
   onNotificationPress: (notification: NotificationItem) => void
-  onShowAll: () => void
+  onViewAll: () => void
 }) {
   return (
-    <SectionBlock actionLabel="All" title="Updates" onAction={onShowAll}>
+    <SectionBlock actionLabel="View all" title="Updates" onAction={onViewAll}>
       <ListCard>
         {notifications.slice(0, 3).map((notification, index, items) => (
           <UpdateRow
@@ -338,14 +326,6 @@ const styles = StyleSheet.create({
   },
   completedText: {
     textDecorationLine: "line-through",
-  },
-  dismissButton: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 8,
-    height: 28,
-    justifyContent: "center",
-    width: 28,
   },
   drawerGroup: {
     gap: 8,

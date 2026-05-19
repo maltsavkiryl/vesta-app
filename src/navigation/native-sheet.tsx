@@ -7,6 +7,7 @@ import type {
 
 import type { Theme } from "@/ui/foundations/theme"
 import { Text } from "@/ui/primitives/Text"
+import { firePressHaptic, type PressHapticIntent } from "@/utils/haptics"
 
 const SHEET_DETENTS = {
   large: 0.98,
@@ -24,6 +25,7 @@ interface BaseNavigationOptions {
   headerBlurEffect?: NativeStackNavigationOptions["headerBlurEffect"]
   headerLeft?: NativeStackNavigationOptions["headerLeft"]
   headerRight?: NativeStackNavigationOptions["headerRight"]
+  motionEnabled?: boolean
   sheetCornerRadius?: number
   sheetAllowedDetents?: NativeStackNavigationOptions["sheetAllowedDetents"]
   unstable_headerLeftItems?: NativeStackNavigationOptions["unstable_headerLeftItems"]
@@ -35,6 +37,7 @@ interface HeaderActionButtonProps {
   onPress: () => void
   theme: Theme
   disabled?: boolean
+  haptic?: PressHapticIntent | "none"
 }
 
 interface HeaderActionOptions {
@@ -42,9 +45,16 @@ interface HeaderActionOptions {
   label?: string
   onPress: () => void
   disabled?: boolean
+  haptic?: PressHapticIntent | "none"
 }
 
-export function HeaderActionButton({ kind, onPress, theme, disabled }: HeaderActionButtonProps) {
+export function HeaderActionButton({
+  kind,
+  onPress,
+  theme,
+  disabled,
+  haptic = "selection",
+}: HeaderActionButtonProps) {
   const isConfirm = kind === "confirm"
   const backgroundColor = isConfirm
     ? disabled
@@ -71,7 +81,10 @@ export function HeaderActionButton({ kind, onPress, theme, disabled }: HeaderAct
       accessibilityState={{ disabled: Boolean(disabled) }}
       disabled={disabled}
       hitSlop={12}
-      onPress={onPress}
+      onPress={() => {
+        firePressHaptic(haptic)
+        onPress()
+      }}
       style={[
         styles.headerActionButton,
         { backgroundColor },
@@ -88,11 +101,13 @@ function HeaderProminentActionButton({
   onPress,
   theme,
   disabled,
+  haptic = "selection",
 }: {
   label: string
   onPress: () => void
   theme: Theme
   disabled?: boolean
+  haptic?: PressHapticIntent | "none"
 }) {
   const backgroundColor = disabled
     ? theme.isDark
@@ -109,7 +124,10 @@ function HeaderProminentActionButton({
       accessibilityState={{ disabled: Boolean(disabled) }}
       disabled={disabled}
       hitSlop={12}
-      onPress={onPress}
+      onPress={() => {
+        firePressHaptic(haptic)
+        onPress()
+      }}
       style={[
         styles.headerProminentButton,
         { backgroundColor },
@@ -129,7 +147,7 @@ function HeaderProminentActionButton({
 
 function createNativeHeaderItem(
   theme: Theme,
-  { kind, label, onPress, disabled }: HeaderActionOptions,
+  { kind, label, onPress, disabled, haptic = "selection" }: HeaderActionOptions,
 ): NativeStackHeaderItem {
   const isConfirm = kind === "confirm"
   const itemLabel = label ?? (isConfirm ? "Save" : "")
@@ -144,7 +162,10 @@ function createNativeHeaderItem(
       name: isConfirm ? "checkmark" : "xmark",
     },
     label: itemLabel,
-    onPress,
+    onPress: () => {
+      firePressHaptic(haptic)
+      onPress()
+    },
     tintColor: isConfirm ? (theme.isDark ? "#0A84FF" : "#007AFF") : theme.colors.text,
     type: "button",
     variant: isConfirm ? "prominent" : "plain",
@@ -179,11 +200,12 @@ export function createHeaderActionOptions(
   return {
     headerLeft: leftAction
       ? () => (
-          <HeaderActionButton
-            disabled={leftAction.disabled}
-            kind={leftAction.kind}
-            onPress={leftAction.onPress}
-            theme={theme}
+            <HeaderActionButton
+              disabled={leftAction.disabled}
+              haptic={leftAction.haptic}
+              kind={leftAction.kind}
+              onPress={leftAction.onPress}
+              theme={theme}
           />
         )
       : undefined,
@@ -192,6 +214,7 @@ export function createHeaderActionOptions(
           rightAction.kind === "confirm" ? (
             <HeaderProminentActionButton
               disabled={rightAction.disabled}
+              haptic={rightAction.haptic}
               label={rightAction.label ?? "Save"}
               onPress={rightAction.onPress}
               theme={theme}
@@ -199,6 +222,7 @@ export function createHeaderActionOptions(
           ) : (
             <HeaderActionButton
               disabled={rightAction.disabled}
+              haptic={rightAction.haptic}
               kind={rightAction.kind}
               onPress={rightAction.onPress}
               theme={theme}
@@ -260,6 +284,7 @@ export function createSheetOptions(
       : undefined
 
   return {
+    animation: options.motionEnabled === false ? "none" : "default",
     presentation,
     sheetAllowedDetents: detents,
     sheetCornerRadius: options.sheetCornerRadius ?? 24,
@@ -277,6 +302,12 @@ export function createPushDetailOptions(
   options: BaseNavigationOptions = {},
 ) {
   return {
+    animation:
+      options.motionEnabled === false
+        ? "none"
+        : Platform.OS === "android"
+          ? "ios_from_right"
+          : "default",
     presentation: "card" as const,
     headerShown: true,
     headerBackButtonDisplayMode: "minimal" as const,

@@ -3,18 +3,19 @@ import { StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import DateTimePicker from "@react-native-community/datetimepicker"
 
-import { formatTime, nearestMinute, timeValueToDate } from "@/features/schedule/availability.utils"
+import {
+  formatTime,
+  isAvailabilityTimeField,
+  nearestMinute,
+  timeValueToDate,
+  type AvailabilityTimeField,
+} from "@/features/schedule/availability.utils"
 import { createHeaderActionOptions, useAppTheme, useDesignTokens } from "@/ui"
 
-type AvailabilityTimeField = "startTime" | "endTime"
 type AvailabilityTimeReturnTarget =
   | "availability"
   | "availability-template"
   | "availability-template-day"
-
-function isTimeField(value?: string): value is AvailabilityTimeField {
-  return value === "startTime" || value === "endTime"
-}
 
 function isReturnTarget(value?: string): value is AvailabilityTimeReturnTarget {
   return (
@@ -44,7 +45,7 @@ export function AvailabilityTimePickerScreen() {
     value?: string
   }>()
 
-  const field: AvailabilityTimeField = isTimeField(rawField) ? rawField : "startTime"
+  const field: AvailabilityTimeField = isAvailabilityTimeField(rawField) ? rawField : "startTime"
   const returnTo: AvailabilityTimeReturnTarget = isReturnTarget(rawReturnTo)
     ? rawReturnTo
     : "availability"

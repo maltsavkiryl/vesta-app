@@ -12,3 +12,15 @@ export function markNotificationRead(accountId: string, id: string) {
 export function markAllNotificationsRead(accountId: string) {
   return commitAccountAction(accountId, { type: "markAllNotificationsRead" }, applyAppAction)
 }
+
+export function archiveNotification(accountId: string, id: string) {
+  return commitAccountAction(
+    accountId,
+    { type: "archiveNotification", payload: { id } },
+    applyAppAction,
+  )
+}
+
+export function archiveAllNotifications(accountId: string) {
+  return commitAccountAction(accountId, { type: "archiveAllNotifications" }, applyAppAction)
+}

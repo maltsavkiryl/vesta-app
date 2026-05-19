@@ -1,5 +1,7 @@
 import { Alert } from "react-native"
 
+import { fireHaptic } from "@/utils/haptics"
+
 import { showNativeUploadOptions, type UploadSource } from "./showUploadOptions"
 
 export type UploadTarget = { id?: string; title: string }
@@ -94,6 +96,7 @@ export async function uploadDocumentFromSource({
 
     const validationError = getUploadValidationError(asset)
     if (validationError) {
+      fireHaptic("warning")
       Alert.alert("Cannot upload file", validationError)
       return "failed"
     }
@@ -113,12 +116,16 @@ export async function uploadDocumentFromSource({
       typeof result.error === "object" &&
       "message" in result.error
     ) {
+      fireHaptic("error")
       Alert.alert("Cannot upload file", String(result.error.message))
       return "failed"
     }
+
+    fireHaptic("success")
     Alert.alert("Upload complete", `${target.title} has been uploaded.`)
     return "completed"
   } catch {
+    fireHaptic("error")
     Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
     return "failed"
   }

@@ -1,6 +1,7 @@
 import Config from "@/config"
 import { applyAppAction, normalizeEmail } from "@/services/app/app-state.reducer"
 import {
+  commitAccountPasswordChange,
   commitAccountAction,
   ensureDb,
   getAccountState,
@@ -100,7 +101,7 @@ export function requestPasswordReset(email: string) {
   const db = ensureDb()
   const normalized = normalizeEmail(email)
   const account = db.accounts.find((candidate) => candidate.email === normalized)
-  if (!account) return getSession()
+  if (!account) return { ok: false, message: "No local demo account exists for that email yet." }
 
   commitAccountAction(
     account.id,
@@ -110,7 +111,59 @@ export function requestPasswordReset(email: string) {
     },
     applyAppAction,
   )
-  return getSession()
+  return { ok: true }
+}
+
+export function changePassword(accountId: string, currentPassword: string, nextPassword: string) {
+  const db = ensureDb()
+  const account = db.accounts.find((candidate) => candidate.id === accountId)
+  if (!account) {
+    return {
+      result: { ok: false, message: "Missing account." } satisfies AuthResult,
+      session: db.session,
+      state: null,
+    }
+  }
+
+  if (account.password !== currentPassword) {
+    return {
+      result: { ok: false, message: "Current password is incorrect." } satisfies AuthResult,
+      session: db.session,
+      state: null,
+    }
+  }
+
+  const { state } = commitAccountPasswordChange(account.id, nextPassword, applyAppAction)
+
+  return {
+    result: { ok: true } satisfies AuthResult,
+    session: getSession(),
+    state,
+  }
+}
+
+export function resetPassword(email: string, nextPassword: string) {
+  const db = ensureDb()
+  const normalized = normalizeEmail(email)
+  const account = db.accounts.find((candidate) => candidate.email === normalized)
+  if (!account) {
+    return {
+      result: {
+        ok: false,
+        message: "No local demo account exists for that email yet.",
+      } satisfies AuthResult,
+      session: db.session,
+      state: null,
+    }
+  }
+
+  const { state } = commitAccountPasswordChange(account.id, nextPassword, applyAppAction)
+
+  return {
+    result: { ok: true } satisfies AuthResult,
+    session: getSession(),
+    state,
+  }
 }
 
 export function completeOnboarding(

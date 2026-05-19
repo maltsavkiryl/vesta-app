@@ -4,20 +4,14 @@ import { Ionicons } from "@expo/vector-icons"
 import { Text, useDesignTokens } from "@/ui"
 
 export function HomeHeader({
-  employerName,
   firstName,
   greeting,
   hasUnread,
-  role,
-  onEmployerPress,
   onNotificationsPress,
 }: {
-  employerName?: string
   firstName: string
   greeting: string
   hasUnread: boolean
-  role?: string
-  onEmployerPress: () => void
   onNotificationsPress: () => void
 }) {
   const tokens = useDesignTokens()
@@ -31,19 +25,6 @@ export function HomeHeader({
           weight="bold"
           style={[styles.headerTitle, { color: tokens.textPrimary }]}
         />
-        {employerName ? (
-          <Pressable onPress={onEmployerPress} style={styles.employerButton}>
-            <View style={[styles.employerDot, { backgroundColor: tokens.success }]} />
-            <Text
-              text={role ? `${employerName} · ${role}` : employerName}
-              numberOfLines={1}
-              size="xxs"
-              weight="medium"
-              style={[styles.employerLabel, { color: tokens.accent }]}
-            />
-            <Ionicons color={tokens.accent} name="chevron-down-outline" size={13} />
-          </Pressable>
-        ) : null}
       </View>
 
       <Pressable hitSlop={10} onPress={onNotificationsPress}>
@@ -64,21 +45,6 @@ export function HomeHeader({
 }
 
 const styles = StyleSheet.create({
-  employerButton: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 5,
-    marginTop: 5,
-    maxWidth: 260,
-  },
-  employerDot: {
-    borderRadius: 4,
-    height: 7,
-    width: 7,
-  },
-  employerLabel: {
-    flexShrink: 1,
-  },
   flex: {
     flex: 1,
   },

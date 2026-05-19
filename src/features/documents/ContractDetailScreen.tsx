@@ -13,6 +13,7 @@ import {
   useDesignTokens,
 } from "@/ui"
 
+import { shareContractPdf } from "./documentShare"
 import { useContractDetailScreen } from "./useContractDetailScreen"
 
 export function ContractDetailScreen() {
@@ -26,6 +27,7 @@ export function ContractDetailScreen() {
         ? {
             disabled: !canSign,
             kind: "confirm",
+            haptic: "none",
             label: "Sign",
             onPress: signCurrentContract,
           }
@@ -34,8 +36,9 @@ export function ContractDetailScreen() {
 
   return (
     <AppScrollScreen
+      variant="grouped"
       contentContainerStyle={styles.content}
-      style={{ backgroundColor: tokens.background }}
+      style={{ backgroundColor: tokens.groupedBackground }}
     >
       <Stack.Screen
         options={{
@@ -57,7 +60,7 @@ export function ContractDetailScreen() {
               style={{ color: tokens.textSecondary }}
             />
           </View>
-          <View style={[styles.preview, { backgroundColor: tokens.background }]}>
+          <View style={[styles.preview, { backgroundColor: tokens.surface }]}>
             <Text
               text={contract.body}
               size="xxs"
@@ -99,17 +102,31 @@ export function ContractDetailScreen() {
           ) : (
             <View style={styles.actions}>
               <Pressable
+                onPress={() => {
+                  void shareContractPdf(contract)
+                }}
                 style={[
-                  styles.secondaryAction,
-                  { backgroundColor: tokens.background, borderColor: tokens.border },
+                  contract.status === "pending" ? styles.secondaryAction : styles.primaryAction,
+                  contract.status === "pending"
+                    ? { backgroundColor: tokens.surface, borderColor: tokens.border }
+                    : { backgroundColor: tokens.accent },
                 ]}
               >
-                <Ionicons color={tokens.textPrimary} name="download-outline" size={14} />
+                <Ionicons
+                  color={
+                    contract.status === "pending" ? tokens.textPrimary : tokens.accentForeground
+                  }
+                  name="download-outline"
+                  size={14}
+                />
                 <Text
                   text="Download"
                   size="xxs"
-                  weight="medium"
-                  style={{ color: tokens.textPrimary }}
+                  weight={contract.status === "pending" ? "medium" : "semiBold"}
+                  style={{
+                    color:
+                      contract.status === "pending" ? tokens.textPrimary : tokens.accentForeground,
+                  }}
                 />
               </Pressable>
               {contract.status === "pending" ? (

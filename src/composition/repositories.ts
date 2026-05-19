@@ -26,8 +26,11 @@ import type { ClockError } from "@/features/time/data/time.errors"
 import type { TimeRepository } from "@/features/time/data/time.repository"
 import { applyAppAction, normalizeEmail } from "@/services/app/app-state.reducer"
 import {
+  commitAccountPasswordChange,
   commitAccountAction,
   ensureDb,
+  findAccountByEmail,
+  findAccountOrThrow,
   getAccountState,
   getSession,
   prependAccount,
@@ -107,6 +110,10 @@ function getHomeTasks(state: AppStoreState): HomeTask[] {
   return tasks
 }
 
+function getVisibleNotifications(state: AppStoreState) {
+  return state.notifications.filter((notification) => !notification.archivedAt)
+}
+
 function toProfileError(error: ProfileError["type"], message: string): ProfileError {
   return { type: error, message }
 }
@@ -125,6 +132,20 @@ function lastItem<T>(items: T[]): T {
 
 function createMockAuthRepository(): AuthRepository {
   return {
+    async changePassword(accountId: string, currentPassword: string, nextPassword: string) {
+      const db = ensureDb()
+      const account = findAccountOrThrow(db, accountId)
+
+      if (account.password !== currentPassword) {
+        return failure<AuthError>({
+          type: "invalid-credentials",
+          message: "Current password is incorrect.",
+        })
+      }
+
+      const { changedAt } = commitAccountPasswordChange(accountId, nextPassword, applyAppAction)
+      return success({ changedAt })
+    },
     async completeOnboarding(accountId: string, input: CompleteOnboardingInput) {
       const nextState = commitAccountAction(
         accountId,
@@ -159,7 +180,7 @@ function createMockAuthRepository(): AuthRepository {
     async requestPasswordReset(email: string) {
       const db = ensureDb()
       const normalized = normalizeEmail(email)
-      const account = db.accounts.find((candidate) => candidate.email === normalized)
+      const account = findAccountByEmail(db, normalized)
       if (!account) {
         return failure<AuthError>({
           type: "reset-unavailable",
@@ -176,6 +197,20 @@ function createMockAuthRepository(): AuthRepository {
         applyAppAction,
       )
       return success({ email: normalized })
+    },
+    async resetPassword(email: string, nextPassword: string) {
+      const db = ensureDb()
+      const normalized = normalizeEmail(email)
+      const account = findAccountByEmail(db, normalized)
+      if (!account) {
+        return failure<AuthError>({
+          type: "reset-unavailable",
+          message: "No local demo account exists for that email yet.",
+        })
+      }
+
+      const { changedAt } = commitAccountPasswordChange(account.id, nextPassword, applyAppAction)
+      return success({ changedAt, email: normalized })
     },
     async signIn(input: SignInPayload) {
       if (!Config.DEMO_AUTH_ENABLED) {
@@ -221,7 +256,6 @@ function createMockProfileRepository(): ProfileRepository {
     async getEmployers(accountId) {
       const state = getSignedInState(accountId)
       return {
-        activeEmployerId: state.activeEmployerId,
         employerDirectory: state.employerDirectory,
         employers: state.employers,
       }
@@ -246,23 +280,6 @@ function createMockProfileRepository(): ProfileRepository {
         applyAppAction,
       )
       return success({
-        activeEmployerId: nextState.activeEmployerId,
-        employerDirectory: nextState.employerDirectory,
-        employers: nextState.employers,
-      })
-    },
-    async switchEmployer(accountId, employerId) {
-      const state = getSignedInState(accountId)
-      if (!state.employers.some((candidate) => candidate.id === employerId)) {
-        return failure(toProfileError("employer-not-found", "Employer not linked to this account."))
-      }
-      const nextState = commitAccountAction(
-        accountId,
-        { type: "switchEmployer", payload: { employerId } },
-        applyAppAction,
-      )
-      return success({
-        activeEmployerId: nextState.activeEmployerId,
         employerDirectory: nextState.employerDirectory,
         employers: nextState.employers,
       })
@@ -292,7 +309,6 @@ function createMockScheduleRepository(): ScheduleRepository {
     async getSchedule(accountId) {
       const state = getSignedInState(accountId)
       return {
-        activeEmployerId: state.activeEmployerId,
         availabilityOverrides: state.availabilityOverrides,
         availabilityTemplate: state.availabilityTemplate,
         employers: state.employers,
@@ -479,8 +495,24 @@ function createMockDocumentsRepository(): DocumentsRepository {
 
 function createMockNotificationsRepository(): NotificationsRepository {
   return {
+    async archive(accountId, notificationId) {
+      const nextState = commitAccountAction(
+        accountId,
+        { type: "archiveNotification", payload: { id: notificationId } },
+        applyAppAction,
+      )
+      return getVisibleNotifications(nextState)
+    },
+    async archiveAll(accountId) {
+      const nextState = commitAccountAction(
+        accountId,
+        { type: "archiveAllNotifications" },
+        applyAppAction,
+      )
+      return getVisibleNotifications(nextState)
+    },
     async getNotifications(accountId) {
-      return getSignedInState(accountId).notifications
+      return getVisibleNotifications(getSignedInState(accountId))
     },
     async markAllRead(accountId) {
       const nextState = commitAccountAction(
@@ -488,7 +520,7 @@ function createMockNotificationsRepository(): NotificationsRepository {
         { type: "markAllNotificationsRead" },
         applyAppAction,
       )
-      return nextState.notifications
+      return getVisibleNotifications(nextState)
     },
     async markRead(accountId, notificationId) {
       const nextState = commitAccountAction(
@@ -496,7 +528,7 @@ function createMockNotificationsRepository(): NotificationsRepository {
         { type: "markNotificationRead", payload: { id: notificationId } },
         applyAppAction,
       )
-      return nextState.notifications
+      return getVisibleNotifications(nextState)
     },
   }
 }
@@ -505,17 +537,14 @@ function createMockHomeRepository(): HomeRepository {
   return {
     async getHomeOverview(accountId) {
       const state = getSignedInState(accountId)
+      const notifications = getVisibleNotifications(state)
       return {
         earnings: state.earnings,
-        notifications: state.notifications,
+        notifications,
         profile: state.profile,
-        selectedEmployer: state.employers.find(
-          (employer) => employer.id === state.activeEmployerId,
-        ),
         shifts: state.shifts,
         tasks: getHomeTasks(state),
-        unreadNotifications: state.notifications.filter((notification) => notification.unread)
-          .length,
+        unreadNotifications: notifications.filter((notification) => notification.unread).length,
       }
     },
   }
@@ -528,6 +557,9 @@ function createApiNotReadyError() {
 function createApiRepositories() {
   return {
     auth: {
+      changePassword: async () => {
+        throw createApiNotReadyError()
+      },
       completeOnboarding: async () => {
         throw createApiNotReadyError()
       },
@@ -536,6 +568,9 @@ function createApiRepositories() {
         throw createApiNotReadyError()
       },
       requestPasswordReset: async () => {
+        throw createApiNotReadyError()
+      },
+      resetPassword: async () => {
         throw createApiNotReadyError()
       },
       signIn: async () => {
@@ -559,6 +594,8 @@ function createApiRepositories() {
       },
     } satisfies HomeRepository,
     notifications: {
+      archive: async () => [],
+      archiveAll: async () => [],
       getNotifications: async () => [],
       markAllRead: async () => [],
       markRead: async () => [],
@@ -571,9 +608,6 @@ function createApiRepositories() {
         throw createApiNotReadyError()
       },
       joinEmployer: async () => {
-        throw createApiNotReadyError()
-      },
-      switchEmployer: async () => {
         throw createApiNotReadyError()
       },
       updateProfile: async () => {

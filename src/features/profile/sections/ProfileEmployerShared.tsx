@@ -81,7 +81,7 @@ export function EmployerPreviewCard({
           { label: "Type", value: employer.type },
         ]}
       />
-      <AppButton label="Request to join" onPress={onJoin} />
+      <AppButton label="Request to join" onPress={onJoin} pressHaptic="none" />
     </View>
   )
 }

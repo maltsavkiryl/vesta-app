@@ -12,7 +12,6 @@ import type { Result } from "@/shared/result"
 import type { ScheduleError } from "./schedule.errors"
 
 export interface ScheduleOverview {
-  activeEmployerId: string
   availabilityOverrides: Record<string, AvailabilityOverride>
   availabilityTemplate: AvailabilityTemplate
   employers: Employer[]

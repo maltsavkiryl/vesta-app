@@ -1,6 +1,9 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { Text, ToggleSwitch, appTypography, useDesignTokens } from "@/ui"
+
+import { ListCard, ListCardItem, Text, ToggleSwitch, appTypography, useDesignTokens } from "@/ui"
+
+import { onboardingStyles } from "./onboarding.styles"
 import { ONBOARDING_NOTIFICATION_OPTIONS } from "./types"
 
 export interface OnboardingNotificationsProps {
@@ -12,8 +15,8 @@ export function OnboardingNotifications({ notifications, onToggle }: OnboardingN
   const tokens = useDesignTokens()
 
   return (
-    <View style={styles.stackLarge}>
-      <View style={styles.titleBlock}>
+    <View style={onboardingStyles.section}>
+      <View style={onboardingStyles.titleBlock}>
         <Text
           text="Stay in the loop"
           weight="bold"
@@ -25,41 +28,36 @@ export function OnboardingNotifications({ notifications, onToggle }: OnboardingN
           style={{ color: tokens.textSecondary }}
         />
       </View>
-      <View style={[styles.notificationList, { borderColor: tokens.border }]}>
+      <ListCard style={styles.notificationList}>
         {ONBOARDING_NOTIFICATION_OPTIONS.map((item, index) => (
-          <View
+          <ListCardItem
             key={item.key}
-            style={[
-              styles.notificationRow,
-              index < ONBOARDING_NOTIFICATION_OPTIONS.length - 1
-                ? { borderBottomColor: tokens.border, borderBottomWidth: 1 }
-                : null,
-            ]}
-          >
-            <View
-              style={[
-                styles.notificationIcon,
-                { backgroundColor: tokens.surfaceSecondary, borderColor: tokens.border },
-              ]}
-            >
-              <Ionicons color={tokens.textSecondary} name={item.icon} size={16} />
-            </View>
-            <View style={styles.flex}>
-              <Text text={item.label} size="xs" style={{ color: tokens.textPrimary }} />
-              <Text text={item.desc} size="xxs" style={{ color: tokens.textMuted }} />
-            </View>
-            <ToggleSwitch value={notifications[item.key]} onChange={() => onToggle(item.key)} />
-          </View>
+            isLast={index === ONBOARDING_NOTIFICATION_OPTIONS.length - 1}
+            leading={
+              <View
+                style={[
+                  styles.notificationIcon,
+                  { backgroundColor: tokens.surfaceSecondary, borderColor: tokens.border },
+                ]}
+              >
+                <Ionicons color={tokens.textSecondary} name={item.icon} size={16} />
+              </View>
+            }
+            subtitle={item.desc}
+            subtitleStyle={{ color: tokens.textMuted }}
+            title={item.label}
+            titleStyle={{ color: tokens.textPrimary }}
+            trailing={
+              <ToggleSwitch value={notifications[item.key]} onChange={() => onToggle(item.key)} />
+            }
+          />
         ))}
-      </View>
+      </ListCard>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
   notificationIcon: {
     alignItems: "center",
     borderRadius: 10,
@@ -69,21 +67,6 @@ const styles = StyleSheet.create({
     width: 38,
   },
   notificationList: {
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  notificationRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 4,
-    paddingVertical: 14,
-  },
-  stackLarge: {
-    gap: 20,
-  },
-  titleBlock: {
-    gap: 6,
+    gap: 0,
   },
 })

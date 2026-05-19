@@ -1,6 +1,9 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+
 import { SelectionCard, Text, appTypography, useDesignTokens } from "@/ui"
+
+import { onboardingStyles } from "./onboarding.styles"
 import { ONBOARDING_ROLES } from "./types"
 
 export interface OnboardingRoleProps {
@@ -12,8 +15,8 @@ export function OnboardingRole({ selectedRole, onSelectRole }: OnboardingRolePro
   const tokens = useDesignTokens()
 
   return (
-    <View style={styles.stackLarge}>
-      <View style={styles.titleBlock}>
+    <View style={onboardingStyles.section}>
+      <View style={onboardingStyles.titleBlock}>
         <Text
           text="What's your role?"
           weight="bold"
@@ -51,11 +54,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-  },
-  stackLarge: {
-    gap: 20,
-  },
-  titleBlock: {
-    gap: 6,
   },
 })

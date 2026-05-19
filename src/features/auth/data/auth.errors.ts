@@ -4,4 +4,5 @@ export type AuthError =
   | { type: "invalid-credentials"; message: string }
   | { type: "account-exists"; message: string }
   | { type: "reset-unavailable"; message: string }
+  | { type: "validation"; message: string }
   | { type: "onboarding-invalid"; message: string }

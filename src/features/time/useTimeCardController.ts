@@ -6,6 +6,7 @@ import { getClockSnapshot } from "@/core/date"
 import { createInitialState } from "@/core/mockState"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
+import { fireHaptic } from "@/utils/haptics"
 
 import { captureLocationSnapshot, captureOptionalClockInPhoto } from "./timeCapture"
 
@@ -44,41 +45,56 @@ export function useTimeCardController() {
 
   const handleClockIn = useCallback(async () => {
     const occurredAt = new Date().toISOString()
-    const location = await captureLocationSnapshot(state.clockSession.venueAddress)
+    const location = await captureLocationSnapshot()
     const proofPhoto = await captureOptionalClockInPhoto()
     if (proofPhoto === null) return
     const result = await startClock({ occurredAt, location, proofPhoto })
     if (!result.ok) {
+      fireHaptic("error")
       Alert.alert("Clock-in unavailable", result.error.message)
+      return
     }
-  }, [startClock, state.clockSession.venueAddress])
+
+    fireHaptic("success")
+  }, [startClock])
 
   const handleStartBreak = useCallback(async () => {
     const result = await startBreak({
       occurredAt: new Date().toISOString(),
-      location: await captureLocationSnapshot(state.clockSession.venueAddress),
+      location: await captureLocationSnapshot(),
     })
     if (!result.ok) {
+      fireHaptic("error")
       Alert.alert("Break unavailable", result.error.message)
+      return
     }
-  }, [startBreak, state.clockSession.venueAddress])
+
+    fireHaptic("success")
+  }, [startBreak])
 
   const handleEndBreak = useCallback(async () => {
     const result = await endBreak({
       occurredAt: new Date().toISOString(),
-      location: await captureLocationSnapshot(state.clockSession.venueAddress),
+      location: await captureLocationSnapshot(),
     })
     if (!result.ok) {
+      fireHaptic("error")
       Alert.alert("Break unavailable", result.error.message)
+      return
     }
-  }, [endBreak, state.clockSession.venueAddress])
+
+    fireHaptic("success")
+  }, [endBreak])
 
   return {
     elapsedSeconds,
     handleClockIn,
     handleEndBreak,
     handleStartBreak,
-    openClockOut: () => router.push("/(app)/clock-out" as never),
+    openClockOut: () => {
+      fireHaptic("selection")
+      router.push("/(app)/clock-out" as never)
+    },
     snapshot,
     state,
     totalBreakSeconds,

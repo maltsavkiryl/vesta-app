@@ -1,72 +1,31 @@
 /* eslint-disable react-native/no-inline-styles */
 
 import { useMemo, useState } from "react"
-import { StyleSheet, View } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
+import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
-import type { RequestCategory, RequestType } from "@/core/models"
+import type { RequestCategory } from "@/core/models"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { isRequestCategory, requestCategoryConfig } from "@/features/schedule/requestCategories"
 import { enumerateDateRange } from "@/features/schedule/schedule.utils"
 import {
   AppButton,
   AppScrollScreen,
-  DetailRow,
-  GroupedSection,
+  EmptyState,
   SelectionChip,
+  SelectionIndicator,
   SelectionRow,
+  GroupedSection,
+  SuccessState,
   SurfaceCard,
   Text,
   TextField,
   useDesignTokens,
 } from "@/ui"
-
-const requestTypeConfig: Record<
-  RequestCategory,
-  {
-    description: string
-    icon: keyof typeof Ionicons.glyphMap
-    tone: "accent" | "warning" | "danger"
-    title: string
-    type: RequestType
-  }
-> = {
-  time_off: {
-    description: "Request one or more days off",
-    icon: "calendar-clear-outline",
-    tone: "accent",
-    title: "Time off",
-    type: "Time off",
-  },
-  shift_change: {
-    description: "Ask for help with a scheduled shift",
-    icon: "swap-horizontal-outline",
-    tone: "warning",
-    title: "Shift change",
-    type: "Shift swap",
-  },
-  availability_issue: {
-    description: "Flag an availability conflict or exception",
-    icon: "alert-circle-outline",
-    tone: "danger",
-    title: "Availability issue",
-    type: "Unavailability",
-  },
-}
-
-const reasonPresets: Record<RequestCategory, string[]> = {
-  time_off: ["Personal", "Medical", "Family", "Travel"],
-  shift_change: ["Running late", "Need replacement", "Schedule conflict", "Transport issue"],
-  availability_issue: [
-    "Class or exam",
-    "Family commitment",
-    "Existing appointment",
-    "Unexpected conflict",
-  ],
-}
+import { fireHaptic } from "@/utils/haptics"
 
 function formatDateListLabel(dates: string[]) {
   if (dates.length === 0) return ""
@@ -75,47 +34,59 @@ function formatDateListLabel(dates: string[]) {
   return `${formatShortDate(sorted[0] ?? "")} - ${formatShortDate(sorted[sorted.length - 1] ?? "")}`
 }
 
-function CategoryTile({
-  active,
-  category,
-  isLast,
-  onPress,
-}: {
-  active: boolean
-  category: RequestCategory
-  isLast: boolean
-  onPress: () => void
-}) {
-  const tokens = useDesignTokens()
-  const config = requestTypeConfig[category]
-  const activeColor =
-    config.tone === "warning"
-      ? tokens.warning
-      : config.tone === "danger"
-        ? tokens.danger
-        : tokens.accent
+function getTodayDateString() {
+  return new Date().toISOString().slice(0, 10)
+}
 
-  return (
-    <SelectionRow
-      backgroundColor={tokens.transparent}
-      dividerInset={58}
-      grouped
-      isLast={isLast}
-      leading={
-        <View style={[styles.categoryGlyph, { backgroundColor: `${activeColor}1A` }]}>
-          <Ionicons color={activeColor} name={config.icon} size={18} />
-        </View>
-      }
-      onPress={onPress}
-      selected={active}
-      style={styles.categoryRow}
-      subtitle={config.description}
-      title={config.title}
-      trailing={
-        active ? <Ionicons color={tokens.accent} name="checkmark-outline" size={18} /> : null
-      }
-    />
-  )
+function getTargetSectionCopy(category: RequestCategory) {
+  if (category === "shift_change") {
+    return {
+      sectionTitle: "Shift",
+      subtitle: "Pick the exact shift that needs support so everyone reviews the right context.",
+    }
+  }
+
+  if (category === "availability_issue") {
+    return {
+      sectionTitle: "Affected dates",
+      subtitle: "Mark the days that no longer match your current availability.",
+    }
+  }
+
+  return {
+    sectionTitle: "Dates",
+    subtitle: "Choose one or more dates so your manager can review the request quickly.",
+  }
+}
+
+function getSuccessCopy(category: RequestCategory) {
+  return category === "shift_change"
+    ? "Your manager and the team coordinating replacements now have the shift details and reason."
+    : "Your manager now has the dates and context they need to review this request."
+}
+
+function getRequestActionCopy(category: RequestCategory) {
+  if (category === "shift_change") {
+    return {
+      reasonTitle: "Why do you need a swap?",
+      screenTitle: "Shift swap",
+      submitLabel: "Send shift swap",
+    }
+  }
+
+  if (category === "availability_issue") {
+    return {
+      reasonTitle: "Why is your availability changing?",
+      screenTitle: "Unavailability",
+      submitLabel: "Send unavailability",
+    }
+  }
+
+  return {
+    reasonTitle: "Why do you need time off?",
+    screenTitle: "Time off",
+    submitLabel: "Send time off",
+  }
 }
 
 export function RequestScreen() {
@@ -126,268 +97,231 @@ export function RequestScreen() {
   const { state } = useScheduleStateQuery()
   const params = useLocalSearchParams<{ category?: RequestCategory; shiftId?: string }>()
 
-  const initialCategory =
-    params.category && requestTypeConfig[params.category] ? params.category : "time_off"
-  const [category, setCategory] = useState<RequestCategory>(initialCategory)
+  const category = isRequestCategory(params.category) ? params.category : "time_off"
   const [selectedDates, setSelectedDates] = useState<string[]>([])
   const [selectedShiftId, setSelectedShiftId] = useState(params.shiftId ?? "")
   const [reason, setReason] = useState("")
   const [note, setNote] = useState("")
   const [done, setDone] = useState(false)
 
-  const upcomingShifts = useMemo(
-    () => (state?.shifts ?? []).filter((shift) => shift.date >= "2026-05-18"),
-    [state?.shifts],
-  )
+  const today = getTodayDateString()
+  const config = requestCategoryConfig[category]
+  const actionCopy = getRequestActionCopy(category)
+  const targetSectionCopy = getTargetSectionCopy(category)
   const activePlanningWindow = state?.planningWindows.find((window) => window.status === "open")
   const requestDates = activePlanningWindow
     ? enumerateDateRange(activePlanningWindow.startDate, activePlanningWindow.endDate)
     : []
+  const upcomingShifts = useMemo(
+    () =>
+      (state?.shifts ?? []).filter(
+        (shift) => shift.id === params.shiftId || shift.date >= today,
+      ),
+    [params.shiftId, state?.shifts, today],
+  )
   const selectedShift = upcomingShifts.find((shift) => shift.id === selectedShiftId)
-
+  const targetSelected = category === "shift_change" ? Boolean(selectedShiftId) : selectedDates.length > 0
   const summaryTarget =
     category === "shift_change"
       ? selectedShift
         ? `${selectedShift.dayLabel} · ${getShiftTimeRange(selectedShift)}`
         : ""
       : formatDateListLabel(selectedDates)
-  const canSubmit =
-    Boolean(reason.trim()) &&
-    (category === "shift_change" ? Boolean(selectedShiftId) : selectedDates.length > 0)
-  const config = requestTypeConfig[category]
+  const detailTargetLabel =
+    category === "shift_change"
+      ? selectedShift
+        ? `${selectedShift.role} · ${selectedShift.venueName}`
+        : ""
+      : selectedDates.length === 1
+        ? formatFullDate(selectedDates[0] ?? "")
+        : selectedDates.length > 1
+          ? `${selectedDates.length} dates selected`
+          : ""
+  const canSubmit = Boolean(reason.trim()) && targetSelected
 
   if (done) {
     return (
       <AppScrollScreen
         contentContainerStyle={[styles.doneScreen, { paddingBottom: insets.bottom + 30 }]}
-        style={{ backgroundColor: tokens.groupedBackground }}
+        variant="grouped"
       >
-        <View style={styles.doneContent}>
-          <View style={[styles.successIcon, { backgroundColor: `${tokens.success}1A` }]}>
-            <Ionicons color={tokens.success} name="checkmark-circle-outline" size={42} />
-          </View>
-          <Text
-            text="Request sent"
-            weight="bold"
-            style={{ color: tokens.textPrimary, fontSize: 22 }}
-          />
-          <Text
-            text="Your manager now has the context they need to review this request."
-            size="xs"
-            style={{ color: tokens.textSecondary, textAlign: "center" }}
-          />
+        <SuccessState subtitle={getSuccessCopy(category)} title="Request sent">
           <SurfaceCard style={styles.doneSummaryCard}>
-            <Text
-              text={config.type}
-              size="xs"
-              weight="semiBold"
-              style={{ color: tokens.textPrimary }}
-            />
-            <Text text={summaryTarget} size="xxs" style={{ color: tokens.textSecondary }} />
+            <Text text={actionCopy.screenTitle} size="xxs" weight="semiBold" style={{ color: tokens.textSecondary }} />
+            <Text text={summaryTarget} size="sm" weight="semiBold" style={{ color: tokens.textPrimary }} />
+            {detailTargetLabel ? (
+              <Text text={detailTargetLabel} size="xxs" style={{ color: tokens.textSecondary }} />
+            ) : null}
             <Text text={reason} size="xxs" style={{ color: tokens.textSecondary }} />
           </SurfaceCard>
-          <AppButton label="Done" onPress={() => router.back()} />
-        </View>
+          <AppButton fullWidth label="Done" onPress={() => router.back()} />
+        </SuccessState>
       </AppScrollScreen>
     )
   }
 
   return (
-    <AppScrollScreen
-      contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 30 }]}
-      style={{ backgroundColor: tokens.groupedBackground }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={[styles.flex, { backgroundColor: tokens.groupedBackground }]}
     >
-      <View style={styles.intro}>
-        <Text
-          text="Start with the type of help you need, then add just enough context for a quick decision."
-          size="xs"
-          style={{ color: tokens.textSecondary }}
-        />
-      </View>
-
-      <GroupedSection>
-        {(["time_off", "shift_change", "availability_issue"] as RequestCategory[]).map(
-          (item, index, items) => (
-            <CategoryTile
-              key={item}
-              active={category === item}
-              category={item}
-              isLast={index === items.length - 1}
-              onPress={() => {
-                setCategory(item)
-                setReason("")
-                setNote("")
-              }}
-            />
-          ),
-        )}
-      </GroupedSection>
-
-      {category === "shift_change" ? (
-        <View style={styles.flatSection}>
-          <Text
-            size="xxs"
-            style={[styles.flatSectionTitle, { color: tokens.textMuted }]}
-            text="Which shift needs help?"
-            weight="semiBold"
-          />
-          <View style={styles.shiftList}>
-            {upcomingShifts.map((shift) => (
-              <SelectionRow
-                backgroundColor={tokens.surface}
-                key={shift.id}
-                onPress={() => setSelectedShiftId(shift.id)}
-                selected={selectedShiftId === shift.id}
-                style={styles.shiftRow}
-                subtitle={`${getShiftTimeRange(shift)} · ${shift.role}`}
-                title={`${shift.dayLabel} · ${formatShortDate(shift.date)}`}
-                trailing={
-                  selectedShiftId === shift.id ? (
-                    <Ionicons color={tokens.accent} name="checkmark-outline" size={18} />
-                  ) : null
-                }
-              />
-            ))}
-          </View>
-        </View>
-      ) : (
-        <GroupedSection
-          title={category === "time_off" ? "Which dates?" : "Which days are affected?"}
+      <View style={styles.flex}>
+        <Stack.Screen options={{ title: actionCopy.screenTitle }} />
+        <AppScrollScreen
+          contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 28 }]}
+          variant="grouped"
         >
-          <View style={styles.dateWrap}>
-            {requestDates.map((date) => {
-              const selected = selectedDates.includes(date)
-              return (
-                <SelectionChip
-                  key={date}
-                  onPress={() =>
-                    setSelectedDates((current) =>
-                      current.includes(date)
-                        ? current.filter((item) => item !== date)
-                        : [...current, date].sort((left, right) => left.localeCompare(right)),
+          <GroupedSection bodyStyle={styles.sectionBody} title={targetSectionCopy.sectionTitle}>
+            <View style={styles.groupBody}>
+              <Text text={targetSectionCopy.subtitle} size="xs" style={{ color: tokens.textSecondary }} />
+              {category === "shift_change" ? (
+                upcomingShifts.length > 0 ? (
+                  <View style={styles.shiftList}>
+                    {upcomingShifts.map((shift, index) => {
+                      const selected = selectedShiftId === shift.id
+
+                      return (
+                        <SelectionRow
+                          backgroundColor={selected ? tokens.accentSoft : tokens.surface}
+                          dividerInset={16}
+                          isLast={index === upcomingShifts.length - 1}
+                          key={shift.id}
+                          onPress={() => setSelectedShiftId(shift.id)}
+                          selected={selected}
+                          style={styles.shiftRow}
+                          subtitle={`${formatFullDate(shift.date)} · ${shift.role} · ${shift.venueName}`}
+                          title={`${shift.dayLabel} · ${getShiftTimeRange(shift)}`}
+                          trailing={selected ? <SelectionIndicator /> : null}
+                        />
+                      )
+                    })}
+                  </View>
+                ) : (
+                  <EmptyState
+                    subtitle="There are no upcoming shifts available for a change request right now."
+                    title="No shifts to choose from"
+                  />
+                )
+              ) : requestDates.length > 0 ? (
+                <View style={styles.dateWrap}>
+                  {requestDates.map((date) => {
+                    const selected = selectedDates.includes(date)
+                    return (
+                      <SelectionChip
+                        key={date}
+                        label={formatShortDate(date)}
+                        onPress={() =>
+                          setSelectedDates((current) =>
+                            current.includes(date)
+                              ? current.filter((item) => item !== date)
+                              : [...current, date].sort((left, right) => left.localeCompare(right)),
+                          )
+                        }
+                        selected={selected}
+                        selectedVariant="solid"
+                      />
                     )
-                  }
-                  label={formatShortDate(date)}
-                  selected={selected}
-                  selectedVariant="solid"
+                  })}
+                </View>
+              ) : (
+                <EmptyState
+                  subtitle="A planning window needs to be open before you can send a date-based request."
+                  title="No open planning window"
                 />
-              )
-            })}
-          </View>
-          {selectedDates.length > 0 ? (
-            <Text
-              text={
-                selectedDates.length === 1
-                  ? formatFullDate(selectedDates[0] ?? "")
-                  : `${selectedDates.length} dates selected`
-              }
-              size="xxs"
-              style={{ color: tokens.textSecondary, paddingHorizontal: 14, paddingBottom: 14 }}
-            />
-          ) : null}
-        </GroupedSection>
-      )}
+              )}
+            </View>
+          </GroupedSection>
 
-      <GroupedSection title="Reason">
-        <View style={styles.reasonWrap}>
-          {reasonPresets[category].map((option) => {
-            const selected = option === reason
-            return (
-              <SelectionChip
-                key={option}
-                onPress={() => setReason(selected ? "" : option)}
-                label={option}
-                selected={selected}
-                selectedVariant="solid"
+          <GroupedSection bodyStyle={styles.sectionBody} title={actionCopy.reasonTitle}>
+            <View style={styles.groupBody}>
+              <View style={styles.reasonWrap}>
+                {config.reasonPresets.map((option) => {
+                  const selected = option === reason
+                  return (
+                    <SelectionChip
+                      key={option}
+                      label={option}
+                      onPress={() => setReason(selected ? "" : option)}
+                      selected={selected}
+                      selectedVariant="solid"
+                    />
+                  )
+                })}
+              </View>
+            </View>
+          </GroupedSection>
+
+          <GroupedSection bodyStyle={styles.sectionBody} title="Note">
+            <View style={styles.groupBody}>
+              <TextField
+                caption="Optional context shown with your request."
+                containerStyle={styles.noteShell}
+                inputStyle={styles.noteInput}
+                label="Add a note"
+                multiline
+                numberOfLines={4}
+                onChangeText={setNote}
+                placeholder="Anything your manager should know"
+                textAlignVertical="top"
+                value={note}
+                variant="muted"
               />
-            )
-          })}
-        </View>
-      </GroupedSection>
+            </View>
+          </GroupedSection>
 
-      <TextField
-        containerStyle={styles.noteShell}
-        inputStyle={styles.noteInput}
-        label="Note"
-        multiline
-        numberOfLines={3}
-        onChangeText={setNote}
-        placeholder="Add anything your manager should know"
-        textAlignVertical="top"
-        value={note}
-        variant="muted"
-      />
+          <View style={styles.submitBlock}>
+            <AppButton
+              disabled={!canSubmit}
+              fullWidth
+              label={actionCopy.submitLabel}
+              onPress={async () => {
+                const result = await createRequest({
+                  category,
+                  note: note.trim() || undefined,
+                  reason,
+                  statusDetail:
+                    category === "shift_change"
+                      ? "Waiting for colleague and manager approval"
+                      : "Waiting for manager review",
+                  target:
+                    category === "shift_change"
+                      ? {
+                          kind: "shift",
+                          label: summaryTarget,
+                          shiftId: selectedShiftId,
+                        }
+                      : {
+                          endDate: selectedDates[selectedDates.length - 1],
+                          kind: "dates",
+                          label: summaryTarget,
+                          startDate: selectedDates[0],
+                        },
+                  type: config.type,
+                })
+                if (!result.ok) {
+                  fireHaptic("error")
+                  return
+                }
 
-      <GroupedSection title="Summary">
-        <DetailRow label="Type" value={config.type} />
-        <DetailRow
-          label={category === "shift_change" ? "Shift" : "Dates"}
-          value={summaryTarget || "Choose one first"}
-        />
-        <DetailRow isLast label="Reason" value={reason || "Choose one"} />
-      </GroupedSection>
-
-      <AppButton
-        disabled={!canSubmit}
-        label="Submit request"
-        onPress={async () => {
-          const result = await createRequest({
-            category,
-            note: note.trim() || undefined,
-            reason,
-            statusDetail:
-              category === "shift_change"
-                ? "Waiting for colleague and manager approval"
-                : "Waiting for manager review",
-            target:
-              category === "shift_change"
-                ? {
-                    kind: "shift",
-                    label: summaryTarget,
-                    shiftId: selectedShiftId,
-                  }
-                : {
-                    endDate: selectedDates[selectedDates.length - 1],
-                    kind: "dates",
-                    label: summaryTarget,
-                    startDate: selectedDates[0],
-                  },
-            type: config.type,
-          })
-          if (!result.ok) return
-          setDone(true)
-        }}
-      />
-    </AppScrollScreen>
+                fireHaptic("success")
+                setDone(true)
+              }}
+              pressHaptic="none"
+            />
+          </View>
+        </AppScrollScreen>
+      </View>
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
-  categoryGlyph: {
-    alignItems: "center",
-    borderRadius: 12,
-    height: 36,
-    justifyContent: "center",
-    width: 36,
-  },
-  categoryRow: {
-    minHeight: 72,
-    paddingHorizontal: 14,
-  },
   dateWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  doneContent: {
-    alignItems: "center",
-    gap: 16,
-    paddingHorizontal: 20,
   },
   doneScreen: {
-    alignItems: "center",
     justifyContent: "center",
     minHeight: "100%",
     paddingHorizontal: 20,
@@ -396,48 +330,46 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     gap: 10,
   },
-  flatSection: {
-    gap: 8,
+  flex: {
+    flex: 1,
   },
-  flatSectionTitle: {
-    letterSpacing: 0.6,
-    paddingHorizontal: 4,
-    textTransform: "uppercase",
-  },
-  intro: {
-    gap: 6,
+  groupBody: {
+    gap: 14,
   },
   noteInput: {
     fontSize: 15,
-    minHeight: 72,
+    minHeight: 96,
     paddingTop: 2,
   },
   noteShell: {
-    minHeight: 116,
+    minHeight: 146,
   },
   reasonWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
   },
   screen: {
-    gap: 18,
+    gap: 20,
     paddingHorizontal: 20,
-    paddingTop: 20,
+  },
+  sectionBody: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    elevation: 0,
+    overflow: "visible",
+    padding: 0,
+    shadowOpacity: 0,
   },
   shiftList: {
-    gap: 10,
+    gap: 0,
   },
   shiftRow: {
-    minHeight: 84,
+    borderRadius: 0,
+    borderWidth: 0,
+    minHeight: 74,
   },
-  successIcon: {
-    alignItems: "center",
-    borderRadius: 999,
-    height: 72,
-    justifyContent: "center",
-    width: 72,
+  submitBlock: {
+    paddingTop: 4,
   },
 })

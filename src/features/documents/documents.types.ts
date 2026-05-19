@@ -1,7 +1,5 @@
 import type { DocumentStatus } from "@/core/models"
 
-export type DocumentCategory = "required" | "payslips" | "contracts"
-
 export interface Payslip {
   id: string
   month: string

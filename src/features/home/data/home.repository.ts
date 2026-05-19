@@ -1,4 +1,4 @@
-import type { Employer, HomeTask, NotificationItem, Shift, UserProfile } from "@/core/models"
+import type { HomeTask, NotificationItem, Shift, UserProfile } from "@/core/models"
 
 export interface HomeOverview {
   earnings: {
@@ -11,7 +11,6 @@ export interface HomeOverview {
   }
   notifications: NotificationItem[]
   profile: UserProfile
-  selectedEmployer?: Employer
   shifts: Shift[]
   tasks: HomeTask[]
   unreadNotifications: number

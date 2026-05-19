@@ -1,5 +1,5 @@
 import { buildNewTimeEntry } from "@/core/mockState"
-import type { AppStoreState, DocumentItem, Employer, TimeEntry, UserProfile } from "@/core/models"
+import type { AppStoreState, DocumentItem, TimeEntry, UserProfile } from "@/core/models"
 import { buildTimeEntryEvent } from "@/core/timeEntries"
 
 import type { AppAction } from "./app.types"
@@ -40,11 +40,14 @@ export function applyAppAction(state: AppStoreState, action: AppAction): AppStor
     case "completeOnboarding":
       return {
         ...state,
-        activeEmployerId: action.payload.employerId,
-        employers: state.employers.map((employer) => ({
-          ...employer,
-          active: employer.id === action.payload.employerId,
-        })),
+        employers: state.employers.some((employer) => employer.id === action.payload.employerId)
+          ? state.employers
+          : (() => {
+              const employer = state.employerDirectory.find(
+                (candidate) => candidate.id === action.payload.employerId,
+              )
+              return employer ? [...state.employers, employer] : state.employers
+            })(),
         profile: {
           ...state.profile,
           onboardingComplete: true,
@@ -57,6 +60,17 @@ export function applyAppAction(state: AppStoreState, action: AppAction): AppStor
         profile: {
           ...state.profile,
           ...action.payload,
+        },
+      }
+    case "updatePasswordMetadata":
+      return {
+        ...state,
+        profile: {
+          ...state.profile,
+          security: {
+            ...state.profile.security,
+            passwordLastChangedAt: action.payload.changedAt,
+          },
         },
       }
     case "saveAvailabilityOverride":
@@ -115,6 +129,28 @@ export function applyAppAction(state: AppStoreState, action: AppAction): AppStor
         ...state,
         notifications: state.notifications.map((notification) => ({
           ...notification,
+          unread: false,
+        })),
+      }
+    case "archiveNotification":
+      return {
+        ...state,
+        notifications: state.notifications.map((notification) =>
+          notification.id === action.payload.id
+            ? {
+                ...notification,
+                archivedAt: new Date().toISOString(),
+                unread: false,
+              }
+            : notification,
+        ),
+      }
+    case "archiveAllNotifications":
+      return {
+        ...state,
+        notifications: state.notifications.map((notification) => ({
+          ...notification,
+          archivedAt: notification.archivedAt ?? new Date().toISOString(),
           unread: false,
         })),
       }
@@ -258,15 +294,6 @@ export function applyAppAction(state: AppStoreState, action: AppAction): AppStor
           ? state.signedContractIds
           : [...state.signedContractIds, action.payload.contractId],
       }
-    case "switchEmployer":
-      return {
-        ...state,
-        activeEmployerId: action.payload.employerId,
-        employers: state.employers.map((employer) => ({
-          ...employer,
-          active: employer.id === action.payload.employerId,
-        })),
-      }
     case "joinEmployer": {
       const employer = state.employerDirectory.find(
         (candidate) => candidate.id === action.payload.employerId,
@@ -297,13 +324,6 @@ export function withStateAuthStatus(
     ...state,
     authStatus,
   }
-}
-
-export function withEmployerActiveState(employers: Employer[], employerId: string): Employer[] {
-  return employers.map((employer) => ({
-    ...employer,
-    active: employer.id === employerId,
-  }))
 }
 
 export function withProfileUpdate(

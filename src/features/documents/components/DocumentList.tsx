@@ -2,10 +2,9 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { DocumentItem } from "@/core/models"
-import { AppSegmentedControl, Banner, Text, appLayout, useDesignTokens } from "@/ui"
+import { Banner, Text, appLayout, useDesignTokens } from "@/ui"
 
-import { documentCategories } from "../documents.data"
-import type { Contract, DocumentCategory, Payslip } from "../documents.types"
+import type { Contract, Payslip } from "../documents.types"
 import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.utils"
 
 export function AttentionBanner({ count, onPress }: { count: number; onPress: () => void }) {
@@ -30,25 +29,6 @@ export function AttentionBanner({ count, onPress }: { count: number; onPress: ()
   )
 }
 
-export function CategoryPicker({
-  onChange,
-  value,
-}: {
-  onChange: (category: DocumentCategory) => void
-  value: DocumentCategory
-}) {
-  return (
-    <AppSegmentedControl
-      onChange={onChange}
-      options={documentCategories.map((category) => ({
-        label: category.label,
-        value: category.id,
-      }))}
-      value={value}
-    />
-  )
-}
-
 export function RequiredDocumentRow({
   document,
   onPress,
@@ -62,7 +42,7 @@ export function RequiredDocumentRow({
   const showsStatusText = shouldShowDocumentRowStatus(document.status)
 
   return (
-    <Pressable onPress={onPress} style={[styles.documentRow, { borderBottomColor: tokens.border }]}>
+    <Pressable onPress={onPress} style={[styles.documentRow, { backgroundColor: tokens.surface }]}>
       <View style={[styles.statusIcon, { backgroundColor: status.backgroundColor }]}>
         <Ionicons color={status.color} name={status.icon} size={18} />
       </View>
@@ -115,7 +95,7 @@ export function PayslipRow({ onPress, payslip }: { onPress: () => void; payslip:
   const tokens = useDesignTokens()
 
   return (
-    <Pressable onPress={onPress} style={[styles.documentRow, { borderBottomColor: tokens.border }]}>
+    <Pressable onPress={onPress} style={[styles.documentRow, { backgroundColor: tokens.surface }]}>
       <View style={[styles.statusIcon, { backgroundColor: `${tokens.success}14` }]}>
         <Ionicons color={tokens.success} name="cash-outline" size={18} />
       </View>
@@ -199,17 +179,15 @@ export function ContractCard({
         ) : (
           <Pressable
             onPress={onDownload}
-            style={[
-              styles.contractPrimary,
-              {
-                backgroundColor: `${tokens.success}10`,
-                borderColor: `${tokens.success}22`,
-              },
-              styles.contractPrimaryBorder,
-            ]}
+            style={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
           >
-            <Ionicons color={tokens.success} name="download-outline" size={14} />
-            <Text text="Download" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
+            <Ionicons color={tokens.accentForeground} name="download-outline" size={14} />
+            <Text
+              text="Download"
+              size="xxs"
+              weight="semiBold"
+              style={{ color: tokens.accentForeground }}
+            />
           </Pressable>
         )}
       </View>
@@ -243,9 +221,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 10,
   },
-  contractPrimaryBorder: {
-    borderWidth: 1,
-  },
   contractSecondary: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -259,10 +234,12 @@ const styles = StyleSheet.create({
   },
   documentRow: {
     alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderCurve: "continuous",
+    borderRadius: 17,
     flexDirection: "row",
     gap: appLayout.rowGap,
     minHeight: 68,
+    paddingHorizontal: 16,
     paddingVertical: 14,
   },
   eyeButton: {

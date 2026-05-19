@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 // we always make sure 'react-native' gets included first
 // eslint-disable-next-line no-restricted-imports
 import * as ReactNative from "react-native"
@@ -160,6 +161,85 @@ jest.mock("expo-localization", () => ({
   getLocales: () => [{ languageTag: "en-US", textDirection: "ltr" }],
 }))
 
+jest.mock("expo-haptics", () => ({
+  ImpactFeedbackStyle: {
+    Heavy: "heavy",
+    Light: "light",
+    Medium: "medium",
+    Rigid: "rigid",
+    Soft: "soft",
+  },
+  NotificationFeedbackType: {
+    Error: "error",
+    Success: "success",
+    Warning: "warning",
+  },
+  impactAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  selectionAsync: jest.fn(),
+}))
+
+jest.mock("react-native-reanimated", () => {
+  const React = require("react")
+  const { View } = require("react-native")
+
+  const AnimatedView = React.forwardRef((props: Record<string, unknown>, ref: unknown) =>
+    React.createElement(View, { ...props, ref }, props.children),
+  )
+  AnimatedView.displayName = "AnimatedView"
+
+  const interpolate = (value: number, input: number[], output: number[]) => {
+    if (input.length < 2 || output.length < 2) {
+      return output[0] ?? value
+    }
+
+    const [inputStart, inputEnd] = [input[0], input[input.length - 1]]
+    const [outputStart, outputEnd] = [output[0], output[output.length - 1]]
+    if (inputEnd === inputStart) {
+      return outputStart
+    }
+
+    const progress = (value - inputStart) / (inputEnd - inputStart)
+    return outputStart + progress * (outputEnd - outputStart)
+  }
+
+  return {
+    __esModule: true,
+    default: {
+      View: AnimatedView,
+      createAnimatedComponent: (Component: unknown) => Component,
+    },
+    Easing: {
+      bezier: () => (value: number) => value,
+      cubic: (value: number) => value,
+      out: (easing: unknown) => easing,
+      quad: (value: number) => value,
+    },
+    Extrapolation: {
+      CLAMP: "clamp",
+    },
+    View: AnimatedView,
+    createAnimatedComponent: (Component: unknown) => Component,
+    interpolate,
+    useAnimatedStyle: (factory: () => Record<string, unknown>) => factory(),
+    useSharedValue: (value: unknown) => ({ value }),
+    withDelay: (_delay: number, value: unknown) => value,
+    withSequence: (...values: unknown[]) => values[values.length - 1],
+    withSpring: (value: unknown) => value,
+    withTiming: (value: unknown) => value,
+  }
+})
+
+jest.mock("react-native-worklets", () => ({
+  __esModule: true,
+  createSerializable: (value: unknown) => value,
+  createWorkletRuntime: jest.fn(),
+  makeMutable: (value: unknown) => ({ value }),
+  runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
+  runOnUI: (fn: (...args: unknown[]) => unknown) => fn,
+  useSharedValue: (value: unknown) => ({ value }),
+}))
+
 jest.mock("../src/i18n/index.ts", () => ({
   i18n: {
     isInitialized: true,
@@ -169,6 +249,19 @@ jest.mock("../src/i18n/index.ts", () => ({
     },
     numberToCurrency: jest.fn(),
   },
+}))
+
+jest.mock("@/providers/motion-provider", () => ({
+  MotionProvider: ({ children }: { children: ReactNode }) => children,
+  useAppMotion: () => ({
+    enterDistance: 0,
+    enterDuration: 0,
+    mode: "full",
+    preference: "system",
+    prefersReducedMotion: false,
+    shouldReduceMotion: false,
+    staggerStep: 0,
+  }),
 }))
 
 declare const tron // eslint-disable-line @typescript-eslint/no-unused-vars

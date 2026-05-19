@@ -1,14 +1,18 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+
 import {
   AppButton,
   AppSegmentedControl,
+  SelectionIndicator,
   SelectionRow,
   Text,
   appTypography,
   useDesignTokens,
 } from "@/ui"
+
 import { AuthTextField } from "../AuthTextField"
+import { onboardingStyles } from "./onboarding.styles"
 import type { OnboardingEmployer as OnboardingEmployerType } from "./types"
 
 export interface OnboardingEmployerProps {
@@ -43,8 +47,8 @@ export function OnboardingEmployer({
   const tokens = useDesignTokens()
 
   return (
-    <View style={styles.stackLarge}>
-      <View style={styles.titleBlock}>
+    <View style={onboardingStyles.section}>
+      <View style={onboardingStyles.titleBlock}>
         <Text
           text="Join your employer"
           weight="bold"
@@ -88,7 +92,7 @@ export function OnboardingEmployer({
                     : "Code not recognized"
             }
             size="xxs"
-            style={{ color: tokens.textMuted, textAlign: "center" }}
+            style={[onboardingStyles.centeredText, styles.helperText, { color: tokens.textMuted }]}
           />
         </View>
       ) : (
@@ -206,7 +210,7 @@ function CodeBoxes({ code }: { code: string }) {
             <Text
               text={code[index] ?? ""}
               weight="bold"
-              style={{ color: tokens.textPrimary, fontSize: 21, lineHeight: 26 }}
+              style={[onboardingStyles.metricValue, { color: tokens.textPrimary }]}
             />
           </View>
         )
@@ -238,9 +242,16 @@ function EmployerRow({
         </View>
       }
       trailing={
-        <View style={styles.rating}>
-          <Ionicons color={tokens.warning} name="star" size={11} />
-          <Text text={String(employer.rating)} size="xxs" style={{ color: tokens.textSecondary }} />
+        <View style={styles.trailingContent}>
+          <View style={styles.rating}>
+            <Ionicons color={tokens.warning} name="star" size={11} />
+            <Text
+              text={String(employer.rating)}
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+            />
+          </View>
+          {selected ? <SelectionIndicator /> : null}
         </View>
       }
     />
@@ -256,11 +267,15 @@ function PreviewStat({ label, value }: { label: string; value: string }) {
         text={value}
         size="xs"
         weight="semiBold"
-        style={{ color: tokens.textPrimary, textAlign: "center" }}
+        style={[onboardingStyles.centeredText, styles.previewValue, { color: tokens.textPrimary }]}
       />
       <Text
         text={label}
-        style={{ color: tokens.textSecondary, fontSize: 11, lineHeight: 14, textAlign: "center" }}
+        style={[
+          onboardingStyles.caption,
+          onboardingStyles.centeredText,
+          { color: tokens.textSecondary },
+        ]}
       />
     </View>
   )
@@ -301,6 +316,9 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  helperText: {
+    textAlign: "center",
+  },
   joinedCard: {
     alignItems: "center",
     borderRadius: 16,
@@ -318,6 +336,9 @@ const styles = StyleSheet.create({
   previewStats: {
     flexDirection: "row",
     gap: 8,
+  },
+  previewValue: {
+    textAlign: "center",
   },
   rating: {
     alignItems: "center",
@@ -337,10 +358,9 @@ const styles = StyleSheet.create({
   stack: {
     gap: 10,
   },
-  stackLarge: {
-    gap: 20,
-  },
-  titleBlock: {
-    gap: 6,
+  trailingContent: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
   },
 })

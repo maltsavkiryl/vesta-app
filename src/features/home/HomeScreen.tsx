@@ -10,7 +10,7 @@ import {
 import { HomeTimeCard } from "@/features/home/components/HomeTimeCard"
 import { UpcomingShiftsSection } from "@/features/home/components/UpcomingShiftsSection"
 import { useHomeScreen } from "@/features/home/useHomeScreen"
-import { AppScrollScreen, useDesignTokens } from "@/ui"
+import { AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
 
 export function HomeTasksScreen() {
   const tokens = useDesignTokens()
@@ -20,14 +20,17 @@ export function HomeTasksScreen() {
     <AppScrollScreen
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.nativeSheetContent}
-      style={{ backgroundColor: tokens.background }}
+      style={{ backgroundColor: tokens.groupedBackground }}
+      variant="grouped"
       topInset="none"
     >
-      <HomeTasksDrawerGroups
-        backgroundColor={tokens.surface}
-        onComplete={completeTask}
-        pendingTasks={pendingTasks}
-      />
+      <MotionView>
+        <HomeTasksDrawerGroups
+          backgroundColor={tokens.surface}
+          onComplete={completeTask}
+          pendingTasks={pendingTasks}
+        />
+      </MotionView>
     </AppScrollScreen>
   )
 }
@@ -36,11 +39,9 @@ export function HomeScreen() {
   const {
     completeTask,
     greeting,
-    hideTask,
     home,
-    openDocuments,
+    openLatestPayslip,
     openNotifications,
-    openProfile,
     openSchedule,
     openShift,
     pendingTasks,
@@ -51,43 +52,51 @@ export function HomeScreen() {
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
-      <HomeHeader
-        employerName={home?.selectedEmployer?.name}
-        firstName={home?.profile.firstName ?? ""}
-        greeting={greeting}
-        hasUnread={(home?.unreadNotifications ?? 0) > 0}
-        role={home?.profile.role}
-        onEmployerPress={openProfile}
-        onNotificationsPress={openNotifications}
-      />
+      <MotionView>
+        <HomeHeader
+          firstName={home?.profile.firstName ?? ""}
+          greeting={greeting}
+          hasUnread={(home?.unreadNotifications ?? 0) > 0}
+          onNotificationsPress={openNotifications}
+        />
+      </MotionView>
 
       <View style={styles.stack}>
-        <HomeTimeCard />
+        <MotionView delay={50}>
+          <HomeTimeCard />
+        </MotionView>
 
-        <UpcomingShiftsSection
-          shifts={upcomingShifts}
-          onShiftPress={openShift}
-          onSeeAll={openSchedule}
-        />
+        <MotionView delay={100}>
+          <UpcomingShiftsSection
+            shifts={upcomingShifts}
+            onShiftPress={openShift}
+            onViewAll={openSchedule}
+          />
+        </MotionView>
 
-        <EarningsSummaryCard
-          earnedAmount={home?.earnings.earnedAmount ?? 0}
-          monthLabel={home?.earnings.monthLabel ?? ""}
-          onPayslipPress={openDocuments}
-        />
+        <MotionView delay={150}>
+          <EarningsSummaryCard
+            earnedAmount={home?.earnings.earnedAmount ?? 0}
+            monthLabel={home?.earnings.monthLabel ?? ""}
+            onPayslipPress={openLatestPayslip}
+          />
+        </MotionView>
 
-        <HomeTasksSection
-          tasks={pendingTasks}
-          onComplete={completeTask}
-          onDismiss={hideTask}
-          onShowAll={() => router.push("/(app)/tasks" as never)}
-        />
+        <MotionView delay={200}>
+          <HomeTasksSection
+            tasks={pendingTasks}
+            onComplete={completeTask}
+            onViewAll={() => router.push("/(app)/tasks" as never)}
+          />
+        </MotionView>
 
-        <HomeUpdatesSection
-          notifications={home?.notifications ?? []}
-          onNotificationPress={(notification) => void runAction(notification.action)}
-          onShowAll={openNotifications}
-        />
+        <MotionView delay={250}>
+          <HomeUpdatesSection
+            notifications={home?.notifications ?? []}
+            onNotificationPress={(notification) => void runAction(notification.action)}
+            onViewAll={openNotifications}
+          />
+        </MotionView>
       </View>
     </AppScrollScreen>
   )

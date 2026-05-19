@@ -1,6 +1,8 @@
 import { StyleSheet, View } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
-import { Text, appTypography, useDesignTokens } from "@/ui"
+
+import { ListCard, ListCardItem, SuccessState, Text, useDesignTokens } from "@/ui"
+
+import { onboardingStyles } from "./onboarding.styles"
 
 export interface OnboardingDoneProps {
   availabilityDays: string[]
@@ -24,81 +26,39 @@ export function OnboardingDone({
   ]
 
   return (
-    <View style={[styles.stackLarge, styles.doneContent]}>
-      <View style={[styles.doneIcon, { backgroundColor: tokens.successSoft }]}>
-        <Ionicons color={tokens.success} name="checkmark-outline" size={44} />
-      </View>
-      <View style={styles.titleBlock}>
-        <Text
-          text="You're all set!"
-          weight="bold"
-          style={[appTypography.authTitle, { color: tokens.textPrimary, textAlign: "center" }]}
-        />
-        <Text
-          text="Your Vesta account is ready. Here's what we set up for you."
-          size="xs"
-          style={{ color: tokens.textSecondary, textAlign: "center" }}
-        />
-      </View>
-      <View
-        style={[
-          styles.summaryCard,
-          { backgroundColor: tokens.surfaceSecondary, borderColor: tokens.border },
-        ]}
-      >
+    <View style={onboardingStyles.section}>
+      <SuccessState
+        icon="checkmark-outline"
+        style={styles.successState}
+        subtitle="Your Vesta account is ready. Here's what we set up for you."
+        title="You're all set!"
+      />
+      <ListCard style={styles.summaryCard}>
         {rows.map((row, index) => (
-          <View
+          <ListCardItem
             key={row.label}
-            style={[
-              styles.summaryRow,
-              index < rows.length - 1
-                ? { borderBottomColor: tokens.border, borderBottomWidth: 1 }
-                : null,
-            ]}
-          >
-            <Text text={row.label} size="xs" style={{ color: tokens.textSecondary }} />
-            <Text
-              text={row.value}
-              size="xs"
-              weight="medium"
-              style={{ color: tokens.textPrimary }}
-            />
-          </View>
+            isLast={index === rows.length - 1}
+            title={row.label}
+            titleStyle={{ color: tokens.textSecondary }}
+            trailing={
+              <Text text={row.value} size="xs" weight="medium" style={styles.summaryValue} />
+            }
+          />
         ))}
-      </View>
+      </ListCard>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  doneContent: {
-    alignItems: "center",
-    paddingTop: 16,
-  },
-  doneIcon: {
-    alignItems: "center",
-    borderRadius: 48,
-    height: 96,
-    justifyContent: "center",
-    width: 96,
-  },
-  stackLarge: {
-    gap: 20,
+  successState: {
+    paddingHorizontal: 0,
+    paddingVertical: 16,
   },
   summaryCard: {
-    alignSelf: "stretch",
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
+    gap: 0,
   },
-  summaryRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-  },
-  titleBlock: {
-    gap: 6,
+  summaryValue: {
+    textAlign: "right",
   },
 })

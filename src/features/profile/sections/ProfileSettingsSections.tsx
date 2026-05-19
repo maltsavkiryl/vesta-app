@@ -1,7 +1,23 @@
+import { useState } from "react"
+import { StyleSheet } from "react-native"
+import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
-import { GroupedSection, ListRow, StatusBadge, Text, ToggleSwitch } from "@/ui"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import {
+  AppButton,
+  Banner,
+  GroupedSection,
+  ListRow,
+  SelectionIndicator,
+  StatusBadge,
+  Text,
+  TextField,
+  ToggleSwitch,
+  useDesignTokens,
+} from "@/ui"
 import type { DesignTokens } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 import { LANGUAGE_OPTIONS, SectionFooter } from "./ProfileSectionShared"
 
@@ -63,7 +79,6 @@ export function LanguageSection({
             key={language}
             isLast={index === LANGUAGE_OPTIONS.length - 1}
             title={language}
-            subtitle={selected ? "Current language" : undefined}
             onPress={() => onSelectLanguage(language)}
             leading={
               <Ionicons
@@ -72,9 +87,7 @@ export function LanguageSection({
                 size={18}
               />
             }
-            trailing={
-              selected ? <Ionicons color={tokens.accent} name="checkmark-circle" size={20} /> : null
-            }
+            trailing={selected ? <SelectionIndicator /> : null}
           />
         )
       })}
@@ -143,6 +156,108 @@ export function SecuritySection({
           trailing={<StatusBadge label="Current" tone="success" />}
         />
       </GroupedSection>
+    </>
+  )
+}
+
+export function ChangePasswordSection() {
+  const router = useRouter()
+  const tokens = useDesignTokens()
+  const { changePassword } = useAuthActions()
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [nextPassword, setNextPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState<string>()
+  const [isSaving, setIsSaving] = useState(false)
+
+  const canSubmit = Boolean(currentPassword && nextPassword && confirmPassword) && !isSaving
+
+  const handleSubmit = async () => {
+    if (nextPassword.length < 6) {
+      fireHaptic("warning")
+      setError("Use a password with at least 6 characters.")
+      return
+    }
+
+    if (nextPassword !== confirmPassword) {
+      fireHaptic("warning")
+      setError("The new passwords do not match.")
+      return
+    }
+
+    setIsSaving(true)
+    setError(undefined)
+    const result = await changePassword({ currentPassword, nextPassword })
+    setIsSaving(false)
+
+    if (!result.ok) {
+      fireHaptic("error")
+      setError(result.error.message)
+      return
+    }
+
+    fireHaptic("success")
+    router.back()
+  }
+
+  return (
+    <>
+      <GroupedSection title="Update password">
+        <TextField
+          autoCapitalize="none"
+          autoCorrect={false}
+          containerStyle={styles.field}
+          label="Current password"
+          onChangeText={setCurrentPassword}
+          secureTextEntry
+          textContentType="password"
+          value={currentPassword}
+          variant="muted"
+        />
+        <TextField
+          autoCapitalize="none"
+          autoCorrect={false}
+          containerStyle={styles.field}
+          label="New password"
+          onChangeText={setNextPassword}
+          secureTextEntry
+          textContentType="newPassword"
+          value={nextPassword}
+          variant="muted"
+        />
+        <TextField
+          autoCapitalize="none"
+          autoCorrect={false}
+          containerStyle={styles.field}
+          label="Confirm new password"
+          onChangeText={setConfirmPassword}
+          onSubmitEditing={() => {
+            if (canSubmit) {
+              void handleSubmit()
+            }
+          }}
+          returnKeyType="done"
+          secureTextEntry
+          textContentType="password"
+          value={confirmPassword}
+          variant="muted"
+        />
+      </GroupedSection>
+      {error ? (
+        <Banner tone="danger">
+          <Text text={error} size="xxs" style={{ color: tokens.danger }} />
+        </Banner>
+      ) : null}
+      <AppButton
+        disabled={!canSubmit}
+        fullWidth
+        label={isSaving ? "Saving..." : "Save password"}
+        onPress={() => {
+          void handleSubmit()
+        }}
+        pressHaptic="none"
+      />
+      <SectionFooter text="This updates the locally stored password for the current demo account." />
     </>
   )
 }
@@ -331,3 +446,10 @@ export function LegalPrivacyPreviewSection({
     </GroupedSection>
   )
 }
+
+const styles = StyleSheet.create({
+  field: {
+    marginHorizontal: 12,
+    marginVertical: 6,
+  },
+})

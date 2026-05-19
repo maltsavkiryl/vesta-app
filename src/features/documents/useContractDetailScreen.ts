@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 
 import { useDocumentActions } from "@/features/documents/data/documents.mutations"
 import { useContractsQuery } from "@/features/documents/data/documents.queries"
+import { fireHaptic } from "@/utils/haptics"
 
 import { findContract } from "./documents.utils"
 
@@ -19,7 +20,12 @@ export function useContractDetailScreen() {
   const signCurrentContract = async () => {
     if (!contract || !canSign) return
     const result = await signContract(contract.id)
-    if (!result.ok) return
+    if (!result.ok) {
+      fireHaptic("error")
+      return
+    }
+
+    fireHaptic("success")
     router.back()
   }
 

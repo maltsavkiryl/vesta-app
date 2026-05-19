@@ -53,6 +53,7 @@ export type AppAction =
   | { type: "signOut" }
   | { type: "completeOnboarding"; payload: { role: string; employerId: string } }
   | { type: "updateProfile"; payload: Partial<UserProfile> }
+  | { type: "updatePasswordMetadata"; payload: { changedAt: string } }
   | { type: "saveAvailabilityOverride"; payload: AvailabilityOverride }
   | { type: "saveAvailabilityTemplate"; payload: AvailabilityTemplate }
   | { type: "submitPlanningWindow"; payload: { id: string; submittedAt: string } }
@@ -60,20 +61,20 @@ export type AppAction =
   | { type: "respondToShift"; payload: { id: string } }
   | { type: "markNotificationRead"; payload: { id: string } }
   | { type: "markAllNotificationsRead" }
+  | { type: "archiveNotification"; payload: { id: string } }
+  | { type: "archiveAllNotifications" }
   | { type: "startClock"; payload?: ClockActionPayload }
   | { type: "startBreak"; payload?: ClockActionPayload }
   | { type: "endBreak"; payload?: ClockActionPayload }
   | { type: "confirmClockOut"; payload?: ClockActionPayload }
   | { type: "uploadDocument"; payload: DocumentUploadPayload }
   | { type: "signContract"; payload: { contractId: string } }
-  | { type: "switchEmployer"; payload: { employerId: string } }
   | { type: "joinEmployer"; payload: { employerId: string } }
   | { type: "recordPasswordReset"; payload: { email: string } }
 
 export interface AccountSnapshotDto extends Omit<AppStoreState, "authStatus"> {}
 
 export interface ProfileAggregateDto {
-  activeEmployerId: string
   employerDirectory: Employer[]
   employers: Employer[]
   lastPasswordResetEmail?: string

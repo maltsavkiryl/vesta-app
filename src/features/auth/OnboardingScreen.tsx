@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
-import { AppButton, AppScrollScreen, useDesignTokens } from "@/ui"
+import { AppButton, AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 import { OnboardingAvailability } from "./onboarding/OnboardingAvailability"
 import { OnboardingDone } from "./onboarding/OnboardingDone"
@@ -23,13 +24,14 @@ export function OnboardingScreen() {
   const tokens = useDesignTokens()
   const { completeOnboarding } = useAuthActions()
   const { state: accountState } = useProfileStateQuery()
+  const initialEmployerId = accountState?.employers[0]?.id ?? ""
   const [step, setStep] = useState(0)
   const [selectedRole, setSelectedRole] = useState(accountState?.profile.role ?? "")
-  const [selectedEmployerId, setSelectedEmployerId] = useState(accountState?.activeEmployerId ?? "")
+  const [selectedEmployerId, setSelectedEmployerId] = useState(initialEmployerId)
   const [joinMode, setJoinMode] = useState<"code" | "search">("code")
   const [code, setCode] = useState("")
   const [search, setSearch] = useState("")
-  const [joined, setJoined] = useState(Boolean(accountState?.activeEmployerId))
+  const [joined, setJoined] = useState(Boolean(initialEmployerId))
   const [availabilityDays, setAvailabilityDays] = useState(["Mon", "Tue", "Wed", "Thu", "Fri"])
   const [timeSlot, setTimeSlot] = useState("evenings")
   const [notifications, setNotifications] = useState<Record<string, boolean>>({
@@ -77,10 +79,13 @@ export function OnboardingScreen() {
   const complete = async () => {
     const result = await completeOnboarding({
       role: selectedRole || "Waiter",
-      employerId:
-        (activeEmployer ?? accountState?.employers[0])?.id ?? accountState?.activeEmployerId ?? "",
+      employerId: (activeEmployer ?? accountState?.employers[0])?.id ?? "",
     })
-    if (!result.ok) return
+    if (!result.ok) {
+      fireHaptic("error")
+      return
+    }
+    fireHaptic("success")
     router.replace("/")
   }
 
@@ -124,7 +129,7 @@ export function OnboardingScreen() {
         <View style={styles.backButtonSpacer} />
       </View>
 
-      <View style={styles.stepContent}>
+      <MotionView delay={55} key={step} style={styles.stepContent}>
         {step === 1 ? (
           <OnboardingRole selectedRole={selectedRole} onSelectRole={setSelectedRole} />
         ) : null}
@@ -196,15 +201,18 @@ export function OnboardingScreen() {
             role={ONBOARDING_ROLES.find((item) => item.id === selectedRole)?.label ?? selectedRole}
           />
         ) : null}
-      </View>
+      </MotionView>
 
-      <AppButton
-        disabled={!canContinue}
-        label={
-          step === 5 ? "Start using Vesta" : step === 2 && !joined ? "Skip for now" : "Continue"
-        }
-        onPress={next}
-      />
+      <MotionView delay={95}>
+        <AppButton
+          disabled={!canContinue}
+          label={
+            step === 5 ? "Start using Vesta" : step === 2 && !joined ? "Skip for now" : "Continue"
+          }
+          onPress={next}
+          pressHaptic={step === 5 ? "none" : "selection"}
+        />
+      </MotionView>
     </AppScrollScreen>
   )
 }

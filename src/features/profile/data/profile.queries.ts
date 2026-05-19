@@ -27,37 +27,22 @@ export function useEmployersQuery() {
   })
 }
 
-export function useSelectedEmployerQuery() {
-  const employersQuery = useEmployersQuery()
-
-  return useMemo(
-    () =>
-      employersQuery.data?.employers.find(
-        (employer) => employer.id === employersQuery.data?.activeEmployerId,
-      ),
-    [employersQuery.data],
-  )
-}
-
 export function useProfileStateQuery() {
   const profileQuery = useProfileQuery()
   const employersQuery = useEmployersQuery()
-  const selectedEmployer = useSelectedEmployerQuery()
 
   return useMemo(
     () => ({
       profile: profileQuery.data,
-      selectedEmployer,
       state:
         profileQuery.data && employersQuery.data
           ? {
-              activeEmployerId: employersQuery.data.activeEmployerId,
               employerDirectory: employersQuery.data.employerDirectory,
               employers: employersQuery.data.employers,
               profile: profileQuery.data,
             }
           : undefined,
     }),
-    [employersQuery.data, profileQuery.data, selectedEmployer],
+    [employersQuery.data, profileQuery.data],
   )
 }

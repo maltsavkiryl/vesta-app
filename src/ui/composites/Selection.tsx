@@ -1,12 +1,15 @@
 import { ReactNode } from "react"
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { Platform, Pressable, StyleProp, StyleSheet, Switch, View, ViewStyle } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
+import { firePressHaptic, type PressHapticIntent } from "@/utils/haptics"
 
 export function SelectionCard({
   icon,
   onPress,
+  pressHaptic = "selection",
   selected,
   style,
   subtitle,
@@ -14,6 +17,7 @@ export function SelectionCard({
 }: {
   icon?: ReactNode
   onPress: () => void
+  pressHaptic?: PressHapticIntent | "none"
   selected: boolean
   style?: StyleProp<ViewStyle>
   subtitle?: string
@@ -23,7 +27,10 @@ export function SelectionCard({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        firePressHaptic(pressHaptic)
+        onPress()
+      }}
       style={[
         styles.card,
         {
@@ -56,11 +63,13 @@ export function SelectionCard({
 export function SelectionChip({
   label,
   onPress,
+  pressHaptic = "selection",
   selected,
   selectedVariant = "soft",
 }: {
   label: string
   onPress: () => void
+  pressHaptic?: PressHapticIntent | "none"
   selected: boolean
   selectedVariant?: "soft" | "solid"
 }) {
@@ -74,7 +83,10 @@ export function SelectionChip({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        firePressHaptic(pressHaptic)
+        onPress()
+      }}
       style={[
         styles.chip,
         {
@@ -95,6 +107,7 @@ export function SelectionRow({
   isLast = false,
   leading,
   onPress,
+  pressHaptic = "selection",
   selected,
   style,
   subtitle,
@@ -107,6 +120,7 @@ export function SelectionRow({
   isLast?: boolean
   leading?: ReactNode
   onPress: () => void
+  pressHaptic?: PressHapticIntent | "none"
   selected: boolean
   style?: StyleProp<ViewStyle>
   subtitle?: string
@@ -114,18 +128,22 @@ export function SelectionRow({
   trailing?: ReactNode
 }) {
   const tokens = useDesignTokens()
-  const baseBackgroundColor =
-    backgroundColor ?? (selected ? tokens.accentSoft : tokens.surfaceSecondary)
+  const baseBackgroundColor = backgroundColor ?? tokens.surfaceSecondary
 
   return (
     <Pressable
-      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={() => {
+        firePressHaptic(pressHaptic)
+        onPress()
+      }}
       style={({ pressed }) => [
         styles.row,
         grouped && styles.groupedRow,
         {
           backgroundColor: pressed ? tokens.pressed : baseBackgroundColor,
-          borderColor: selected ? tokens.accent : tokens.border,
+          borderColor: tokens.border,
         },
         style,
       ]}
@@ -147,21 +165,47 @@ export function SelectionRow({
   )
 }
 
+export function SelectionIndicator() {
+  const tokens = useDesignTokens()
+
+  return <Ionicons color={tokens.accent} name="checkmark-circle" size={20} />
+}
+
 export function ToggleSwitch({
   accessibilityLabel,
   onChange,
+  pressHaptic = "toggle",
   value,
 }: {
   accessibilityLabel?: string
   onChange: () => void | Promise<void>
+  pressHaptic?: PressHapticIntent | "none"
   value: boolean
 }) {
   const tokens = useDesignTokens()
 
+  if (Platform.OS === "ios" || Platform.OS === "android") {
+    return (
+      <Switch
+        accessibilityLabel={accessibilityLabel}
+        ios_backgroundColor={tokens.surfaceTertiary}
+        onValueChange={() => {
+          firePressHaptic(pressHaptic)
+          void onChange()
+        }}
+        trackColor={{ false: tokens.surfaceTertiary, true: tokens.success }}
+        value={value}
+      />
+    )
+  }
+
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel}
-      onPress={onChange}
+      onPress={() => {
+        firePressHaptic(pressHaptic)
+        void onChange()
+      }}
       style={[
         styles.toggleTrack,
         { backgroundColor: value ? tokens.success : tokens.surfaceTertiary },

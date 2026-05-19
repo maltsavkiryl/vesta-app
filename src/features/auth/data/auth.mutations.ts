@@ -70,6 +70,33 @@ export function useRequestPasswordResetMutation() {
   })
 }
 
+export function useResetPasswordMutation() {
+  return useMutation({
+    mutationFn: ({ email, nextPassword }: { email: string; nextPassword: string }) =>
+      appRepositories.auth.resetPassword(email, nextPassword),
+  })
+}
+
+export function useChangePasswordMutation() {
+  const { accountId } = useAuthSession()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      currentPassword,
+      nextPassword,
+    }: {
+      currentPassword: string
+      nextPassword: string
+    }) => appRepositories.auth.changePassword(accountId!, currentPassword, nextPassword),
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      void queryClient.invalidateQueries({ queryKey: authQueryKeys.session })
+      invalidateSignedInResources(queryClient, accountId)
+    },
+  })
+}
+
 export function useCompleteOnboardingMutation() {
   const queryClient = useQueryClient()
   const { accountId } = useAuthSession()
@@ -88,27 +115,35 @@ export function useCompleteOnboardingMutation() {
 }
 
 export function useAuthActions() {
+  const changePasswordMutation = useChangePasswordMutation()
   const signInMutation = useSignInMutation()
   const registerMutation = useRegisterMutation()
   const signOutMutation = useSignOutMutation()
   const requestPasswordResetMutation = useRequestPasswordResetMutation()
+  const resetPasswordMutation = useResetPasswordMutation()
   const completeOnboardingMutation = useCompleteOnboardingMutation()
 
   return useMemo(
     () => ({
+      changePassword: (payload: { currentPassword: string; nextPassword: string }) =>
+        changePasswordMutation.mutateAsync(payload),
       completeOnboarding: (payload: Parameters<typeof completeOnboardingWorkflow>[2]) =>
         completeOnboardingMutation.mutateAsync(payload),
       register: (payload: Parameters<typeof appRepositories.auth.register>[0]) =>
         registerMutation.mutateAsync(payload),
       requestPasswordReset: (email: string) => requestPasswordResetMutation.mutateAsync(email),
+      resetPassword: (payload: { email: string; nextPassword: string }) =>
+        resetPasswordMutation.mutateAsync(payload),
       signIn: (payload: Parameters<typeof appRepositories.auth.signIn>[0]) =>
         signInMutation.mutateAsync(payload),
       signOut: (): Promise<AppSession> => signOutMutation.mutateAsync(),
     }),
     [
+      changePasswordMutation,
       completeOnboardingMutation,
       registerMutation,
       requestPasswordResetMutation,
+      resetPasswordMutation,
       signInMutation,
       signOutMutation,
     ],

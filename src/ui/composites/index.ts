@@ -4,6 +4,7 @@ export * from "./DetailForm"
 export * from "./List"
 export * from "./SectionTitle"
 export * from "./Selection"
+export { MotionPressable, MotionView } from "./app-motion"
 
 export {
   ActionRow,

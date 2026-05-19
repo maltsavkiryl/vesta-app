@@ -1,10 +1,4 @@
-import type { Contract, DocumentCategory, Payslip } from "./documents.types"
-
-export const documentCategories: { id: DocumentCategory; label: string }[] = [
-  { id: "required", label: "Required" },
-  { id: "payslips", label: "Payslips" },
-  { id: "contracts", label: "Contracts" },
-]
+import type { Contract, Payslip } from "./documents.types"
 
 export const payslips: Payslip[] = [
   {

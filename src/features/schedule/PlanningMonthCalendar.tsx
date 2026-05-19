@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -20,6 +21,7 @@ export function PlanningMonthCalendar({
   anchorDate,
   cells,
   getDayState,
+  onLongPressDate,
   onNextMonth,
   onPrevMonth,
   onSelectDate,
@@ -28,6 +30,7 @@ export function PlanningMonthCalendar({
   anchorDate: Date
   cells: Array<string | null>
   getDayState: (dateString: string) => CalendarDayState
+  onLongPressDate: (dateString: string) => void
   onNextMonth: () => void
   onPrevMonth: () => void
   onSelectDate: (dateString: string) => void
@@ -36,6 +39,7 @@ export function PlanningMonthCalendar({
   const tokens = useDesignTokens()
   const today = new Date().toISOString().slice(0, 10)
   const currentMonth = anchorDate.getMonth()
+  const ignoreNextPressRef = useRef(false)
 
   return (
     <View style={styles.card}>
@@ -124,23 +128,59 @@ export function PlanningMonthCalendar({
               : dayState.availabilityStatus === "unavailable"
                 ? tokens.surfaceSecondary
                 : `${availabilityColor}10`
+          const activeBackgroundColor = isSelected
+            ? tokens.accent
+            : dayState.needsResponse
+              ? `${tokens.warning}18`
+              : dayState.hasShift
+                ? `${tokens.accent}18`
+                : dayState.availabilityStatus === "unavailable"
+                  ? `${tokens.textMuted}18`
+                  : `${availabilityColor}18`
+          const activeBorderColor = isSelected
+            ? tokens.accent
+            : dayState.needsResponse
+              ? `${tokens.warning}50`
+              : dayState.hasShift
+                ? `${tokens.accent}45`
+                : dayState.availabilityStatus === "unavailable"
+                  ? `${tokens.textMuted}34`
+                  : `${availabilityColor}45`
 
           return (
             <Pressable
               key={dateString}
               accessibilityRole="button"
-              onPress={() => onSelectDate(dateString)}
-              style={[
+              onLongPress={() => {
+                ignoreNextPressRef.current = true
+                onLongPressDate(dateString)
+              }}
+              onPress={() => {
+                if (ignoreNextPressRef.current) {
+                  ignoreNextPressRef.current = false
+                  return
+                }
+
+                onSelectDate(dateString)
+              }}
+              style={({ pressed }) => [
                 styles.dayCell,
+                pressed ? styles.dayCellActive : null,
                 {
-                  backgroundColor: isSelected ? tokens.accent : containerColor,
-                  borderColor: isSelected
-                    ? tokens.accent
-                    : isToday
+                  backgroundColor: pressed
+                    ? activeBackgroundColor
+                    : isSelected
                       ? tokens.accent
-                      : dayState.needsResponse
-                        ? `${tokens.warning}30`
-                        : "transparent",
+                      : containerColor,
+                  borderColor: pressed
+                    ? activeBorderColor
+                    : isSelected
+                      ? tokens.accent
+                      : isToday
+                        ? tokens.accent
+                        : dayState.needsResponse
+                          ? `${tokens.warning}30`
+                          : "transparent",
                 },
               ]}
             >
@@ -203,6 +243,9 @@ const styles = StyleSheet.create({
     minHeight: 42,
     paddingHorizontal: 4,
     paddingVertical: 6,
+  },
+  dayCellActive: {
+    transform: [{ scale: 0.94 }],
   },
   dayLabelCell: {
     alignItems: "center",

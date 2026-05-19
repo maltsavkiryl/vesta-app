@@ -13,11 +13,3 @@ export function joinEmployer(accountId: string, employerId: string) {
     applyAppAction,
   )
 }
-
-export function switchEmployer(accountId: string, employerId: string) {
-  return commitAccountAction(
-    accountId,
-    { type: "switchEmployer", payload: { employerId } },
-    applyAppAction,
-  )
-}

@@ -40,15 +40,50 @@ export function useMarkAllNotificationsReadMutation() {
   })
 }
 
+export function useArchiveNotificationMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (id: string) => appRepositories.notifications.archive(accountId!, id),
+    onSuccess: () => {
+      if (!accountId) return
+      invalidateNotificationQueries(queryClient, accountId)
+    },
+  })
+}
+
+export function useArchiveAllNotificationsMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: () => appRepositories.notifications.archiveAll(accountId!),
+    onSuccess: () => {
+      if (!accountId) return
+      invalidateNotificationQueries(queryClient, accountId)
+    },
+  })
+}
+
 export function useNotificationActions() {
+  const archiveAllNotificationsMutation = useArchiveAllNotificationsMutation()
+  const archiveNotificationMutation = useArchiveNotificationMutation()
   const markNotificationReadMutation = useMarkNotificationReadMutation()
   const markAllNotificationsReadMutation = useMarkAllNotificationsReadMutation()
 
   return useMemo(
     () => ({
+      archiveAllNotifications: () => archiveAllNotificationsMutation.mutateAsync(),
+      archiveNotification: (id: string) => archiveNotificationMutation.mutateAsync(id),
       markAllNotificationsRead: () => markAllNotificationsReadMutation.mutateAsync(),
       markNotificationRead: (id: string) => markNotificationReadMutation.mutateAsync(id),
     }),
-    [markAllNotificationsReadMutation, markNotificationReadMutation],
+    [
+      archiveAllNotificationsMutation,
+      archiveNotificationMutation,
+      markAllNotificationsReadMutation,
+      markNotificationReadMutation,
+    ],
   )
 }

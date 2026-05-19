@@ -16,6 +16,7 @@ import {
   appTypography,
   useDesignTokens,
 } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
@@ -45,9 +46,14 @@ export function ClockOutScreen() {
 
   const finish = async () => {
     const occurredAt = new Date().toISOString()
-    const location = await captureLocationSnapshot(clockSession.venueAddress)
+    const location = await captureLocationSnapshot()
     const result = await confirmClockOut({ occurredAt, location })
-    if (!result.ok) return
+    if (!result.ok) {
+      fireHaptic("error")
+      return
+    }
+
+    fireHaptic("success")
     setConfirmed(true)
     setTimeout(() => router.replace("/(app)/(tabs)/time"), 900)
   }
@@ -121,7 +127,12 @@ export function ClockOutScreen() {
 
           <View style={styles.footerBlock}>
             <View style={styles.footerActions}>
-              <AppButton label="Confirm clock out" variant="danger" onPress={finish} />
+              <AppButton
+                label="Confirm clock out"
+                variant="danger"
+                onPress={finish}
+                pressHaptic="none"
+              />
               <AppButton label="Keep working" variant="secondary" onPress={router.back} />
             </View>
           </View>

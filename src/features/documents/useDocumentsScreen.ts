@@ -4,14 +4,12 @@ import { useDocumentActions } from "@/features/documents/data/documents.mutation
 import { useDocumentsStateQuery } from "@/features/documents/data/documents.queries"
 
 import { payslips } from "./documents.data"
-import type { DocumentCategory } from "./documents.types"
-import { matchesQuery } from "./documents.utils"
+import { isRequiredDocument, matchesQuery } from "./documents.utils"
 import { showDocumentUploadOptions } from "./documentUploadFlow"
 
 export function useDocumentsScreen() {
   const { documents, contracts } = useDocumentsStateQuery()
   const { uploadDocument } = useDocumentActions()
-  const [category, setCategory] = useState<DocumentCategory>("required")
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
 
@@ -20,7 +18,10 @@ export function useDocumentsScreen() {
     [documents],
   )
   const filteredDocuments = useMemo(
-    () => documents.filter((document) => matchesQuery(query, document.title)),
+    () =>
+      documents.filter(
+        (document) => isRequiredDocument(document) && matchesQuery(query, document.title),
+      ),
     [documents, query],
   )
   const filteredPayslips = useMemo(
@@ -43,7 +44,6 @@ export function useDocumentsScreen() {
 
   return {
     cancelSearch,
-    category,
     contracts,
     filteredContracts,
     filteredDocuments,
@@ -52,7 +52,6 @@ export function useDocumentsScreen() {
     missingCount,
     openUploadOptions,
     query,
-    setCategory,
     setIsSearching,
     setQuery,
   }

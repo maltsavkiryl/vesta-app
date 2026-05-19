@@ -2,7 +2,7 @@ import { PropsWithChildren, ReactNode, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { AppScrollScreen, Banner, Text, appTypography, useDesignTokens } from "@/ui"
+import { AppScrollScreen, Banner, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
 
 export function AuthScaffold({
   children,
@@ -39,7 +39,7 @@ export function AuthScaffold({
       showsVerticalScrollIndicator={scrollEnabled}
       style={{ backgroundColor: palette.canvas }}
     >
-      <View style={styles.hero}>
+      <MotionView style={styles.hero}>
         <View style={[styles.ringLarge, { borderColor: palette.ringLarge }]} />
         <View style={[styles.ringMedium, { borderColor: palette.ringMedium }]} />
         <View style={[styles.ringSmall, { borderColor: palette.ringSmall }]} />
@@ -52,12 +52,12 @@ export function AuthScaffold({
           />
           <Text text={subtitle} size="xs" style={{ color: palette.heroSubtitle }} />
         </View>
-      </View>
+      </MotionView>
 
-      <View style={[styles.card, { backgroundColor: tokens.surfaceSecondary }]}>
+      <MotionView delay={70} style={[styles.card, { backgroundColor: tokens.surfaceSecondary }]}>
         {children}
         {footer ? <View style={styles.footer}>{footer}</View> : null}
-      </View>
+      </MotionView>
     </AppScrollScreen>
   )
 }

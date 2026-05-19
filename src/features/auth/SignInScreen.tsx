@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { DEMO_AUTH_CREDENTIALS } from "@/providers/app-provider"
-import { Banner, Button, Text, appTypography, useDesignTokens } from "@/ui"
+import { Banner, Button, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 import { AuthTextField } from "./AuthTextField"
 
@@ -24,16 +25,19 @@ export function SignInScreen() {
 
   const handleContinue = async () => {
     if (!email.includes("@")) {
+      fireHaptic("warning")
       setError("Please enter a valid email address.")
       return
     }
 
     const result = await signIn({ email, password })
     if (!result.ok) {
+      fireHaptic("error")
       setError(result.error.message)
       return
     }
 
+    fireHaptic("success")
     setError(undefined)
     router.replace("/")
   }
@@ -52,16 +56,16 @@ export function SignInScreen() {
           },
         ]}
       >
-        <View style={styles.header}>
+        <MotionView style={styles.header}>
           <VestaLogo />
           <Text
             text="Log in or sign up"
             weight="bold"
             style={[appTypography.authTitle, { color: tokens.textPrimary }]}
           />
-        </View>
+        </MotionView>
 
-        <View style={styles.form}>
+        <MotionView delay={70} style={styles.form}>
           <AuthTextField
             autoCapitalize="none"
             autoComplete="email"
@@ -128,7 +132,7 @@ export function SignInScreen() {
             </Banner>
           ) : null}
 
-          <Button fullWidth label="Continue" onPress={handleContinue} />
+          <Button fullWidth label="Continue" onPress={handleContinue} pressHaptic="none" />
           <Button
             fullWidth
             label="Register"
@@ -140,17 +144,9 @@ export function SignInScreen() {
             <Text text="or" size="xs" style={{ color: tokens.textSecondary }} />
           </View>
 
-          <SocialButton
-            icon="logo-google"
-            label="Continue with Google"
-            onPress={handleContinue}
-          />
-          <SocialButton
-            icon="logo-apple"
-            label="Continue with Apple"
-            onPress={handleContinue}
-          />
-        </View>
+          <SocialButton icon="logo-google" label="Continue with Google" onPress={handleContinue} />
+          <SocialButton icon="logo-apple" label="Continue with Apple" onPress={handleContinue} />
+        </MotionView>
       </View>
     </KeyboardAvoidingView>
   )
@@ -192,12 +188,7 @@ function SocialButton({
       ]}
     >
       <Ionicons color={tokens.textPrimary} name={icon} size={20} />
-      <Text
-        text={label}
-        weight="semiBold"
-        size="sm"
-        style={{ color: tokens.textPrimary }}
-      />
+      <Text text={label} weight="semiBold" size="sm" style={{ color: tokens.textPrimary }} />
     </Pressable>
   )
 }

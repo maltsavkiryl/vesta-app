@@ -1,5 +1,3 @@
-import { Ionicons } from "@expo/vector-icons"
-
 export const ONBOARDING_TOTAL_STEPS = 6
 
 export const ONBOARDING_ROLES = [

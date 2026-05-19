@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
-import { StyleSheet, View, type ViewStyle, type StyleProp } from "react-native"
-import { useDesignTokens } from "@/ui/foundations/theme"
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+
+import { useDesignTokens } from "@/ui/foundations/tokens"
 
 export type GlyphBoxTone = "neutral" | "accent" | "success" | "warning" | "danger"
 
@@ -38,9 +39,7 @@ export function GlyphBox({ children, tone = "neutral", size = "md", style }: Gly
   }[tone]
 
   return (
-    <View style={[styles.container, styles[size], { backgroundColor }, style]}>
-      {children}
-    </View>
+    <View style={[styles.container, sizeStyles[size], { backgroundColor }, style]}>{children}</View>
   )
 }
 
@@ -49,19 +48,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  sm: {
-    borderRadius: 10,
-    height: 32,
-    width: 32,
+})
+
+const sizeStyles: Record<NonNullable<GlyphBoxProps["size"]>, ViewStyle> = {
+  lg: {
+    borderRadius: 16,
+    height: 48,
+    width: 48,
   },
   md: {
     borderRadius: 12,
     height: 36,
     width: 36,
   },
-  lg: {
-    borderRadius: 16,
-    height: 48,
-    width: 48,
+  sm: {
+    borderRadius: 10,
+    height: 32,
+    width: 32,
   },
-})
+}

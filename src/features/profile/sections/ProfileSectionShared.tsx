@@ -1,25 +1,11 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { SelectionRow, Text, useDesignTokens } from "@/ui"
+import { LANGUAGE_OPTIONS } from "@/features/profile/profileSections"
+import { GroupedSection, SelectionIndicator, SelectionRow, Text, useDesignTokens } from "@/ui"
 
-export type SectionKey =
-  | "personal"
-  | "contact"
-  | "address"
-  | "appearance"
-  | "preferences"
-  | "language"
-  | "employers"
-  | "join-employer"
-  | "banking"
-  | "legal"
-  | "security"
-  | "privacy"
-  | "support"
-
-export const LANGUAGE_OPTIONS = ["English (UK)", "Nederlands", "Français"] as const
-export type JoinMode = "code" | "search"
+export { LANGUAGE_OPTIONS }
+export type { JoinMode, SectionKey } from "@/features/profile/profileSections"
 
 export function SectionFooter({ text }: { text: string }) {
   const tokens = useDesignTokens()
@@ -28,17 +14,19 @@ export function SectionFooter({ text }: { text: string }) {
 
 export function ThemeOption({
   icon,
+  isLast = false,
   label,
   onPress,
   selected,
 }: {
   icon: keyof typeof Ionicons.glyphMap
+  isLast?: boolean
   label: string
   onPress: () => void
   selected: boolean
 }) {
   const tokens = useDesignTokens()
-  const backgroundColor = selected ? tokens.accentSoft : tokens.surface
+  const subtitle = selected ? "Current appearance" : "Use this appearance"
 
   return (
     <SelectionRow
@@ -55,12 +43,13 @@ export function ThemeOption({
       onPress={onPress}
       selected={selected}
       style={styles.themeOption}
-      subtitle={selected ? "Selected" : "Use this appearance"}
+      subtitle={subtitle}
       title={label}
-      trailing={
-        selected ? <Ionicons color={tokens.accent} name="checkmark-outline" size={18} /> : null
-      }
-      backgroundColor={backgroundColor}
+      trailing={selected ? <SelectionIndicator /> : null}
+      backgroundColor={tokens.transparent}
+      dividerInset={58}
+      grouped
+      isLast={isLast}
     />
   )
 }
@@ -72,57 +61,72 @@ export function AppearanceSection({
   onSelectTheme: (themePreference: "system" | "light" | "dark") => void
   selectedTheme: "system" | "light" | "dark"
 }) {
-  const tokens = useDesignTokens()
-
   return (
-    <View style={styles.appearanceSection}>
-      <Text
-        text="Appearance"
-        size="xxs"
-        weight="semiBold"
-        style={[styles.sectionLabel, { color: tokens.textMuted }]}
-      />
-      <View style={styles.themeList}>
-        {(
-          [
-            { icon: "phone-portrait-outline", label: "System", value: "system" },
-            { icon: "sunny-outline", label: "Light", value: "light" },
-            { icon: "moon-outline", label: "Dark", value: "dark" },
-          ] satisfies Array<{
-            icon: keyof typeof Ionicons.glyphMap
-            label: string
-            value: "system" | "light" | "dark"
-          }>
-        ).map((themePreference) => (
-          <ThemeOption
-            key={themePreference.value}
-            icon={themePreference.icon}
-            label={themePreference.label}
-            selected={selectedTheme === themePreference.value}
-            onPress={() => onSelectTheme(themePreference.value)}
-          />
-        ))}
-      </View>
-    </View>
+    <GroupedSection title="Appearance">
+      {(
+        [
+          { icon: "phone-portrait-outline", label: "System", value: "system" },
+          { icon: "sunny-outline", label: "Light", value: "light" },
+          { icon: "moon-outline", label: "Dark", value: "dark" },
+        ] satisfies Array<{
+          icon: keyof typeof Ionicons.glyphMap
+          label: string
+          value: "system" | "light" | "dark"
+        }>
+      ).map((themePreference) => (
+        <ThemeOption
+          key={themePreference.value}
+          icon={themePreference.icon}
+          label={themePreference.label}
+          selected={selectedTheme === themePreference.value}
+          onPress={() => onSelectTheme(themePreference.value)}
+          isLast={themePreference.value === "dark"}
+        />
+      ))}
+    </GroupedSection>
+  )
+}
+
+export function MotionSection({
+  onSelectMotionPreference,
+  selectedMotionPreference,
+}: {
+  onSelectMotionPreference: (motionPreference: "system" | "reduced" | "full") => void
+  selectedMotionPreference: "system" | "reduced" | "full"
+}) {
+  return (
+    <GroupedSection title="Motion">
+      {(
+        [
+          { icon: "phone-portrait-outline", label: "System", value: "system" },
+          { icon: "swap-vertical-outline", label: "Reduced", value: "reduced" },
+          { icon: "sparkles-outline", label: "Full", value: "full" },
+        ] satisfies Array<{
+          icon: keyof typeof Ionicons.glyphMap
+          label: string
+          value: "system" | "reduced" | "full"
+        }>
+      ).map((motionPreference) => (
+        <ThemeOption
+          key={motionPreference.value}
+          icon={motionPreference.icon}
+          label={motionPreference.label}
+          selected={selectedMotionPreference === motionPreference.value}
+          onPress={() => onSelectMotionPreference(motionPreference.value)}
+          isLast={motionPreference.value === "full"}
+        />
+      ))}
+    </GroupedSection>
   )
 }
 
 const styles = StyleSheet.create({
-  appearanceSection: {
-    gap: 10,
-  },
   sectionFooter: {
     paddingHorizontal: 4,
   },
-  sectionLabel: {
-    letterSpacing: 0,
-  },
-  themeList: {
-    gap: 10,
-  },
   themeOption: {
-    borderRadius: 16,
     minHeight: 72,
+    paddingHorizontal: 16,
   },
   themeOptionIcon: {
     alignItems: "center",

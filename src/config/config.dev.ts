@@ -8,4 +8,5 @@
 export default {
   API_URL: "http://localhost:3000/api/v1",
   DEMO_AUTH_ENABLED: true,
+  SUPPORT_EMAIL: "support@vesta.services",
 }

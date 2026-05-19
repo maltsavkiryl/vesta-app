@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+
 import { AppScrollScreen, Text, appTypography, useDesignTokens } from "@/ui"
 
 export interface OnboardingWelcomeProps {

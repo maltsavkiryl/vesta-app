@@ -1,23 +1,24 @@
 import { StyleSheet, View } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import { useLocalSearchParams } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { AppButton, AppScrollScreen, Text, appLayout, appTypography, useDesignTokens } from "@/ui"
 
 import { payslips } from "./documents.data"
+import { sharePayslipPdf } from "./documentShare"
 
 export function PayslipDetailScreen() {
-  const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const tokens = useDesignTokens()
   const insets = useSafeAreaInsets()
   const payslip = payslips.find((item) => item.id === id)
 
   return (
-    <View style={[styles.screen, { backgroundColor: tokens.background }]}>
+    <View style={[styles.screen, { backgroundColor: tokens.groupedBackground }]}>
       <AppScrollScreen
+        variant="grouped"
         contentContainerStyle={styles.content}
-        style={[styles.flex, { backgroundColor: tokens.background }]}
+        style={[styles.flex, { backgroundColor: tokens.groupedBackground }]}
       >
         {payslip ? (
           <>
@@ -58,7 +59,7 @@ export function PayslipDetailScreen() {
               weight="semiBold"
               style={[styles.caps, { color: tokens.textMuted }]}
             />
-            <View style={[styles.breakdown, { backgroundColor: tokens.background }]}>
+            <View style={[styles.breakdown, { backgroundColor: tokens.surface }]}>
               {payslip.rows.map((row) => (
                 <View
                   key={row.label}
@@ -86,13 +87,18 @@ export function PayslipDetailScreen() {
           style={[
             styles.footer,
             {
-              backgroundColor: tokens.background,
+              backgroundColor: tokens.groupedBackground,
               borderTopColor: tokens.border,
               paddingBottom: Math.max(insets.bottom, 16),
             },
           ]}
         >
-          <AppButton label="Download PDF" onPress={router.back} />
+          <AppButton
+            label="Download PDF"
+            onPress={() => {
+              void sharePayslipPdf(payslip)
+            }}
+          />
         </View>
       ) : null}
     </View>

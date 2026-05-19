@@ -5,24 +5,27 @@ import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
 
 import { SurfaceCard } from "./AppPrimitives"
+import { MotionView } from "./app-motion"
 import { SectionTitle } from "./SectionTitle"
 
 export function SectionBlock({
   actionLabel,
   badgeLabel,
   children,
+  motionDelay = 0,
   onAction,
   trailing,
   title,
 }: PropsWithChildren<{
   actionLabel?: string
   badgeLabel?: string
+  motionDelay?: number
   onAction?: () => void
   trailing?: ReactNode
   title: string
 }>) {
   return (
-    <View style={styles.section}>
+    <MotionView delay={motionDelay} style={styles.section}>
       <SectionTitle
         actionLabel={actionLabel}
         badgeLabel={badgeLabel}
@@ -32,7 +35,7 @@ export function SectionBlock({
         titleSize="sm"
       />
       {children}
-    </View>
+    </MotionView>
   )
 }
 
@@ -44,6 +47,7 @@ export function ListCardItem({
   isLast,
   leading,
   onPress,
+  style,
   subtitle,
   subtitleStyle,
   title,
@@ -53,6 +57,7 @@ export function ListCardItem({
   isLast?: boolean
   leading?: ReactNode
   onPress?: () => void
+  style?: StyleProp<ViewStyle>
   subtitle?: string
   subtitleStyle?: StyleProp<any>
   title: string
@@ -67,6 +72,7 @@ export function ListCardItem({
       {...(onPress ? { onPress } : undefined)}
       style={[
         styles.row,
+        style,
         !isLast && {
           borderBottomColor: tokens.border,
           borderBottomWidth: StyleSheet.hairlineWidth,

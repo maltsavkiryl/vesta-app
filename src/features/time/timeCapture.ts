@@ -1,8 +1,15 @@
 import { Alert } from "react-native"
+import { CameraType, launchCameraAsync, requestCameraPermissionsAsync } from "expo-image-picker"
+import {
+  Accuracy,
+  getCurrentPositionAsync,
+  requestForegroundPermissionsAsync,
+  reverseGeocodeAsync,
+} from "expo-location"
 
 import type { LocationSnapshot, ProofPhoto } from "@/core/models"
 
-function buildAddressLabel(components: {
+export function buildAddressLabel(components: {
   city?: string | null
   district?: string | null
   name?: string | null
@@ -21,11 +28,12 @@ function buildAddressLabel(components: {
     .join(", ")
 }
 
-export async function captureLocationSnapshot(
-  fallbackAddress: string,
-): Promise<LocationSnapshot | undefined> {
-  const Location = await import("expo-location")
-  const permission = await Location.requestForegroundPermissionsAsync()
+export function buildCoordinateLabel(latitude: number, longitude: number) {
+  return `Captured at ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
+}
+
+export async function captureLocationSnapshot(): Promise<LocationSnapshot | undefined> {
+  const permission = await requestForegroundPermissionsAsync()
 
   if (!permission.granted) {
     Alert.alert("Location not shared", "The entry will still be saved without a map snapshot.")
@@ -33,25 +41,27 @@ export async function captureLocationSnapshot(
   }
 
   try {
-    const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
+    const position = await getCurrentPositionAsync({
+      accuracy: Accuracy.Balanced,
     })
-    let addressLabel = fallbackAddress
+    const latitude = position.coords.latitude
+    const longitude = position.coords.longitude
+    let addressLabel = buildCoordinateLabel(latitude, longitude)
 
     try {
-      const reverseGeocode = await Location.reverseGeocodeAsync({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+      const reverseGeocode = await reverseGeocodeAsync({
+        latitude,
+        longitude,
       })
       const firstMatch = reverseGeocode[0]
       if (firstMatch) {
-        addressLabel = buildAddressLabel(firstMatch) || fallbackAddress
+        addressLabel = buildAddressLabel(firstMatch) || addressLabel
       }
     } catch {}
 
     return {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
+      latitude,
+      longitude,
       addressLabel,
       accuracyMeters: position.coords.accuracy ?? undefined,
     }
@@ -76,17 +86,16 @@ export async function captureOptionalClockInPhoto(): Promise<ProofPhoto | undefi
   if (nextAction === "cancel") return null
   if (nextAction === "skip") return undefined
 
-  const ImagePicker = await import("expo-image-picker")
-  const permission = await ImagePicker.requestCameraPermissionsAsync()
+  const permission = await requestCameraPermissionsAsync()
   if (!permission.granted) {
     Alert.alert("Camera access needed", "Allow camera access to capture a clock-in selfie.")
     return undefined
   }
 
-  const result = await ImagePicker.launchCameraAsync({
+  const result = await launchCameraAsync({
     allowsEditing: true,
     aspect: [3, 4],
-    cameraType: ImagePicker.CameraType.front,
+    cameraType: CameraType.front,
     mediaTypes: ["images"],
     quality: 0.75,
   })

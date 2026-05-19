@@ -47,33 +47,15 @@ export function useJoinEmployerMutation() {
   })
 }
 
-export function useSwitchEmployerMutation() {
-  const queryClient = useQueryClient()
-  const { accountId } = useAppSession()
-
-  return useMutation({
-    mutationFn: (employerId: string) =>
-      appRepositories.profile.switchEmployer(accountId!, employerId),
-    onSuccess: (result) => {
-      if (!accountId || !result.ok) return
-      invalidateProfileQueries(queryClient, accountId, true)
-      void queryClient.invalidateQueries({ queryKey: ["time", accountId] })
-      void queryClient.invalidateQueries({ queryKey: ["documents", accountId] })
-    },
-  })
-}
-
 export function useProfileActions() {
   const updateProfileMutation = useUpdateProfileMutation()
   const joinEmployerMutation = useJoinEmployerMutation()
-  const switchEmployerMutation = useSwitchEmployerMutation()
 
   return useMemo(
     () => ({
       joinEmployer: (employerId: string) => joinEmployerMutation.mutateAsync(employerId),
-      switchEmployer: (employerId: string) => switchEmployerMutation.mutateAsync(employerId),
       updateProfile: (payload: Partial<UserProfile>) => updateProfileMutation.mutateAsync(payload),
     }),
-    [joinEmployerMutation, switchEmployerMutation, updateProfileMutation],
+    [joinEmployerMutation, updateProfileMutation],
   )
 }

@@ -10,6 +10,7 @@ import {
   getActivePlanningWindow,
   getNextIncompleteAvailabilityDate,
 } from "@/features/schedule/schedule.utils"
+import { fireHaptic } from "@/utils/haptics"
 
 type ActionResult = "completed" | "opened" | "cancelled" | "failed"
 
@@ -25,6 +26,7 @@ export function useAppAction() {
 
       switch (action.type) {
         case "navigate":
+          fireHaptic("selection")
           router.push(action.route as never)
           return "opened"
         case "uploadDocument":
@@ -36,6 +38,7 @@ export function useAppAction() {
             uploadDocument,
           })
         case "editAvailabilityTemplate":
+          fireHaptic("selection")
           router.push("/(app)/availability-template" as never)
           return "opened"
         case "editAvailabilityOverride": {
@@ -51,21 +54,29 @@ export function useAppAction() {
               : undefined)
 
           if (!date) {
+            fireHaptic("selection")
             router.push("/(app)/(tabs)/schedule" as never)
             return "opened"
           }
 
+          fireHaptic("selection")
           router.push(`/(app)/availability/${date}` as never)
           return "opened"
         }
         case "createScheduleRequest":
+          fireHaptic("selection")
           router.push(
             `/(app)/request?category=${action.category ?? ""}&shiftId=${action.shiftId ?? ""}` as never,
           )
           return "opened"
         case "respondToShift": {
           const result = await respondToShift(action.shiftId)
-          if (!result.ok) return "failed"
+          if (!result.ok) {
+            fireHaptic("error")
+            return "failed"
+          }
+
+          fireHaptic("success")
           router.push(`/(app)/shift/${action.shiftId}` as never)
           return "completed"
         }

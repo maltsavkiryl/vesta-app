@@ -1,6 +1,7 @@
 import { Redirect, Stack, useRouter } from "expo-router"
 
 import { useAppSession } from "@/providers/app-provider"
+import { useAppMotion } from "@/providers/motion-provider"
 import {
   createHeaderActionOptions,
   createPushDetailOptions,
@@ -11,6 +12,7 @@ import {
 export default function AppLayout() {
   const { isSignedIn, needsOnboarding } = useAppSession()
   const { theme } = useAppTheme()
+  const { shouldReduceMotion } = useAppMotion()
   const router = useRouter()
   const groupedSheetBackground = theme.isDark ? "#000000" : "#F2F2F7"
   const secondarySheetBackground = theme.isDark ? "#2C2C2E" : "#F1F1F6"
@@ -30,6 +32,7 @@ export default function AppLayout() {
   return (
     <Stack
       screenOptions={{
+        animation: shouldReduceMotion ? "none" : "default",
         headerShown: false,
         contentStyle: {
           backgroundColor: theme.colors.background,
@@ -41,25 +44,29 @@ export default function AppLayout() {
         name="notifications"
         options={createPushDetailOptions(theme, "Notifications", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
           ...closeActions,
         })}
       />
       <Stack.Screen
         name="request"
-        options={createPushDetailOptions(theme, "New request", {
+        options={createPushDetailOptions(theme, undefined, {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="shift/[id]"
         options={createPushDetailOptions(theme, "Shift details", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="availability/[date]"
         options={createSheetOptions(theme, "Availability", {
           backgroundColor: secondarySheetBackground,
+          motionEnabled: !shouldReduceMotion,
           ...closeActions,
           presentation: "pageSheet",
         })}
@@ -68,12 +75,14 @@ export default function AppLayout() {
         name="availability-template"
         options={createPushDetailOptions(theme, "Weekly template", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="availability-template/[day]"
         options={createSheetOptions(theme, "Weekday defaults", {
           backgroundColor: secondarySheetBackground,
+          motionEnabled: !shouldReduceMotion,
           ...closeActions,
           presentation: "pageSheet",
         })}
@@ -82,6 +91,7 @@ export default function AppLayout() {
         name="availability-time-picker"
         options={createSheetOptions(theme, "Choose time", {
           backgroundColor: secondarySheetBackground,
+          motionEnabled: !shouldReduceMotion,
           ...closeActions,
           presentation: "formSheet",
           preset: "medium",
@@ -91,6 +101,7 @@ export default function AppLayout() {
         name="clock-out"
         options={createSheetOptions(theme, "End shift", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
           ...closeActions,
           initialDetent: "large",
         })}
@@ -99,32 +110,48 @@ export default function AppLayout() {
         name="tasks"
         options={createPushDetailOptions(theme, "All tasks", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="time-entries"
         options={createPushDetailOptions(theme, "Time entries", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="time-entry/[id]"
         options={createPushDetailOptions(theme, "Entry details", {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="document-payslip/[id]"
-        options={createPushDetailOptions(theme, "Payslip")}
+        options={createPushDetailOptions(theme, "Payslip", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+        })}
+      />
+      <Stack.Screen
+        name="document-upload/[id]"
+        options={createPushDetailOptions(theme, "Uploaded file", {
+          backgroundColor: groupedSheetBackground,
+        })}
       />
       <Stack.Screen
         name="document-contract/[id]"
-        options={createPushDetailOptions(theme, "Contract")}
+        options={createPushDetailOptions(theme, "Contract", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+        })}
       />
       <Stack.Screen
         name="profile/[section]"
         options={createPushDetailOptions(theme, undefined, {
           backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
         })}
       />
     </Stack>

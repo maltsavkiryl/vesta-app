@@ -2,13 +2,13 @@ import { Tabs } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { useDesignTokens } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 export default function TabLayout() {
   const tokens = useDesignTokens()
 
   const tabBarIcon = (routeName: string, focused: boolean) => {
     const iconName = {
-      documents: focused ? "document-text" : "document-text-outline",
       home: focused ? "home" : "home-outline",
       profile: focused ? "person-circle" : "person-circle-outline",
       schedule: focused ? "calendar" : "calendar-outline",
@@ -22,6 +22,11 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => {
+          fireHaptic("tab")
+        },
+      }}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: tokens.accent,
@@ -37,7 +42,6 @@ export default function TabLayout() {
       <Tabs.Screen name="home" options={{ title: "Home" }} />
       <Tabs.Screen name="schedule" options={{ title: "Planning" }} />
       <Tabs.Screen name="time" options={{ title: "Time" }} />
-      <Tabs.Screen name="documents" options={{ title: "Docs" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>
   )
