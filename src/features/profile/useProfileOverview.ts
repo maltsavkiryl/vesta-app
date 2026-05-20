@@ -6,18 +6,15 @@ import { createInitialState } from "@/core/mockState"
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { useDocumentsStateQuery } from "@/features/documents/data/documents.queries"
 import { payslips } from "@/features/documents/documents.data"
+import { useProfileActions } from "@/features/profile/data/profile.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import { useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
 import { PROFILE_OVERVIEW_ORDER, buildProfileOverviewSections } from "./profileOverviewRows"
+import { selectProfilePhoto } from "./profilePhotoUploadFlow"
 import { getProfileSetupStatus } from "./profileSetupStatus"
 import { PROFILE_OVERVIEW_TITLES } from "./profileSections"
-
-function capitalize(value?: string) {
-  if (!value) return "Waiter"
-  return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
-}
 
 function getInitials(firstName: string, lastName: string) {
   return `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.toUpperCase()
@@ -27,6 +24,7 @@ export function useProfileOverview() {
   const router = useRouter()
   const { themeContext } = useAppTheme()
   const { signOut } = useAuthActions()
+  const { updateProfile } = useProfileActions()
   const { contracts, documents } = useDocumentsStateQuery()
   const { state: profileState } = useProfileStateQuery()
   const state = useMemo(
@@ -48,6 +46,26 @@ export function useProfileOverview() {
   const latestPayslip = payslips[0]
   const setupStatus = getProfileSetupStatus(state)
 
+  const handleProfilePhotoPress = async () => {
+    const selection = await selectProfilePhoto()
+
+    if (selection.kind === "cancelled") {
+      return
+    }
+
+    const result = await updateProfile({
+      avatarUri: selection.uri,
+    })
+
+    if (!result.ok) {
+      fireHaptic("error")
+      Alert.alert("Couldn't update photo", result.error.message)
+      return
+    }
+
+    fireHaptic("success")
+  }
+
   const handleSignOut = () => {
     Alert.alert("Sign out?", "You'll need to sign in again to access your account.", [
       { style: "cancel", text: "Cancel" },
@@ -55,21 +73,28 @@ export function useProfileOverview() {
         text: "Sign out",
         style: "destructive",
         onPress: () => {
-          void signOut().then(() => {
-            fireHaptic("success")
-            router.replace("/(auth)/sign-in")
-          })
+          void (async () => {
+            try {
+              await signOut()
+              fireHaptic("success")
+              router.replace("/")
+            } catch {
+              fireHaptic("error")
+              Alert.alert("Couldn't sign out", "Please try again.")
+            }
+          })()
         },
       },
     ])
   }
 
   return {
+    avatarUri: state.profile.avatarUri,
     email: state.profile.email,
     fullName,
     initials: getInitials(state.profile.firstName, state.profile.lastName),
+    onProfilePhotoPress: handleProfilePhotoPress,
     profileSetupStatus: setupStatus,
-    role: capitalize(state.profile.role),
     sections: buildProfileOverviewSections({
       contractSummary:
         pendingContractCount > 0
@@ -78,6 +103,8 @@ export function useProfileOverview() {
             ? `${contracts.length} on file`
             : "No contracts",
       fullName,
+      hasPendingContracts: pendingContractCount > 0,
+      hasRequiredDocuments: pendingDocumentCount > 0,
       legalDocumentsSummary:
         pendingDocumentCount > 0 ? `${pendingDocumentCount} required` : "All set",
       payslipsSummary: latestPayslip?.month ?? "No payslips",

@@ -17,7 +17,6 @@ PACKET_PRIORITY = {
     "screen_decomposition": 2,
     "hook_decomposition": 3,
     "component_decomposition": 4,
-    "manual_review_hotspot": 5,
 }
 
 
@@ -125,7 +124,8 @@ def add_provider_findings(findings: list[dict[str, Any]]) -> None:
             )
 
 
-def add_manual_hotspot_findings(findings: list[dict[str, Any]], rules: list[dict[str, Any]]) -> None:
+def manual_review_surfaces(rules: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    surfaces: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     for rule in rules:
         for hotspot in rule.get("hotspots", []):
@@ -136,19 +136,17 @@ def add_manual_hotspot_findings(findings: list[dict[str, Any]], rules: list[dict
             if key in seen:
                 continue
             seen.add(key)
-            findings.append(
+            surfaces.append(
                 {
-                    "finding_id": f"hotspot::{rule['id']}::{hotspot}",
+                    "review_id": f"hotspot::{rule['id']}::{hotspot}",
                     "rule_id": rule["id"],
                     "path": hotspot,
-                    "category": "manual_review_hotspot",
-                    "severity": "low",
-                    "confidence": "medium",
-                    "recommended_fix_type": "manual_review_against_rule",
+                    "kind": "historical_hotspot",
                     "shared_layer_candidate": path.is_dir(),
                     "summary": f"Historical hotspot for rule `{rule['id']}`. Review this surface against the accepted preference.",
                 }
             )
+    return surfaces
 
 
 def cluster(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -158,7 +156,6 @@ def cluster(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "screen_decomposition": "Screen decomposition",
         "hook_decomposition": "Hook decomposition",
         "component_decomposition": "Component decomposition",
-        "manual_review_hotspot": "Manual product and native review",
     }
     for finding in findings:
         packet_id = finding["category"]
@@ -181,8 +178,6 @@ def cluster(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def recommended_first_packets(work_packets: list[dict[str, Any]]) -> list[dict[str, Any]]:
     shortlist: list[dict[str, Any]] = []
     for packet in work_packets:
-        if packet["packet_id"] == "manual_review_hotspot":
-            continue
         top_paths = [finding["path"] for finding in packet["findings"][:3]]
         shortlist.append(
             {
@@ -196,11 +191,14 @@ def recommended_first_packets(work_packets: list[dict[str, Any]]) -> list[dict[s
 
 
 def report_markdown(payload: dict[str, Any]) -> str:
+    findings_count = len(payload["findings"])
+    review_surface_count = len(payload["review_surfaces"])
     lines = [
         "# Codebase Improvement Report",
         "",
         f"- Scope: `{payload['scope']}`",
-        f"- Findings: `{len(payload['findings'])}`",
+        f"- Findings: `{findings_count}`",
+        f"- Review surfaces: `{review_surface_count}`",
         f"- Work packets: `{len(payload['work_packets'])}`",
         f"- Worktree: `{payload['worktree']['entries']}` changed paths"
         if payload["worktree"]["is_dirty"]
@@ -224,6 +222,15 @@ def report_markdown(payload: dict[str, Any]) -> str:
             top_paths = ", ".join(f"`{path}`" for path in packet["top_paths"])
             lines.append(f"- {packet['title']}: `{packet['finding_count']}` findings. Start in {top_paths}.")
         lines.append("")
+    if not payload["work_packets"]:
+        lines.extend(
+            [
+                "## Actionable Findings",
+                "",
+                "- None. The current automated audit did not detect any live cleanup work.",
+                "",
+            ]
+        )
     for packet in payload["work_packets"]:
         lines.append(f"## {packet['title']}")
         lines.append("")
@@ -231,6 +238,14 @@ def report_markdown(payload: dict[str, Any]) -> str:
             lines.append(f"- `{finding['path']}` -> `{finding['recommended_fix_type']}`")
             lines.append(f"  Rule: `{finding['rule_id']}`")
             lines.append(f"  Summary: {finding['summary']}")
+        lines.append("")
+    if payload["review_surfaces"]:
+        lines.append("## Historical Review Surfaces")
+        lines.append("")
+        for surface in payload["review_surfaces"]:
+            lines.append(f"- `{surface['path']}`")
+            lines.append(f"  Rule: `{surface['rule_id']}`")
+            lines.append(f"  Summary: {surface['summary']}")
         lines.append("")
     return "\n".join(lines)
 
@@ -245,13 +260,14 @@ def main() -> None:
     findings: list[dict[str, Any]] = []
     add_size_findings(findings)
     add_provider_findings(findings)
-    add_manual_hotspot_findings(findings, manifest["rules"])
+    review_surfaces = manual_review_surfaces(manifest["rules"])
 
     payload = {
         "scope": "vesta-mobile",
         "generatedAt": now_iso(),
         "worktree": worktree_summary(),
         "findings": findings,
+        "review_surfaces": review_surfaces,
         "work_packets": cluster(findings),
     }
     payload["recommended_first"] = recommended_first_packets(payload["work_packets"])

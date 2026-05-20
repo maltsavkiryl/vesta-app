@@ -1,6 +1,5 @@
 import { StyleSheet, View } from "react-native"
 
-import { HomeCockpitDeck } from "@/features/home/components/HomeCockpitDeck"
 import { EarningsSummaryCard } from "@/features/home/components/EarningsSummaryCard"
 import { HomeHeader } from "@/features/home/components/HomeHeader"
 import {
@@ -42,18 +41,15 @@ export function HomeScreen() {
     greeting,
     home,
     homeSummary,
-    nextShift,
     openLatestPayslip,
     openNotifications,
     openSchedule,
     openShift,
     openTasks,
     pendingTasks,
-    priorityTask,
     runAction,
     shouldShowTasksSection,
     shouldShowUpdatesSection,
-    unreadCount,
     upcomingShifts,
   } = useHomeScreen()
 
@@ -74,21 +70,8 @@ export function HomeScreen() {
           <HomeTimeCard />
         </MotionView>
 
-        <MotionView delay={100}>
-          <HomeCockpitDeck
-            nextShift={nextShift}
-            onOpenNotifications={openNotifications}
-            onOpenSchedule={openSchedule}
-            onOpenTask={completeTask}
-            onOpenTasks={openTasks}
-            pendingTaskCount={pendingTasks.length}
-            priorityTask={priorityTask}
-            unreadCount={unreadCount}
-          />
-        </MotionView>
-
         {shouldShowTasksSection ? (
-          <MotionView delay={150}>
+          <MotionView delay={100}>
             <HomeTasksSection
               tasks={pendingTasks}
               onComplete={completeTask}
@@ -97,7 +80,7 @@ export function HomeScreen() {
           </MotionView>
         ) : null}
 
-        <MotionView delay={200}>
+        <MotionView delay={150}>
           <UpcomingShiftsSection
             shifts={upcomingShifts}
             onShiftPress={openShift}
@@ -106,7 +89,7 @@ export function HomeScreen() {
         </MotionView>
 
         {shouldShowUpdatesSection ? (
-          <MotionView delay={250}>
+          <MotionView delay={200}>
             <HomeUpdatesSection
               notifications={home?.notifications ?? []}
               onNotificationPress={(notification) => void runAction(notification.action)}
@@ -115,7 +98,7 @@ export function HomeScreen() {
           </MotionView>
         ) : null}
 
-        <MotionView delay={300}>
+        <MotionView delay={250}>
           <EarningsSummaryCard
             earnedAmount={home?.earnings.earnedAmount ?? 0}
             monthLabel={home?.earnings.monthLabel ?? ""}

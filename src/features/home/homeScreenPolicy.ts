@@ -20,7 +20,7 @@ export function deriveHomeScreenPolicy({
   const hasMeaningfulUpdates = notifications.length > 0
   const hasMultipleMeaningfulUpdates = notifications.length > 1
   const homeSummary = priorityTask
-    ? `${pendingTasks.length} action${pendingTasks.length === 1 ? "" : "s"} waiting`
+    ? ""
     : nextShift
       ? `Next shift ${nextShift.dayLabel} at ${nextShift.startTime}`
       : unreadCount > 0

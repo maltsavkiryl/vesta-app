@@ -17,10 +17,11 @@ export function ProfileScreen() {
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
       <MotionView>
         <ProfileOverviewHeader
+          avatarUri={screen.avatarUri}
           email={screen.email}
           fullName={screen.fullName}
           initials={screen.initials}
-          role={screen.role}
+          onAvatarPress={screen.onProfilePhotoPress}
         />
       </MotionView>
       <MotionView delay={55}>

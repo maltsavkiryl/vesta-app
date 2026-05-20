@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
-import { AppButton, AppScrollScreen, TextField } from "@/ui"
+import { AppButton, AppScrollScreen, TextField, useDesignTokens } from "@/ui"
 
 import {
   AvailabilityHoursSection,
@@ -12,6 +12,7 @@ import { useAvailabilityScreen } from "./useAvailabilityScreen"
 
 export function AvailabilityScreen() {
   const screen = useAvailabilityScreen()
+  const tokens = useDesignTokens()
 
   return (
     <AppScrollScreen contentContainerStyle={styles.screen} topInset="none" variant="grouped">
@@ -34,7 +35,7 @@ export function AvailabilityScreen() {
         ) : null}
 
         <TextField
-          containerStyle={styles.noteShell}
+          containerStyle={[styles.noteShell, { backgroundColor: tokens.surface }]}
           inputStyle={styles.noteInput}
           label="Note"
           multiline

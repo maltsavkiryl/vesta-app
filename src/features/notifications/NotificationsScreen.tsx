@@ -2,7 +2,7 @@
 
 import { StyleSheet, View } from "react-native"
 
-import { AppScrollScreen, useDesignTokens } from "@/ui"
+import { AppScrollScreen, appLayout, useDesignTokens } from "@/ui"
 
 import {
   NotificationsClearAll,
@@ -35,7 +35,7 @@ export function NotificationsScreen() {
       {notifications.length === 0 ? (
         <NotificationsEmptyState />
       ) : (
-        <View style={styles.groups}>
+        <View>
           <NotificationsUnreadActions
             onMarkAllRead={() => {
               void markAllNotificationsRead()
@@ -62,11 +62,9 @@ export function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  groups: {
-    paddingHorizontal: 16,
-  },
   screen: {
     flexGrow: 1,
     paddingBottom: 36,
+    paddingHorizontal: appLayout.screenPaddingHorizontal,
   },
 })

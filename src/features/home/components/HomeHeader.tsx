@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { MetaPill, Text, useDesignTokens } from "@/ui"
+import { Text, useDesignTokens } from "@/ui"
 
 export function HomeHeader({
   firstName,
@@ -23,19 +23,15 @@ export function HomeHeader({
       <View style={styles.flex}>
         <View style={styles.topRow}>
           <Text text={greeting} size="xxs" weight="medium" style={{ color: tokens.textSecondary }} />
-          <MetaPill
-            backgroundColor={`${tokens.accent}12`}
-            label="Action cockpit"
-            leading={<Ionicons color={tokens.accent} name="sparkles-outline" size={11} />}
-            textStyle={{ color: tokens.accent }}
-          />
         </View>
         <Text
           text={firstName}
           weight="bold"
           style={[styles.headerTitle, { color: tokens.textPrimary }]}
         />
-        <Text text={summary} size="xs" style={[styles.summary, { color: tokens.textSecondary }]} />
+        {summary ? (
+          <Text text={summary} size="xs" style={[styles.summary, { color: tokens.textSecondary }]} />
+        ) : null}
       </View>
 
       <Pressable hitSlop={10} onPress={onNotificationsPress}>

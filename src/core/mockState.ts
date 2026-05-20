@@ -127,6 +127,7 @@ const profile: UserProfile = {
   email: "demo.employee@vesta.local",
   role: "Waiter",
   preferredName: "Sofia",
+  avatarUri: undefined,
   phone: "",
   dateOfBirth: "",
   nationality: "Belgian",

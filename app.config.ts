@@ -93,8 +93,9 @@ module.exports = (_: ConfigContext): ExpoConfig => {
       [
         "expo-image-picker",
         {
-          cameraPermission: "Allow Vesta to take photos of documents for upload.",
-          photosPermission: "Allow Vesta to choose document photos for upload.",
+          cameraPermission: "Allow Vesta to take profile photos and document photos for upload.",
+          photosPermission:
+            "Allow Vesta to choose profile photos and document photos from your library.",
         },
       ],
       [

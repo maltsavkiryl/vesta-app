@@ -1,7 +1,8 @@
-import { DynamicColorIOS, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { NativeTabs } from "expo-router/unstable-native-tabs"
 
 import { RequestComposeAccessory } from "@/features/schedule/RequestComposeAccessory"
+import { useDesignTokens } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
 const labelStyle = {
@@ -9,28 +10,28 @@ const labelStyle = {
   fontWeight: "600",
 } as const
 
-const liquidGlassColor = DynamicColorIOS({
-  dark: "#FFFFFF",
-  light: "#000000",
-})
-
-const brandBlue = "#007AFF"
-
 export default function TabLayout() {
+  const tokens = useDesignTokens()
+  const tabBarBlurEffect = tokens.isDark ? "systemChromeMaterialDark" : "systemChromeMaterialLight"
+
   return (
     <View style={styles.container}>
       <NativeTabs
-        iconColor={{ default: liquidGlassColor, selected: brandBlue }}
+        backgroundColor={tokens.tabBar}
+        blurEffect={tabBarBlurEffect}
+        disableTransparentOnScrollEdge
+        iconColor={{ default: tokens.textSecondary, selected: tokens.accent }}
         labelStyle={{
-          default: { ...labelStyle, color: liquidGlassColor },
-          selected: { ...labelStyle, color: brandBlue },
+          default: { ...labelStyle, color: tokens.textSecondary },
+          selected: { ...labelStyle, color: tokens.accent },
         }}
         screenListeners={{
           tabPress: () => {
             fireHaptic("tab")
           },
         }}
-        tintColor={brandBlue}
+        shadowColor={tokens.tabBarBorder}
+        tintColor={tokens.accent}
       >
         <NativeTabs.Trigger name="home">
           <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>

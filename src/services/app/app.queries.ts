@@ -1,7 +1,7 @@
 import { QueryClient, useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
-import type { AppSession } from "@/features/auth/data/auth.transformer"
+import type { AppSession } from "@/services/app/app.session"
 
 import { getSession } from "./app.store"
 

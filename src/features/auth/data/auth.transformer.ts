@@ -1,13 +1,9 @@
 import type { MockBackendSessionDto } from "@/services/app/app.types"
+import type { AppSession } from "@/services/app/app.session"
 
 import type { AuthSessionDto } from "./auth.dto"
 
-export interface AppSession {
-  accountId: string | null
-  isSignedIn: boolean
-  needsOnboarding: boolean
-  signedInAt?: string
-}
+export type { AppSession } from "@/services/app/app.session"
 
 export function toAppSession(session: MockBackendSessionDto, needsOnboarding = false): AppSession {
   return {

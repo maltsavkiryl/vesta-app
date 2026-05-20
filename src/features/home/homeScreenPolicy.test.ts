@@ -42,7 +42,7 @@ describe("deriveHomeScreenPolicy", () => {
       upcomingShifts: [sampleShift],
     })
 
-    expect(policy.homeSummary).toBe("1 action waiting")
+    expect(policy.homeSummary).toBe("")
     expect(policy.priorityTask?.id).toBe(sampleTask.id)
     expect(policy.shouldShowTasksSection).toBe(false)
     expect(policy.shouldShowUpdatesSection).toBe(false)

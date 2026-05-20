@@ -4,7 +4,6 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import {
-  AttentionBanner,
   ContractCard,
   PayslipRow,
   RequiredDocumentRow,
@@ -50,14 +49,11 @@ function LegalDocumentsContent() {
     cancelSearch,
     filteredDocuments,
     isSearching,
-    missingCount,
     openUploadOptions,
     query,
-    setIsSearching,
     setQuery,
   } = useDocumentsScreen()
   const hasSearchQuery = query.trim().length > 0
-  const firstMissingDocument = filteredDocuments.find((document) => document.status === "action_required")
 
   return (
     <View style={styles.content}>
@@ -65,29 +61,12 @@ function LegalDocumentsContent() {
         isSearching={isSearching}
         query={query}
         searchPlaceholder="Search legal documents..."
-        showSearchButton
+        showSearchButton={false}
         showTitle={false}
-        showUploadButton
+        showUploadButton={false}
         onCancelSearch={cancelSearch}
         onQueryChange={setQuery}
-        onSearchPress={() => setIsSearching(true)}
-        onUploadPress={() => openUploadOptions()}
       />
-      {!hasSearchQuery ? (
-        <AttentionBanner
-          count={missingCount}
-          onPress={() => {
-            if (!firstMissingDocument) {
-              return
-            }
-
-            openUploadOptions({
-              id: firstMissingDocument.id,
-              title: firstMissingDocument.title,
-            })
-          }}
-        />
-      ) : null}
       <View style={styles.list}>
         {filteredDocuments.length > 0 ? (
           filteredDocuments.map((document) => (
@@ -129,8 +108,7 @@ function LegalDocumentsContent() {
 
 function ContractsContent() {
   const router = useRouter()
-  const { cancelSearch, filteredContracts, isSearching, query, setIsSearching, setQuery } =
-    useDocumentsScreen()
+  const { cancelSearch, filteredContracts, isSearching, query, setQuery } = useDocumentsScreen()
   const hasSearchQuery = query.trim().length > 0
 
   return (
@@ -139,12 +117,11 @@ function ContractsContent() {
         isSearching={isSearching}
         query={query}
         searchPlaceholder="Search contracts..."
-        showSearchButton
+        showSearchButton={false}
         showTitle={false}
         showUploadButton={false}
         onCancelSearch={cancelSearch}
         onQueryChange={setQuery}
-        onSearchPress={() => setIsSearching(true)}
       />
       <View style={styles.contractList}>
         {filteredContracts.length > 0 ? (
@@ -189,8 +166,7 @@ function ContractsContent() {
 
 function PayslipsContent() {
   const router = useRouter()
-  const { cancelSearch, filteredPayslips, isSearching, query, setIsSearching, setQuery } =
-    useDocumentsScreen()
+  const { cancelSearch, filteredPayslips, isSearching, query, setQuery } = useDocumentsScreen()
   const hasSearchQuery = query.trim().length > 0
 
   return (
@@ -199,12 +175,11 @@ function PayslipsContent() {
         isSearching={isSearching}
         query={query}
         searchPlaceholder="Search payslips..."
-        showSearchButton
+        showSearchButton={false}
         showTitle={false}
         showUploadButton={false}
         onCancelSearch={cancelSearch}
         onQueryChange={setQuery}
-        onSearchPress={() => setIsSearching(true)}
       />
       <View style={styles.list}>
         {filteredPayslips.length > 0 ? (

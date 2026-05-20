@@ -1,11 +1,11 @@
 import type { ComponentProps } from "react"
 import { Platform, Pressable, StyleSheet, View } from "react-native"
+import type { ButtonProps } from "@expo/ui/swift-ui"
 import { Ionicons } from "@expo/vector-icons"
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack"
-import type { SFSymbol } from "sf-symbols-typescript"
 
 import type { Theme } from "@/ui/foundations/theme"
 import { Text } from "@/ui/primitives/Text"
@@ -20,6 +20,7 @@ type SheetPreset = "medium" | "resizable"
 type SheetDetent = "medium" | "large"
 type SheetPresentation = "formSheet" | "pageSheet"
 type HeaderActionKind = "close" | "confirm" | "icon"
+type SystemImageName = NonNullable<ButtonProps["systemImage"]>
 
 interface BaseNavigationOptions {
   backgroundColor?: string
@@ -63,7 +64,7 @@ type HeaderActionOptions =
       kind: "icon"
       accessibilityLabel: string
       iconName: ComponentProps<typeof Ionicons>["name"]
-      iosIconName: SFSymbol
+      iosIconName: SystemImageName
       prominent?: boolean
     } & BaseHeaderActionOptions)
 

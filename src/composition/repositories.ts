@@ -216,7 +216,7 @@ function createMockAuthRepository(): AuthRepository {
       if (!Config.DEMO_AUTH_ENABLED) {
         return failure<AuthError>({
           type: "demo-disabled",
-          message: "Online sign-in is not available in this build yet.",
+          message: "Online sign-in isn't available yet.",
         })
       }
 

@@ -52,6 +52,7 @@ export interface UserProfile {
   email: string
   role?: string
   preferredName: string
+  avatarUri?: string
   phone: string
   dateOfBirth: string
   nationality: string

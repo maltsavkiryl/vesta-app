@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { AppStoreState } from "@/core/models"
+import type { AppTone } from "@/ui/composites/appTone"
 import { maskIban } from "@/utils/formatters"
 
 import {
@@ -15,6 +16,7 @@ export interface ProfileOverviewRow {
   label: string
   value?: string
   badge?: string
+  badgeTone?: AppTone
   route?: ProfileRoute
   destructive?: boolean
   showChevron?: boolean
@@ -25,6 +27,8 @@ export interface ProfileOverviewRow {
 export function buildProfileOverviewSections({
   contractSummary,
   fullName,
+  hasPendingContracts,
+  hasRequiredDocuments,
   legalDocumentsSummary,
   payslipsSummary,
   notificationCount,
@@ -33,6 +37,8 @@ export function buildProfileOverviewSections({
 }: {
   contractSummary: string
   fullName: string
+  hasPendingContracts: boolean
+  hasRequiredDocuments: boolean
   legalDocumentsSummary: string
   payslipsSummary: string
   notificationCount: number
@@ -77,12 +83,16 @@ export function buildProfileOverviewSections({
         value: employersSummary,
       },
       {
+        badge: hasRequiredDocuments ? "Missing" : undefined,
+        badgeTone: hasRequiredDocuments ? "danger" : undefined,
         icon: "shield-checkmark-outline",
         label: "Legal documents",
         route: "/profile/legal-documents",
         value: legalDocumentsSummary,
       },
       {
+        badge: hasPendingContracts ? "Needed" : undefined,
+        badgeTone: hasPendingContracts ? "accent" : undefined,
         icon: "document-text-outline",
         label: "Contracts",
         route: "/profile/contracts",
@@ -104,6 +114,7 @@ export function buildProfileOverviewSections({
       },
       {
         badge: hasContactGap ? "Needed" : undefined,
+        badgeTone: hasContactGap ? "accent" : undefined,
         icon: "mail-outline",
         label: "Contact details",
         route: "/profile/contact",
@@ -111,6 +122,7 @@ export function buildProfileOverviewSections({
       },
       {
         badge: hasAddressGap ? "Needed" : undefined,
+        badgeTone: hasAddressGap ? "accent" : undefined,
         icon: "location-outline",
         label: "Address",
         route: "/profile/address",
@@ -118,6 +130,7 @@ export function buildProfileOverviewSections({
       },
       {
         badge: hasBankGap ? "Needed" : undefined,
+        badgeTone: hasBankGap ? "accent" : undefined,
         icon: "card-outline",
         label: "Bank details",
         route: "/profile/banking",
@@ -125,6 +138,7 @@ export function buildProfileOverviewSections({
       },
       {
         badge: hasLegalGap ? "Needed" : undefined,
+        badgeTone: hasLegalGap ? "accent" : undefined,
         icon: "document-text-outline",
         label: "Legal information",
         route: "/profile/legal",

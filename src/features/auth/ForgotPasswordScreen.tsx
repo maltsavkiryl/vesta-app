@@ -69,8 +69,8 @@ export function ForgotPasswordScreen() {
         step === "verify"
           ? "Confirm your email to continue."
           : step === "reset"
-            ? "Set a new password for this device."
-            : "Your password has been updated on this device."
+            ? "Set a new password for your account."
+            : "Your password has been updated."
       }
     >
       {step === "done" ? (

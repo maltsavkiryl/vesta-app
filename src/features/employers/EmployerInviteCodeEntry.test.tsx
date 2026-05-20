@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react-native"
 
-import { ThemeProvider } from "@/theme/context"
+import { ThemeProvider } from "@/ui"
 
 import { EmployerInviteCodeEntry } from "./EmployerInviteCodeEntry"
 

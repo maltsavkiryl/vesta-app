@@ -26,7 +26,7 @@ export function signIn(payload: SignInPayload): {
 } {
   if (!Config.DEMO_AUTH_ENABLED) {
     return {
-      result: { ok: false, message: "Online sign-in is not available in this build yet." },
+      result: { ok: false, message: "Online sign-in isn't available yet." },
       session: getSession(),
       state: null,
     }

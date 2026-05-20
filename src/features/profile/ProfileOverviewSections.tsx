@@ -66,6 +66,18 @@ function ProfileOverviewRowItem({ isLast, item }: { isLast: boolean; item: Profi
   const router = useRouter()
   const tokens = useDesignTokens()
   const canPress = Boolean(item.route || item.onPress)
+  const trailing =
+    item.rightAccessory ??
+    (item.badge ? (
+      <View style={styles.rowTrailing}>
+        <Pill label={item.badge} tone={item.badgeTone ?? "accent"} />
+        {item.showChevron !== false && canPress ? (
+          <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
+        ) : null}
+      </View>
+    ) : item.showChevron !== false && canPress ? (
+      <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
+    ) : null)
 
   const handlePress = () => {
     if (item.onPress) {
@@ -94,14 +106,7 @@ function ProfileOverviewRowItem({ isLast, item }: { isLast: boolean; item: Profi
           style={styles.rowIcon}
         />
       }
-      trailing={
-        item.rightAccessory ??
-        (item.badge ? (
-          <Pill label={item.badge} tone="accent" />
-        ) : item.showChevron !== false && canPress ? (
-          <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
-        ) : null)
-      }
+      trailing={trailing}
     />
   )
 }
@@ -125,6 +130,11 @@ const styles = StyleSheet.create({
   },
   rowIcon: {
     width: 17,
+  },
+  rowTrailing: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
   },
   versionLabel: {
     marginBottom: 4,
