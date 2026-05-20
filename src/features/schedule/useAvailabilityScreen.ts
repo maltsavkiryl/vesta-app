@@ -1,19 +1,13 @@
 import { useCallback, useLayoutEffect, useMemo, useState } from "react"
-import { Platform } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import type { DateTimePickerEvent } from "@react-native-community/datetimepicker"
 import { useNavigation } from "@react-navigation/native"
 
 import type { AvailabilityStatus } from "@/core/models"
-import {
-  type AvailabilityTimeField,
-  formatTime,
-  isAvailabilityTimeField,
-  nearestMinute,
-} from "@/features/schedule/availability.utils"
+import { type AvailabilityTimeField } from "@/features/schedule/availability.utils"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { getTemplateAvailability, getWeekdayKey } from "@/features/schedule/schedule.utils"
+import { useAvailabilityTimeFieldController } from "@/features/schedule/useAvailabilityTimeFieldController"
 import { createHeaderActionOptions, useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -51,10 +45,7 @@ export function useAvailabilityScreen() {
   const [startTime, setStartTime] = useState(initialDay.startTime)
   const [endTime, setEndTime] = useState(initialDay.endTime)
   const [note, setNote] = useState(initialDay.note ?? "")
-  const [activeTimeField, setActiveTimeField] = useState<AvailabilityTimeField | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-
-  const pickerValue = activeTimeField === "endTime" ? endTime : startTime
   const weekdayLabel = getWeekdayKey(date)
 
   const updateTimeValue = useCallback((field: AvailabilityTimeField, nextValue: string) => {
@@ -121,6 +112,14 @@ export function useAvailabilityScreen() {
     })
   }, [persistOverride, templateDay.endTime, templateDay.startTime, templateDay.status])
 
+  const timeFieldController = useAvailabilityTimeFieldController({
+    date,
+    endTime,
+    routeState: { timeField, timeNonce, timeValue },
+    startTime,
+    updateTimeValue,
+  })
+
   useLayoutEffect(() => {
     navigation.setOptions(
       createHeaderActionOptions(theme, {
@@ -143,69 +142,18 @@ export function useAvailabilityScreen() {
     )
   }, [handleSave, isSaving, navigation, router, theme])
 
-  useLayoutEffect(() => {
-    if (!timeNonce || !isAvailabilityTimeField(timeField) || !timeValue) {
-      return
-    }
-
-    updateTimeValue(timeField, timeValue)
-    router.setParams({
-      timeField: undefined,
-      timeNonce: undefined,
-      timeValue: undefined,
-    })
-  }, [router, timeField, timeNonce, timeValue, updateTimeValue])
-
-  const handleAndroidTimeChange = useCallback(
-    (event: DateTimePickerEvent, selectedDate?: Date) => {
-      if (event.type !== "set" || !selectedDate || !activeTimeField) {
-        setActiveTimeField(null)
-        return
-      }
-
-      const nextValue = formatTime(
-        selectedDate.getHours(),
-        nearestMinute(selectedDate.getMinutes()),
-      )
-      updateTimeValue(activeTimeField, nextValue)
-      setActiveTimeField(null)
-    },
-    [activeTimeField, updateTimeValue],
-  )
-
-  const handleTimePress = useCallback(
-    (field: AvailabilityTimeField) => {
-      if (Platform.OS === "ios") {
-        router.push({
-          params: {
-            date,
-            field,
-            returnTo: "availability",
-            title: field === "startTime" ? "Choose start time" : "Choose end time",
-            value: field === "startTime" ? startTime : endTime,
-          },
-          pathname: "/(app)/availability-time-picker",
-        })
-        return
-      }
-
-      setActiveTimeField(field)
-    },
-    [date, endTime, router, startTime],
-  )
-
   return {
-    activeTimeField,
+    activeTimeField: timeFieldController.activeTimeField,
     canResetToTemplate: Boolean(existingOverride),
     date,
     endTime,
     existingOverride,
-    handleAndroidTimeChange,
+    handleAndroidTimeChange: timeFieldController.handleAndroidTimeChange,
     handleResetToTemplate,
-    handleTimePress,
+    handleTimePress: timeFieldController.handleTimePress,
     isSaving,
     note,
-    pickerValue,
+    pickerValue: timeFieldController.pickerValue,
     setNote,
     setStatus,
     startTime,

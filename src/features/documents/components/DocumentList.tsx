@@ -6,6 +6,12 @@ import { Banner, Text, appLayout, useDesignTokens } from "@/ui"
 
 import type { Contract, Payslip } from "../documents.types"
 import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.utils"
+import { DocumentContractCard } from "./DocumentContractCard"
+import {
+  DocumentRowTail,
+  DocumentStatusIcon,
+  PayslipSummary,
+} from "./DocumentRowAffordances"
 
 export function AttentionBanner({ count, onPress }: { count: number; onPress: () => void }) {
   const tokens = useDesignTokens()
@@ -43,9 +49,11 @@ export function RequiredDocumentRow({
 
   return (
     <Pressable onPress={onPress} style={[styles.documentRow, { backgroundColor: tokens.surface }]}>
-      <View style={[styles.statusIcon, { backgroundColor: status.backgroundColor }]}>
-        <Ionicons color={status.color} name={status.icon} size={18} />
-      </View>
+      <DocumentStatusIcon
+        backgroundColor={status.backgroundColor}
+        color={status.color}
+        icon={status.icon}
+      />
       <View style={styles.flex}>
         <Text
           text={document.title}
@@ -59,34 +67,17 @@ export function RequiredDocumentRow({
           style={{ color: tokens.textSecondary }}
         />
       </View>
-      <View style={styles.rowTail}>
-        {showsStatusText ? (
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor: status.backgroundColor,
-              },
-            ]}
-          >
-            <Text text={status.label} size="xxs" weight="medium" style={{ color: status.color }} />
-          </View>
-        ) : null}
-        {isMissing ? (
-          <View style={[styles.inlineUpload, { backgroundColor: tokens.accent }]}>
-            <Text
-              text="Upload"
-              size="xxs"
-              weight="semiBold"
-              style={{ color: tokens.accentForeground }}
-            />
-          </View>
-        ) : (
-          <View style={[styles.eyeButton, { backgroundColor: tokens.surface }]}>
-            <Ionicons color={tokens.textSecondary} name="eye-outline" size={14} />
-          </View>
-        )}
-      </View>
+      <DocumentRowTail
+        accent={tokens.accent}
+        accentForeground={tokens.accentForeground}
+        actionLabel={isMissing ? "Upload" : "View"}
+        isMissing={isMissing}
+        showStatusText={showsStatusText}
+        statusBackgroundColor={status.backgroundColor}
+        statusColor={status.color}
+        statusLabel={status.label}
+        textSecondary={tokens.textSecondary}
+      />
     </Pressable>
   )
 }
@@ -96,9 +87,11 @@ export function PayslipRow({ onPress, payslip }: { onPress: () => void; payslip:
 
   return (
     <Pressable onPress={onPress} style={[styles.documentRow, { backgroundColor: tokens.surface }]}>
-      <View style={[styles.statusIcon, { backgroundColor: `${tokens.success}14` }]}>
-        <Ionicons color={tokens.success} name="cash-outline" size={18} />
-      </View>
+      <DocumentStatusIcon
+        backgroundColor={`${tokens.success}14`}
+        color={tokens.success}
+        icon="cash-outline"
+      />
       <View style={styles.flex}>
         <Text
           text={payslip.month}
@@ -108,130 +101,15 @@ export function PayslipRow({ onPress, payslip }: { onPress: () => void; payslip:
         />
         <Text text={`Paid ${payslip.date}`} size="xxs" style={{ color: tokens.textSecondary }} />
       </View>
-      <View style={styles.payslipTail}>
-        <Text text={payslip.net} size="xs" weight="bold" style={{ color: tokens.textPrimary }} />
-        <Text text="Net pay" size="xxs" style={{ color: tokens.textMuted }} />
-      </View>
+      <PayslipSummary amount={payslip.net} muted={tokens.textMuted} primary={tokens.textPrimary} />
       <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
     </Pressable>
   )
 }
 
-export function ContractCard({
-  contract,
-  onDownload,
-  onSign,
-  onView,
-}: {
-  contract: Contract
-  onDownload: () => void
-  onSign: () => void
-  onView: () => void
-}) {
-  const tokens = useDesignTokens()
-  const status = getDocumentStatusConfig(tokens, contract.status)
-
-  return (
-    <View style={[styles.contractCard, { backgroundColor: tokens.surface }]}>
-      <View style={styles.contractHeader}>
-        <View style={[styles.statusIcon, { backgroundColor: status.backgroundColor }]}>
-          <Ionicons color={status.color} name={status.icon} size={18} />
-        </View>
-        <View style={styles.flex}>
-          <Text
-            text={contract.name}
-            size="xs"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary }}
-          />
-          <Text
-            text={`${contract.type} · ${contract.date}`}
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-        </View>
-        <Text text={status.label} size="xxs" weight="semiBold" style={{ color: status.color }} />
-      </View>
-      <View style={styles.contractActions}>
-        <Pressable
-          onPress={onView}
-          style={[
-            styles.contractSecondary,
-            { backgroundColor: tokens.background, borderColor: tokens.border },
-          ]}
-        >
-          <Ionicons color={tokens.textPrimary} name="eye-outline" size={14} />
-          <Text text="View" size="xxs" weight="medium" style={{ color: tokens.textPrimary }} />
-        </Pressable>
-        {contract.status === "pending" ? (
-          <Pressable
-            onPress={onSign}
-            style={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
-          >
-            <Ionicons color={tokens.accentForeground} name="pencil-outline" size={14} />
-            <Text
-              text="Review & sign"
-              size="xxs"
-              weight="semiBold"
-              style={{ color: tokens.accentForeground }}
-            />
-          </Pressable>
-        ) : (
-          <Pressable
-            onPress={onDownload}
-            style={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
-          >
-            <Ionicons color={tokens.accentForeground} name="download-outline" size={14} />
-            <Text
-              text="Download"
-              size="xxs"
-              weight="semiBold"
-              style={{ color: tokens.accentForeground }}
-            />
-          </Pressable>
-        )}
-      </View>
-    </View>
-  )
-}
+export const ContractCard = DocumentContractCard
 
 const styles = StyleSheet.create({
-  contractActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  contractCard: {
-    borderCurve: "continuous",
-    borderRadius: 17,
-    gap: appLayout.cardGap,
-    padding: 16,
-  },
-  contractHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 12,
-  },
-  contractPrimary: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
-    flex: 2,
-    flexDirection: "row",
-    gap: 5,
-    justifyContent: "center",
-    padding: 10,
-  },
-  contractSecondary: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
-    borderWidth: 1,
-    flex: 1,
-    flexDirection: "row",
-    gap: 5,
-    justifyContent: "center",
-    padding: 10,
-  },
   documentRow: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -242,43 +120,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-  eyeButton: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 8,
-    height: 28,
-    justifyContent: "center",
-    width: 28,
-  },
   flex: {
     flex: 1,
-  },
-  inlineUpload: {
-    borderCurve: "continuous",
-    borderRadius: 8,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-  },
-  payslipTail: {
-    alignItems: "flex-end",
-  },
-  rowTail: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  statusBadge: {
-    borderCurve: "continuous",
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  statusIcon: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
   },
 })

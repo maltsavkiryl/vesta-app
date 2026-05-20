@@ -1,63 +1,15 @@
 # Codebase Improvement Report
 
 - Scope: `vesta-mobile`
-- Findings: `45`
-- Work packets: `4`
-- Worktree: `26` changed paths
+- Findings: `34`
+- Work packets: `1`
+- Worktree: `33` changed paths
 
 ## Worktree Guardrail
 
-- Tracked changes: `14`
-- Untracked paths: `12`
+- Tracked changes: `13`
+- Untracked paths: `20`
 - Do not start broad sweeps in already-touched areas without isolating the work first.
-
-## Start Here
-
-- Screen decomposition: `5` findings. Start in `src/features/schedule/RequestScreen.tsx`, `src/features/schedule/ScheduleScreen.tsx`, `src/features/schedule/ShiftDetailScreen.tsx`.
-- Hook decomposition: `3` findings. Start in `src/features/profile/useProfileDetailScreen.ts`, `src/features/schedule/useAvailabilityScreen.ts`, `src/features/time/useTimeCardController.ts`.
-- Component decomposition: `3` findings. Start in `src/features/documents/components/DocumentList.tsx`, `src/features/home/components/HomeTaskSections.tsx`, `src/features/time/components/TimeOverviewActiveCard.tsx`.
-
-## Screen decomposition
-
-- `src/features/schedule/RequestScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 386 lines; prefer a shell plus hooks/components split.
-- `src/features/schedule/ScheduleScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 611 lines; prefer a shell plus hooks/components split.
-- `src/features/schedule/ShiftDetailScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 293 lines; prefer a shell plus hooks/components split.
-- `src/features/time/ClockOutScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 257 lines; prefer a shell plus hooks/components split.
-- `src/features/time/TimeEntryDetailScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 355 lines; prefer a shell plus hooks/components split.
-
-## Hook decomposition
-
-- `src/features/profile/useProfileDetailScreen.ts` -> `split_hook_by_domain_or_responsibility`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Hook file is 218 lines; split by responsibility before it becomes a new hotspot.
-- `src/features/schedule/useAvailabilityScreen.ts` -> `split_hook_by_domain_or_responsibility`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Hook file is 216 lines; split by responsibility before it becomes a new hotspot.
-- `src/features/time/useTimeCardController.ts` -> `split_hook_by_domain_or_responsibility`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Hook file is 232 lines; split by responsibility before it becomes a new hotspot.
-
-## Component decomposition
-
-- `src/features/documents/components/DocumentList.tsx` -> `split_component_and_extract_helpers`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Component file is 284 lines; review whether it now mixes layout, state, and helpers.
-- `src/features/home/components/HomeTaskSections.tsx` -> `split_component_and_extract_helpers`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Component file is 329 lines; review whether it now mixes layout, state, and helpers.
-- `src/features/time/components/TimeOverviewActiveCard.tsx` -> `split_component_and_extract_helpers`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Component file is 223 lines; review whether it now mixes layout, state, and helpers.
 
 ## Manual product and native review
 
