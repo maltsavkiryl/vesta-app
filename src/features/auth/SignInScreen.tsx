@@ -1,46 +1,28 @@
-import { useState } from "react"
-import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native"
-import { useRouter } from "expo-router"
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { useAuthActions } from "@/features/auth/data/auth.mutations"
-import { DEMO_AUTH_CREDENTIALS } from "@/providers/app-provider"
 import { Banner, Button, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
-import { fireHaptic } from "@/utils/haptics"
 
+import { AuthAccessoryButton } from "./AuthAccessoryButton"
+import { AuthLogo } from "./AuthLogo"
 import { AuthTextField } from "./AuthTextField"
-
-const vestaLogo = require("@assets/images/vesta-logo.png")
+import { useSignInScreen } from "./useSignInScreen"
 
 export function SignInScreen() {
-  const router = useRouter()
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
-  const { signIn } = useAuthActions()
-
-  const [email, setEmail] = useState<string>(DEMO_AUTH_CREDENTIALS.email)
-  const [password, setPassword] = useState<string>(DEMO_AUTH_CREDENTIALS.password)
-  const [error, setError] = useState<string>()
-
-  const handleContinue = async () => {
-    if (!email.includes("@")) {
-      fireHaptic("warning")
-      setError("Please enter a valid email address.")
-      return
-    }
-
-    const result = await signIn({ email, password })
-    if (!result.ok) {
-      fireHaptic("error")
-      setError(result.error.message)
-      return
-    }
-
-    fireHaptic("success")
-    setError(undefined)
-    router.replace("/")
-  }
+  const {
+    clearEmail,
+    clearPassword,
+    email,
+    error,
+    handleContinue,
+    handleEmailChange,
+    handlePasswordChange,
+    password,
+    router,
+  } = useSignInScreen()
 
   return (
     <KeyboardAvoidingView
@@ -57,7 +39,7 @@ export function SignInScreen() {
         ]}
       >
         <MotionView style={styles.header}>
-          <VestaLogo />
+          <AuthLogo style={styles.logo} />
           <Text
             text="Log in or sign up"
             weight="bold"
@@ -72,10 +54,7 @@ export function SignInScreen() {
             keyboardType="email-address"
             label="Email"
             labelCase="default"
-            onChangeText={(value) => {
-              setEmail(value)
-              if (error) setError(undefined)
-            }}
+            onChangeText={handleEmailChange}
             onSubmitEditing={handleContinue}
             placeholder="Email"
             returnKeyType="next"
@@ -84,14 +63,12 @@ export function SignInScreen() {
             value={email}
             rightAccessory={
               email.length > 0 ? (
-                <Pressable
+                <AuthAccessoryButton
                   accessibilityLabel="Clear email"
-                  hitSlop={10}
-                  onPress={() => setEmail("")}
+                  icon="close"
+                  onPress={clearEmail}
                   style={[styles.clearButton, { backgroundColor: tokens.textMuted }]}
-                >
-                  <Ionicons color={tokens.accentForeground} name="close" size={12} />
-                </Pressable>
+                />
               ) : null
             }
           />
@@ -101,10 +78,7 @@ export function SignInScreen() {
             autoComplete="off"
             label="Password"
             labelCase="default"
-            onChangeText={(value) => {
-              setPassword(value)
-              if (error) setError(undefined)
-            }}
+            onChangeText={handlePasswordChange}
             onSubmitEditing={handleContinue}
             placeholder="Password"
             returnKeyType="done"
@@ -114,14 +88,12 @@ export function SignInScreen() {
             value={password}
             rightAccessory={
               password.length > 0 ? (
-                <Pressable
+                <AuthAccessoryButton
                   accessibilityLabel="Clear password"
-                  hitSlop={10}
-                  onPress={() => setPassword("")}
+                  icon="close"
+                  onPress={clearPassword}
                   style={[styles.clearButton, { backgroundColor: tokens.textMuted }]}
-                >
-                  <Ionicons color={tokens.accentForeground} name="close" size={12} />
-                </Pressable>
+                />
               ) : null
             }
           />
@@ -149,18 +121,6 @@ export function SignInScreen() {
         </MotionView>
       </View>
     </KeyboardAvoidingView>
-  )
-}
-
-function VestaLogo() {
-  return (
-    <Image
-      accessibilityLabel="Vesta"
-      accessibilityIgnoresInvertColors
-      resizeMode="contain"
-      source={vestaLogo}
-      style={styles.logo}
-    />
   )
 }
 

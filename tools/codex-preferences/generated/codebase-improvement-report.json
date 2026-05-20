@@ -1,11 +1,11 @@
 {
   "scope": "vesta-mobile",
-  "generatedAt": "2026-05-20T07:41:06+00:00",
+  "generatedAt": "2026-05-20T08:06:33+00:00",
   "worktree": {
     "is_dirty": true,
-    "entries": 4,
-    "untracked": 0,
-    "tracked_changes": 4
+    "entries": 26,
+    "untracked": 12,
+    "tracked_changes": 14
   },
   "findings": [
     {
@@ -29,17 +29,6 @@
       "recommended_fix_type": "split_into_shell_hook_components",
       "shared_layer_candidate": false,
       "summary": "Screen file is 386 lines; prefer a shell plus hooks/components split."
-    },
-    {
-      "finding_id": "screen-size::src/features/schedule/AvailabilityTemplateScreen.tsx",
-      "rule_id": "arch-uniformity-small-files-hooks-components",
-      "path": "src/features/schedule/AvailabilityTemplateScreen.tsx",
-      "category": "screen_decomposition",
-      "severity": "medium",
-      "confidence": "high",
-      "recommended_fix_type": "split_into_shell_hook_components",
-      "shared_layer_candidate": false,
-      "summary": "Screen file is 431 lines; prefer a shell plus hooks/components split."
     },
     {
       "finding_id": "hook-size::src/features/schedule/useAvailabilityScreen.ts",
@@ -73,39 +62,6 @@
       "recommended_fix_type": "split_into_shell_hook_components",
       "shared_layer_candidate": false,
       "summary": "Screen file is 293 lines; prefer a shell plus hooks/components split."
-    },
-    {
-      "finding_id": "screen-size::src/features/auth/SignInScreen.tsx",
-      "rule_id": "arch-uniformity-small-files-hooks-components",
-      "path": "src/features/auth/SignInScreen.tsx",
-      "category": "screen_decomposition",
-      "severity": "medium",
-      "confidence": "high",
-      "recommended_fix_type": "split_into_shell_hook_components",
-      "shared_layer_candidate": false,
-      "summary": "Screen file is 241 lines; prefer a shell plus hooks/components split."
-    },
-    {
-      "finding_id": "screen-size::src/features/auth/OnboardingScreen.tsx",
-      "rule_id": "arch-uniformity-small-files-hooks-components",
-      "path": "src/features/auth/OnboardingScreen.tsx",
-      "category": "screen_decomposition",
-      "severity": "medium",
-      "confidence": "high",
-      "recommended_fix_type": "split_into_shell_hook_components",
-      "shared_layer_candidate": false,
-      "summary": "Screen file is 267 lines; prefer a shell plus hooks/components split."
-    },
-    {
-      "finding_id": "screen-size::src/features/auth/RegisterScreen.tsx",
-      "rule_id": "arch-uniformity-small-files-hooks-components",
-      "path": "src/features/auth/RegisterScreen.tsx",
-      "category": "screen_decomposition",
-      "severity": "medium",
-      "confidence": "high",
-      "recommended_fix_type": "split_into_shell_hook_components",
-      "shared_layer_candidate": false,
-      "summary": "Screen file is 283 lines; prefer a shell plus hooks/components split."
     },
     {
       "finding_id": "screen-size::src/features/time/TimeEntryDetailScreen.tsx",
@@ -149,7 +105,7 @@
       "confidence": "medium",
       "recommended_fix_type": "split_component_and_extract_helpers",
       "shared_layer_candidate": false,
-      "summary": "Component file is 227 lines; review whether it now mixes layout, state, and helpers."
+      "summary": "Component file is 223 lines; review whether it now mixes layout, state, and helpers."
     },
     {
       "finding_id": "hook-size::src/features/profile/useProfileDetailScreen.ts",
@@ -163,17 +119,6 @@
       "summary": "Hook file is 218 lines; split by responsibility before it becomes a new hotspot."
     },
     {
-      "finding_id": "screen-size::src/features/documents/ContractDetailScreen.tsx",
-      "rule_id": "arch-uniformity-small-files-hooks-components",
-      "path": "src/features/documents/ContractDetailScreen.tsx",
-      "category": "screen_decomposition",
-      "severity": "medium",
-      "confidence": "high",
-      "recommended_fix_type": "split_into_shell_hook_components",
-      "shared_layer_candidate": false,
-      "summary": "Screen file is 222 lines; prefer a shell plus hooks/components split."
-    },
-    {
       "finding_id": "component-size::src/features/documents/components/DocumentList.tsx",
       "rule_id": "arch-uniformity-small-files-hooks-components",
       "path": "src/features/documents/components/DocumentList.tsx",
@@ -183,39 +128,6 @@
       "recommended_fix_type": "split_component_and_extract_helpers",
       "shared_layer_candidate": false,
       "summary": "Component file is 284 lines; review whether it now mixes layout, state, and helpers."
-    },
-    {
-      "finding_id": "screen-size::src/features/notifications/NotificationsScreen.tsx",
-      "rule_id": "arch-uniformity-small-files-hooks-components",
-      "path": "src/features/notifications/NotificationsScreen.tsx",
-      "category": "screen_decomposition",
-      "severity": "medium",
-      "confidence": "high",
-      "recommended_fix_type": "split_into_shell_hook_components",
-      "shared_layer_candidate": false,
-      "summary": "Screen file is 390 lines; prefer a shell plus hooks/components split."
-    },
-    {
-      "finding_id": "provider-cycle::src/providers/app-provider.tsx",
-      "rule_id": "arch-shell-only-app-provider",
-      "path": "src/providers/app-provider.tsx",
-      "category": "provider_boundary_cleanup",
-      "severity": "high",
-      "confidence": "medium",
-      "recommended_fix_type": "move_shell_state_access_to_repositories_or_composition",
-      "shared_layer_candidate": true,
-      "summary": "Provider imports appear to cross into feature query/data code; verify that the shell remains repository-driven."
-    },
-    {
-      "finding_id": "provider-cycle::src/providers/motion-provider.tsx",
-      "rule_id": "arch-shell-only-app-provider",
-      "path": "src/providers/motion-provider.tsx",
-      "category": "provider_boundary_cleanup",
-      "severity": "high",
-      "confidence": "medium",
-      "recommended_fix_type": "move_shell_state_access_to_repositories_or_composition",
-      "shared_layer_candidate": true,
-      "summary": "Provider imports appear to cross into feature query/data code; verify that the shell remains repository-driven."
     },
     {
       "finding_id": "hotspot::arch-http-ready-clean-break::src/services/api",
@@ -594,105 +506,10 @@
   ],
   "work_packets": [
     {
-      "packet_id": "provider_boundary_cleanup",
-      "title": "Provider boundary cleanup",
-      "priority": 1,
-      "findings": [
-        {
-          "finding_id": "provider-cycle::src/providers/app-provider.tsx",
-          "rule_id": "arch-shell-only-app-provider",
-          "path": "src/providers/app-provider.tsx",
-          "category": "provider_boundary_cleanup",
-          "severity": "high",
-          "confidence": "medium",
-          "recommended_fix_type": "move_shell_state_access_to_repositories_or_composition",
-          "shared_layer_candidate": true,
-          "summary": "Provider imports appear to cross into feature query/data code; verify that the shell remains repository-driven."
-        },
-        {
-          "finding_id": "provider-cycle::src/providers/motion-provider.tsx",
-          "rule_id": "arch-shell-only-app-provider",
-          "path": "src/providers/motion-provider.tsx",
-          "category": "provider_boundary_cleanup",
-          "severity": "high",
-          "confidence": "medium",
-          "recommended_fix_type": "move_shell_state_access_to_repositories_or_composition",
-          "shared_layer_candidate": true,
-          "summary": "Provider imports appear to cross into feature query/data code; verify that the shell remains repository-driven."
-        }
-      ]
-    },
-    {
       "packet_id": "screen_decomposition",
       "title": "Screen decomposition",
       "priority": 2,
       "findings": [
-        {
-          "finding_id": "screen-size::src/features/auth/OnboardingScreen.tsx",
-          "rule_id": "arch-uniformity-small-files-hooks-components",
-          "path": "src/features/auth/OnboardingScreen.tsx",
-          "category": "screen_decomposition",
-          "severity": "medium",
-          "confidence": "high",
-          "recommended_fix_type": "split_into_shell_hook_components",
-          "shared_layer_candidate": false,
-          "summary": "Screen file is 267 lines; prefer a shell plus hooks/components split."
-        },
-        {
-          "finding_id": "screen-size::src/features/auth/RegisterScreen.tsx",
-          "rule_id": "arch-uniformity-small-files-hooks-components",
-          "path": "src/features/auth/RegisterScreen.tsx",
-          "category": "screen_decomposition",
-          "severity": "medium",
-          "confidence": "high",
-          "recommended_fix_type": "split_into_shell_hook_components",
-          "shared_layer_candidate": false,
-          "summary": "Screen file is 283 lines; prefer a shell plus hooks/components split."
-        },
-        {
-          "finding_id": "screen-size::src/features/auth/SignInScreen.tsx",
-          "rule_id": "arch-uniformity-small-files-hooks-components",
-          "path": "src/features/auth/SignInScreen.tsx",
-          "category": "screen_decomposition",
-          "severity": "medium",
-          "confidence": "high",
-          "recommended_fix_type": "split_into_shell_hook_components",
-          "shared_layer_candidate": false,
-          "summary": "Screen file is 241 lines; prefer a shell plus hooks/components split."
-        },
-        {
-          "finding_id": "screen-size::src/features/documents/ContractDetailScreen.tsx",
-          "rule_id": "arch-uniformity-small-files-hooks-components",
-          "path": "src/features/documents/ContractDetailScreen.tsx",
-          "category": "screen_decomposition",
-          "severity": "medium",
-          "confidence": "high",
-          "recommended_fix_type": "split_into_shell_hook_components",
-          "shared_layer_candidate": false,
-          "summary": "Screen file is 222 lines; prefer a shell plus hooks/components split."
-        },
-        {
-          "finding_id": "screen-size::src/features/notifications/NotificationsScreen.tsx",
-          "rule_id": "arch-uniformity-small-files-hooks-components",
-          "path": "src/features/notifications/NotificationsScreen.tsx",
-          "category": "screen_decomposition",
-          "severity": "medium",
-          "confidence": "high",
-          "recommended_fix_type": "split_into_shell_hook_components",
-          "shared_layer_candidate": false,
-          "summary": "Screen file is 390 lines; prefer a shell plus hooks/components split."
-        },
-        {
-          "finding_id": "screen-size::src/features/schedule/AvailabilityTemplateScreen.tsx",
-          "rule_id": "arch-uniformity-small-files-hooks-components",
-          "path": "src/features/schedule/AvailabilityTemplateScreen.tsx",
-          "category": "screen_decomposition",
-          "severity": "medium",
-          "confidence": "high",
-          "recommended_fix_type": "split_into_shell_hook_components",
-          "shared_layer_candidate": false,
-          "summary": "Screen file is 431 lines; prefer a shell plus hooks/components split."
-        },
         {
           "finding_id": "screen-size::src/features/schedule/RequestScreen.tsx",
           "rule_id": "arch-uniformity-small-files-hooks-components",
@@ -826,7 +643,7 @@
           "confidence": "medium",
           "recommended_fix_type": "split_component_and_extract_helpers",
           "shared_layer_candidate": false,
-          "summary": "Component file is 227 lines; review whether it now mixes layout, state, and helpers."
+          "summary": "Component file is 223 lines; review whether it now mixes layout, state, and helpers."
         }
       ]
     },
@@ -1214,22 +1031,13 @@
   ],
   "recommended_first": [
     {
-      "packet_id": "provider_boundary_cleanup",
-      "title": "Provider boundary cleanup",
-      "finding_count": 2,
-      "top_paths": [
-        "src/providers/app-provider.tsx",
-        "src/providers/motion-provider.tsx"
-      ]
-    },
-    {
       "packet_id": "screen_decomposition",
       "title": "Screen decomposition",
-      "finding_count": 11,
+      "finding_count": 5,
       "top_paths": [
-        "src/features/auth/OnboardingScreen.tsx",
-        "src/features/auth/RegisterScreen.tsx",
-        "src/features/auth/SignInScreen.tsx"
+        "src/features/schedule/RequestScreen.tsx",
+        "src/features/schedule/ScheduleScreen.tsx",
+        "src/features/schedule/ShiftDetailScreen.tsx"
       ]
     },
     {
@@ -1240,6 +1048,16 @@
         "src/features/profile/useProfileDetailScreen.ts",
         "src/features/schedule/useAvailabilityScreen.ts",
         "src/features/time/useTimeCardController.ts"
+      ]
+    },
+    {
+      "packet_id": "component_decomposition",
+      "title": "Component decomposition",
+      "finding_count": 3,
+      "top_paths": [
+        "src/features/documents/components/DocumentList.tsx",
+        "src/features/home/components/HomeTaskSections.tsx",
+        "src/features/time/components/TimeOverviewActiveCard.tsx"
       ]
     }
   ]

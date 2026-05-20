@@ -1,76 +1,34 @@
-import { useState } from "react"
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native"
-import { useRouter } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { Button, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
-import { fireHaptic } from "@/utils/haptics"
 
+import { AuthAccessoryButton } from "./AuthAccessoryButton"
 import { AuthError } from "./AuthScaffold"
+import { AuthLogo } from "./AuthLogo"
 import { AuthTextField } from "./AuthTextField"
-
-const vestaLogo = require("@assets/images/vesta-logo.png")
+import { useRegisterScreen } from "./useRegisterScreen"
 
 export function RegisterScreen() {
-  const router = useRouter()
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
-  const { register } = useAuthActions()
-
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string>()
-
-  const clearError = () => {
-    if (error) setError(undefined)
-  }
-
-  const handleSubmit = async () => {
-    if (!firstName.trim() || !lastName.trim()) {
-      fireHaptic("warning")
-      setError("Please enter your full name.")
-      return
-    }
-    if (!email.includes("@")) {
-      fireHaptic("warning")
-      setError("Please enter a valid email address.")
-      return
-    }
-    if (password.length < 8) {
-      fireHaptic("warning")
-      setError("Password must be at least 8 characters.")
-      return
-    }
-    if (password !== confirmPassword) {
-      fireHaptic("warning")
-      setError("Passwords don't match.")
-      return
-    }
-
-    setError(undefined)
-    const result = await register({ firstName, lastName, email, password })
-    if (!result.ok) {
-      fireHaptic("error")
-      setError(result.error.message)
-      return
-    }
-    fireHaptic("success")
-    router.replace("/(auth)/onboarding")
-  }
+  const {
+    confirmPassword,
+    email,
+    error,
+    firstName,
+    handleSubmit,
+    lastName,
+    password,
+    router,
+    setConfirmPassword,
+    setEmail,
+    setFirstName,
+    setLastName,
+    setPassword,
+    showPassword,
+    toggleShowPassword,
+  } = useRegisterScreen()
 
   return (
     <KeyboardAvoidingView
@@ -89,7 +47,7 @@ export function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <MotionView style={styles.header}>
-          <VestaLogo />
+          <AuthLogo style={styles.logo} />
           <Text
             text="Create account"
             weight="bold"
@@ -113,10 +71,7 @@ export function RegisterScreen() {
               autoCapitalize="words"
               autoComplete="given-name"
               containerStyle={styles.nameField}
-              onChangeText={(value) => {
-                setFirstName(value)
-                clearError()
-              }}
+              onChangeText={setFirstName}
               label="First name"
               labelCase="default"
               placeholder="First name"
@@ -130,10 +85,7 @@ export function RegisterScreen() {
               autoCapitalize="words"
               autoComplete="family-name"
               containerStyle={styles.nameField}
-              onChangeText={(value) => {
-                setLastName(value)
-                clearError()
-              }}
+              onChangeText={setLastName}
               label="Last name"
               labelCase="default"
               placeholder="Last name"
@@ -151,10 +103,7 @@ export function RegisterScreen() {
             keyboardType="email-address"
             label="Email"
             labelCase="default"
-            onChangeText={(value) => {
-              setEmail(value)
-              clearError()
-            }}
+            onChangeText={setEmail}
             placeholder="Email"
             returnKeyType="next"
             showLabel={false}
@@ -168,10 +117,7 @@ export function RegisterScreen() {
             autoComplete="new-password"
             label="Password"
             labelCase="default"
-            onChangeText={(value) => {
-              setPassword(value)
-              clearError()
-            }}
+            onChangeText={setPassword}
             placeholder="Password"
             returnKeyType="next"
             secureTextEntry={!showPassword}
@@ -179,18 +125,11 @@ export function RegisterScreen() {
             textContentType="newPassword"
             value={password}
             rightAccessory={
-              <Pressable
+              <AuthAccessoryButton
                 accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-                hitSlop={10}
-                onPress={() => setShowPassword((current) => !current)}
-                style={styles.iconButton}
-              >
-                <Ionicons
-                  color={tokens.textSecondary}
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={20}
-                />
-              </Pressable>
+                icon={showPassword ? "eye-off-outline" : "eye-outline"}
+                onPress={toggleShowPassword}
+              />
             }
           />
 
@@ -200,10 +139,7 @@ export function RegisterScreen() {
             autoComplete="new-password"
             label="Confirm password"
             labelCase="default"
-            onChangeText={(value) => {
-              setConfirmPassword(value)
-              clearError()
-            }}
+            onChangeText={setConfirmPassword}
             onSubmitEditing={handleSubmit}
             placeholder="Confirm password"
             returnKeyType="done"
@@ -228,18 +164,6 @@ export function RegisterScreen() {
   )
 }
 
-function VestaLogo() {
-  return (
-    <Image
-      accessibilityLabel="Vesta"
-      accessibilityIgnoresInvertColors
-      resizeMode="contain"
-      source={vestaLogo}
-      style={styles.logo}
-    />
-  )
-}
-
 const styles = StyleSheet.create({
   centerText: {
     textAlign: "center",
@@ -255,12 +179,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginBottom: 24,
-  },
-  iconButton: {
-    alignItems: "center",
-    height: 28,
-    justifyContent: "center",
-    width: 28,
   },
   logo: {
     height: 76,

@@ -1,8 +1,9 @@
 import type { QueryClient } from "@tanstack/react-query"
 
-import { appQueryKeys } from "./app.queries"
-import type { MockBackendSessionDto } from "./app.types"
+import type { AppSession } from "@/features/auth/data/auth.transformer"
 
-export function setSessionCache(queryClient: QueryClient, session: MockBackendSessionDto) {
+import { appQueryKeys } from "./app.queries"
+
+export function setSessionCache(queryClient: QueryClient, session: AppSession) {
   queryClient.setQueryData(appQueryKeys.session, session)
 }

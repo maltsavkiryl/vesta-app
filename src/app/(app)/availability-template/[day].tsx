@@ -1,3 +1,3 @@
-import { AvailabilityTemplateDayScreen } from "@/features/schedule/AvailabilityTemplateScreen"
+import { AvailabilityTemplateDayScreen } from "@/features/schedule/AvailabilityTemplateDayScreen"
 
 export default AvailabilityTemplateDayScreen

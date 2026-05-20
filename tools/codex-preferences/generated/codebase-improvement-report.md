@@ -1,51 +1,24 @@
 # Codebase Improvement Report
 
 - Scope: `vesta-mobile`
-- Findings: `53`
-- Work packets: `5`
-- Worktree: `4` changed paths
+- Findings: `45`
+- Work packets: `4`
+- Worktree: `26` changed paths
 
 ## Worktree Guardrail
 
-- Tracked changes: `4`
-- Untracked paths: `0`
+- Tracked changes: `14`
+- Untracked paths: `12`
 - Do not start broad sweeps in already-touched areas without isolating the work first.
 
 ## Start Here
 
-- Provider boundary cleanup: `2` findings. Start in `src/providers/app-provider.tsx`, `src/providers/motion-provider.tsx`.
-- Screen decomposition: `11` findings. Start in `src/features/auth/OnboardingScreen.tsx`, `src/features/auth/RegisterScreen.tsx`, `src/features/auth/SignInScreen.tsx`.
+- Screen decomposition: `5` findings. Start in `src/features/schedule/RequestScreen.tsx`, `src/features/schedule/ScheduleScreen.tsx`, `src/features/schedule/ShiftDetailScreen.tsx`.
 - Hook decomposition: `3` findings. Start in `src/features/profile/useProfileDetailScreen.ts`, `src/features/schedule/useAvailabilityScreen.ts`, `src/features/time/useTimeCardController.ts`.
-
-## Provider boundary cleanup
-
-- `src/providers/app-provider.tsx` -> `move_shell_state_access_to_repositories_or_composition`
-  Rule: `arch-shell-only-app-provider`
-  Summary: Provider imports appear to cross into feature query/data code; verify that the shell remains repository-driven.
-- `src/providers/motion-provider.tsx` -> `move_shell_state_access_to_repositories_or_composition`
-  Rule: `arch-shell-only-app-provider`
-  Summary: Provider imports appear to cross into feature query/data code; verify that the shell remains repository-driven.
+- Component decomposition: `3` findings. Start in `src/features/documents/components/DocumentList.tsx`, `src/features/home/components/HomeTaskSections.tsx`, `src/features/time/components/TimeOverviewActiveCard.tsx`.
 
 ## Screen decomposition
 
-- `src/features/auth/OnboardingScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 267 lines; prefer a shell plus hooks/components split.
-- `src/features/auth/RegisterScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 283 lines; prefer a shell plus hooks/components split.
-- `src/features/auth/SignInScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 241 lines; prefer a shell plus hooks/components split.
-- `src/features/documents/ContractDetailScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 222 lines; prefer a shell plus hooks/components split.
-- `src/features/notifications/NotificationsScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 390 lines; prefer a shell plus hooks/components split.
-- `src/features/schedule/AvailabilityTemplateScreen.tsx` -> `split_into_shell_hook_components`
-  Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Screen file is 431 lines; prefer a shell plus hooks/components split.
 - `src/features/schedule/RequestScreen.tsx` -> `split_into_shell_hook_components`
   Rule: `arch-uniformity-small-files-hooks-components`
   Summary: Screen file is 386 lines; prefer a shell plus hooks/components split.
@@ -84,7 +57,7 @@
   Summary: Component file is 329 lines; review whether it now mixes layout, state, and helpers.
 - `src/features/time/components/TimeOverviewActiveCard.tsx` -> `split_component_and_extract_helpers`
   Rule: `arch-uniformity-small-files-hooks-components`
-  Summary: Component file is 227 lines; review whether it now mixes layout, state, and helpers.
+  Summary: Component file is 223 lines; review whether it now mixes layout, state, and helpers.
 
 ## Manual product and native review
 

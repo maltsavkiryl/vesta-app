@@ -195,6 +195,19 @@ describe("overview section actions", () => {
     ).toBeTruthy()
   })
 
+  it("shows the employer on upcoming cards without the role pill", () => {
+    renderWithTheme(
+      <UpcomingShiftsSection
+        shifts={[sampleShift]}
+        onShiftPress={() => undefined}
+        onViewAll={() => undefined}
+      />,
+    )
+
+    expect(screen.getByText("Bistro Noir")).toBeTruthy()
+    expect(screen.queryByText("Waiter")).toBeNull()
+  })
+
   it("shows an empty state when there are no recent entries", () => {
     renderWithTheme(
       <RecentEntries entries={[]} onOpenEntry={() => undefined} onViewAll={() => undefined} />,

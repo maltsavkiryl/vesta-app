@@ -45,24 +45,6 @@ function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => vo
           size="xxs"
           style={{ color: tokens.textMuted }}
         />
-
-        <View
-          style={[
-            styles.rolePill,
-            {
-              backgroundColor: tokens.surfaceSecondary,
-              borderColor: tokens.transparent,
-            },
-          ]}
-        >
-          <Text
-            text={shift.role}
-            numberOfLines={1}
-            size="xxs"
-            weight="medium"
-            style={{ color: tokens.textPrimary }}
-          />
-        </View>
       </View>
     </Pressable>
   )
@@ -118,16 +100,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 36,
     marginTop: 10,
-  },
-  rolePill: {
-    alignSelf: "flex-start",
-    borderCurve: "continuous",
-    borderRadius: 999,
-    borderWidth: 1,
-    marginTop: 8,
-    maxWidth: "100%",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
   },
   upcomingCard: {
     borderCurve: "continuous",

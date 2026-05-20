@@ -56,12 +56,8 @@ export function ActiveCardContent({
   const remainingSeconds = Math.max(shiftDurationSeconds - elapsedSeconds, 0)
   const secondaryLabel =
     isShiftSession && clockSession.scheduledStart && clockSession.scheduledEnd
-      ? `${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${
-          clockSession.role ?? clockSession.venueName
-        }`
-      : clockSession.role
-        ? `${clockSession.venueName} · ${clockSession.role}`
-        : `${clockSession.venueName} timer`
+      ? `${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${clockSession.venueName}`
+      : `${clockSession.venueName} timer`
 
   return (
     <HeroCard

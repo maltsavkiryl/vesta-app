@@ -1,7 +1,10 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react"
 import { AccessibilityInfo, type AccessibilityChangeEventName } from "react-native"
+import { useQuery } from "@tanstack/react-query"
 
-import { useProfileQuery } from "@/features/profile/data/profile.queries"
+import { appRepositories } from "@/composition/repositories"
+import { useAppSession } from "@/providers/app-provider"
+import { appQueryKeys } from "@/services/app/app.queries"
 import {
   normalizeMotionPreference,
   resolveMotionMode,
@@ -24,7 +27,13 @@ const MotionContext = createContext<AppMotionContextValue | null>(null)
 const REDUCE_MOTION_EVENT = "reduceMotionChanged" satisfies AccessibilityChangeEventName
 
 export function MotionProvider({ children }: PropsWithChildren) {
-  const { data: profile } = useProfileQuery()
+  const { accountId } = useAppSession()
+  const profileQuery = useQuery({
+    enabled: Boolean(accountId),
+    queryFn: () => appRepositories.profile.getProfile(accountId!),
+    queryKey: appQueryKeys.profile(accountId),
+  })
+  const profile = profileQuery.data
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const preference = normalizeMotionPreference(profile?.motionPreference)
 
