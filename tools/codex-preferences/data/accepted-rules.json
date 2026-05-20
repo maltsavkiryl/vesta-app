@@ -4,7 +4,7 @@
     "policy": "local-overlay-wins",
     "historyMiningMode": "tiered-full-history",
     "autoUpdateMode": "draft-first",
-    "updatedAt": "2026-05-20T07:28:54+00:00"
+    "updatedAt": "2026-05-20T07:42:13+00:00"
   },
   "rules": [
     {
@@ -37,7 +37,7 @@
       ],
       "upstreamCoverage": "partial",
       "upstreamSkillRefs": [
-        "building-react-native-apps/react-native-best-practices"
+        "react-native-best-practices"
       ],
       "overlayReason": "Upstream React Native skills do not encode this repo's chosen architecture direction or clean-break preference.",
       "confidence": "high",
@@ -256,8 +256,8 @@
       "domain": "native_ios",
       "skill": "vesta-mobile-native-ios",
       "triggerPhrases": [
-        "apple native",
         "real native experience",
+        "grouped settings",
         "profile screens are ugly",
         "detail row not implemented"
       ],

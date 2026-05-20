@@ -16,6 +16,8 @@ from common import (
     SESSIONS_DIR,
     SKILL_GAP_REPORT_JSON,
     SKILL_GAP_REPORT_MD,
+    SKILL_HEALTH_REPORT_JSON,
+    SKILL_HEALTH_REPORT_MD,
     accepted_manifest,
     now_iso,
     proposed_manifest,
@@ -258,6 +260,103 @@ def gap_report_markdown(report: dict[str, Any]) -> str:
     return "\n".join(sections)
 
 
+def build_skill_health_report(accepted: dict[str, Any], proposed: dict[str, Any]) -> dict[str, Any]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    issues: list[dict[str, str]] = []
+    trigger_index: dict[str, list[str]] = {}
+
+    for rule in accepted["rules"]:
+        grouped.setdefault(rule["skill"], []).append(rule)
+        triggers = [trigger.strip().lower() for trigger in rule.get("triggerPhrases", []) if trigger.strip()]
+        if len(triggers) < 2:
+            issues.append(
+                {
+                    "kind": "weak_trigger_coverage",
+                    "rule_id": rule["id"],
+                    "detail": "Rule has fewer than two explicit trigger phrases.",
+                }
+            )
+        if rule.get("upstreamCoverage") in {"partial", "covered"} and not rule.get("upstreamSkillRefs"):
+            issues.append(
+                {
+                    "kind": "missing_upstream_reference",
+                    "rule_id": rule["id"],
+                    "detail": "Rule claims upstream coverage but has no upstream skill references.",
+                }
+            )
+        for trigger in triggers:
+            trigger_index.setdefault(trigger, []).append(rule["id"])
+
+    for trigger, rule_ids in sorted(trigger_index.items()):
+        unique_rule_ids = sorted(set(rule_ids))
+        if len(unique_rule_ids) < 2:
+            continue
+        issues.append(
+            {
+                "kind": "overlapping_trigger_phrase",
+                "rule_id": ", ".join(unique_rule_ids),
+                "detail": f"Trigger phrase `{trigger}` appears in multiple accepted rules.",
+            }
+        )
+
+    skill_summaries = []
+    for skill_name, rules in sorted(grouped.items()):
+        upstream_refs: list[str] = []
+        seen_upstream: set[str] = set()
+        for rule in rules:
+            for ref in rule.get("upstreamSkillRefs", []):
+                if ref in seen_upstream:
+                    continue
+                seen_upstream.add(ref)
+                upstream_refs.append(ref)
+        skill_summaries.append(
+            {
+                "skill": skill_name,
+                "ruleCount": len(rules),
+                "upstreamRefs": upstream_refs,
+            }
+        )
+
+    return {
+        "scope": SCOPE_LABEL,
+        "generatedAt": now_iso(),
+        "acceptedRuleCount": len(accepted["rules"]),
+        "proposedRuleCount": len(proposed["rules"]),
+        "skillCount": len(skill_summaries),
+        "issues": issues,
+        "skills": skill_summaries,
+    }
+
+
+def skill_health_markdown(report: dict[str, Any]) -> str:
+    lines = [
+        "# Skill Health Report",
+        "",
+        f"- Scope: `{report['scope']}`",
+        f"- Local skills: `{report['skillCount']}`",
+        f"- Accepted rules: `{report['acceptedRuleCount']}`",
+        f"- Proposed rules: `{report['proposedRuleCount']}`",
+        f"- Health issues: `{len(report['issues'])}`",
+        "",
+        "## Local Skill Coverage",
+        "",
+    ]
+    for skill in report["skills"]:
+        upstream = ", ".join(f"`{ref}`" for ref in skill["upstreamRefs"]) or "None"
+        lines.append(f"- `{skill['skill']}`: `{skill['ruleCount']}` rules. Upstream fallbacks: {upstream}.")
+    lines.append("")
+    lines.append("## Health Issues")
+    lines.append("")
+    if not report["issues"]:
+        lines.append("- None.")
+        lines.append("")
+        return "\n".join(lines)
+    for issue in report["issues"]:
+        lines.append(f"- `{issue['kind']}` on `{issue['rule_id']}`: {issue['detail']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", action="store_true")
@@ -280,18 +379,22 @@ def main() -> None:
     state["session_messages_seen"] = len(session_matches)
 
     report = build_gap_report(accepted, proposed)
+    health_report = build_skill_health_report(accepted, proposed)
 
     write_json(ACCEPTED_RULES_PATH, accepted)
     write_json(PROPOSED_RULES_PATH, proposed)
     write_json(SCAN_STATE_PATH, state)
     write_json(SKILL_GAP_REPORT_JSON, report)
     write_text(SKILL_GAP_REPORT_MD, gap_report_markdown(report))
+    write_json(SKILL_HEALTH_REPORT_JSON, health_report)
+    write_text(SKILL_HEALTH_REPORT_MD, skill_health_markdown(health_report))
 
     if args.report:
         print(f"Refreshed {SCOPE_LABEL} preference data.")
         print(f"Accepted rules: {len(accepted['rules'])}")
         print(f"Proposed rules: {len(proposed['rules'])}")
         print(f"Gap report: {repo_relative(SKILL_GAP_REPORT_MD)}")
+        print(f"Health report: {repo_relative(SKILL_HEALTH_REPORT_MD)}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vesta-Mobile Native iOS"
+  short_description: "Repo-local Apple-native guidance layered on top of the imported HIG skill."
+  default_prompt: "Use $vesta-mobile-native-ios to decide the repo-specific iOS direction for this React Native screen, then map it to the proper native implementation path."

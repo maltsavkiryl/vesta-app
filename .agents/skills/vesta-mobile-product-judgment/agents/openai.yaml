@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vesta-Mobile Product Judgment"
+  short_description: "Repo-specific UX and product cleanup rules for vesta-mobile screens."
+  default_prompt: "Use $vesta-mobile-product-judgment to review this screen for low-value UI, weak copy, or a local-versus-shared UX fix choice."

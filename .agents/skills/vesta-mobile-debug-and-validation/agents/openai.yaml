@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vesta-Mobile Debug And Validation"
+  short_description: "Repo-specific debugging workflow for route errors, stack traces, and native failures."
+  default_prompt: "Use $vesta-mobile-debug-and-validation to triage this exact vesta-mobile error from the first hard blocker rather than from generic troubleshooting steps."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vesta-Mobile Native Android"
+  short_description: "Repo-local Android interaction guidance layered on top of the imported Material skill."
+  default_prompt: "Use $vesta-mobile-native-android to choose the repo-specific Android flow direction for this screen before implementing the Material or React Native details."

@@ -1,17 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
-
-import { appRepositories } from "@/composition/repositories"
+import { appQueryKeys, useAppSessionQuery } from "@/services/app/app.queries"
 
 export const authQueryKeys = {
-  session: ["auth", "session"] as const,
+  session: appQueryKeys.session,
 }
 
 export function useAuthSessionQuery() {
-  return useQuery({
-    initialData: () => undefined,
-    queryFn: () => appRepositories.auth.getSession(),
-    queryKey: authQueryKeys.session,
-  })
+  return useAppSessionQuery()
 }
 
 export function useAuthSession() {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vesta-Mobile React Native Architecture"
+  short_description: "Repo-specific architecture rules for repositories, providers, workflows, and decomposition."
+  default_prompt: "Use $vesta-mobile-react-native-architecture to choose the correct repo structure and refactor direction before changing this React Native feature."

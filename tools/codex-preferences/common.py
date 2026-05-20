@@ -25,6 +25,8 @@ PROPOSED_RULES_PATH = DATA_DIR / "proposed-rules.json"
 SCAN_STATE_PATH = DATA_DIR / "scan-state.json"
 SKILL_GAP_REPORT_JSON = GENERATED_DIR / "skill-gap-report.json"
 SKILL_GAP_REPORT_MD = GENERATED_DIR / "skill-gap-report.md"
+SKILL_HEALTH_REPORT_JSON = GENERATED_DIR / "skill-health-report.json"
+SKILL_HEALTH_REPORT_MD = GENERATED_DIR / "skill-health-report.md"
 CODEBASE_REPORT_JSON = GENERATED_DIR / "codebase-improvement-report.json"
 CODEBASE_REPORT_MD = GENERATED_DIR / "codebase-improvement-report.md"
 

@@ -1,0 +1,49 @@
+{
+  "scope": "vesta-mobile",
+  "generatedAt": "2026-05-20T07:42:13+00:00",
+  "acceptedRuleCount": 13,
+  "proposedRuleCount": 0,
+  "skillCount": 6,
+  "issues": [],
+  "skills": [
+    {
+      "skill": "vesta-mobile-debug-and-validation",
+      "ruleCount": 2,
+      "upstreamRefs": []
+    },
+    {
+      "skill": "vesta-mobile-native-android",
+      "ruleCount": 1,
+      "upstreamRefs": [
+        "android-design-guidelines",
+        "react-native-design"
+      ]
+    },
+    {
+      "skill": "vesta-mobile-native-ios",
+      "ruleCount": 2,
+      "upstreamRefs": [
+        "ios-design-guidelines",
+        "react-native-design"
+      ]
+    },
+    {
+      "skill": "vesta-mobile-product-judgment",
+      "ruleCount": 4,
+      "upstreamRefs": []
+    },
+    {
+      "skill": "vesta-mobile-react-native-architecture",
+      "ruleCount": 3,
+      "upstreamRefs": [
+        "react-native-best-practices",
+        "react-native-design"
+      ]
+    },
+    {
+      "skill": "vesta-mobile-skill-maintainer",
+      "ruleCount": 1,
+      "upstreamRefs": []
+    }
+  ]
+}

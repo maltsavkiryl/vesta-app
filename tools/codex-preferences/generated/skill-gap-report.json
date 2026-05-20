@@ -1,6 +1,6 @@
 {
   "scope": "vesta-mobile",
-  "generatedAt": "2026-05-20T07:28:54+00:00",
+  "generatedAt": "2026-05-20T07:42:13+00:00",
   "acceptedRuleCount": 13,
   "proposedRuleCount": 0,
   "buckets": {
@@ -12,7 +12,7 @@
         "domain": "react_native_architecture",
         "skill": "vesta-mobile-react-native-architecture",
         "upstreamSkillRefs": [
-          "building-react-native-apps/react-native-best-practices"
+          "react-native-best-practices"
         ],
         "overlayReason": "Upstream React Native skills do not encode this repo's chosen architecture direction or clean-break preference."
       },

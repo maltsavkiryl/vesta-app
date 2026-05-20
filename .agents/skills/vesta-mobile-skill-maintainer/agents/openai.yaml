@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vesta-Mobile Skill Maintainer"
+  short_description: "Maintains the local vesta-mobile skill overlay, reports, and cleanup backlog."
+  default_prompt: "Use $vesta-mobile-skill-maintainer to refresh the vesta-mobile preference system, regenerate the local skill pack, and update the cleanup backlog."

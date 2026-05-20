@@ -26,7 +26,7 @@
 ## Partially covered upstream and strengthened locally
 
 - `arch-http-ready-clean-break` -> `vesta-mobile-react-native-architecture`
-  Upstream references: building-react-native-apps/react-native-best-practices
+  Upstream references: react-native-best-practices
 - `arch-uniformity-small-files-hooks-components` -> `vesta-mobile-react-native-architecture`
   Upstream references: react-native-design
 - `native-ios-real-native-over-lookalikes` -> `vesta-mobile-native-ios`

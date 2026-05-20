@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -11,14 +12,52 @@ SCREEN_LIMIT = 220
 HOOK_LIMIT = 180
 COMPONENT_LIMIT = 220
 
+PACKET_PRIORITY = {
+    "provider_boundary_cleanup": 1,
+    "screen_decomposition": 2,
+    "hook_decomposition": 3,
+    "component_decomposition": 4,
+    "manual_review_hotspot": 5,
+}
+
 
 def file_line_count(path: Path) -> int:
     return len(read_text(path).splitlines())
 
 
+def is_test_file(path: Path) -> bool:
+    return (
+        path.name.endswith(".test.ts")
+        or path.name.endswith(".test.tsx")
+        or path.name.endswith(".spec.ts")
+        or path.name.endswith(".spec.tsx")
+        or "__tests__" in path.parts
+    )
+
+
+def worktree_summary() -> dict[str, Any]:
+    result = subprocess.run(
+        ["git", "status", "--short"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    lines = [line for line in result.stdout.splitlines() if line.strip()]
+    untracked = sum(1 for line in lines if line.startswith("??"))
+    return {
+        "is_dirty": bool(lines),
+        "entries": len(lines),
+        "untracked": untracked,
+        "tracked_changes": len(lines) - untracked,
+    }
+
+
 def add_size_findings(findings: list[dict[str, Any]]) -> None:
     for path in REPO_ROOT.glob("src/features/**/*"):
         if not path.is_file() or path.suffix not in {".ts", ".tsx"}:
+            continue
+        if is_test_file(path):
             continue
         rel = repo_relative(path)
         lines = file_line_count(path)
@@ -128,11 +167,32 @@ def cluster(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
             {
                 "packet_id": packet_id,
                 "title": names.get(packet_id, packet_id.replace("_", " ").title()),
+                "priority": PACKET_PRIORITY.get(packet_id, 99),
                 "findings": [],
             },
         )
         packet["findings"].append(finding)
-    return list(packets.values())
+    ordered = sorted(packets.values(), key=lambda item: (item["priority"], item["title"]))
+    for packet in ordered:
+        packet["findings"] = sorted(packet["findings"], key=lambda item: item["path"])
+    return ordered
+
+
+def recommended_first_packets(work_packets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    shortlist: list[dict[str, Any]] = []
+    for packet in work_packets:
+        if packet["packet_id"] == "manual_review_hotspot":
+            continue
+        top_paths = [finding["path"] for finding in packet["findings"][:3]]
+        shortlist.append(
+            {
+                "packet_id": packet["packet_id"],
+                "title": packet["title"],
+                "finding_count": len(packet["findings"]),
+                "top_paths": top_paths,
+            }
+        )
+    return shortlist[:3]
 
 
 def report_markdown(payload: dict[str, Any]) -> str:
@@ -142,8 +202,28 @@ def report_markdown(payload: dict[str, Any]) -> str:
         f"- Scope: `{payload['scope']}`",
         f"- Findings: `{len(payload['findings'])}`",
         f"- Work packets: `{len(payload['work_packets'])}`",
+        f"- Worktree: `{payload['worktree']['entries']}` changed paths"
+        if payload["worktree"]["is_dirty"]
+        else "- Worktree: `clean`",
         "",
     ]
+    if payload["worktree"]["is_dirty"]:
+        lines.extend(
+            [
+                "## Worktree Guardrail",
+                "",
+                f"- Tracked changes: `{payload['worktree']['tracked_changes']}`",
+                f"- Untracked paths: `{payload['worktree']['untracked']}`",
+                "- Do not start broad sweeps in already-touched areas without isolating the work first.",
+                "",
+            ]
+        )
+    if payload["recommended_first"]:
+        lines.extend(["## Start Here", ""])
+        for packet in payload["recommended_first"]:
+            top_paths = ", ".join(f"`{path}`" for path in packet["top_paths"])
+            lines.append(f"- {packet['title']}: `{packet['finding_count']}` findings. Start in {top_paths}.")
+        lines.append("")
     for packet in payload["work_packets"]:
         lines.append(f"## {packet['title']}")
         lines.append("")
@@ -170,9 +250,11 @@ def main() -> None:
     payload = {
         "scope": "vesta-mobile",
         "generatedAt": now_iso(),
+        "worktree": worktree_summary(),
         "findings": findings,
         "work_packets": cluster(findings),
     }
+    payload["recommended_first"] = recommended_first_packets(payload["work_packets"])
     write_json(CODEBASE_REPORT_JSON, payload)
     write_text(CODEBASE_REPORT_MD, report_markdown(payload))
 

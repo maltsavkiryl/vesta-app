@@ -2,8 +2,8 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRe
 import { useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
-import { useAuthSession } from "@/features/auth/data/auth.queries"
 import { DEMO_AUTH_CREDENTIALS } from "@/services/app/app.transformer"
+import { useAppSessionQuery } from "@/services/app/app.queries"
 import {
   createClockLiveActivityPayload,
   endClockLiveActivity,
@@ -22,7 +22,10 @@ const AppContext = createContext<AppContextValue | null>(null)
 export { DEMO_AUTH_CREDENTIALS }
 
 export function AppProvider({ children }: PropsWithChildren) {
-  const { accountId, isSignedIn, needsOnboarding } = useAuthSession()
+  const sessionQuery = useAppSessionQuery()
+  const accountId = sessionQuery.data?.accountId ?? null
+  const isSignedIn = sessionQuery.data?.isSignedIn ?? false
+  const needsOnboarding = sessionQuery.data?.needsOnboarding ?? false
   const clockSessionQuery = useQuery({
     enabled: Boolean(accountId),
     queryFn: () => appRepositories.time.getClockSession(accountId!),
