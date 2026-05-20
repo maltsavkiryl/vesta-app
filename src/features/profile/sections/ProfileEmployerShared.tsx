@@ -76,12 +76,12 @@ export function EmployerPreviewCard({
       </View>
       <MetricGrid
         items={[
-          { label: "People", value: String(employer.teamSize) },
-          { label: "Status", value: "Hiring" },
+          { label: "City", value: employer.city },
+          { label: "Code", value: employer.code },
           { label: "Type", value: employer.type },
         ]}
       />
-      <AppButton label="Request to join" onPress={onJoin} pressHaptic="none" />
+      <AppButton label="Add workplace" onPress={onJoin} pressHaptic="none" />
     </View>
   )
 }

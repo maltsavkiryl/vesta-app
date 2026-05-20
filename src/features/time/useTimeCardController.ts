@@ -39,13 +39,13 @@ function buildIdleClockCardState(
 ): IdleClockCardState {
   if (!resolution.ok) {
     return {
-      actionLabel: "Unavailable",
-      detailLabel: "No workplace configured for manual timer starts",
+      actionLabel: "Setup needed",
+      detailLabel: "Manual time tracking is not enabled for your linked workplaces",
       disabled: true,
-      helperLabel: "Ask your employer to enable timer starts without a scheduled shift.",
+      helperLabel: "Ask your employer to enable clock-ins without a scheduled shift.",
       kind: "unavailable",
-      subtitle: "Clock-in is only available when one of your linked employers allows it.",
-      title: "No workplace available",
+      subtitle: "You can only start time from a workplace that allows manual clock-ins.",
+      title: "No workplace ready",
     }
   }
 
@@ -59,7 +59,7 @@ function buildIdleClockCardState(
     return {
       actionLabel: "Clock in",
       detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.context.venueAddress}`,
-      helperLabel: `Clock-in opens at ${getClockInOpenLabel(recommendedOption.context.scheduledStart)}`,
+      helperLabel: `Available from ${getClockInOpenLabel(recommendedOption.context.scheduledStart)}`,
       kind: "shift",
       subtitle: `${recommendedOption.context.role ?? "Scheduled shift"} · ${getPlannedDurationLabel(
         recommendedOption.context.scheduledStart,
@@ -73,9 +73,9 @@ function buildIdleClockCardState(
     return {
       actionLabel: "Start timer",
       detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.locationLabel}`,
-      helperLabel: "No scheduled shift is needed for this workplace.",
+      helperLabel: "No scheduled shift is needed here.",
       kind: "single-employer",
-      subtitle: "Start logging time even when you do not have a scheduled shift.",
+      subtitle: "Start tracking time even when you are not scheduled.",
       title: recommendedOption.context.venueName,
     }
   }
@@ -88,10 +88,10 @@ function buildIdleClockCardState(
     actionLabel: "Start timer",
     detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.locationLabel}`,
     helperLabel: distanceLabel
-      ? `${distanceLabel}. Closest linked workplace is suggested first.`
-      : "Closest linked workplace is suggested first.",
+      ? `${distanceLabel} away. Closest workplace is suggested first.`
+      : "Closest workplace is suggested first.",
     kind: "multiple-employers",
-    subtitle: "Choose a workplace, then start logging time without a scheduled shift.",
+    subtitle: "Choose a workplace, then start tracking time without a scheduled shift.",
     title: recommendedOption.context.venueName,
   }
 }

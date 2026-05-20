@@ -48,8 +48,8 @@ export function RecentEntries({
       ) : (
         <EmptyState
           icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
-          subtitle="Clock in and out from the Time tab to start building your history."
-          title="No time entries yet"
+          subtitle="Clock in and out from the Time tab to start building your work history."
+          title="No entries yet"
         />
       )}
     </SectionBlock>
@@ -77,8 +77,8 @@ export function TimeEntriesListScreen({
       {totalEntries === 0 ? (
         <EmptyState
           icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
-          subtitle="Your completed time entries will appear here once you start clocking time."
-          title="No time entries yet"
+          subtitle="Completed shifts appear here after you clock out for the first time."
+          title="Nothing in your history yet"
         />
       ) : (
         <>

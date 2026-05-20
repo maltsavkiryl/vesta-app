@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -26,13 +26,19 @@ export function ShiftDetailEmptyState() {
       actionLabel="Back to Planning"
       icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
       onAction={() => router.replace("/(app)/(tabs)/schedule")}
-      subtitle="This shift is no longer available in your local planning data."
-      title="Shift not found"
+      subtitle="This shift is no longer in your planning. It may have been removed or changed."
+      title="Shift no longer available"
     />
   )
 }
 
-export function ShiftDetailHero({ shift }: { shift: Shift }) {
+export function ShiftDetailHero({
+  onOpenMaps,
+  shift,
+}: {
+  onOpenMaps: () => void
+  shift: Shift
+}) {
   const tokens = useDesignTokens()
 
   return (
@@ -69,10 +75,18 @@ export function ShiftDetailHero({ shift }: { shift: Shift }) {
           label={shift.venueName}
           leading={<Ionicons color={tokens.textSecondary} name="business-outline" size={13} />}
         />
-        <MetaPill
-          label="Open in Maps"
-          leading={<Ionicons color={tokens.textSecondary} name="location-outline" size={13} />}
-        />
+        <Pressable
+          onPress={onOpenMaps}
+          style={[styles.mapActionChip, { backgroundColor: tokens.backgroundMuted }]}
+        >
+          <Ionicons color={tokens.textSecondary} name="location-outline" size={13} />
+          <Text
+            size="xxs"
+            style={{ color: tokens.textSecondary }}
+            text="Open in Maps"
+            weight="medium"
+          />
+        </Pressable>
       </View>
     </SurfaceCard>
   )
@@ -130,8 +144,9 @@ export function ShiftActionNeededSection({
 export function ShiftPlanSection({ shift }: { shift: Shift }) {
   return (
     <GroupedSection title="Plan for this shift">
-      <ShiftPlanRow label="Venue" value={`${shift.venueName} · ${shift.venueAddress}`} />
-      <ShiftPlanRow label="Duration" value={getShiftTimeRange(shift)} />
+      <ShiftPlanRow label="Venue" value={shift.venueName} />
+      <ShiftPlanRow label="Address" value={shift.venueAddress} />
+      <ShiftPlanRow label="Time" value={getShiftTimeRange(shift)} />
       <ShiftPlanRow
         isLast
         label="Team"
@@ -160,14 +175,14 @@ export function ShiftRequestActions({ shift }: { shift: Shift }) {
   return (
     <GroupedSection
       bodyStyle={[styles.actionSectionBody, { backgroundColor: tokens.transparent }]}
-      title="Need a change?"
+      title="Need to change this shift?"
     >
       <View style={styles.actionStack}>
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />}
           onPress={() => router.push(`/(app)/request?category=shift_change&shiftId=${shift.id}` as never)}
           subtitle="Start a shift change request from this shift"
-          title="Need replacement help"
+          title="Request a replacement"
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
 
@@ -260,6 +275,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
+  },
+  mapActionChip: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    borderCurve: "continuous",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   planDivider: {
     bottom: 0,

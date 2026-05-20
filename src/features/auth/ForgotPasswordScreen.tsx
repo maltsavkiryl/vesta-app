@@ -67,10 +67,10 @@ export function ForgotPasswordScreen() {
       title={"Reset your\npassword."}
       subtitle={
         step === "verify"
-          ? "Confirm your local demo account email to continue."
+          ? "Confirm your email to continue."
           : step === "reset"
             ? "Set a new password for this device."
-            : "Your local password has been updated."
+            : "Your password has been updated on this device."
       }
     >
       {step === "done" ? (

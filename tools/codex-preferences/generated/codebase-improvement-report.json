@@ -1,11 +1,11 @@
 {
   "scope": "vesta-mobile",
-  "generatedAt": "2026-05-20T08:50:41+00:00",
+  "generatedAt": "2026-05-20T10:39:35+00:00",
   "worktree": {
     "is_dirty": true,
-    "entries": 33,
-    "untracked": 20,
-    "tracked_changes": 13
+    "entries": 42,
+    "untracked": 10,
+    "tracked_changes": 32
   },
   "findings": [
     {

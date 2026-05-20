@@ -33,7 +33,7 @@ export function JoinModeHero({ joinMode, tokens }: { joinMode: JoinMode; tokens:
         <View style={styles.joinModeCopy}>
           <Text text="JOIN WORKPLACE" size="xxs" weight="semiBold" style={eyebrowStyle} />
           <Text
-            text={joinMode === "code" ? "Enter an invite code" : "Find your next employer"}
+            text={joinMode === "code" ? "Enter a workplace code" : "Find a workplace"}
             size="lg"
             weight="bold"
             style={titleStyle}
@@ -41,8 +41,8 @@ export function JoinModeHero({ joinMode, tokens }: { joinMode: JoinMode; tokens:
           <Text
             text={
               joinMode === "code"
-                ? "Use the invite code your manager shared to connect with the right workplace instantly."
-                : "Browse open workplaces and choose the one you want to join."
+                ? "Use the code your manager shared to link the right workplace to your profile."
+                : "Browse workplaces and choose the one you want to add."
             }
             size="xs"
             style={subtitleStyle}
@@ -81,7 +81,7 @@ export function JoinModePicker({
   return (
     <View style={styles.modePickerCard}>
       <Text
-        text="Choose how you want to join"
+        text="Choose how you want to add a workplace"
         size="xs"
         weight="semiBold"
         style={{ color: tokens.textPrimary }}
@@ -134,9 +134,9 @@ export function JoinSuccessCard({
       <View style={successIconStyle}>
         <Ionicons color={tokens.success} name="checkmark-circle-outline" size={34} />
       </View>
-      <Text text="Request sent" size="sm" weight="bold" style={titleStyle} />
+      <Text text="Workplace added" size="sm" weight="bold" style={titleStyle} />
       <Text
-        text={`You'll be notified when ${joinedEmployer.name} approves your request.`}
+        text={`${joinedEmployer.name} is now linked to your profile.`}
         size="xs"
         style={bodyStyle}
       />

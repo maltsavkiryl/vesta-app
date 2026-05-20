@@ -52,7 +52,7 @@ export function RequestSuccessContent({
       contentContainerStyle={{ justifyContent: "center", minHeight: "100%", paddingBottom: insets.bottom + 30, paddingHorizontal: 20 }}
       variant="grouped"
     >
-      <SuccessState subtitle={successCopy} title="Request sent" />
+      <SuccessState subtitle={successCopy} title="Request submitted" />
       <View style={{ alignSelf: "stretch", gap: 14, paddingTop: 18 }}>
         <SurfaceCard style={{ alignSelf: "stretch", gap: 10 }}>
           <Text
@@ -122,8 +122,8 @@ export function RequestTargetSection({
             </View>
           ) : (
             <EmptyState
-              subtitle="There are no upcoming shifts available for a change request right now."
-              title="No shifts to choose from"
+              subtitle="When a shift is scheduled, you can ask for a replacement or report a conflict here."
+              title="No upcoming shifts to update"
             />
           )
         ) : requestDates.length > 0 ? (
@@ -140,8 +140,8 @@ export function RequestTargetSection({
           </View>
         ) : (
           <EmptyState
-            subtitle="A planning window needs to be open before you can send a date-based request."
-            title="No open planning window"
+            subtitle="Time-off requests appear here when the next planning window opens."
+            title="No dates open right now"
           />
         )}
       </View>

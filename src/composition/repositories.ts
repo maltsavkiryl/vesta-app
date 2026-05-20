@@ -165,7 +165,7 @@ function createMockAuthRepository(): AuthRepository {
       if (db.accounts.some((account) => account.email === email)) {
         return failure<AuthError>({
           type: "account-exists",
-          message: "A local demo account already exists for that email.",
+          message: "An account already exists for that email.",
         })
       }
 
@@ -184,7 +184,7 @@ function createMockAuthRepository(): AuthRepository {
       if (!account) {
         return failure<AuthError>({
           type: "reset-unavailable",
-          message: "No local demo account exists for that email yet.",
+          message: "No account was found for that email.",
         })
       }
 
@@ -205,7 +205,7 @@ function createMockAuthRepository(): AuthRepository {
       if (!account) {
         return failure<AuthError>({
           type: "reset-unavailable",
-          message: "No local demo account exists for that email yet.",
+          message: "No account was found for that email.",
         })
       }
 
@@ -216,7 +216,7 @@ function createMockAuthRepository(): AuthRepository {
       if (!Config.DEMO_AUTH_ENABLED) {
         return failure<AuthError>({
           type: "demo-disabled",
-          message: "Production authentication is not connected yet.",
+          message: "Online sign-in is not available in this build yet.",
         })
       }
 
@@ -227,14 +227,14 @@ function createMockAuthRepository(): AuthRepository {
       if (!account) {
         return failure<AuthError>({
           type: "account-not-found",
-          message: "No local demo account exists for that email yet.",
+          message: "No account was found for that email.",
         })
       }
 
       if (account.password !== input.password) {
         return failure<AuthError>({
           type: "invalid-credentials",
-          message: "Incorrect password for this local demo account.",
+          message: "Incorrect password for this account.",
         })
       }
 

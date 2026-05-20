@@ -252,7 +252,7 @@ describe("RequestScreen", () => {
       )
     })
 
-    expect(await screen.findByText("Request sent")).toBeTruthy()
+    expect(await screen.findByText("Request submitted")).toBeTruthy()
     expect(screen.getByText("Need replacement")).toBeTruthy()
     expect(screen.getByText("Done")).toBeTruthy()
   })

@@ -61,7 +61,7 @@ export function AvailabilityIntro({ date, weekdayLabel }: { date: string; weekda
       <Text
         size="xs"
         style={{ color: tokens.textSecondary }}
-        text={`Override your ${weekdayLabel} template for this specific date.`}
+        text={`Use different availability than your usual ${weekdayLabel} hours for this date.`}
       />
     </View>
   )
@@ -78,7 +78,7 @@ export function AvailabilityTemplateSection({
   const summary = `${availabilityStatusOptions[templateDay.status].label} · ${formatTimeLabel(templateDay.startTime)} to ${formatTimeLabel(templateDay.endTime)}`
 
   return (
-    <GroupedSection title="Default for this weekday">
+    <GroupedSection title="Weekly default">
       <ListRow
         isLast
         leading={
@@ -88,8 +88,8 @@ export function AvailabilityTemplateSection({
         }
         subtitle={
           existingOverride
-            ? "A date-specific override is active."
-            : "No override yet. Save to customize this date."
+            ? "This date is currently using its own custom availability."
+            : "Save this screen only if this date should differ from your usual hours."
         }
         title={summary}
       />
@@ -107,7 +107,7 @@ export function AvailabilityStatusSection({
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection title="Availability status">
+    <GroupedSection title="Availability for this date">
       {(Object.keys(availabilityStatusOptions) as AvailabilityStatus[]).map(
         (candidate, index, items) => {
           const option = availabilityStatusOptions[candidate]
@@ -160,16 +160,16 @@ export function AvailabilityHoursSection({
   startTime: string
 }) {
   return (
-    <GroupedSection title="Working hours">
+    <GroupedSection title="Available hours">
       <ListRow
-        subtitle="When you can start"
-        title="From"
+        subtitle="Start time"
+        title="Start"
         trailing={<AvailabilityTimeValue value={startTime} />}
         onPress={() => onPressTime("startTime")}
       />
       <ListRow
-        subtitle="When you can finish"
-        title="To"
+        subtitle="End time"
+        title="End"
         trailing={<AvailabilityTimeValue value={endTime} />}
         onPress={() => onPressTime("endTime")}
       />

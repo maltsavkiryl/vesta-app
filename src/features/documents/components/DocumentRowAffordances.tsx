@@ -50,9 +50,7 @@ export function DocumentRowTail({
           <Text text={actionLabel} size="xxs" weight="semiBold" style={{ color: accentForeground }} />
         </View>
       ) : (
-        <View style={styles.eyeButton}>
-          <Ionicons color={textSecondary} name="eye-outline" size={14} />
-        </View>
+        <Ionicons color={textSecondary} name="chevron-forward" size={15} />
       )}
     </View>
   )
@@ -76,15 +74,6 @@ export function PayslipSummary({
 }
 
 const styles = StyleSheet.create({
-  eyeButton: {
-    alignItems: "center",
-    backgroundColor: "transparent",
-    borderCurve: "continuous",
-    borderRadius: 8,
-    height: 28,
-    justifyContent: "center",
-    width: 28,
-  },
   inlineAction: {
     borderCurve: "continuous",
     borderRadius: 8,

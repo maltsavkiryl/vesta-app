@@ -59,7 +59,7 @@ export function ActiveCardMetrics({
               ? `${formatDurationLabel(remainingSeconds)} remaining`
               : isShiftSession
                 ? "Shift target reached"
-                : `${clockSession.venueName} timer running`
+                : `Tracking time at ${clockSession.venueName}`
         }
         size="xs"
         weight="semiBold"
@@ -87,7 +87,7 @@ export function ActiveCardLocation({ clockSession }: { clockSession: ClockSessio
       <Text
         ellipsizeMode="tail"
         numberOfLines={1}
-        text={`Location verified · ${liveLocationLabel}`}
+        text={`Checked in at ${liveLocationLabel}`}
         size="xxs"
         weight="medium"
         style={[styles.flex, { color: tokens.success }]}

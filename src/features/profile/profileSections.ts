@@ -43,10 +43,10 @@ export type JoinMode = "code" | "search"
 export const LANGUAGE_OPTIONS = ["English (UK)", "Nederlands", "Français"] as const
 
 export const PROFILE_OVERVIEW_TITLES: Record<ProfileOverviewSection, string> = {
-  employment: "Employment",
-  personal: "Personal",
-  settings: "Settings",
-  support: "Support",
+  employment: "Work",
+  personal: "Profile",
+  settings: "Preferences",
+  support: "Help",
 }
 
 export const PROFILE_SECTION_META: Record<
@@ -92,7 +92,7 @@ export const PROFILE_SECTION_META: Record<
   },
   "join-employer": {
     icon: "add-circle-outline",
-    title: "Join employer",
+    title: "Add workplace",
   },
   "language": {
     icon: "globe-outline",
@@ -130,7 +130,7 @@ export const PROFILE_SECTION_META: Record<
   },
   "change-password": {
     icon: "key-outline",
-    subtitle: "Update the local password for this device's demo account.",
+    subtitle: "Update the password used to sign in on this device.",
     title: "Change password",
   },
   "support": {

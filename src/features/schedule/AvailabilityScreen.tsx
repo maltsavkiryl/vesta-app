@@ -49,7 +49,7 @@ export function AvailabilityScreen() {
         {screen.canResetToTemplate ? (
           <View style={styles.buttonStack}>
             <AppButton
-              label="Use weekly template instead"
+              label="Reset to weekly default"
               onPress={() => {
                 void screen.handleResetToTemplate()
               }}

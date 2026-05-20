@@ -100,18 +100,18 @@ describe("schedule empty states", () => {
   it("shows an empty state when there are no requests", () => {
     renderWithTheme(<ScheduleScreen />)
 
-    expect(screen.getByText("No requests yet")).toBeTruthy()
+    expect(screen.getByText("Nothing pending")).toBeTruthy()
     expect(
-      screen.getByText("Requests you send from planning will show up here while they are being reviewed."),
+      screen.getByText("Requests you send from planning appear here while they are being reviewed."),
     ).toBeTruthy()
   })
 
   it("shows an empty state when a shift detail route is stale", () => {
     renderWithTheme(<ShiftDetailScreen />)
 
-    expect(screen.getByText("Shift not found")).toBeTruthy()
+    expect(screen.getByText("Shift no longer available")).toBeTruthy()
     expect(
-      screen.getByText("This shift is no longer available in your local planning data."),
+      screen.getByText("This shift is no longer in your planning. It may have been removed or changed."),
     ).toBeTruthy()
     expect(screen.getByText("Back to Planning")).toBeTruthy()
   })

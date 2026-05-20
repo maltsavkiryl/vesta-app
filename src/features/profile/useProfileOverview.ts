@@ -11,6 +11,7 @@ import { useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
 import { PROFILE_OVERVIEW_ORDER, buildProfileOverviewSections } from "./profileOverviewRows"
+import { getProfileSetupStatus } from "./profileSetupStatus"
 import { PROFILE_OVERVIEW_TITLES } from "./profileSections"
 
 function capitalize(value?: string) {
@@ -45,6 +46,7 @@ export function useProfileOverview() {
   ).length
   const pendingContractCount = contracts.filter((contract) => contract.status === "pending").length
   const latestPayslip = payslips[0]
+  const setupStatus = getProfileSetupStatus(state)
 
   const handleSignOut = () => {
     Alert.alert("Sign out?", "You'll need to sign in again to access your account.", [
@@ -66,7 +68,7 @@ export function useProfileOverview() {
     email: state.profile.email,
     fullName,
     initials: getInitials(state.profile.firstName, state.profile.lastName),
-    profileCompleteness: 95,
+    profileSetupStatus: setupStatus,
     role: capitalize(state.profile.role),
     sections: buildProfileOverviewSections({
       contractSummary:

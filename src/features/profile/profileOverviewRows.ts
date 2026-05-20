@@ -39,13 +39,42 @@ export function buildProfileOverviewSections({
   state: AppStoreState
   themeContext: "light" | "dark"
 }) {
+  const employersSummary =
+    state.employers.length === 0
+      ? "Link your first workplace"
+      : state.employers.length === 1
+        ? state.employers[0]?.name ?? "1 linked"
+        : `${state.employers.length} linked`
+  const contactSummary = state.profile.phone || "Add phone number"
+  const addressSummary =
+    state.profile.address.street && state.profile.address.postalCode
+      ? `${state.profile.address.city}, ${state.profile.address.country}`
+      : "Add home address"
+  const bankSummary =
+    maskIban(state.profile.bankAccount.iban) === "Not added"
+      ? "Add payout account"
+      : maskIban(state.profile.bankAccount.iban)
+  const legalSummary =
+    state.profile.legal.nationalRegisterNumber &&
+    state.profile.legal.taxId &&
+    state.profile.legal.socialSecurityNumber
+      ? state.profile.legal.payrollStatus
+      : "Finish payroll details"
+  const hasContactGap = contactSummary === "Add phone number"
+  const hasAddressGap = addressSummary === "Add home address"
+  const hasBankGap = bankSummary === "Add payout account"
+  const hasLegalGap = legalSummary === "Finish payroll details"
+  const securitySummary = state.profile.security.faceIdEnabled
+    ? `Password + ${state.profile.security.biometricType}`
+    : "Password only"
+
   return {
     employment: [
       {
         icon: "business-outline",
-        label: `${state.employers.length} employer${state.employers.length === 1 ? "" : "s"}`,
+        label: "Workplaces",
         route: "/profile/employers",
-        value: state.employers.map((employer) => employer.name).join(", ") || "None",
+        value: employersSummary,
       },
       {
         icon: "shield-checkmark-outline",
@@ -74,28 +103,32 @@ export function buildProfileOverviewSections({
         value: fullName,
       },
       {
+        badge: hasContactGap ? "Needed" : undefined,
         icon: "mail-outline",
         label: "Contact details",
         route: "/profile/contact",
-        value: state.profile.email,
+        value: contactSummary,
       },
       {
+        badge: hasAddressGap ? "Needed" : undefined,
         icon: "location-outline",
         label: "Address",
         route: "/profile/address",
-        value: `${state.profile.address.city || state.profile.homeCity}, ${state.profile.address.country}`,
+        value: addressSummary,
       },
       {
+        badge: hasBankGap ? "Needed" : undefined,
         icon: "card-outline",
         label: "Bank details",
         route: "/profile/banking",
-        value: maskIban(state.profile.bankAccount.iban),
+        value: bankSummary,
       },
       {
+        badge: hasLegalGap ? "Needed" : undefined,
         icon: "document-text-outline",
         label: "Legal information",
         route: "/profile/legal",
-        value: "National reg. · Tax ID",
+        value: legalSummary,
       },
     ],
     settings: [
@@ -121,13 +154,13 @@ export function buildProfileOverviewSections({
         icon: "shield-checkmark-outline",
         label: "Security",
         route: "/profile/security",
-        value: `Password, ${state.profile.security.biometricType}`,
+        value: securitySummary,
       },
       {
         icon: "lock-closed-outline",
         label: "Privacy",
         route: "/profile/privacy",
-        value: "Data & permissions",
+        value: "App diagnostics & sharing",
       },
     ],
     support: [
@@ -135,7 +168,7 @@ export function buildProfileOverviewSections({
         icon: "help-circle-outline",
         label: "Help & support",
         route: "/profile/support",
-        value: "FAQs, contact Vesta",
+        value: "Get help or contact Vesta",
       },
     ],
   } satisfies Record<ProfileOverviewSection, ProfileOverviewRow[]>

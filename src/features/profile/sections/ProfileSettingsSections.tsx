@@ -257,7 +257,7 @@ export function ChangePasswordSection() {
         }}
         pressHaptic="none"
       />
-      <SectionFooter text="This updates the locally stored password for the current demo account." />
+      <SectionFooter text="This updates the password saved for this account on this device." />
     </>
   )
 }

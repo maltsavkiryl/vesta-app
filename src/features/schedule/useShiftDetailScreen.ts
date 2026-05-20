@@ -1,5 +1,6 @@
 import { useLocalSearchParams } from "expo-router"
 
+import { openVenueInMaps } from "@/features/schedule/openVenueInMaps"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { fireHaptic } from "@/utils/haptics"
@@ -24,8 +25,17 @@ export function useShiftDetailScreen() {
     fireHaptic("success")
   }
 
+  const handleOpenMaps = () => {
+    if (!shift) {
+      return
+    }
+
+    void openVenueInMaps(shift.venueAddress)
+  }
+
   return {
     handleAcknowledgeUpdate,
+    handleOpenMaps,
     shift,
   }
 }

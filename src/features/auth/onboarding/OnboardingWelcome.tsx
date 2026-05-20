@@ -36,7 +36,7 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
           style={[appTypography.onboardingHeroTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Let's get your account set up in just a few steps. It'll only take 2 minutes."
+          text="Let's get your account ready in a few quick steps. You can change everything later."
           size="sm"
           style={{ color: tokens.textSecondary }}
         />

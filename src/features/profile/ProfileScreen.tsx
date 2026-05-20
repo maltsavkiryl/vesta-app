@@ -24,7 +24,7 @@ export function ProfileScreen() {
         />
       </MotionView>
       <MotionView delay={55}>
-        <ProfileCompletenessCard progress={screen.profileCompleteness} />
+        <ProfileCompletenessCard setupStatus={screen.profileSetupStatus} />
       </MotionView>
 
       {screen.sectionOrder.map((section) => (

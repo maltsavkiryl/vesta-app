@@ -213,9 +213,9 @@ describe("overview section actions", () => {
       <RecentEntries entries={[]} onOpenEntry={() => undefined} onViewAll={() => undefined} />,
     )
 
-    expect(screen.getByText("No time entries yet")).toBeTruthy()
+    expect(screen.getByText("No entries yet")).toBeTruthy()
     expect(
-      screen.getByText("Clock in and out from the Time tab to start building your history."),
+      screen.getByText("Clock in and out from the Time tab to start building your work history."),
     ).toBeTruthy()
   })
 
@@ -224,10 +224,10 @@ describe("overview section actions", () => {
       <TimeEntriesListScreen groupedEntries={{}} onOpenEntry={() => undefined} totalEntries={0} />,
     )
 
-    expect(screen.getByText("No time entries yet")).toBeTruthy()
+    expect(screen.getByText("Nothing in your history yet")).toBeTruthy()
     expect(
       screen.getByText(
-        "Your completed time entries will appear here once you start clocking time.",
+        "Completed shifts appear here after you clock out for the first time.",
       ),
     ).toBeTruthy()
   })

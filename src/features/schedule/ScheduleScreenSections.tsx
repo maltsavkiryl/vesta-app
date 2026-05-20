@@ -146,7 +146,7 @@ export function ScheduleDateActionsSection({
   const tokens = useDesignTokens()
 
   return (
-    <SectionBlock motionDelay={165} title="Actions for this date">
+    <SectionBlock motionDelay={165} title="For this day">
       <View style={styles.stack}>
         <ActionRow
           onPress={onEditSelectedDate}
@@ -164,7 +164,7 @@ export function ScheduleDateActionsSection({
           <ActionRow
             onPress={onOpenSelectedShiftNeedingResponse}
             subtitle="Review the updated shift and confirm it from the detail view."
-            title="Review shift change"
+            title="Respond to shift update"
             leading={
               <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
                 <Ionicons color={tokens.accent} name="flash-outline" size={16} />
@@ -183,7 +183,7 @@ export function ScheduleDateActionsSection({
               ? "Ask for a replacement or flag a conflict for this shift."
               : "Request time off or explain a conflict on this day."
           }
-          title={selectedDayShifts.length > 0 ? "Request a change" : "Create request"}
+          title={selectedDayShifts.length > 0 ? "Report a conflict" : "Request time off"}
           leading={
             <View style={[styles.actionGlyph, { backgroundColor: tokens.accentSoft }]}>
               <Ionicons
@@ -244,8 +244,8 @@ export function SchedulePendingRequestsSection({ requests }: { requests: Request
       ) : (
         <EmptyState
           icon={<Ionicons color={tokens.textMuted} name="document-text-outline" size={18} />}
-          subtitle="Requests you send from planning will show up here while they are being reviewed."
-          title="No requests yet"
+          subtitle="Requests you send from planning appear here while they are being reviewed."
+          title="Nothing pending"
         />
       )}
     </SectionBlock>

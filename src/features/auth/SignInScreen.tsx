@@ -1,5 +1,4 @@
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Banner, Button, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
@@ -41,9 +40,14 @@ export function SignInScreen() {
         <MotionView style={styles.header}>
           <AuthLogo style={styles.logo} />
           <Text
-            text="Log in or sign up"
+            text="Sign in"
             weight="bold"
             style={[appTypography.authTitle, { color: tokens.textPrimary }]}
+          />
+          <Text
+            text="Use your Vesta account to open planning, time, and payroll."
+            size="xs"
+            style={[styles.headerSubtitle, { color: tokens.textSecondary }]}
           />
         </MotionView>
 
@@ -111,45 +115,14 @@ export function SignInScreen() {
             onPress={() => router.replace("/(auth)/register")}
             variant="secondary"
           />
-
-          <View style={styles.divider}>
-            <Text text="or" size="xs" style={{ color: tokens.textSecondary }} />
-          </View>
-
-          <SocialButton icon="logo-google" label="Continue with Google" onPress={handleContinue} />
-          <SocialButton icon="logo-apple" label="Continue with Apple" onPress={handleContinue} />
+          <Text
+            text="Google and Apple sign-in are not set up in this build."
+            size="xxs"
+            style={[styles.footerNote, { color: tokens.textMuted }]}
+          />
         </MotionView>
       </View>
     </KeyboardAvoidingView>
-  )
-}
-
-function SocialButton({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap
-  label: string
-  onPress: () => void
-}) {
-  const tokens = useDesignTokens()
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.socialButton,
-        {
-          backgroundColor: tokens.surface,
-          borderColor: tokens.border,
-          opacity: pressed ? 0.88 : 1,
-        },
-      ]}
-    >
-      <Ionicons color={tokens.textPrimary} name={icon} size={20} />
-      <Text text={label} weight="semiBold" size="sm" style={{ color: tokens.textPrimary }} />
-    </Pressable>
   )
 }
 
@@ -166,9 +139,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 40,
   },
-  divider: {
-    alignItems: "center",
-    marginVertical: 4,
+  footerNote: {
+    textAlign: "center",
   },
   form: {
     alignItems: "stretch",
@@ -178,6 +150,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
+  headerSubtitle: {
+    marginTop: 8,
+    textAlign: "center",
+  },
   logo: {
     height: 53,
     marginBottom: 18,
@@ -185,17 +161,5 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
-  },
-  socialButton: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: 16,
-    width: "100%",
   },
 })

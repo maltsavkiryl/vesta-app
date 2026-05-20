@@ -26,7 +26,7 @@ export function signIn(payload: SignInPayload): {
 } {
   if (!Config.DEMO_AUTH_ENABLED) {
     return {
-      result: { ok: false, message: "Production authentication is not connected yet." },
+      result: { ok: false, message: "Online sign-in is not available in this build yet." },
       session: getSession(),
       state: null,
     }
@@ -38,7 +38,7 @@ export function signIn(payload: SignInPayload): {
 
   if (!account) {
     return {
-      result: { ok: false, message: "No local demo account exists for that email yet." },
+      result: { ok: false, message: "No account was found for that email." },
       session: db.session,
       state: null,
     }
@@ -46,7 +46,7 @@ export function signIn(payload: SignInPayload): {
 
   if (account.password !== payload.password) {
     return {
-      result: { ok: false, message: "Incorrect password for this local demo account." },
+      result: { ok: false, message: "Incorrect password for this account." },
       session: db.session,
       state: null,
     }
@@ -72,7 +72,7 @@ export function register(payload: RegisterPayload) {
     return {
       result: {
         ok: false,
-        message: "A local demo account already exists for that email.",
+        message: "An account already exists for that email.",
       } satisfies AuthResult,
       session: db.session,
       state: null,
@@ -101,7 +101,7 @@ export function requestPasswordReset(email: string) {
   const db = ensureDb()
   const normalized = normalizeEmail(email)
   const account = db.accounts.find((candidate) => candidate.email === normalized)
-  if (!account) return { ok: false, message: "No local demo account exists for that email yet." }
+  if (!account) return { ok: false, message: "No account was found for that email." }
 
   commitAccountAction(
     account.id,
@@ -150,7 +150,7 @@ export function resetPassword(email: string, nextPassword: string) {
     return {
       result: {
         ok: false,
-        message: "No local demo account exists for that email yet.",
+        message: "No account was found for that email.",
       } satisfies AuthResult,
       session: db.session,
       state: null,

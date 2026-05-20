@@ -5,6 +5,7 @@ import type { NotificationItem, NotificationKind } from "@/core/models"
 import { Text, useDesignTokens } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
+import { getNotificationActionLabel } from "./notificationActionLabel"
 import { groupLabels, type NotificationGroupKey } from "./useNotificationsScreen"
 
 const iconByKind: Record<NotificationKind, keyof typeof Ionicons.glyphMap> = {
@@ -127,6 +128,7 @@ function NotificationRow({
 }) {
   const tokens = useDesignTokens()
   const color = getNotificationTone(tokens, item.kind)
+  const actionLabel = getNotificationActionLabel(item.action)
 
   return (
     <View
@@ -156,9 +158,9 @@ function NotificationRow({
             </View>
           </View>
           <Text text={item.body} size="xxs" style={[styles.bodyText, { color: tokens.textSecondary }]} />
-          {item.action ? (
+          {actionLabel ? (
             <View style={[styles.cta, { backgroundColor: `${tokens.accent}10` }]}>
-              <Text text="Open" size="xxs" weight="semiBold" style={{ color: tokens.accent }} />
+              <Text text={actionLabel} size="xxs" weight="semiBold" style={{ color: tokens.accent }} />
               <Ionicons color={tokens.accent} name="chevron-forward-outline" size={12} />
             </View>
           ) : null}

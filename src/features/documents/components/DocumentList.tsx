@@ -26,7 +26,7 @@ export function AttentionBanner({ count, onPress }: { count: number; onPress: ()
       trailing={<Text text="View" size="xxs" weight="semiBold" style={{ color: tokens.danger }} />}
     >
       <Text
-        text={`${count} document${count > 1 ? "s" : ""} need${count === 1 ? "s" : ""} attention`}
+        text={`${count} document${count > 1 ? "s" : ""} still need${count === 1 ? "s" : ""} an upload`}
         size="xxs"
         weight="medium"
         style={[styles.flex, { color: tokens.danger }]}
@@ -61,11 +61,7 @@ export function RequiredDocumentRow({
           weight="medium"
           style={{ color: tokens.textPrimary }}
         />
-        <Text
-          text={isMissing ? document.subtitle : `${document.category} · ${document.subtitle}`}
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-        />
+        <Text text={document.subtitle} size="xxs" style={{ color: tokens.textSecondary }} />
       </View>
       <DocumentRowTail
         accent={tokens.accent}
@@ -102,7 +98,7 @@ export function PayslipRow({ onPress, payslip }: { onPress: () => void; payslip:
         <Text text={`Paid ${payslip.date}`} size="xxs" style={{ color: tokens.textSecondary }} />
       </View>
       <PayslipSummary amount={payslip.net} muted={tokens.textMuted} primary={tokens.textPrimary} />
-      <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
+      <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
     </Pressable>
   )
 }

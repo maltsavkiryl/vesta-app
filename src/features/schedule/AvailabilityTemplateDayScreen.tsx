@@ -27,7 +27,7 @@ export function AvailabilityTemplateDayScreen() {
       contentContainerStyle={styles.screen}
       style={{ backgroundColor: tokens.surfaceSecondary }}
     >
-      <Stack.Screen options={{ title: `${availabilityWeekdayLabels[day]} defaults` }} />
+      <Stack.Screen options={{ title: `${availabilityWeekdayLabels[day]} weekly default` }} />
 
       <View style={styles.content}>
         <AvailabilityStatusSection onSelectStatus={setStatus} status={editedRule.status} />

@@ -60,7 +60,7 @@ export function OnboardingEmployer({
           style={[appTypography.onboardingTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Enter the 6-character code from your manager or search by name."
+          text="Use your invite code or choose the workplace you want to start with."
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
@@ -145,10 +145,10 @@ export function OnboardingEmployer({
             </View>
           </View>
           <View style={styles.previewStats}>
-            <PreviewStat label="Employees" value={String(previewEmployer.teamSize)} />
-            <PreviewStat label="Hiring" value="Open" />
+            <PreviewStat label="City" value={previewEmployer.city} />
+            <PreviewStat label="Code" value={previewEmployer.code} />
           </View>
-          <AppButton label={joined ? "Request sent" : "Request to join"} onPress={onJoin} />
+          <AppButton label={joined ? "Selected" : "Use this employer"} onPress={onJoin} />
         </View>
       ) : null}
 
@@ -162,13 +162,13 @@ export function OnboardingEmployer({
           <Ionicons color={tokens.success} name="checkmark-circle-outline" size={24} />
           <View style={styles.flex}>
             <Text
-              text="Request sent!"
+              text="Employer selected"
               size="xs"
               weight="semiBold"
               style={{ color: tokens.textPrimary }}
             />
             <Text
-              text={`You'll be notified when ${previewEmployer.name} approves you.`}
+              text={`${previewEmployer.name} will be used when you finish onboarding.`}
               size="xxs"
               style={{ color: tokens.textSecondary }}
             />

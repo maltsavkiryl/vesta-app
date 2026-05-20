@@ -7,6 +7,7 @@ import { useAppAction } from "@/features/actions/useAppAction"
 import { useHomeQuery } from "@/features/home/data/home.queries"
 
 import type { TaskItem } from "./components/HomeTaskSections"
+import { deriveHomeScreenPolicy } from "./homeScreenPolicy"
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -33,6 +34,13 @@ export function useHomeScreen() {
     () => (home?.tasks ?? []).filter((task) => !task.completed),
     [home?.tasks],
   )
+  const unreadCount = home?.unreadNotifications ?? 0
+  const policy = deriveHomeScreenPolicy({
+    notifications: home?.notifications ?? [],
+    pendingTasks,
+    unreadCount,
+    upcomingShifts,
+  })
 
   const navigate = useCallback((route: AppNavigationRoute) => router.push(route as never), [router])
   const openShift = useCallback(
@@ -45,6 +53,8 @@ export function useHomeScreen() {
     completeTask,
     greeting,
     home,
+    homeSummary: policy.homeSummary,
+    nextShift: policy.nextShift,
     openNotifications: () => navigate("/notifications"),
     openLatestPayslip: () => {
       if (!latestPayslip) return
@@ -52,9 +62,13 @@ export function useHomeScreen() {
     },
     openSchedule: () => navigate("/(app)/(tabs)/schedule"),
     openShift,
+    openTasks: () => navigate("/(app)/tasks"),
     pendingTasks,
+    priorityTask: policy.priorityTask,
     runAction,
-    router,
+    shouldShowTasksSection: policy.shouldShowTasksSection,
+    shouldShowUpdatesSection: policy.shouldShowUpdatesSection,
+    unreadCount,
     upcomingShifts,
   }
 }

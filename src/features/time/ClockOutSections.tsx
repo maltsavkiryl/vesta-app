@@ -33,8 +33,8 @@ export function ClockOutEmptyState() {
       actionLabel="Back to Time"
       icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
       onAction={() => router.replace("/(app)/(tabs)/time")}
-      subtitle="There is no active clock session to close right now."
-      title="Nothing to clock out"
+      subtitle="You're not currently clocked in."
+      title="No active session"
     />
   )
 }
@@ -49,7 +49,7 @@ export function ClockOutSuccessState({
   const tokens = useDesignTokens()
 
   return (
-    <SuccessState subtitle="You've clocked out successfully" title="Great shift!">
+    <SuccessState subtitle="Your time has been saved." title="Clocked out">
       <View style={styles.successStats}>
         <View style={styles.statBlock}>
           <Text
@@ -66,7 +66,11 @@ export function ClockOutSuccessState({
             text={`€${earnings}`}
             weight="bold"
           />
-          <Text size="xxs" style={[styles.statLabel, { color: tokens.textSecondary }]} text="Estimated" />
+          <Text
+            size="xxs"
+            style={[styles.statLabel, { color: tokens.textSecondary }]}
+            text="Est. pay"
+          />
         </View>
       </View>
     </SuccessState>
@@ -110,7 +114,7 @@ export function ClockOutContent({
         )}
       </GroupedSection>
 
-      <GroupedSection title="Pay">
+      <GroupedSection title="Pay estimate">
         <ClockOutPaySummary earnings={summary.earnings} workedLabel={summary.workedLabel} />
       </GroupedSection>
 

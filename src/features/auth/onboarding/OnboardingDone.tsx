@@ -20,7 +20,7 @@ export function OnboardingDone({
   const tokens = useDesignTokens()
   const rows = [
     { label: "Role", value: role || "Waiter" },
-    { label: "Employer", value: employerName ?? "Pending" },
+    { label: "Workplace", value: employerName ?? "No workplace selected" },
     { label: "Availability", value: `${availabilityDays.length} days/week` },
     { label: "Notifications", value: `${enabledNotifications} enabled` },
   ]
@@ -30,8 +30,8 @@ export function OnboardingDone({
       <SuccessState
         icon="checkmark-outline"
         style={styles.successState}
-        subtitle="Your Vesta account is ready. Here's what we set up for you."
-        title="You're all set!"
+        subtitle="Your account is ready. Here is the setup you will start with."
+        title="Ready to start"
       />
       <ListCard style={styles.summaryCard}>
         {rows.map((row, index) => (

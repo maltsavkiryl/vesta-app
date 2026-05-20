@@ -41,7 +41,7 @@ export function ShiftDetailScreen() {
       contentContainerStyle={styles.screen}
       style={{ backgroundColor: tokens.groupedBackground }}
     >
-      <ShiftDetailHero shift={screen.shift} />
+      <ShiftDetailHero onOpenMaps={screen.handleOpenMaps} shift={screen.shift} />
 
       {screen.shift.requiresResponse ? (
         <ShiftActionNeededSection

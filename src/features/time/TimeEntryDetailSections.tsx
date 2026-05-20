@@ -29,11 +29,11 @@ export function TimeEntryDetailEmptyState() {
 
   return (
     <SurfaceCard style={styles.emptyCard}>
-      <Text style={{ color: tokens.textPrimary }} text="Entry not found" weight="semiBold" />
+      <Text style={{ color: tokens.textPrimary }} text="Entry no longer available" weight="semiBold" />
       <Text
         size="xs"
         style={{ color: tokens.textSecondary }}
-        text="This time entry is no longer available in local state."
+        text="This time entry is no longer in your saved history."
       />
     </SurfaceCard>
   )
@@ -83,7 +83,7 @@ export function TimeEntryHero({
 
 export function TimeEntrySummarySection({ entry }: { entry: TimeEntry }) {
   return (
-    <GroupedSection title="Summary">
+    <GroupedSection title="Shift summary">
       <DetailRow label="Worked" value={getTimeEntryWorkedLabel(entry)} />
       <DetailRow label="Breaks" value={getTimeEntryBreakLabel(entry)} />
       <DetailRow label="Gross span" value={getTimeEntryGrossLabel(entry)} />
@@ -100,7 +100,7 @@ export function TimeEntryMapSection({
   mapRegion: NonNullable<ReturnType<typeof import("@/core/timeEntries").getTimeEntryMapRegion>>
 }) {
   return (
-    <GroupedSection title="Check-in map">
+    <GroupedSection title="Clock-in location">
       <View style={styles.mapWrapper}>
         <MapView
           initialRegion={mapRegion}
@@ -171,7 +171,7 @@ export function TimeEntryBreaksSection({
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection title="Break sessions">
+    <GroupedSection title="Breaks">
       {breakSegments.map((segment, index) => (
         <View
           key={segment.id}
@@ -202,7 +202,11 @@ export function TimeEntryBreaksSection({
           <Text
             size="xs"
             style={{ color: tokens.textPrimary }}
-            text={segment.durationSeconds > 0 ? formatDurationLabel(segment.durationSeconds) : "Open"}
+            text={
+              segment.durationSeconds > 0
+                ? formatDurationLabel(segment.durationSeconds)
+                : "In progress"
+            }
             weight="medium"
           />
         </View>
@@ -271,7 +275,7 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={event.location?.addressLabel ?? "No location snapshot"}
+          text={event.location?.addressLabel ?? "No location captured"}
         />
       </View>
       <Text

@@ -6,27 +6,30 @@ import { ListCard, ListCardItem } from "@/ui"
 import { Pill, ProgressBar, SectionBlock, SurfaceCard, Text, useDesignTokens } from "@/ui"
 
 import type { ProfileOverviewRow } from "./profileOverviewRows"
+import type { ProfileSetupStatus } from "./profileSetupStatus"
 
-export function ProfileCompletenessCard({ progress }: { progress: number }) {
+export function ProfileCompletenessCard({ setupStatus }: { setupStatus: ProfileSetupStatus }) {
   const tokens = useDesignTokens()
+  const badgeLabel =
+    setupStatus.remainingCount === 0
+      ? "Complete"
+      : `${setupStatus.remainingCount} step${setupStatus.remainingCount === 1 ? "" : "s"} left`
 
   return (
     <SurfaceCard style={styles.completenessCard}>
       <View style={styles.progressHeader}>
-        <Text
-          text="Profile complete"
-          size="xs"
-          weight="medium"
-          style={{ color: tokens.textPrimary }}
-        />
-        <Text text={`${progress}%`} size="xs" weight="semiBold" style={{ color: tokens.accent }} />
+        <View style={styles.headerCopy}>
+          <Text
+            text={setupStatus.title}
+            size="xs"
+            weight="medium"
+            style={{ color: tokens.textPrimary }}
+          />
+          <Text text={setupStatus.detail} size="xxs" style={{ color: tokens.textMuted }} />
+        </View>
+        <Pill label={badgeLabel} tone={setupStatus.remainingCount === 0 ? "success" : "accent"} />
       </View>
-      <ProgressBar progress={progress} />
-      <Text
-        text="Add an emergency contact to complete your profile."
-        size="xxs"
-        style={{ color: tokens.textMuted }}
-      />
+      <ProgressBar progress={setupStatus.progress} />
     </SurfaceCard>
   )
 }
@@ -110,8 +113,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
+  headerCopy: {
+    flex: 1,
+    gap: 4,
+    paddingRight: 12,
+  },
   progressHeader: {
-    alignItems: "center",
+    alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
   },

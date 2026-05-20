@@ -59,7 +59,7 @@ export function IdleCardContent({
     idleState.kind === "shift" ? (
       <HeroStatusPill icon="checkmark-circle-outline" text="Confirmed" tone="success" />
     ) : idleState.kind === "unavailable" ? (
-      <HeroStatusPill icon="alert-circle-outline" text="Needs setup" tone="warning" />
+      <HeroStatusPill icon="alert-circle-outline" text="Setup needed" tone="warning" />
     ) : (
       <HeroStatusPill icon="time-outline" text="No shift needed" tone="neutral" />
     )
@@ -117,7 +117,6 @@ export function IdleCardContent({
           <IdleDetails
             detailLabel={idleState.detailLabel}
             helperLabel={idleState.helperLabel}
-            navigateColor={tokens.success}
             warningColor={idleState.kind === "unavailable" ? tokens.warning : tokens.accent}
           />
         </View>
@@ -131,7 +130,6 @@ export function IdleCardContent({
               <IdleDetails
                 detailLabel={idleState.detailLabel}
                 helperLabel={idleState.helperLabel}
-                navigateColor={tokens.success}
                 warningColor={idleState.kind === "unavailable" ? tokens.warning : tokens.accent}
               />
             </View>
@@ -152,21 +150,15 @@ export function IdleCardContent({
 function IdleDetails({
   detailLabel,
   helperLabel,
-  navigateColor,
   warningColor,
 }: {
   detailLabel: string
   helperLabel: string
-  navigateColor: string
   warningColor: string
 }) {
   return (
     <View style={styles.idleDetailsContent}>
-      <HeroDetailRow
-        icon="location-outline"
-        text={detailLabel}
-        trailing={<Ionicons color={navigateColor} name="navigate-circle-outline" size={18} />}
-      />
+      <HeroDetailRow icon="location-outline" text={detailLabel} />
 
       <View style={styles.heroDivider} />
 

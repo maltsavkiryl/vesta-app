@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import {
+  AttentionBanner,
   ContractCard,
   PayslipRow,
   RequiredDocumentRow,
@@ -49,12 +50,14 @@ function LegalDocumentsContent() {
     cancelSearch,
     filteredDocuments,
     isSearching,
+    missingCount,
     openUploadOptions,
     query,
     setIsSearching,
     setQuery,
   } = useDocumentsScreen()
   const hasSearchQuery = query.trim().length > 0
+  const firstMissingDocument = filteredDocuments.find((document) => document.status === "action_required")
 
   return (
     <View style={styles.content}>
@@ -62,14 +65,29 @@ function LegalDocumentsContent() {
         isSearching={isSearching}
         query={query}
         searchPlaceholder="Search legal documents..."
-        showSearchButton={false}
+        showSearchButton
         showTitle={false}
-        showUploadButton={false}
+        showUploadButton
         onCancelSearch={cancelSearch}
         onQueryChange={setQuery}
         onSearchPress={() => setIsSearching(true)}
         onUploadPress={() => openUploadOptions()}
       />
+      {!hasSearchQuery ? (
+        <AttentionBanner
+          count={missingCount}
+          onPress={() => {
+            if (!firstMissingDocument) {
+              return
+            }
+
+            openUploadOptions({
+              id: firstMissingDocument.id,
+              title: firstMissingDocument.title,
+            })
+          }}
+        />
+      ) : null}
       <View style={styles.list}>
         {filteredDocuments.length > 0 ? (
           filteredDocuments.map((document) => (
@@ -121,7 +139,7 @@ function ContractsContent() {
         isSearching={isSearching}
         query={query}
         searchPlaceholder="Search contracts..."
-        showSearchButton={false}
+        showSearchButton
         showTitle={false}
         showUploadButton={false}
         onCancelSearch={cancelSearch}
@@ -181,7 +199,7 @@ function PayslipsContent() {
         isSearching={isSearching}
         query={query}
         searchPlaceholder="Search payslips..."
-        showSearchButton={false}
+        showSearchButton
         showTitle={false}
         showUploadButton={false}
         onCancelSearch={cancelSearch}

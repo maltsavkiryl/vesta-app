@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { HomeCockpitDeck } from "@/features/home/components/HomeCockpitDeck"
 import { EarningsSummaryCard } from "@/features/home/components/EarningsSummaryCard"
 import { HomeHeader } from "@/features/home/components/HomeHeader"
 import {
@@ -40,13 +41,19 @@ export function HomeScreen() {
     completeTask,
     greeting,
     home,
+    homeSummary,
+    nextShift,
     openLatestPayslip,
     openNotifications,
     openSchedule,
     openShift,
+    openTasks,
     pendingTasks,
-    router,
+    priorityTask,
     runAction,
+    shouldShowTasksSection,
+    shouldShowUpdatesSection,
+    unreadCount,
     upcomingShifts,
   } = useHomeScreen()
 
@@ -58,6 +65,7 @@ export function HomeScreen() {
           greeting={greeting}
           hasUnread={(home?.unreadNotifications ?? 0) > 0}
           onNotificationsPress={openNotifications}
+          summary={homeSummary}
         />
       </MotionView>
 
@@ -67,6 +75,29 @@ export function HomeScreen() {
         </MotionView>
 
         <MotionView delay={100}>
+          <HomeCockpitDeck
+            nextShift={nextShift}
+            onOpenNotifications={openNotifications}
+            onOpenSchedule={openSchedule}
+            onOpenTask={completeTask}
+            onOpenTasks={openTasks}
+            pendingTaskCount={pendingTasks.length}
+            priorityTask={priorityTask}
+            unreadCount={unreadCount}
+          />
+        </MotionView>
+
+        {shouldShowTasksSection ? (
+          <MotionView delay={150}>
+            <HomeTasksSection
+              tasks={pendingTasks}
+              onComplete={completeTask}
+              onViewAll={openTasks}
+            />
+          </MotionView>
+        ) : null}
+
+        <MotionView delay={200}>
           <UpcomingShiftsSection
             shifts={upcomingShifts}
             onShiftPress={openShift}
@@ -74,27 +105,21 @@ export function HomeScreen() {
           />
         </MotionView>
 
-        <MotionView delay={150}>
+        {shouldShowUpdatesSection ? (
+          <MotionView delay={250}>
+            <HomeUpdatesSection
+              notifications={home?.notifications ?? []}
+              onNotificationPress={(notification) => void runAction(notification.action)}
+              onViewAll={openNotifications}
+            />
+          </MotionView>
+        ) : null}
+
+        <MotionView delay={300}>
           <EarningsSummaryCard
             earnedAmount={home?.earnings.earnedAmount ?? 0}
             monthLabel={home?.earnings.monthLabel ?? ""}
             onPayslipPress={openLatestPayslip}
-          />
-        </MotionView>
-
-        <MotionView delay={200}>
-          <HomeTasksSection
-            tasks={pendingTasks}
-            onComplete={completeTask}
-            onViewAll={() => router.push("/(app)/tasks" as never)}
-          />
-        </MotionView>
-
-        <MotionView delay={250}>
-          <HomeUpdatesSection
-            notifications={home?.notifications ?? []}
-            onNotificationPress={(notification) => void runAction(notification.action)}
-            onViewAll={openNotifications}
           />
         </MotionView>
       </View>

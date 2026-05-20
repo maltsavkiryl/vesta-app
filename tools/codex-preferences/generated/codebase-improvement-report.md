@@ -3,12 +3,12 @@
 - Scope: `vesta-mobile`
 - Findings: `34`
 - Work packets: `1`
-- Worktree: `33` changed paths
+- Worktree: `42` changed paths
 
 ## Worktree Guardrail
 
-- Tracked changes: `13`
-- Untracked paths: `20`
+- Tracked changes: `32`
+- Untracked paths: `10`
 - Do not start broad sweeps in already-touched areas without isolating the work first.
 
 ## Manual product and native review
