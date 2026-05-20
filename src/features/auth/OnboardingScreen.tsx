@@ -1,9 +1,14 @@
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
+import { useFocusEffect } from "@react-navigation/native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import {
+  consumePendingEmployerInviteCode,
+} from "@/features/employers/employerQrScanSession"
+import { findEmployerByInviteCode, normalizeEmployerInviteCode } from "@/features/employers/employerInviteCode"
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import { AppButton, AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
@@ -55,9 +60,7 @@ export function OnboardingScreen() {
     [accountState?.employerDirectory, accountState?.employers],
   )
   const selectedEmployer = employers.find((employer) => employer.id === selectedEmployerId)
-  const foundEmployer = employers.find(
-    (employer) => employer.code.toUpperCase() === code.toUpperCase(),
-  )
+  const foundEmployer = findEmployerByInviteCode(employers, code)
   const searchResults =
     search.trim().length > 1
       ? employers.filter(
@@ -67,6 +70,14 @@ export function OnboardingScreen() {
         )
       : []
   const activeEmployer = foundEmployer ?? selectedEmployer
+  const codeHelperText =
+    code.length === 0
+      ? "Type or paste your invite code"
+      : code.length < 6
+        ? `${6 - code.length} more character${code.length === 5 ? "" : "s"}`
+        : foundEmployer
+          ? "Employer found!"
+          : "Code not recognized"
   const canContinue = [
     true,
     Boolean(selectedRole),
@@ -75,6 +86,18 @@ export function OnboardingScreen() {
     true,
     true,
   ][step]
+
+  useFocusEffect(
+    useCallback(() => {
+      const scannedCode = consumePendingEmployerInviteCode()
+      if (!scannedCode) return
+
+      setJoinMode("code")
+      setSearch("")
+      setJoined(false)
+      setCode(normalizeEmployerInviteCode(scannedCode))
+    }, []),
+  )
 
   const complete = async () => {
     const result = await completeOnboarding({
@@ -136,18 +159,14 @@ export function OnboardingScreen() {
         {step === 2 ? (
           <OnboardingEmployer
             code={code}
+            codeHelperText={codeHelperText}
             joined={joined}
             joinMode={joinMode}
             search={search}
             searchResults={searchResults}
             selectedEmployerId={selectedEmployerId}
             onCodeChange={(value) => {
-              setCode(
-                value
-                  .toUpperCase()
-                  .replace(/[^A-Z0-9]/g, "")
-                  .slice(0, 6),
-              )
+              setCode(value)
               setJoined(false)
             }}
             onJoin={() => {
@@ -162,6 +181,7 @@ export function OnboardingScreen() {
               setSearch("")
               setJoined(false)
             }}
+            onOpenQrScanner={() => router.push("/(auth)/employer-join-scanner")}
             onSearchChange={setSearch}
             onSelectEmployer={(id) => {
               setSelectedEmployerId(id)

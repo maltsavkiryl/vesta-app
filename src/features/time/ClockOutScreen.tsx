@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
@@ -10,6 +11,7 @@ import {
   AppButton,
   AppScrollScreen,
   DetailRow,
+  EmptyState,
   GroupedSection,
   SuccessState,
   Text,
@@ -33,7 +35,22 @@ export function ClockOutScreen() {
   const [confirmed, setConfirmed] = useState(false)
 
   if (!clockSession) {
-    return null
+    return (
+      <AppScrollScreen
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={[styles.screen, styles.emptyScreen, { paddingBottom: insets.bottom + 30 }]}
+        style={{ backgroundColor: tokens.groupedBackground }}
+        topInset="none"
+      >
+        <EmptyState
+          actionLabel="Back to Time"
+          icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
+          onAction={() => router.replace("/(app)/(tabs)/time")}
+          subtitle="There is no active clock session to close right now."
+          title="Nothing to clock out"
+        />
+      </AppScrollScreen>
+    )
   }
 
   const netSeconds = Math.max(summary.payableSeconds, 0)
@@ -177,6 +194,10 @@ const styles = StyleSheet.create({
   content: {
     gap: 20,
     padding: 20,
+  },
+  emptyScreen: {
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   footerActions: {
     alignSelf: "stretch",

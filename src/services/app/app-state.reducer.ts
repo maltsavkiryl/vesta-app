@@ -156,10 +156,20 @@ export function applyAppAction(state: AppStoreState, action: AppAction): AppStor
       }
     case "startClock": {
       const occurredAt = action.payload?.occurredAt ?? new Date().toISOString()
+      const clockContext = action.payload?.clockContext ?? {
+        employerId: state.clockSession.employerId,
+        role: state.clockSession.role,
+        scheduledEnd: state.clockSession.scheduledEnd,
+        scheduledStart: state.clockSession.scheduledStart,
+        shiftId: state.clockSession.shiftId,
+        source: state.clockSession.source,
+        venueAddress: state.clockSession.venueAddress,
+        venueName: state.clockSession.venueName,
+      }
       return {
         ...state,
         clockSession: {
-          ...state.clockSession,
+          ...clockContext,
           state: "working",
           startedAt: occurredAt,
           breakStartedAt: undefined,

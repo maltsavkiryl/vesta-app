@@ -102,18 +102,13 @@ export function AvailabilityTemplateScreen() {
       <View style={styles.content}>
         <View style={styles.intro}>
           <Text
-            text="Weekly template"
-            weight="bold"
-            style={{ color: tokens.textPrimary, fontSize: 24 }}
-          />
-          <Text
             text="Set your usual pattern here, then adjust specific dates only when something changes."
             size="xs"
             style={{ color: tokens.textSecondary }}
           />
         </View>
 
-        <GroupedSection title="Your usual week">
+        <GroupedSection>
           {availabilityWeekdays.map((weekday, index) => {
             const day = template[weekday]
             const statusColor = getAvailabilityColor(day.status, tokens)

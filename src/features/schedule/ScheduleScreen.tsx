@@ -24,6 +24,7 @@ import type { PlanningQuickActionOption } from "@/features/schedule/showPlanning
 import {
   ActionRow,
   AppScrollScreen,
+  EmptyState,
   MetaPill,
   MotionView,
   PageHeader,
@@ -185,6 +186,7 @@ export function ScheduleScreen() {
     return [...dateRequests, ...shiftRequests]
   }, [selectedDate, selectedShiftIds, state])
   const pendingRequests = (state?.requests ?? []).filter((request) => request.status === "pending")
+  const visibleRequests = (pendingRequests.length > 0 ? pendingRequests : (state?.requests ?? [])).slice(0, 4)
   const selectedShiftNeedingResponse = selectedDayShifts.find((shift) => shift.requiresResponse)
   const nextPlanningWindowDate =
     activePlanningWindow && state
@@ -491,17 +493,23 @@ export function ScheduleScreen() {
       ) : null}
 
       <SectionBlock motionDelay={275} title="Pending requests">
-        <SurfaceCard style={styles.requestCard}>
-          {(pendingRequests.length > 0 ? pendingRequests : (state?.requests ?? []))
-            .slice(0, 4)
-            .map((request, index, items) => (
+        {visibleRequests.length > 0 ? (
+          <SurfaceCard style={styles.requestCard}>
+            {visibleRequests.map((request, index, items) => (
               <RequestSummaryRow
                 key={request.id}
                 isLast={index === items.length - 1}
                 request={request}
               />
             ))}
-        </SurfaceCard>
+          </SurfaceCard>
+        ) : (
+          <EmptyState
+            icon={<Ionicons color={tokens.textMuted} name="document-text-outline" size={18} />}
+            subtitle="Requests you send from planning will show up here while they are being reviewed."
+            title="No requests yet"
+          />
+        )}
       </SectionBlock>
     </AppScrollScreen>
   )

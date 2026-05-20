@@ -1,7 +1,8 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 
 import type { Shift } from "@/core/models"
-import { SectionBlock, Text, useDesignTokens } from "@/ui"
+import { EmptyState, SectionBlock, Text, useDesignTokens } from "@/ui"
 
 function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => void }) {
   const tokens = useDesignTokens()
@@ -76,24 +77,34 @@ export function UpcomingShiftsSection({
   onShiftPress: (shift: Shift) => void
   onViewAll: () => void
 }) {
+  const tokens = useDesignTokens()
+
   return (
     <SectionBlock title="Upcoming" actionLabel="View all" onAction={onViewAll}>
-      <View style={styles.upcomingRail}>
-        <ScrollView
-          horizontal
-          contentContainerStyle={styles.upcomingList}
-          showsHorizontalScrollIndicator={false}
-        >
-          {shifts.map((shift, index) => (
-            <View
-              key={shift.id}
-              style={index === shifts.length - 1 ? undefined : styles.upcomingSeparator}
-            >
-              <UpcomingShiftCard shift={shift} onPress={() => onShiftPress(shift)} />
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+      {shifts.length > 0 ? (
+        <View style={styles.upcomingRail}>
+          <ScrollView
+            horizontal
+            contentContainerStyle={styles.upcomingList}
+            showsHorizontalScrollIndicator={false}
+          >
+            {shifts.map((shift, index) => (
+              <View
+                key={shift.id}
+                style={index === shifts.length - 1 ? undefined : styles.upcomingSeparator}
+              >
+                <UpcomingShiftCard shift={shift} onPress={() => onShiftPress(shift)} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      ) : (
+        <EmptyState
+          icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
+          subtitle="Your next assigned shifts will appear here as soon as planning is published."
+          title="No upcoming shifts"
+        />
+      )}
     </SectionBlock>
   )
 }

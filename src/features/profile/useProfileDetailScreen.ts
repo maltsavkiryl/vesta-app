@@ -1,8 +1,14 @@
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { Alert } from "react-native"
 import { useRouter } from "expo-router"
+import { useFocusEffect } from "@react-navigation/native"
 
 import { createInitialState } from "@/core/mockState"
+import { consumePendingEmployerInviteCode } from "@/features/employers/employerQrScanSession"
+import {
+  findEmployerByInviteCode,
+  normalizeEmployerInviteCode,
+} from "@/features/employers/employerInviteCode"
 import { useProfileActions } from "@/features/profile/data/profile.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import { useAppTheme, useDesignTokens } from "@/ui"
@@ -43,10 +49,7 @@ export function useProfileDetailScreen(section: SectionKey) {
   const availableEmployers = state.employerDirectory.filter(
     (employer) => !state.employers.some((existing) => existing.id === employer.id),
   )
-  const normalizedJoinCode = joinCode.trim().toUpperCase()
-  const codeMatchedEmployer = availableEmployers.find(
-    (employer) => employer.code.toUpperCase() === normalizedJoinCode,
-  )
+  const codeMatchedEmployer = findEmployerByInviteCode(availableEmployers, joinCode)
   const searchResults = availableEmployers.filter((employer) => {
     const query = joinSearch.trim().toLowerCase()
     if (!query) return true
@@ -75,6 +78,19 @@ export function useProfileDetailScreen(section: SectionKey) {
         profile: state.profile,
       }),
     [addressState, bankState, contactState, legalState, personalState, state.profile],
+  )
+
+  useFocusEffect(
+    useCallback(() => {
+      const scannedCode = consumePendingEmployerInviteCode()
+      if (!scannedCode || section !== "join-employer") return
+
+      setJoinMode("code")
+      setJoinSearch("")
+      setSelectedJoinEmployerId(undefined)
+      setJoinedEmployerId(undefined)
+      setJoinCode(normalizeEmployerInviteCode(scannedCode))
+    }, [section]),
   )
 
   const saveCurrentSection = () =>

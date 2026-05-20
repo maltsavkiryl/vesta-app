@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 import {
   AppScrollScreen,
   Banner,
+  EmptyState,
   Text,
   appLayout,
   appTypography,
@@ -85,6 +86,7 @@ export function ContractDetailScreen() {
                 style={[
                   styles.signatureInput,
                   {
+                    backgroundColor: tokens.surface,
                     borderColor: signature ? tokens.accent : tokens.border,
                     color: tokens.textPrimary,
                   },
@@ -151,7 +153,15 @@ export function ContractDetailScreen() {
             </View>
           )}
         </>
-      ) : null}
+      ) : (
+        <EmptyState
+          actionLabel="Back"
+          icon={<Ionicons color={tokens.textMuted} name="document-text-outline" size={18} />}
+          onAction={() => router.back()}
+          subtitle="This contract is no longer available in your local documents list."
+          title="Contract not found"
+        />
+      )}
     </AppScrollScreen>
   )
 }

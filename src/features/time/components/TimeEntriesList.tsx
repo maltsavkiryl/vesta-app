@@ -12,6 +12,7 @@ import {
 import {
   AppScrollScreen,
   DateBadge,
+  EmptyState,
   ListCard,
   ListCardItem,
   SectionBlock,
@@ -29,18 +30,28 @@ export function RecentEntries({
   onOpenEntry: (entry: TimeEntry) => void
   onViewAll: () => void
 }) {
+  const tokens = useDesignTokens()
+
   return (
     <SectionBlock title="Recent entries" actionLabel="View all" onAction={onViewAll}>
-      <ListCard style={styles.entriesCard}>
-        {entries.slice(0, 4).map((entry, index, items) => (
-          <EntryRow
-            key={entry.id}
-            entry={entry}
-            isLast={index === items.length - 1}
-            onPress={() => onOpenEntry(entry)}
-          />
-        ))}
-      </ListCard>
+      {entries.length > 0 ? (
+        <ListCard style={styles.entriesCard}>
+          {entries.slice(0, 4).map((entry, index, items) => (
+            <EntryRow
+              key={entry.id}
+              entry={entry}
+              isLast={index === items.length - 1}
+              onPress={() => onOpenEntry(entry)}
+            />
+          ))}
+        </ListCard>
+      ) : (
+        <EmptyState
+          icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
+          subtitle="Clock in and out from the Time tab to start building your history."
+          title="No time entries yet"
+        />
+      )}
     </SectionBlock>
   )
 }
@@ -55,6 +66,7 @@ export function TimeEntriesListScreen({
   totalEntries: number
 }) {
   const tokens = useDesignTokens()
+  const months = Object.entries(groupedEntries)
 
   return (
     <AppScrollScreen
@@ -62,36 +74,46 @@ export function TimeEntriesListScreen({
       style={{ backgroundColor: tokens.groupedBackground }}
       variant="grouped"
     >
-      <Text
-        text={`${totalEntries} entries total`}
-        size="xs"
-        style={{ color: tokens.textSecondary }}
-      />
-      {Object.entries(groupedEntries).map(([month, monthEntries]) => (
-        <SectionBlock
-          key={month}
-          title={month}
-          trailing={
-            <Text
-              text={`${monthEntries.length} shifts`}
-              size="xxs"
-              style={{ color: tokens.textMuted }}
-            />
-          }
-        >
-          <ListCard style={styles.entriesCard}>
-            {monthEntries.map((entry, index) => (
-              <EntryRow
-                key={entry.id}
-                entry={entry}
-                isLast={index === monthEntries.length - 1}
-                onPress={() => onOpenEntry(entry)}
-                showEarnings
-              />
-            ))}
-          </ListCard>
-        </SectionBlock>
-      ))}
+      {totalEntries === 0 ? (
+        <EmptyState
+          icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
+          subtitle="Your completed shifts will appear here once you start clocking time."
+          title="No time entries yet"
+        />
+      ) : (
+        <>
+          <Text
+            text={`${totalEntries} entries total`}
+            size="xs"
+            style={{ color: tokens.textSecondary }}
+          />
+          {months.map(([month, monthEntries]) => (
+            <SectionBlock
+              key={month}
+              title={month}
+              trailing={
+                <Text
+                  text={`${monthEntries.length} shifts`}
+                  size="xxs"
+                  style={{ color: tokens.textMuted }}
+                />
+              }
+            >
+              <ListCard style={styles.entriesCard}>
+                {monthEntries.map((entry, index) => (
+                  <EntryRow
+                    key={entry.id}
+                    entry={entry}
+                    isLast={index === monthEntries.length - 1}
+                    onPress={() => onOpenEntry(entry)}
+                    showEarnings
+                  />
+                ))}
+              </ListCard>
+            </SectionBlock>
+          ))}
+        </>
+      )}
     </AppScrollScreen>
   )
 }

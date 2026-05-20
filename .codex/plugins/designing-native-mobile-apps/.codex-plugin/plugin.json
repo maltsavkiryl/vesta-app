@@ -1,0 +1,39 @@
+{
+  "name": "designing-native-mobile-apps",
+  "version": "0.1.0",
+  "description": "Native mobile UI and UX skills covering iOS Human Interface Guidelines, Android Material 3 guidance, and React Native product design patterns.",
+  "author": {
+    "name": "Vesta",
+    "url": "https://github.com/ehmo/platform-design-skills"
+  },
+  "homepage": "https://github.com/ehmo/platform-design-skills",
+  "repository": "https://github.com/ehmo/platform-design-skills",
+  "license": "MIT",
+  "keywords": [
+    "mobile",
+    "ios",
+    "android",
+    "react-native",
+    "design",
+    "ux"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Designing Native Mobile Apps",
+    "shortDescription": "Native-feeling iOS, Android, and React Native UI and UX guidance.",
+    "longDescription": "Includes iOS and Android platform design guidance from ehmo/platform-design-skills plus React Native screen and interaction design guidance from wshobson/agents.",
+    "developerName": "EHMO, wshobson",
+    "category": "Coding",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "logo": "./assets/callstack-plugin-icon.png",
+    "websiteURL": "https://github.com/ehmo/platform-design-skills",
+    "defaultPrompt": [
+      "Review this iOS-oriented React Native screen for Apple HIG alignment and native feel.",
+      "Review this Android screen for Material 3 and Android platform UX issues.",
+      "Suggest better React Native UI patterns for a screen that should feel native on both iOS and Android."
+    ]
+  }
+}

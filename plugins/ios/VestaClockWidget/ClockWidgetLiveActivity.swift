@@ -4,16 +4,26 @@ import WidgetKit
 
 // MARK: - Helpers
 
-private func elapsedSeconds(from isoString: String, breakSeconds: Int, status: String, breakStartedAt: String?) -> Int {
+private func parseISODate(_ isoString: String?) -> Date? {
+  guard let isoString else { return nil }
+
   let formatter = ISO8601DateFormatter()
   formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-  guard let start = formatter.date(from: isoString) else { return 0 }
-  let total = Int(Date().timeIntervalSince(start))
-  var breaks = breakSeconds
-  if status == "onBreak", let bsStr = breakStartedAt, let bs = formatter.date(from: bsStr) {
-    breaks += Int(Date().timeIntervalSince(bs))
+  if let date = formatter.date(from: isoString) {
+    return date
   }
-  return max(0, total - breaks)
+
+  formatter.formatOptions = [.withInternetDateTime]
+  return formatter.date(from: isoString)
+}
+
+private func displayedTimerSeconds(for state: ClockActivityAttributes.ContentState) -> Int {
+  if state.status == "onBreak", let breakStartedAt = parseISODate(state.breakStartedAt) {
+    return max(Int(Date().timeIntervalSince(breakStartedAt)), 0)
+  }
+
+  guard let startedAt = parseISODate(state.startedAt) else { return 0 }
+  return max(Int(Date().timeIntervalSince(startedAt)), 0)
 }
 
 private func formattedDuration(_ seconds: Int) -> String {
@@ -26,12 +36,21 @@ private func formattedDuration(_ seconds: Int) -> String {
 }
 
 private func scheduledEndTime(_ isoString: String) -> String {
-  let formatter = ISO8601DateFormatter()
-  formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-  guard let date = formatter.date(from: isoString) else { return isoString }
+  guard let date = parseISODate(isoString) else { return isoString }
   let display = DateFormatter()
   display.dateFormat = "HH:mm"
   return display.string(from: date)
+}
+
+@ViewBuilder
+private func liveTimerText(for state: ClockActivityAttributes.ContentState) -> some View {
+  if state.status == "onBreak", let breakStartedAt = parseISODate(state.breakStartedAt) {
+    Text(breakStartedAt, style: .timer)
+  } else if let startedAt = parseISODate(state.startedAt) {
+    Text(startedAt, style: .timer)
+  } else {
+    Text(formattedDuration(displayedTimerSeconds(for: state)))
+  }
 }
 
 // MARK: - Lock Screen view
@@ -41,12 +60,6 @@ struct ClockLockScreenView: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    let elapsed = elapsedSeconds(
-      from: state.startedAt,
-      breakSeconds: state.accumulatedBreakSeconds,
-      status: state.status,
-      breakStartedAt: state.breakStartedAt
-    )
     let isOnBreak = state.status == "onBreak"
 
     VStack(alignment: .leading, spacing: 6) {
@@ -60,7 +73,7 @@ struct ClockLockScreenView: View {
 
         Spacer()
 
-        Text(formattedDuration(elapsed))
+        liveTimerText(for: state)
           .font(.title2.monospacedDigit().bold())
           .foregroundStyle(.primary)
       }
@@ -106,19 +119,14 @@ struct ClockDynamicIslandCompactLeading: View {
 }
 
 struct ClockDynamicIslandCompactTrailing: View {
-  let attributes: ClockActivityAttributes
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    let elapsed = elapsedSeconds(
-      from: state.startedAt,
-      breakSeconds: state.accumulatedBreakSeconds,
-      status: state.status,
-      breakStartedAt: state.breakStartedAt
-    )
-    Text(formattedDuration(elapsed))
+    liveTimerText(for: state)
       .font(.caption.monospacedDigit().bold())
       .foregroundStyle(.primary)
+      .lineLimit(1)
+      .minimumScaleFactor(0.7)
   }
 }
 
@@ -127,12 +135,6 @@ struct ClockDynamicIslandExpandedView: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    let elapsed = elapsedSeconds(
-      from: state.startedAt,
-      breakSeconds: state.accumulatedBreakSeconds,
-      status: state.status,
-      breakStartedAt: state.breakStartedAt
-    )
     let isOnBreak = state.status == "onBreak"
 
     VStack(spacing: 8) {
@@ -146,7 +148,7 @@ struct ClockDynamicIslandExpandedView: View {
 
         Spacer()
 
-        Text(formattedDuration(elapsed))
+        liveTimerText(for: state)
           .font(.title3.monospacedDigit().bold())
       }
 
@@ -186,10 +188,7 @@ struct VestaClockWidget: Widget {
           ClockDynamicIslandCompactLeading(state: context.state)
         }
         DynamicIslandExpandedRegion(.trailing) {
-          ClockDynamicIslandCompactTrailing(
-            attributes: context.attributes,
-            state: context.state
-          )
+          ClockDynamicIslandCompactTrailing(state: context.state)
         }
         DynamicIslandExpandedRegion(.bottom) {
           ClockDynamicIslandExpandedView(
@@ -200,10 +199,7 @@ struct VestaClockWidget: Widget {
       } compactLeading: {
         ClockDynamicIslandCompactLeading(state: context.state)
       } compactTrailing: {
-        ClockDynamicIslandCompactTrailing(
-          attributes: context.attributes,
-          state: context.state
-        )
+        ClockDynamicIslandCompactTrailing(state: context.state)
       } minimal: {
         let isOnBreak = context.state.status == "onBreak"
         Image(systemName: isOnBreak ? "pause.circle.fill" : "clock.fill")

@@ -2,6 +2,7 @@ import type {
   AppStoreState,
   AvailabilityOverride,
   AvailabilityTemplate,
+  ClockSessionContext,
   ClockSession,
   DocumentItem,
   EarningsSummary,
@@ -30,6 +31,7 @@ export type DocumentUploadPayload = {
 }
 
 export type ClockActionPayload = {
+  clockContext?: ClockSessionContext
   occurredAt?: string
   location?: LocationSnapshot
   proofPhoto?: ProofPhoto

@@ -1,9 +1,10 @@
-import type { ClockSession, TimeEntry } from "@/core/models"
+import type { ClockSession, ClockSessionContext, TimeEntry } from "@/core/models"
 import type { Result } from "@/shared/result"
 
 import type { ClockError } from "./time.errors"
 
 export interface ClockCommandInput {
+  clockContext?: ClockSessionContext
   occurredAt?: string
   location?: ClockSession["clockInLocation"]
   proofPhoto?: ClockSession["clockInProofPhoto"]

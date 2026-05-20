@@ -18,6 +18,15 @@ const employerDirectory: Employer[] = [
     city: "Brussels",
     teamSize: 12,
     rating: 4.8,
+    clockConfig: {
+      requiresScheduledShift: true,
+    },
+    worksite: {
+      latitude: 50.84554,
+      longitude: 4.36952,
+      radiusMeters: 180,
+      addressLabel: "Rue de la Loi 123, Brussels",
+    },
   },
   {
     id: "grand-cafe",
@@ -27,6 +36,15 @@ const employerDirectory: Employer[] = [
     city: "Brussels",
     teamSize: 8,
     rating: 4.6,
+    clockConfig: {
+      requiresScheduledShift: false,
+    },
+    worksite: {
+      latitude: 50.84789,
+      longitude: 4.35678,
+      radiusMeters: 160,
+      addressLabel: "Grand Place 8, Brussels",
+    },
   },
   {
     id: "lux-hotel",
@@ -36,6 +54,15 @@ const employerDirectory: Employer[] = [
     city: "Brussels",
     teamSize: 45,
     rating: 4.9,
+    clockConfig: {
+      requiresScheduledShift: true,
+    },
+    worksite: {
+      latitude: 50.84172,
+      longitude: 4.35889,
+      radiusMeters: 220,
+      addressLabel: "Avenue Louise 200, Brussels",
+    },
   },
   {
     id: "terra-italiana",
@@ -45,6 +72,15 @@ const employerDirectory: Employer[] = [
     city: "Ghent",
     teamSize: 14,
     rating: 4.6,
+    clockConfig: {
+      requiresScheduledShift: false,
+    },
+    worksite: {
+      latitude: 51.05434,
+      longitude: 3.71742,
+      radiusMeters: 180,
+      addressLabel: "Korenmarkt 11, Ghent",
+    },
   },
   {
     id: "harbor-bakery",
@@ -54,6 +90,15 @@ const employerDirectory: Employer[] = [
     city: "Antwerp",
     teamSize: 9,
     rating: 4.7,
+    clockConfig: {
+      requiresScheduledShift: false,
+    },
+    worksite: {
+      latitude: 51.22177,
+      longitude: 4.39941,
+      radiusMeters: 140,
+      addressLabel: "Suikerrui 20, Antwerp",
+    },
   },
   {
     id: "canal-bar",
@@ -63,6 +108,15 @@ const employerDirectory: Employer[] = [
     city: "Brussels",
     teamSize: 11,
     rating: 4.5,
+    clockConfig: {
+      requiresScheduledShift: true,
+    },
+    worksite: {
+      latitude: 50.8509,
+      longitude: 4.34076,
+      radiusMeters: 150,
+      addressLabel: "Quai aux Briques 32, Brussels",
+    },
   },
 ]
 
@@ -128,6 +182,7 @@ const profile: UserProfile = {
 const shifts: Shift[] = [
   {
     id: "shift-1",
+    employerId: "bistro-noir",
     date: "2026-05-17",
     dayLabel: "Today",
     startTime: "17:00",
@@ -141,6 +196,7 @@ const shifts: Shift[] = [
   },
   {
     id: "shift-2",
+    employerId: "bistro-noir",
     date: "2026-05-18",
     dayLabel: "Mon",
     startTime: "12:00",
@@ -153,6 +209,7 @@ const shifts: Shift[] = [
   },
   {
     id: "shift-3",
+    employerId: "bistro-noir",
     date: "2026-05-20",
     dayLabel: "Wed",
     startTime: "18:00",
@@ -169,6 +226,7 @@ const shifts: Shift[] = [
   },
   {
     id: "shift-4",
+    employerId: "bistro-noir",
     date: "2026-05-22",
     dayLabel: "Fri",
     startTime: "17:00",
@@ -184,6 +242,7 @@ const shifts: Shift[] = [
   },
   {
     id: "shift-5",
+    employerId: "bistro-noir",
     date: "2026-05-24",
     dayLabel: "Sun",
     startTime: "11:00",
@@ -196,6 +255,7 @@ const shifts: Shift[] = [
   },
   {
     id: "shift-6",
+    employerId: "bistro-noir",
     date: "2026-05-27",
     dayLabel: "Wed",
     startTime: "17:00",
@@ -369,6 +429,8 @@ export function createInitialState(): AppStoreState {
     ],
     timeEntries: [],
     clockSession: {
+      source: "shift",
+      employerId: "bistro-noir",
       state: "idle",
       accumulatedBreakSeconds: 0,
       scheduledStart: "17:00",

@@ -145,9 +145,15 @@ export function RequestScreen() {
         contentContainerStyle={[styles.doneScreen, { paddingBottom: insets.bottom + 30 }]}
         variant="grouped"
       >
-        <SuccessState subtitle={getSuccessCopy(category)} title="Request sent">
+        <SuccessState subtitle={getSuccessCopy(category)} title="Request sent" />
+        <View style={styles.doneDetails}>
           <SurfaceCard style={styles.doneSummaryCard}>
-            <Text text={actionCopy.screenTitle} size="xxs" weight="semiBold" style={{ color: tokens.textSecondary }} />
+            <Text
+              text={actionCopy.screenTitle}
+              size="xxs"
+              weight="semiBold"
+              style={{ color: tokens.textSecondary }}
+            />
             <Text text={summaryTarget} size="sm" weight="semiBold" style={{ color: tokens.textPrimary }} />
             {detailTargetLabel ? (
               <Text text={detailTargetLabel} size="xxs" style={{ color: tokens.textSecondary }} />
@@ -155,7 +161,7 @@ export function RequestScreen() {
             <Text text={reason} size="xxs" style={{ color: tokens.textSecondary }} />
           </SurfaceCard>
           <AppButton fullWidth label="Done" onPress={() => router.back()} />
-        </SuccessState>
+        </View>
       </AppScrollScreen>
     )
   }
@@ -325,6 +331,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: "100%",
     paddingHorizontal: 20,
+  },
+  doneDetails: {
+    alignSelf: "stretch",
+    gap: 14,
+    paddingTop: 18,
   },
   doneSummaryCard: {
     alignSelf: "stretch",

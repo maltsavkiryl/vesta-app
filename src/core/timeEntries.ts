@@ -72,8 +72,11 @@ export function buildTimeEntryFromClockSession({
 
   return {
     id: `time-${clockOutAt}`,
+    source: clockSession.source,
+    employerId: clockSession.employerId,
+    shiftId: clockSession.shiftId,
     date: format(new Date(startedAt), "yyyy-MM-dd"),
-    shiftLabel: "Clocked shift",
+    shiftLabel: clockSession.source === "shift" ? "Clocked shift" : "Manual timer",
     venueName: clockSession.venueName,
     venueAddress: clockSession.venueAddress,
     clockInAt: clockSession.startedAt ?? clockOutAt,

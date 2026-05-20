@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 
 import {
   ContractCard,
@@ -9,11 +10,38 @@ import {
 } from "@/features/documents/components/DocumentList"
 import { DocumentsHeader } from "@/features/documents/components/DocumentsHeader"
 import { shareContractPdf } from "@/features/documents/documentShare"
+import { payslips } from "@/features/documents/documents.data"
 import { useDocumentsScreen } from "@/features/documents/useDocumentsScreen"
-import { appLayout } from "@/ui"
+import { EmptyState, appLayout, useDesignTokens } from "@/ui"
 
 import type { SectionKey } from "./profileSections"
 import type { ProfileDetailScreenState } from "./useProfileDetailScreen"
+
+function DocumentsEmptyState({
+  actionLabel,
+  iconName,
+  onAction,
+  subtitle,
+  title,
+}: {
+  actionLabel?: string
+  iconName: keyof typeof Ionicons.glyphMap
+  onAction?: () => void
+  subtitle: string
+  title: string
+}) {
+  const tokens = useDesignTokens()
+
+  return (
+    <EmptyState
+      actionLabel={actionLabel}
+      icon={<Ionicons color={tokens.textMuted} name={iconName} size={18} />}
+      onAction={onAction}
+      subtitle={subtitle}
+      title={title}
+    />
+  )
+}
 
 function LegalDocumentsContent() {
   const router = useRouter()
@@ -26,6 +54,7 @@ function LegalDocumentsContent() {
     setIsSearching,
     setQuery,
   } = useDocumentsScreen()
+  const hasSearchQuery = query.trim().length > 0
 
   return (
     <View style={styles.content}>
@@ -42,25 +71,39 @@ function LegalDocumentsContent() {
         onUploadPress={() => openUploadOptions()}
       />
       <View style={styles.list}>
-        {filteredDocuments.map((document) => (
-          <RequiredDocumentRow
-            key={document.id}
-            document={document}
-            onPress={() => {
-              if (document.status === "action_required") {
-                openUploadOptions({ id: document.id, title: document.title })
-                return
-              }
+        {filteredDocuments.length > 0 ? (
+          filteredDocuments.map((document) => (
+            <RequiredDocumentRow
+              key={document.id}
+              document={document}
+              onPress={() => {
+                if (document.status === "action_required") {
+                  openUploadOptions({ id: document.id, title: document.title })
+                  return
+                }
 
-              if (document.uploadedUri) {
-                router.push({
-                  pathname: "/(app)/document-upload/[id]",
-                  params: { id: document.id },
-                } as never)
-              }
-            }}
+                if (document.uploadedUri) {
+                  router.push({
+                    pathname: "/(app)/document-upload/[id]",
+                    params: { id: document.id },
+                  } as never)
+                }
+              }}
+            />
+          ))
+        ) : (
+          <DocumentsEmptyState
+            actionLabel={hasSearchQuery ? "Clear search" : undefined}
+            iconName="document-text-outline"
+            onAction={hasSearchQuery ? cancelSearch : undefined}
+            subtitle={
+              hasSearchQuery
+                ? "Try another search term or clear the filter to see every required document."
+                : "Anything that needs an upload or review will appear here."
+            }
+            title={hasSearchQuery ? "No matching legal documents" : "Nothing needed right now"}
           />
-        ))}
+        )}
       </View>
     </View>
   )
@@ -70,6 +113,7 @@ function ContractsContent() {
   const router = useRouter()
   const { cancelSearch, filteredContracts, isSearching, query, setIsSearching, setQuery } =
     useDocumentsScreen()
+  const hasSearchQuery = query.trim().length > 0
 
   return (
     <View style={styles.content}>
@@ -85,27 +129,41 @@ function ContractsContent() {
         onSearchPress={() => setIsSearching(true)}
       />
       <View style={styles.contractList}>
-        {filteredContracts.map((contract) => (
-          <ContractCard
-            key={contract.id}
-            contract={contract}
-            onDownload={() => {
-              void shareContractPdf(contract)
-            }}
-            onSign={() =>
-              router.push({
-                pathname: "/(app)/document-contract/[id]",
-                params: { id: contract.id, mode: "sign" },
-              } as never)
+        {filteredContracts.length > 0 ? (
+          filteredContracts.map((contract) => (
+            <ContractCard
+              key={contract.id}
+              contract={contract}
+              onDownload={() => {
+                void shareContractPdf(contract)
+              }}
+              onSign={() =>
+                router.push({
+                  pathname: "/(app)/document-contract/[id]",
+                  params: { id: contract.id, mode: "sign" },
+                } as never)
+              }
+              onView={() =>
+                router.push({
+                  pathname: "/(app)/document-contract/[id]",
+                  params: { id: contract.id, mode: "view" },
+                } as never)
+              }
+            />
+          ))
+        ) : (
+          <DocumentsEmptyState
+            actionLabel={hasSearchQuery ? "Clear search" : undefined}
+            iconName="document-attach-outline"
+            onAction={hasSearchQuery ? cancelSearch : undefined}
+            subtitle={
+              hasSearchQuery
+                ? "Try a different contract name or clear the search."
+                : "Signed and pending agreements will appear here when your employer sends them."
             }
-            onView={() =>
-              router.push({
-                pathname: "/(app)/document-contract/[id]",
-                params: { id: contract.id, mode: "view" },
-              } as never)
-            }
+            title={hasSearchQuery ? "No matching contracts" : "No contracts on file"}
           />
-        ))}
+        )}
       </View>
     </View>
   )
@@ -115,6 +173,7 @@ function PayslipsContent() {
   const router = useRouter()
   const { cancelSearch, filteredPayslips, isSearching, query, setIsSearching, setQuery } =
     useDocumentsScreen()
+  const hasSearchQuery = query.trim().length > 0
 
   return (
     <View style={styles.content}>
@@ -130,18 +189,32 @@ function PayslipsContent() {
         onSearchPress={() => setIsSearching(true)}
       />
       <View style={styles.list}>
-        {filteredPayslips.map((payslip) => (
-          <PayslipRow
-            key={payslip.id}
-            payslip={payslip}
-            onPress={() =>
-              router.push({
-                pathname: "/(app)/document-payslip/[id]",
-                params: { id: payslip.id },
-              } as never)
+        {filteredPayslips.length > 0 ? (
+          filteredPayslips.map((payslip) => (
+            <PayslipRow
+              key={payslip.id}
+              payslip={payslip}
+              onPress={() =>
+                router.push({
+                  pathname: "/(app)/document-payslip/[id]",
+                  params: { id: payslip.id },
+                } as never)
+              }
+            />
+          ))
+        ) : (
+          <DocumentsEmptyState
+            actionLabel={hasSearchQuery ? "Clear search" : undefined}
+            iconName="cash-outline"
+            onAction={hasSearchQuery ? cancelSearch : undefined}
+            subtitle={
+              hasSearchQuery
+                ? "Try a different month or clear the search."
+                : "Payslips will show up here after payroll is published."
             }
+            title={hasSearchQuery ? "No matching payslips" : payslips.length === 0 ? "No payslips yet" : "No matching payslips"}
           />
-        ))}
+        )}
       </View>
     </View>
   )

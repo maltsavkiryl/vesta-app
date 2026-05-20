@@ -1,9 +1,11 @@
+import type { ComponentProps } from "react"
 import { Platform, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack"
+import type { SFSymbol } from "sf-symbols-typescript"
 
 import type { Theme } from "@/ui/foundations/theme"
 import { Text } from "@/ui/primitives/Text"
@@ -17,7 +19,7 @@ const SHEET_DETENTS = {
 type SheetPreset = "medium" | "resizable"
 type SheetDetent = "medium" | "large"
 type SheetPresentation = "formSheet" | "pageSheet"
-type HeaderActionKind = "close" | "confirm"
+type HeaderActionKind = "close" | "confirm" | "icon"
 
 interface BaseNavigationOptions {
   backgroundColor?: string
@@ -33,30 +35,57 @@ interface BaseNavigationOptions {
 }
 
 interface HeaderActionButtonProps {
+  accessibilityLabel?: string
   kind: HeaderActionKind
+  iconName?: ComponentProps<typeof Ionicons>["name"]
+  prominent?: boolean
   onPress: () => void
   theme: Theme
   disabled?: boolean
   haptic?: PressHapticIntent | "none"
 }
 
-interface HeaderActionOptions {
-  kind: HeaderActionKind
-  label?: string
+interface BaseHeaderActionOptions {
   onPress: () => void
   disabled?: boolean
   haptic?: PressHapticIntent | "none"
 }
 
+type HeaderActionOptions =
+  | ({
+      kind: "close"
+    } & BaseHeaderActionOptions)
+  | ({
+      kind: "confirm"
+      label?: string
+    } & BaseHeaderActionOptions)
+  | ({
+      kind: "icon"
+      accessibilityLabel: string
+      iconName: ComponentProps<typeof Ionicons>["name"]
+      iosIconName: SFSymbol
+      prominent?: boolean
+    } & BaseHeaderActionOptions)
+
+function getHeaderAccessibilityLabel(action: HeaderActionOptions) {
+  if (action.kind === "confirm") return action.label ?? "Confirm"
+  if (action.kind === "icon") return action.accessibilityLabel
+  return "Close"
+}
+
 export function HeaderActionButton({
+  accessibilityLabel,
   kind,
+  iconName,
+  prominent = false,
   onPress,
   theme,
   disabled,
   haptic = "selection",
 }: HeaderActionButtonProps) {
-  const isConfirm = kind === "confirm"
-  const backgroundColor = isConfirm
+  const isProminentIcon = kind === "icon" && prominent
+  const isProminent = kind === "confirm" || isProminentIcon
+  const backgroundColor = isProminent
     ? disabled
       ? theme.isDark
         ? "rgba(10, 132, 255, 0.32)"
@@ -67,16 +96,19 @@ export function HeaderActionButton({
     : theme.isDark
       ? "rgba(58, 58, 60, 0.9)"
       : "rgba(118, 118, 128, 0.12)"
-  const iconColor = isConfirm
+  const iconColor = isProminent
     ? "white"
     : disabled
       ? theme.isDark
         ? "rgba(255, 255, 255, 0.45)"
         : "rgba(28, 28, 30, 0.35)"
       : theme.colors.text
+  const renderedIconName =
+    kind === "confirm" ? "checkmark" : kind === "close" ? "close" : (iconName ?? "ellipse")
 
   return (
     <Pressable
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       accessibilityState={{ disabled: Boolean(disabled) }}
       disabled={disabled}
@@ -91,7 +123,7 @@ export function HeaderActionButton({
         disabled ? styles.headerActionButtonDisabled : styles.headerActionButtonEnabled,
       ]}
     >
-      <Ionicons color={iconColor} name={isConfirm ? "checkmark" : "close"} size={20} />
+      <Ionicons color={iconColor} name={renderedIconName} size={20} />
     </Pressable>
   )
 }
@@ -145,30 +177,36 @@ function HeaderProminentActionButton({
   )
 }
 
-function createNativeHeaderItem(
-  theme: Theme,
-  { kind, label, onPress, disabled, haptic = "selection" }: HeaderActionOptions,
-): NativeStackHeaderItem {
-  const isConfirm = kind === "confirm"
-  const itemLabel = label ?? (isConfirm ? "Save" : "")
+function createNativeHeaderItem(theme: Theme, action: HeaderActionOptions): NativeStackHeaderItem {
+  const { kind, onPress, disabled, haptic = "selection" } = action
+  const isProminentIcon = action.kind === "icon" && action.prominent === true
+  const isProminent = kind === "confirm" || isProminentIcon
+  const itemLabel = kind === "confirm" ? (action.label ?? "Save") : ""
   const accessibilityLabel =
-    label && label.trim().length > 0 ? label : isConfirm ? "Confirm" : "Close"
+    kind === "confirm"
+      ? action.label && action.label.trim().length > 0
+        ? action.label
+        : "Confirm"
+      : kind === "icon"
+        ? action.accessibilityLabel
+        : "Close"
+  const iconName = kind === "confirm" ? "checkmark" : kind === "icon" ? action.iosIconName : "xmark"
 
   return {
     accessibilityLabel,
     disabled,
     icon: {
       type: "sfSymbol",
-      name: isConfirm ? "checkmark" : "xmark",
+      name: iconName,
     },
     label: itemLabel,
     onPress: () => {
       firePressHaptic(haptic)
       onPress()
     },
-    tintColor: isConfirm ? (theme.isDark ? "#0A84FF" : "#007AFF") : theme.colors.text,
+    tintColor: isProminent ? (theme.isDark ? "#0A84FF" : "#007AFF") : theme.colors.text,
     type: "button",
-    variant: isConfirm ? "prominent" : "plain",
+    variant: isProminent ? "prominent" : "plain",
     width: itemLabel ? undefined : 36,
   }
 }
@@ -200,12 +238,15 @@ export function createHeaderActionOptions(
   return {
     headerLeft: leftAction
       ? () => (
-            <HeaderActionButton
-              disabled={leftAction.disabled}
-              haptic={leftAction.haptic}
-              kind={leftAction.kind}
-              onPress={leftAction.onPress}
-              theme={theme}
+          <HeaderActionButton
+            accessibilityLabel={getHeaderAccessibilityLabel(leftAction)}
+            disabled={leftAction.disabled}
+            haptic={leftAction.haptic}
+            iconName={leftAction.kind === "icon" ? leftAction.iconName : undefined}
+            kind={leftAction.kind}
+            onPress={leftAction.onPress}
+            prominent={leftAction.kind === "icon" ? leftAction.prominent : undefined}
+            theme={theme}
           />
         )
       : undefined,
@@ -221,10 +262,13 @@ export function createHeaderActionOptions(
             />
           ) : (
             <HeaderActionButton
+              accessibilityLabel={getHeaderAccessibilityLabel(rightAction)}
               disabled={rightAction.disabled}
               haptic={rightAction.haptic}
+              iconName={rightAction.kind === "icon" ? rightAction.iconName : undefined}
               kind={rightAction.kind}
               onPress={rightAction.onPress}
+              prominent={rightAction.kind === "icon" ? rightAction.prominent : undefined}
               theme={theme}
             />
           )

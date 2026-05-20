@@ -98,6 +98,13 @@ module.exports = (_: ConfigContext): ExpoConfig => {
         },
       ],
       [
+        "expo-camera",
+        {
+          barcodeScannerEnabled: true,
+          cameraPermission: "Allow Vesta to scan employer QR codes.",
+        },
+      ],
+      [
         "expo-local-authentication",
         {
           faceIDPermission: "Allow Vesta to use Face ID to unlock the app.",

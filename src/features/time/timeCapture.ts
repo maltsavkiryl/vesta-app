@@ -23,8 +23,16 @@ export function buildAddressLabel(components: {
     .filter(Boolean)
     .join(" ")
     .trim()
-  return [streetLine, localityLine, components.name ?? components.subregion]
-    .filter(Boolean)
+  const normalizeAddressPart = (value: string) => value.trim().toLocaleLowerCase()
+  const parts = [streetLine, localityLine, components.name ?? components.subregion].filter(
+    (value): value is string => Boolean(value?.trim()),
+  )
+
+  return parts
+    .filter((part, index, values) => {
+      const normalizedPart = normalizeAddressPart(part)
+      return values.findIndex((candidate) => normalizeAddressPart(candidate) === normalizedPart) === index
+    })
     .join(", ")
 }
 

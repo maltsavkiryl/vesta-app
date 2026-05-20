@@ -22,6 +22,7 @@ export type NotificationKind =
   | "availability"
   | "announcements"
 export type ClockState = "idle" | "working" | "onBreak"
+export type ClockSessionSource = "shift" | "employer"
 export type TimeEntryStatus = "approved" | "review"
 export type TimeEntryEventType = "clockIn" | "breakStart" | "breakEnd" | "clockOut"
 
@@ -33,6 +34,15 @@ export interface Employer {
   city: string
   teamSize: number
   rating: number
+  clockConfig: {
+    requiresScheduledShift: boolean
+  }
+  worksite?: {
+    latitude: number
+    longitude: number
+    radiusMeters: number
+    addressLabel: string
+  }
 }
 
 export interface UserProfile {
@@ -96,6 +106,7 @@ export interface UserProfile {
 
 export interface Shift {
   id: string
+  employerId?: string
   date: string
   dayLabel: string
   startTime: string
@@ -206,12 +217,21 @@ export interface TimeEntryEvent {
   location?: LocationSnapshot
 }
 
-export interface TimeEntry {
+export interface ClockSessionContext {
+  source: ClockSessionSource
+  employerId: string
+  shiftId?: string
+  scheduledStart?: string
+  scheduledEnd?: string
+  role?: string
+  venueName: string
+  venueAddress: string
+}
+
+export interface TimeEntry extends ClockSessionContext {
   id: string
   date: string
   shiftLabel: string
-  venueName: string
-  venueAddress: string
   clockInAt: string
   clockOutAt: string
   grossSeconds: number
@@ -223,16 +243,11 @@ export interface TimeEntry {
   clockInProofPhoto?: ProofPhoto
 }
 
-export interface ClockSession {
+export interface ClockSession extends ClockSessionContext {
   state: ClockState
   startedAt?: string
   breakStartedAt?: string
   accumulatedBreakSeconds: number
-  scheduledStart: string
-  scheduledEnd: string
-  role: string
-  venueName: string
-  venueAddress: string
   events: TimeEntryEvent[]
   clockInLocation?: LocationSnapshot
   clockInProofPhoto?: ProofPhoto

@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { Employer } from "@/core/models"
-import { GroupedSection, ListRow, StatusBadge, Text } from "@/ui"
+import { EmptyState, GroupedSection, ListRow, StatusBadge, Text } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
 import { EmployerInitialBadge } from "./ProfileEmployerShared"
@@ -64,16 +64,24 @@ export function EmployersSection({
   return (
     <>
       <GroupedSection actionLabel="Join" title="Linked workplaces" onAction={onOpenJoinEmployer}>
-        {employers.map((employer, index) => (
-          <ListRow
-            key={employer.id}
-            title={employer.name}
-            subtitle={`${employer.type} - ${employer.city} - ${employer.teamSize} people`}
-            isLast={index === employers.length - 1}
-            leading={<Ionicons color={tokens.accent} name="business-outline" size={18} />}
-            trailing={<StatusBadge label="Linked" tone="success" />}
+        {employers.length > 0 ? (
+          employers.map((employer, index) => (
+            <ListRow
+              key={employer.id}
+              title={employer.name}
+              subtitle={`${employer.type} - ${employer.city} - ${employer.teamSize} people`}
+              isLast={index === employers.length - 1}
+              leading={<Ionicons color={tokens.accent} name="business-outline" size={18} />}
+              trailing={<StatusBadge label="Linked" tone="success" />}
+            />
+          ))
+        ) : (
+          <EmptyState
+            icon={<Ionicons color={tokens.textMuted} name="business-outline" size={18} />}
+            subtitle="Join a workplace to receive shifts, documents, and payroll updates in the app."
+            title="No linked workplaces"
           />
-        ))}
+        )}
       </GroupedSection>
 
       {availableEmployers.length > 0 ? (

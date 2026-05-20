@@ -1,107 +1,124 @@
 import { StyleSheet, View } from "react-native"
-import { useLocalSearchParams } from "expo-router"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Stack, useLocalSearchParams, useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 
-import { AppButton, AppScrollScreen, Text, appLayout, appTypography, useDesignTokens } from "@/ui"
+import {
+  AppScrollScreen,
+  EmptyState,
+  Text,
+  appLayout,
+  appTypography,
+  createHeaderActionOptions,
+  useAppTheme,
+  useDesignTokens,
+} from "@/ui"
 
 import { payslips } from "./documents.data"
 import { sharePayslipPdf } from "./documentShare"
 
 export function PayslipDetailScreen() {
+  const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const tokens = useDesignTokens()
-  const insets = useSafeAreaInsets()
+  const { theme } = useAppTheme()
   const payslip = payslips.find((item) => item.id === id)
+  const headerActions = payslip
+    ? createHeaderActionOptions(theme, {
+        right: {
+          accessibilityLabel: "Download payslip PDF",
+          iconName: "cloud-download-outline",
+          iosIconName: "icloud.and.arrow.down",
+          kind: "icon",
+          onPress: () => {
+            void sharePayslipPdf(payslip)
+          },
+          prominent: true,
+        },
+      })
+    : undefined
 
   return (
-    <View style={[styles.screen, { backgroundColor: tokens.groupedBackground }]}>
-      <AppScrollScreen
-        variant="grouped"
-        contentContainerStyle={styles.content}
-        style={[styles.flex, { backgroundColor: tokens.groupedBackground }]}
-      >
-        {payslip ? (
-          <>
-            <View>
-              <Text
-                text={payslip.month}
-                weight="bold"
-                style={[appTypography.detailTitle, { color: tokens.textPrimary }]}
-              />
-              <Text text={payslip.period} size="xxs" style={{ color: tokens.textSecondary }} />
-            </View>
-            <View
-              style={[
-                styles.netPayHero,
-                { backgroundColor: `${tokens.success}10`, borderColor: `${tokens.success}22` },
-              ]}
-            >
-              <Text
-                text="NET PAY"
-                size="xxs"
-                weight="semiBold"
-                style={[styles.caps, { color: tokens.success }]}
-              />
-              <Text
-                text={payslip.net}
-                weight="bold"
-                style={[appTypography.heroValue, { color: tokens.textPrimary }]}
-              />
-              <Text
-                text={`Paid ${payslip.date}`}
-                size="xxs"
-                style={{ color: tokens.textSecondary }}
-              />
-            </View>
+    <AppScrollScreen
+      variant="grouped"
+      contentContainerStyle={styles.content}
+      style={{ backgroundColor: tokens.groupedBackground }}
+    >
+      <Stack.Screen
+        options={{
+          ...headerActions,
+          title: "Payslip",
+        }}
+      />
+      {payslip ? (
+        <>
+          <View>
             <Text
-              text="BREAKDOWN"
+              text={payslip.month}
+              weight="bold"
+              style={[appTypography.detailTitle, { color: tokens.textPrimary }]}
+            />
+            <Text text={payslip.period} size="xxs" style={{ color: tokens.textSecondary }} />
+          </View>
+          <View
+            style={[
+              styles.netPayHero,
+              { backgroundColor: `${tokens.success}10`, borderColor: `${tokens.success}22` },
+            ]}
+          >
+            <Text
+              text="NET PAY"
               size="xxs"
               weight="semiBold"
-              style={[styles.caps, { color: tokens.textMuted }]}
+              style={[styles.caps, { color: tokens.success }]}
             />
-            <View style={[styles.breakdown, { backgroundColor: tokens.surface }]}>
-              {payslip.rows.map((row) => (
-                <View
-                  key={row.label}
-                  style={[styles.breakdownRow, { borderBottomColor: tokens.border }]}
-                >
-                  <Text
-                    text={row.label}
-                    size="xxs"
-                    style={[styles.flex, { color: tokens.textSecondary }]}
-                  />
-                  <Text
-                    text={row.amount}
-                    size="xxs"
-                    weight="semiBold"
-                    style={{ color: row.type === "minus" ? tokens.danger : tokens.success }}
-                  />
-                </View>
-              ))}
-            </View>
-          </>
-        ) : null}
-      </AppScrollScreen>
-      {payslip ? (
-        <View
-          style={[
-            styles.footer,
-            {
-              backgroundColor: tokens.groupedBackground,
-              borderTopColor: tokens.border,
-              paddingBottom: Math.max(insets.bottom, 16),
-            },
-          ]}
-        >
-          <AppButton
-            label="Download PDF"
-            onPress={() => {
-              void sharePayslipPdf(payslip)
-            }}
+            <Text
+              text={payslip.net}
+              weight="bold"
+              style={[appTypography.heroValue, { color: tokens.textPrimary }]}
+            />
+            <Text
+              text={`Paid ${payslip.date}`}
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+            />
+          </View>
+          <Text
+            text="BREAKDOWN"
+            size="xxs"
+            weight="semiBold"
+            style={[styles.caps, { color: tokens.textMuted }]}
           />
-        </View>
-      ) : null}
-    </View>
+          <View style={[styles.breakdown, { backgroundColor: tokens.surface }]}>
+            {payslip.rows.map((row) => (
+              <View
+                key={row.label}
+                style={[styles.breakdownRow, { borderBottomColor: tokens.border }]}
+              >
+                <Text
+                  text={row.label}
+                  size="xxs"
+                  style={[styles.flex, { color: tokens.textSecondary }]}
+                />
+                <Text
+                  text={row.amount}
+                  size="xxs"
+                  weight="semiBold"
+                  style={{ color: row.type === "minus" ? tokens.danger : tokens.success }}
+                />
+              </View>
+            ))}
+          </View>
+        </>
+      ) : (
+        <EmptyState
+          actionLabel="Back"
+          icon={<Ionicons color={tokens.textMuted} name="cash-outline" size={18} />}
+          onAction={() => router.back()}
+          subtitle="This payslip is no longer available in the current local list."
+          title="Payslip not found"
+        />
+      )}
+    </AppScrollScreen>
   )
 }
 
@@ -132,11 +149,6 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  footer: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: appLayout.sheetPaddingHorizontal,
-    paddingTop: 14,
-  },
   netPayHero: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -144,8 +156,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 20,
     paddingVertical: 16,
-  },
-  screen: {
-    flex: 1,
   },
 })

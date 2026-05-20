@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native"
 
 import type { HomeTask, NotificationItem, Shift, TimeEntry } from "@/core/models"
-import { RecentEntries } from "@/features/time/components/TimeEntriesList"
+import { RecentEntries, TimeEntriesListScreen } from "@/features/time/components/TimeEntriesList"
 import { ThemeProvider } from "@/ui"
 
 import { HomeTasksSection, HomeUpdatesSection } from "./HomeTaskSections"
@@ -27,6 +27,15 @@ jest.mock("react-native-keyboard-controller", () => {
     )),
   }
 })
+
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+  }),
+}))
 
 const sampleShift: Shift = {
   id: "shift-1",
@@ -112,6 +121,17 @@ describe("overview section actions", () => {
     expect(onViewAll).toHaveBeenCalledTimes(1)
   })
 
+  it("hides home tasks when there are no pending tasks", () => {
+    renderWithTheme(
+      <HomeTasksSection tasks={[]} onComplete={() => undefined} onViewAll={() => undefined} />,
+    )
+
+    expect(screen.queryByText("Tasks")).toBeNull()
+    expect(screen.queryByText("All tasks done!")).toBeNull()
+    expect(screen.queryByText("History")).toBeNull()
+    expect(screen.queryByText("View all")).toBeNull()
+  })
+
   it("uses View all for home updates", () => {
     const onViewAll = jest.fn()
 
@@ -129,6 +149,19 @@ describe("overview section actions", () => {
     expect(screen.queryByText("All")).toBeNull()
   })
 
+  it("hides home updates when there are no notifications", () => {
+    renderWithTheme(
+      <HomeUpdatesSection
+        notifications={[]}
+        onNotificationPress={() => undefined}
+        onViewAll={() => undefined}
+      />,
+    )
+
+    expect(screen.queryByText("Updates")).toBeNull()
+    expect(screen.queryByText("View all")).toBeNull()
+  })
+
   it("keeps View all for recent entries", () => {
     const onViewAll = jest.fn()
 
@@ -143,5 +176,38 @@ describe("overview section actions", () => {
     fireEvent.press(screen.getByText("View all"))
 
     expect(onViewAll).toHaveBeenCalledTimes(1)
+  })
+
+  it("shows an empty state when there are no upcoming shifts", () => {
+    renderWithTheme(
+      <UpcomingShiftsSection shifts={[]} onShiftPress={() => undefined} onViewAll={() => undefined} />,
+    )
+
+    expect(screen.getByText("No upcoming shifts")).toBeTruthy()
+    expect(
+      screen.getByText("Your next assigned shifts will appear here as soon as planning is published."),
+    ).toBeTruthy()
+  })
+
+  it("shows an empty state when there are no recent entries", () => {
+    renderWithTheme(
+      <RecentEntries entries={[]} onOpenEntry={() => undefined} onViewAll={() => undefined} />,
+    )
+
+    expect(screen.getByText("No time entries yet")).toBeTruthy()
+    expect(
+      screen.getByText("Clock in and out from the Time tab to start building your history."),
+    ).toBeTruthy()
+  })
+
+  it("shows an empty state on the full time entries screen when there are no entries", () => {
+    renderWithTheme(
+      <TimeEntriesListScreen groupedEntries={{}} onOpenEntry={() => undefined} totalEntries={0} />,
+    )
+
+    expect(screen.getByText("No time entries yet")).toBeTruthy()
+    expect(
+      screen.getByText("Your completed shifts will appear here once you start clocking time."),
+    ).toBeTruthy()
   })
 })

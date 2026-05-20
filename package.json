@@ -48,6 +48,7 @@
     "date-fns": "^4.2.1",
     "expo": "55.0.25",
     "expo-build-properties": "~55.0.14",
+    "expo-camera": "~55.0.18",
     "expo-constants": "~55.0.16",
     "expo-dev-client": "~55.0.35",
     "expo-document-picker": "^55.0.13",

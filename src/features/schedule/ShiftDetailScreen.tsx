@@ -11,6 +11,7 @@ import {
   ActionRow,
   AppButton,
   AppScrollScreen,
+  EmptyState,
   GroupedSection,
   MetaPill,
   StatusBadge,
@@ -48,10 +49,12 @@ export function ShiftDetailScreen() {
         contentContainerStyle={styles.screen}
         style={{ backgroundColor: tokens.groupedBackground }}
       >
-        <Text
-          text="Shift not found"
-          weight="bold"
-          style={{ color: tokens.textPrimary, fontSize: 24 }}
+        <EmptyState
+          actionLabel="Back to Planning"
+          icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
+          onAction={() => router.replace("/(app)/(tabs)/schedule")}
+          subtitle="This shift is no longer available in your local planning data."
+          title="Shift not found"
         />
       </AppScrollScreen>
     )

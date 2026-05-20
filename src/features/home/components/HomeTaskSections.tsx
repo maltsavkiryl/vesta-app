@@ -139,36 +139,7 @@ export function HomeTasksSection({
   onViewAll: () => void
   tasks: TaskItem[]
 }) {
-  const tokens = useDesignTokens()
-
-  if (tasks.length === 0) {
-    return (
-      <View
-        style={[
-          styles.allDone,
-          { backgroundColor: `${tokens.success}10`, borderColor: `${tokens.success}20` },
-        ]}
-      >
-        <ToneIcon name="checkmark-outline" tone="success" />
-        <View style={styles.flex}>
-          <Text
-            text="All tasks done!"
-            size="xs"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary }}
-          />
-          <Text
-            text="Nothing pending right now."
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-          />
-        </View>
-        <Pressable onPress={onViewAll}>
-          <Text text="History" size="xxs" weight="medium" style={{ color: tokens.accent }} />
-        </Pressable>
-      </View>
-    )
-  }
+  if (tasks.length === 0) return null
 
   return (
     <SectionBlock
@@ -231,6 +202,8 @@ export function HomeUpdatesSection({
   onNotificationPress: (notification: NotificationItem) => void
   onViewAll: () => void
 }) {
+  if (notifications.length === 0) return null
+
   return (
     <SectionBlock actionLabel="View all" title="Updates" onAction={onViewAll}>
       <ListCard>
@@ -312,15 +285,6 @@ function TaskGroup({
 }
 
 const styles = StyleSheet.create({
-  allDone: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 17,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    padding: 16,
-  },
   capsLabel: {
     letterSpacing: 0,
   },
@@ -336,9 +300,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     paddingHorizontal: 0,
-  },
-  flex: {
-    flex: 1,
   },
   iconTile: {
     alignItems: "center",

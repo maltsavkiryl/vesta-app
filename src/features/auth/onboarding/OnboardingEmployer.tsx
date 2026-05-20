@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { EmployerInviteCodeEntry } from "@/features/employers/EmployerInviteCodeEntry"
 import {
   AppButton,
   AppSegmentedControl,
@@ -17,6 +18,7 @@ import type { OnboardingEmployer as OnboardingEmployerType } from "./types"
 
 export interface OnboardingEmployerProps {
   code: string
+  codeHelperText: string
   joined: boolean
   joinMode: "code" | "search"
   previewEmployer?: OnboardingEmployerType
@@ -26,12 +28,14 @@ export interface OnboardingEmployerProps {
   onCodeChange: (value: string) => void
   onJoin: () => void
   onModeChange: (mode: "code" | "search") => void
+  onOpenQrScanner: () => void
   onSearchChange: (value: string) => void
   onSelectEmployer: (id: string) => void
 }
 
 export function OnboardingEmployer({
   code,
+  codeHelperText,
   joined,
   joinMode,
   previewEmployer,
@@ -41,6 +45,7 @@ export function OnboardingEmployer({
   onCodeChange,
   onJoin,
   onModeChange,
+  onOpenQrScanner,
   onSearchChange,
   onSelectEmployer,
 }: OnboardingEmployerProps) {
@@ -55,7 +60,7 @@ export function OnboardingEmployer({
           style={[appTypography.onboardingTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Enter the 6-digit code from your manager or search by name."
+          text="Enter the 6-character code from your manager or search by name."
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
@@ -73,26 +78,11 @@ export function OnboardingEmployer({
 
       {joinMode === "code" ? (
         <View style={styles.stack}>
-          <CodeBoxes code={code} />
-          <AuthTextField
-            autoCapitalize="characters"
-            label="Invite code"
-            maxLength={6}
-            onChangeText={onCodeChange}
-            value={code}
-          />
-          <Text
-            text={
-              code.length === 0
-                ? "Type or paste your invite code"
-                : code.length < 6
-                  ? `${6 - code.length} more character${code.length === 5 ? "" : "s"}`
-                  : previewEmployer
-                    ? "Employer found!"
-                    : "Code not recognized"
-            }
-            size="xxs"
-            style={[onboardingStyles.centeredText, styles.helperText, { color: tokens.textMuted }]}
+          <EmployerInviteCodeEntry
+            code={code}
+            helperText={codeHelperText}
+            onChangeCode={onCodeChange}
+            onOpenQrScanner={onOpenQrScanner}
           />
         </View>
       ) : (
@@ -189,36 +179,6 @@ export function OnboardingEmployer({
   )
 }
 
-function CodeBoxes({ code }: { code: string }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={styles.codeRow}>
-      {Array.from({ length: 6 }).map((_, index) => {
-        const filled = index < code.length
-        return (
-          <View
-            key={index}
-            style={[
-              styles.codeBox,
-              {
-                backgroundColor: filled ? tokens.accentSoft : tokens.background,
-                borderColor: filled ? tokens.textPrimary : tokens.border,
-              },
-            ]}
-          >
-            <Text
-              text={code[index] ?? ""}
-              weight="bold"
-              style={[onboardingStyles.metricValue, { color: tokens.textPrimary }]}
-            />
-          </View>
-        )
-      })}
-    </View>
-  )
-}
-
 function EmployerRow({
   employer,
   selected,
@@ -282,19 +242,6 @@ function PreviewStat({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  codeBox: {
-    alignItems: "center",
-    borderRadius: 12,
-    borderWidth: 1.5,
-    height: 56,
-    justifyContent: "center",
-    width: 44,
-  },
-  codeRow: {
-    flexDirection: "row",
-    gap: 7,
-    justifyContent: "center",
-  },
   employerHeader: {
     alignItems: "center",
     flexDirection: "row",
@@ -315,9 +262,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  helperText: {
-    textAlign: "center",
   },
   joinedCard: {
     alignItems: "center",

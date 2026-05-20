@@ -4,21 +4,22 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { Employer } from "@/core/models"
+import { EmployerInviteCodeEntry } from "@/features/employers/EmployerInviteCodeEntry"
 import { Banner, GroupedSection, ListRow, SurfaceCard, Text, TextField } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
 import { EmployerInitialBadge } from "./ProfileEmployerShared"
 
 export function InviteCodePanel({
-  availableEmployers,
   codeMatchedEmployer,
   joinCode,
+  onOpenQrScanner,
   onSetJoinCode,
   tokens,
 }: {
-  availableEmployers: Employer[]
   codeMatchedEmployer?: Employer
   joinCode: string
+  onOpenQrScanner: () => void
   onSetJoinCode: (value: string) => void
   tokens: DesignTokens
 }) {
@@ -45,42 +46,20 @@ export function InviteCodePanel({
             size="xs"
             style={{ color: tokens.textSecondary, textAlign: "center" }}
           />
-          <TextField
-            autoCapitalize="characters"
-            autoCorrect={false}
-            containerStyle={styles.joinCodeField}
-            inputStyle={styles.joinCodeInput}
-            label="Invite code"
-            labelCase="default"
-            maxLength={6}
-            onChangeText={onSetJoinCode}
-            placeholder={availableEmployers[0]?.code ?? "ABC123"}
-            value={joinCode}
-          />
-          <Banner
-            icon={
-              <Ionicons
-                color={
-                  joinCode.length === 6 && codeMatchedEmployer ? tokens.success : tokens.textMuted
-                }
-                name={
-                  joinCode.length === 6 && codeMatchedEmployer
-                    ? "checkmark-circle-outline"
-                    : "information-circle-outline"
-                }
-                size={16}
-              />
+          <EmployerInviteCodeEntry
+            code={joinCode}
+            helperText={
+              joinCode.length === 0
+                ? "Enter a 6-character code to continue."
+                : joinCode.length < 6
+                  ? `${6 - joinCode.length} more characters needed.`
+                  : codeMatchedEmployer
+                    ? `Matched with ${codeMatchedEmployer.name}.`
+                    : "No workplace found for this code."
             }
-            tone={joinCode.length === 6 && codeMatchedEmployer ? "success" : "neutral"}
-          >
-            {joinCode.length === 0
-              ? "Enter a 6-character code to continue."
-              : joinCode.length < 6
-                ? `${6 - joinCode.length} more characters needed.`
-                : codeMatchedEmployer
-                  ? `Matched with ${codeMatchedEmployer.name}.`
-                  : "No workplace found for this code."}
-          </Banner>
+            onChangeCode={onSetJoinCode}
+            onOpenQrScanner={onOpenQrScanner}
+          />
         </View>
       </SurfaceCard>
     </>
@@ -215,16 +194,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 18,
-  },
-  joinCodeField: {
-    width: "100%",
-  },
-  joinCodeInput: {
-    fontSize: 22,
-    fontWeight: "700",
-    letterSpacing: 2,
-    minHeight: 30,
-    textAlign: "center",
   },
   ratingRow: {
     alignItems: "center",

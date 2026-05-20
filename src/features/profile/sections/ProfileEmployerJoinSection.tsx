@@ -18,6 +18,7 @@ export function JoinEmployerSection(props: {
   onChangeMode: (mode: JoinMode) => void
   onChangeSearch: (value: string) => void
   onJoinSelectedEmployer: () => void
+  onOpenQrScanner: () => void
   onSetJoinCode: (value: string) => void
   onSelectEmployer: (employerId: string) => void
   router: ReturnType<typeof useRouter>
@@ -36,6 +37,7 @@ export function JoinEmployerSection(props: {
     onChangeMode,
     onChangeSearch,
     onJoinSelectedEmployer,
+    onOpenQrScanner,
     onSelectEmployer,
     onSetJoinCode,
     router,
@@ -52,9 +54,9 @@ export function JoinEmployerSection(props: {
 
       {joinMode === "code" ? (
         <InviteCodePanel
-          availableEmployers={availableEmployers}
           codeMatchedEmployer={codeMatchedEmployer}
           joinCode={joinCode}
+          onOpenQrScanner={onOpenQrScanner}
           onSetJoinCode={onSetJoinCode}
           tokens={tokens}
         />

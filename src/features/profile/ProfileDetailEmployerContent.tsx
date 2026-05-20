@@ -71,12 +71,13 @@ export const EMPLOYER_SECTION_CONTENT: Partial<
           joinEmployer(selectedJoinEmployer.id)
           setJoinedEmployerId(selectedJoinEmployer.id)
         }}
+        onOpenQrScanner={() => router.push("/(app)/employer-join-scanner")}
         onSelectEmployer={(employerId) => {
           setSelectedJoinEmployerId(employerId)
           setJoinedEmployerId(undefined)
         }}
         onSetJoinCode={(value) => {
-          setJoinCode(value.toUpperCase())
+          setJoinCode(value)
           setJoinedEmployerId(undefined)
         }}
         router={router}
