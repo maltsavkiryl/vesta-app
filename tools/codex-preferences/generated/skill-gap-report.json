@@ -1,0 +1,129 @@
+{
+  "scope": "vesta-mobile",
+  "generatedAt": "2026-05-20T07:28:54+00:00",
+  "acceptedRuleCount": 13,
+  "proposedRuleCount": 0,
+  "buckets": {
+    "covered": [],
+    "partial": [
+      {
+        "id": "arch-http-ready-clean-break",
+        "title": "Prefer clean-break repository and workflow boundaries",
+        "domain": "react_native_architecture",
+        "skill": "vesta-mobile-react-native-architecture",
+        "upstreamSkillRefs": [
+          "building-react-native-apps/react-native-best-practices"
+        ],
+        "overlayReason": "Upstream React Native skills do not encode this repo's chosen architecture direction or clean-break preference."
+      },
+      {
+        "id": "arch-uniformity-small-files-hooks-components",
+        "title": "Push toward reusable hooks, components, and smaller files",
+        "domain": "react_native_architecture",
+        "skill": "vesta-mobile-react-native-architecture",
+        "upstreamSkillRefs": [
+          "react-native-design"
+        ],
+        "overlayReason": "The repo has explicit line-cap and extraction preferences that are narrower than generic React Native design guidance."
+      },
+      {
+        "id": "native-ios-real-native-over-lookalikes",
+        "title": "Prefer the real native iOS path over lookalikes",
+        "domain": "native_ios",
+        "skill": "vesta-mobile-native-ios",
+        "upstreamSkillRefs": [
+          "ios-design-guidelines",
+          "react-native-design"
+        ],
+        "overlayReason": "Upstream skills cover native feel broadly, but not this repo's explicit 'restore the real native path first' standard."
+      },
+      {
+        "id": "native-ios-grouped-settings-and-real-detail-surfaces",
+        "title": "Make profile and settings surfaces feel Apple-native",
+        "domain": "native_ios",
+        "skill": "vesta-mobile-native-ios",
+        "upstreamSkillRefs": [
+          "ios-design-guidelines"
+        ],
+        "overlayReason": "The repo needs a stronger product-specific default for profile/settings surfaces than the upstream HIG summary alone provides."
+      },
+      {
+        "id": "native-android-use-native-picker-patterns",
+        "title": "Prefer native picker patterns over custom stepper controls",
+        "domain": "native_android",
+        "skill": "vesta-mobile-native-android",
+        "upstreamSkillRefs": [
+          "android-design-guidelines",
+          "react-native-design"
+        ],
+        "overlayReason": "The local product rule is stricter than general Android guidance: keep these flows lightweight and native instead of route-heavy."
+      }
+    ],
+    "overlay": [
+      {
+        "id": "arch-shell-only-app-provider",
+        "title": "Keep shell providers thin and out of feature cycles",
+        "domain": "react_native_architecture",
+        "skill": "vesta-mobile-react-native-architecture",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a repo-specific architectural constraint derived from prior regressions."
+      },
+      {
+        "id": "debug-check-dirty-worktree-first",
+        "title": "Check worktree state before broad structural changes",
+        "domain": "repo_workflow",
+        "skill": "vesta-mobile-skill-maintainer",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a workflow rule driven by the user's actual multi-stream working style in this repo."
+      },
+      {
+        "id": "debug-exact-stack-and-file-first",
+        "title": "Start from the exact file, route, or stack trace",
+        "domain": "debug_validation",
+        "skill": "vesta-mobile-debug-and-validation",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a repo-specific debugging workflow preference, not generic mobile guidance."
+      },
+      {
+        "id": "debug-separate-machine-tooling-from-repo-bugs",
+        "title": "Separate machine-state failures from repo-state failures",
+        "domain": "debug_validation",
+        "skill": "vesta-mobile-debug-and-validation",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a concrete failure-handling pattern from repeated local iOS build issues in this repo."
+      },
+      {
+        "id": "product-action-first-rows",
+        "title": "Prefer action-first compact rows over low-value status copy",
+        "domain": "product_judgment",
+        "skill": "vesta-mobile-product-judgment",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a user-specific product judgment rule, not something upstream design packs can infer."
+      },
+      {
+        "id": "product-prune-low-signal-ui-aggressively",
+        "title": "Prune low-signal data and exact visible clutter aggressively",
+        "domain": "product_judgment",
+        "skill": "vesta-mobile-product-judgment",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a strong user-specific product-editing preference derived from repeated screenshot feedback."
+      },
+      {
+        "id": "product-local-context-over-broad-shared-fix",
+        "title": "Prefer contextual local UI fixes after the shared primitive is proven wrong in-context",
+        "domain": "product_judgment",
+        "skill": "vesta-mobile-product-judgment",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This rule is highly contextual and comes directly from repeated user correction about in-card actions."
+      },
+      {
+        "id": "design-system-accent-buttons-use-white-foreground",
+        "title": "Treat blue-accent buttons with white text as a design-system rule",
+        "domain": "product_judgment",
+        "skill": "vesta-mobile-product-judgment",
+        "upstreamSkillRefs": [],
+        "overlayReason": "This is a concrete repo-local visual rule set by the user."
+      }
+    ]
+  }
+}

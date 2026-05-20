@@ -84,14 +84,14 @@ export function EmployerInviteCodeEntry({
         style={({ pressed }) => [
           styles.qrAction,
           {
-            backgroundColor: tokens.surfaceSecondary,
-            borderColor: tokens.border,
+            backgroundColor: tokens.accent,
+            borderColor: tokens.accent,
             opacity: pressed ? 0.82 : 1,
           },
         ]}
       >
-        <Ionicons color={tokens.accent} name="qr-code-outline" size={18} />
-        <Text text="Scan QR code" size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
+        <Ionicons color="#FFFFFF" name="qr-code-outline" size={18} />
+        <Text text="Scan QR code" size="xs" weight="semiBold" style={{ color: "#FFFFFF" }} />
       </Pressable>
     </View>
   )

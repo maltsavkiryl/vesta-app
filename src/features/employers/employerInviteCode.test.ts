@@ -9,6 +9,7 @@ import {
 const employers: Employer[] = [
   {
     city: "Brussels",
+    clockConfig: { requiresScheduledShift: true },
     code: "BIST01",
     id: "bistro-noir",
     name: "Bistro Noir",
@@ -18,6 +19,7 @@ const employers: Employer[] = [
   },
   {
     city: "Brussels",
+    clockConfig: { requiresScheduledShift: false },
     code: "GRAN02",
     id: "grand-cafe",
     name: "Grand Cafe",

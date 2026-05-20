@@ -372,6 +372,11 @@ function createMockTimeRepository(): TimeRepository {
       if (current.clockSession.state !== "idle") {
         return failure(toClockError("already-clocked-in", "You are already clocked in."))
       }
+      if (!input?.clockContext) {
+        return failure(
+          toClockError("no-clock-context", "Choose a workplace before starting the timer."),
+        )
+      }
       const nextState = commitAccountAction(
         accountId,
         { type: "startClock", payload: input },

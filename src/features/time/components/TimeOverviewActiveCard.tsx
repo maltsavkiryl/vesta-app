@@ -42,14 +42,26 @@ export function ActiveCardContent({
   const tokens = useDesignTokens()
   const isOnBreak = status === "onBreak"
   const liveLocationLabel = clockSession.clockInLocation?.addressLabel ?? clockSession.venueAddress
-  const durationHours = getShiftDurationHours(
-    clockSession.scheduledStart,
-    clockSession.scheduledEnd,
-  )
+  const isShiftSession =
+    clockSession.source === "shift" &&
+    Boolean(clockSession.scheduledStart && clockSession.scheduledEnd)
+  const durationHours =
+    isShiftSession && clockSession.scheduledStart && clockSession.scheduledEnd
+      ? getShiftDurationHours(clockSession.scheduledStart, clockSession.scheduledEnd)
+      : 0
   const shiftDurationSeconds = durationHours * 3600
-  const progress = Math.min((elapsedSeconds / shiftDurationSeconds) * 100, 100)
+  const progress =
+    shiftDurationSeconds > 0 ? Math.min((elapsedSeconds / shiftDurationSeconds) * 100, 100) : 0
   const toneColor = isOnBreak ? tokens.warning : tokens.success
   const remainingSeconds = Math.max(shiftDurationSeconds - elapsedSeconds, 0)
+  const secondaryLabel =
+    isShiftSession && clockSession.scheduledStart && clockSession.scheduledEnd
+      ? `${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${
+          clockSession.role ?? clockSession.venueName
+        }`
+      : clockSession.role
+        ? `${clockSession.venueName} · ${clockSession.role}`
+        : `${clockSession.venueName} timer`
 
   return (
     <HeroCard
@@ -69,7 +81,7 @@ export function ActiveCardContent({
             ]}
           />
           <Text
-            text={`${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${clockSession.role}`}
+            text={secondaryLabel}
             numberOfLines={1}
             size="xs"
             style={{ color: timeHeroColors.secondaryText }}
@@ -98,7 +110,9 @@ export function ActiveCardContent({
               text={
                 isOnBreak
                   ? `${formatSeconds(elapsedSeconds)} worked`
-                  : `Started at ${formatTimeValue(clockSession.startedAt ?? clockSession.scheduledStart)}`
+                  : `Started at ${formatTimeValue(
+                      clockSession.startedAt ?? clockSession.scheduledStart ?? new Date(),
+                    )}`
               }
               size="xxs"
               weight="medium"
@@ -108,20 +122,24 @@ export function ActiveCardContent({
               text={
                 isOnBreak
                   ? `${formatDurationLabel(totalBreakSeconds)} total break`
-                  : remainingSeconds > 0
+                  : isShiftSession && remainingSeconds > 0
                     ? `${formatDurationLabel(remainingSeconds)} remaining`
-                    : "Shift target reached"
+                    : isShiftSession
+                      ? "Shift target reached"
+                      : `${clockSession.venueName} timer running`
               }
               size="xs"
               weight="semiBold"
               style={{ color: timeHeroColors.primaryText }}
             />
-            <ProgressBar
-              fillColor={toneColor}
-              progress={progress}
-              thickness={5}
-              trackColor={tokens.border}
-            />
+            {isShiftSession ? (
+              <ProgressBar
+                fillColor={toneColor}
+                progress={progress}
+                thickness={5}
+                trackColor={tokens.border}
+              />
+            ) : null}
           </View>
 
           <View style={styles.heroStatusRow}>

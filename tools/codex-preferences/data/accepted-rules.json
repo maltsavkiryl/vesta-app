@@ -1,0 +1,457 @@
+{
+  "metadata": {
+    "scope": "vesta-mobile",
+    "policy": "local-overlay-wins",
+    "historyMiningMode": "tiered-full-history",
+    "autoUpdateMode": "draft-first",
+    "updatedAt": "2026-05-20T07:28:54+00:00"
+  },
+  "rules": [
+    {
+      "id": "arch-http-ready-clean-break",
+      "title": "Prefer clean-break repository and workflow boundaries",
+      "scope": "vesta-mobile",
+      "domain": "react_native_architecture",
+      "skill": "vesta-mobile-react-native-architecture",
+      "triggerPhrases": [
+        "architecture",
+        "refactor",
+        "backend boundary",
+        "repositories + commands",
+        "http-ready"
+      ],
+      "directive": "For repo-level architecture work, default toward feature-owned repositories and workflows, an HTTP-ready contract, and clean-break boundaries instead of preserving old shared app-state hooks for compatibility.",
+      "antiPatterns": [
+        "Preserving shared snapshot contracts only for backwards compatibility",
+        "Mixing feature workflow logic back into shell providers"
+      ],
+      "hotspots": [
+        "src/services/api",
+        "src/services/app",
+        "src/features",
+        "src/composition/repositories.ts"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:38-39",
+        "rollout_summaries/2026-05-18T17-24-13-cUgJ-vesta_mobile_architecture_foundation_http_ready_contract.md:17-22"
+      ],
+      "upstreamCoverage": "partial",
+      "upstreamSkillRefs": [
+        "building-react-native-apps/react-native-best-practices"
+      ],
+      "overlayReason": "Upstream React Native skills do not encode this repo's chosen architecture direction or clean-break preference.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-18"
+    },
+    {
+      "id": "arch-shell-only-app-provider",
+      "title": "Keep shell providers thin and out of feature cycles",
+      "scope": "vesta-mobile",
+      "domain": "react_native_architecture",
+      "skill": "vesta-mobile-react-native-architecture",
+      "triggerPhrases": [
+        "AppProvider",
+        "provider cycle",
+        "shell-only",
+        "feature query hooks"
+      ],
+      "directive": "Keep shell providers such as AppProvider shell-only. When shell code needs feature state, query repositories directly instead of importing feature query hooks and recreating provider-to-feature cycles.",
+      "antiPatterns": [
+        "Provider imports from feature query hooks",
+        "Shared shell state coupled to feature-layer hooks"
+      ],
+      "hotspots": [
+        "src/providers/app-provider.tsx",
+        "src/composition/repositories.ts"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:48-49",
+        "MEMORY.md:55-57"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a repo-specific architectural constraint derived from prior regressions.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "arch-uniformity-small-files-hooks-components",
+      "title": "Push toward reusable hooks, components, and smaller files",
+      "scope": "vesta-mobile",
+      "domain": "react_native_architecture",
+      "skill": "vesta-mobile-react-native-architecture",
+      "triggerPhrases": [
+        "more uniform",
+        "reusable components",
+        "reusable logic into hooks",
+        "small files"
+      ],
+      "directive": "When refactoring screens, split them into a thin shell plus hooks and reusable components with explicit file-size pressure rather than leaving large screen-local monoliths.",
+      "antiPatterns": [
+        "Huge screen files that mix data, layout, and local helpers",
+        "Single extracted helper files that keep growing after the first split"
+      ],
+      "hotspots": [
+        "src/features/home",
+        "src/features/profile",
+        "src/features/time",
+        "src/features/schedule"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:279-279",
+        "MEMORY.md:414-414",
+        "MEMORY.md:464-464"
+      ],
+      "upstreamCoverage": "partial",
+      "upstreamSkillRefs": [
+        "react-native-design"
+      ],
+      "overlayReason": "The repo has explicit line-cap and extraction preferences that are narrower than generic React Native design guidance.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "debug-check-dirty-worktree-first",
+      "title": "Check worktree state before broad structural changes",
+      "scope": "vesta-mobile",
+      "domain": "repo_workflow",
+      "skill": "vesta-mobile-skill-maintainer",
+      "triggerPhrases": [
+        "large refactor",
+        "dirty worktree",
+        "git status"
+      ],
+      "directive": "Before broad refactors or repo sweeps, inspect git status and isolate the work so existing in-progress feature edits are not clobbered.",
+      "antiPatterns": [
+        "Sweeping refactors in a dirty worktree without checking current edits"
+      ],
+      "hotspots": [],
+      "evidenceRefs": [
+        "MEMORY.md:40-40"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a workflow rule driven by the user's actual multi-stream working style in this repo.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-20"
+    },
+    {
+      "id": "debug-exact-stack-and-file-first",
+      "title": "Start from the exact file, route, or stack trace",
+      "scope": "vesta-mobile",
+      "domain": "debug_validation",
+      "skill": "vesta-mobile-debug-and-validation",
+      "triggerPhrases": [
+        "why am i getting this error",
+        "Unable to resolve module",
+        "stack trace",
+        "app.transformer.ts"
+      ],
+      "directive": "When the user pastes an exact stack trace, route error, or file path, inspect that precise on-disk module and code path first instead of jumping to generic config or environment theories.",
+      "antiPatterns": [
+        "Starting with alias or config debugging before checking whether the imported file exists",
+        "General troubleshooting lists that do not address the first hard failure in the pasted log"
+      ],
+      "hotspots": [
+        "src/app",
+        "src/services/app/app.transformer.ts",
+        "src/features"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:41-41",
+        "MEMORY.md:164-167",
+        "MEMORY.md:188-189"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a repo-specific debugging workflow preference, not generic mobile guidance.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-17",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "debug-separate-machine-tooling-from-repo-bugs",
+      "title": "Separate machine-state failures from repo-state failures",
+      "scope": "vesta-mobile",
+      "domain": "debug_validation",
+      "skill": "vesta-mobile-debug-and-validation",
+      "triggerPhrases": [
+        "spawn fastlane ENOENT",
+        "pnpm ios failure",
+        "native build failure"
+      ],
+      "directive": "When a failure is caused by local toolchain or machine setup, identify and state that immediately instead of editing application code first.",
+      "antiPatterns": [
+        "Changing app code to chase missing Fastlane, missing simulator runtimes, or PATH problems"
+      ],
+      "hotspots": [
+        "ios",
+        "eas.json",
+        "app.config.ts"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:167-168",
+        "MEMORY.md:182-183",
+        "MEMORY.md:195-197"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a concrete failure-handling pattern from repeated local iOS build issues in this repo.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-17",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "native-ios-real-native-over-lookalikes",
+      "title": "Prefer the real native iOS path over lookalikes",
+      "scope": "vesta-mobile",
+      "domain": "native_ios",
+      "skill": "vesta-mobile-native-ios",
+      "triggerPhrases": [
+        "actual native",
+        "real native",
+        "Liquid Glass",
+        "Apple native"
+      ],
+      "directive": "When the user asks for actual native iOS behavior or appearance, use the true native platform path that already exists in the repo or dependency stack instead of building a JavaScript approximation.",
+      "antiPatterns": [
+        "Custom blur or floating bar approximations when Expo Router native tabs already exist",
+        "Fake iOS controls when a native control path is available"
+      ],
+      "hotspots": [
+        "src/app/(app)/(tabs)",
+        "src/features/schedule",
+        "src/features/documents",
+        "src/features/auth/onboarding"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:162-163",
+        "MEMORY.md:188-190"
+      ],
+      "upstreamCoverage": "partial",
+      "upstreamSkillRefs": [
+        "ios-design-guidelines",
+        "react-native-design"
+      ],
+      "overlayReason": "Upstream skills cover native feel broadly, but not this repo's explicit 'restore the real native path first' standard.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-17",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "native-ios-grouped-settings-and-real-detail-surfaces",
+      "title": "Make profile and settings surfaces feel Apple-native",
+      "scope": "vesta-mobile",
+      "domain": "native_ios",
+      "skill": "vesta-mobile-native-ios",
+      "triggerPhrases": [
+        "apple native",
+        "real native experience",
+        "profile screens are ugly",
+        "detail row not implemented"
+      ],
+      "directive": "For profile and settings surfaces, default toward grouped settings panes, quieter surfaces, compact rows, and real detail screens with working controls rather than generic card stacks or placeholder labels.",
+      "antiPatterns": [
+        "Generic card piles for settings-style screens",
+        "Rows that navigate nowhere or only show placeholder text"
+      ],
+      "hotspots": [
+        "src/features/profile"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:408-410"
+      ],
+      "upstreamCoverage": "partial",
+      "upstreamSkillRefs": [
+        "ios-design-guidelines"
+      ],
+      "overlayReason": "The repo needs a stronger product-specific default for profile/settings surfaces than the upstream HIG summary alone provides.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-17",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "native-android-use-native-picker-patterns",
+      "title": "Prefer native picker patterns over custom stepper controls",
+      "scope": "vesta-mobile",
+      "domain": "native_android",
+      "skill": "vesta-mobile-native-android",
+      "triggerPhrases": [
+        "best possible time input",
+        "native time input",
+        "camera or files",
+        "Android dialog"
+      ],
+      "directive": "For time selection and lightweight upload choices, prefer familiar row-triggered native picker and platform dialog patterns over custom steppers, oversized sheets, or invented controls.",
+      "antiPatterns": [
+        "Custom stepper-based time input flows",
+        "Route-backed upload UIs for a simple camera-or-files choice"
+      ],
+      "hotspots": [
+        "src/features/schedule",
+        "src/features/documents"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:412-412",
+        "MEMORY.md:416-416"
+      ],
+      "upstreamCoverage": "partial",
+      "upstreamSkillRefs": [
+        "android-design-guidelines",
+        "react-native-design"
+      ],
+      "overlayReason": "The local product rule is stricter than general Android guidance: keep these flows lightweight and native instead of route-heavy.",
+      "confidence": "medium",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "product-action-first-rows",
+      "title": "Prefer action-first compact rows over low-value status copy",
+      "scope": "vesta-mobile",
+      "domain": "product_judgment",
+      "skill": "vesta-mobile-product-judgment",
+      "triggerPhrases": [
+        "missing label feels stupid",
+        "action-first",
+        "take unnecessary space"
+      ],
+      "directive": "When a row already communicates the required action, prefer compact action-first rows and keep status labels only when they materially improve comprehension.",
+      "antiPatterns": [
+        "Redundant status text that restates the obvious action",
+        "Extra helper copy that increases row height without adding meaning"
+      ],
+      "hotspots": [
+        "src/features/documents/components/DocumentList.tsx",
+        "src/features/profile",
+        "src/features/schedule"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:320-320",
+        "MEMORY.md:417-417"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a user-specific product judgment rule, not something upstream design packs can infer.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "product-prune-low-signal-ui-aggressively",
+      "title": "Prune low-signal data and exact visible clutter aggressively",
+      "scope": "vesta-mobile",
+      "domain": "product_judgment",
+      "skill": "vesta-mobile-product-judgment",
+      "triggerPhrases": [
+        "very critical look",
+        "not useful to show",
+        "remove this text",
+        "remove these stats"
+      ],
+      "directive": "When the user calls out low-value copy or stats, delete the exact visible block and re-center the screen around its primary job instead of softening or renaming the clutter.",
+      "antiPatterns": [
+        "Decorative dashboards that mix multiple goals on one employee screen",
+        "Empty footer shells or card shells left behind after removing copy"
+      ],
+      "hotspots": [
+        "src/features/home",
+        "src/features/profile",
+        "src/features/time"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:340-340",
+        "MEMORY.md:418-419",
+        "MEMORY.md:468-469"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a strong user-specific product-editing preference derived from repeated screenshot feedback.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "product-local-context-over-broad-shared-fix",
+      "title": "Prefer contextual local UI fixes after the shared primitive is proven wrong in-context",
+      "scope": "vesta-mobile",
+      "domain": "product_judgment",
+      "skill": "vesta-mobile-product-judgment",
+      "triggerPhrases": [
+        "awkward here",
+        "still looks weird here",
+        "improve visibility"
+      ],
+      "directive": "Once the problem is clearly local to a card or screen context, prefer a contextual local styling or component treatment instead of continuing to churn the shared primitive.",
+      "antiPatterns": [
+        "Repeatedly stretching a shared button to fit a compact card use case",
+        "Broad shared-component churn for a clearly local visibility problem"
+      ],
+      "hotspots": [
+        "src/features/time",
+        "src/features/home"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:290-290",
+        "MEMORY.md:415-415",
+        "MEMORY.md:423-423",
+        "MEMORY.md:465-465"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This rule is highly contextual and comes directly from repeated user correction about in-card actions.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-18",
+      "lastSeen": "2026-05-19"
+    },
+    {
+      "id": "design-system-accent-buttons-use-white-foreground",
+      "title": "Treat blue-accent buttons with white text as a design-system rule",
+      "scope": "vesta-mobile",
+      "domain": "product_judgment",
+      "skill": "vesta-mobile-product-judgment",
+      "triggerPhrases": [
+        "blue buttons",
+        "white text and never black text",
+        "accent foreground"
+      ],
+      "directive": "When accent-filled controls are blue, treat white foreground text as a shared design-system rule and fix it at the token or shared component layer instead of one screen at a time.",
+      "antiPatterns": [
+        "One-off foreground overrides on individual screens",
+        "Accent-filled controls that render dark text"
+      ],
+      "hotspots": [
+        "src/ui",
+        "src/theme",
+        "src/features"
+      ],
+      "evidenceRefs": [
+        "MEMORY.md:411-411",
+        "MEMORY.md:437-437"
+      ],
+      "upstreamCoverage": "none",
+      "upstreamSkillRefs": [],
+      "overlayReason": "This is a concrete repo-local visual rule set by the user.",
+      "confidence": "high",
+      "status": "accepted",
+      "firstSeen": "2026-05-17",
+      "lastSeen": "2026-05-19"
+    }
+  ]
+}

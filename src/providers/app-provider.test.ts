@@ -92,6 +92,8 @@ describe("mock backend persistence", () => {
     db.accounts[0].aggregates.time.timeEntries = [
       {
         id: "time-1",
+        source: "shift",
+        employerId: "bistro-noir",
         date: "2026-05-16",
         shiftLabel: "Evening",
         venueName: "Bistro Noir",

@@ -25,43 +25,31 @@ export function InviteCodePanel({
 }) {
   return (
     <>
-      <Banner
-        icon={<Ionicons color={tokens.accent} name="sparkles-outline" size={16} />}
-        title="Quick join"
-        tone="accent"
-      >
-        Ask your manager for the 6-character workplace code.
-      </Banner>
+      <View style={styles.joinCodeHint}>
+        <Ionicons color={tokens.textSecondary} name="sparkles-outline" size={16} />
+        <Text
+          text="Ask your manager for the 6-character workplace code."
+          size="xs"
+          style={{ color: tokens.textSecondary }}
+        />
+      </View>
 
-      <SurfaceCard elevated style={styles.joinCodeCard}>
-        <View style={styles.joinCodeContent}>
-          <Text
-            text="Invite code"
-            size="sm"
-            weight="semiBold"
-            style={{ color: tokens.textPrimary, textAlign: "center" }}
-          />
-          <Text
-            text="We'll use it to match you with the correct team and branch."
-            size="xs"
-            style={{ color: tokens.textSecondary, textAlign: "center" }}
-          />
-          <EmployerInviteCodeEntry
-            code={joinCode}
-            helperText={
-              joinCode.length === 0
-                ? "Enter a 6-character code to continue."
-                : joinCode.length < 6
-                  ? `${6 - joinCode.length} more characters needed.`
-                  : codeMatchedEmployer
-                    ? `Matched with ${codeMatchedEmployer.name}.`
-                    : "No workplace found for this code."
-            }
-            onChangeCode={onSetJoinCode}
-            onOpenQrScanner={onOpenQrScanner}
-          />
-        </View>
-      </SurfaceCard>
+      <View style={styles.joinCodeContent}>
+        <EmployerInviteCodeEntry
+          code={joinCode}
+          helperText={
+            joinCode.length === 0
+              ? "Enter a 6-character code to continue."
+              : joinCode.length < 6
+                ? `${6 - joinCode.length} more characters needed.`
+                : codeMatchedEmployer
+                  ? `Matched with ${codeMatchedEmployer.name}.`
+                  : "No workplace found for this code."
+          }
+          onChangeCode={onSetJoinCode}
+          onOpenQrScanner={onOpenQrScanner}
+        />
+      </View>
     </>
   )
 }
@@ -91,17 +79,15 @@ export function EmployerSearchPanel({
         Search by name, city, type, or invite code.
       </Banner>
 
-      <SurfaceCard elevated style={styles.searchCard}>
+      <View style={styles.searchField}>
         <TextField
           autoCapitalize="words"
-          label="Search"
-          labelCase="default"
           leftAccessory={<Ionicons color={tokens.textMuted} name="search-outline" size={16} />}
           onChangeText={onChangeSearch}
           placeholder="Search by name, type or city"
           value={joinSearch}
         />
-      </SurfaceCard>
+      </View>
 
       <GroupedSection title="Results">
         {searchResults.length > 0 ? (
@@ -185,15 +171,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 36,
   },
-  joinCodeCard: {
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-  },
   joinCodeContent: {
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 18,
+    paddingHorizontal: 4,
+  },
+  joinCodeHint: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 4,
   },
   ratingRow: {
     alignItems: "center",
@@ -201,8 +188,8 @@ const styles = StyleSheet.create({
     gap: 3,
     marginTop: 3,
   },
-  searchCard: {
-    padding: 12,
+  searchField: {
+    paddingHorizontal: 4,
   },
   searchMeta: {
     alignItems: "flex-end",

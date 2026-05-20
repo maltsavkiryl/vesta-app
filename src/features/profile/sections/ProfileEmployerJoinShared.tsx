@@ -2,10 +2,11 @@ import { useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
+import SegmentedControl from "@react-native-segmented-control/segmented-control"
 
 import type { Employer } from "@/core/models"
 import { TimeHeroCard, timeHeroColors } from "@/features/time/components/TimeHeroCard"
-import { AppButton, AppSegmentedControl, SurfaceCard, Text } from "@/ui"
+import { AppButton, Text } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
 import type { JoinMode } from "./ProfileSectionShared"
@@ -68,24 +69,34 @@ export function JoinModePicker({
   onChangeMode: (mode: JoinMode) => void
   tokens: DesignTokens
 }) {
+  const options: { label: string; value: JoinMode }[] = [
+    { label: "Invite code", value: "code" },
+    { label: "Search", value: "search" },
+  ]
+  const selectedIndex = Math.max(
+    options.findIndex((option) => option.value === joinMode),
+    0,
+  )
+
   return (
-    <SurfaceCard elevated style={styles.modePickerCard}>
+    <View style={styles.modePickerCard}>
       <Text
         text="Choose how you want to join"
         size="xs"
         weight="semiBold"
         style={{ color: tokens.textPrimary }}
       />
-      <AppSegmentedControl
-        onChange={onChangeMode}
-        options={[
-          { label: "Invite code", value: "code" },
-          { label: "Search", value: "search" },
-        ]}
-        style={styles.joinModeControl}
-        value={joinMode}
+      <SegmentedControl
+        appearance={tokens.isDark ? "dark" : "light"}
+        onChange={(event) => {
+          const nextOption = options[event.nativeEvent.selectedSegmentIndex]
+          if (!nextOption) return
+          onChangeMode(nextOption.value)
+        }}
+        selectedIndex={selectedIndex}
+        values={options.map((option) => option.label)}
       />
-    </SurfaceCard>
+    </View>
   )
 }
 
@@ -132,7 +143,14 @@ export function JoinSuccessCard({
       <AppButton
         label="Done"
         variant="secondary"
-        onPress={() => router.replace("/profile/employers")}
+        onPress={() => {
+          if (router.canGoBack()) {
+            router.back()
+            return
+          }
+
+          router.replace("/profile/employers")
+        }}
       />
     </View>
   )
@@ -144,10 +162,6 @@ const styles = StyleSheet.create({
   },
   joinModeContent: {
     gap: 0,
-  },
-  joinModeControl: {
-    borderCurve: "continuous",
-    borderRadius: 10,
   },
   joinModeCopy: {
     flex: 1,
@@ -187,6 +201,5 @@ const styles = StyleSheet.create({
   },
   modePickerCard: {
     gap: 10,
-    padding: 14,
   },
 })

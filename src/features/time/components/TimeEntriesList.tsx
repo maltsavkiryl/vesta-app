@@ -77,7 +77,7 @@ export function TimeEntriesListScreen({
       {totalEntries === 0 ? (
         <EmptyState
           icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
-          subtitle="Your completed shifts will appear here once you start clocking time."
+          subtitle="Your completed time entries will appear here once you start clocking time."
           title="No time entries yet"
         />
       ) : (
@@ -93,7 +93,7 @@ export function TimeEntriesListScreen({
               title={month}
               trailing={
                 <Text
-                  text={`${monthEntries.length} shifts`}
+                  text={`${monthEntries.length} entries`}
                   size="xxs"
                   style={{ color: tokens.textMuted }}
                 />

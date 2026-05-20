@@ -31,7 +31,13 @@
     "build:android:sim": "eas build --profile development --platform android --local",
     "build:android:device": "eas build --profile development:device --platform android --local",
     "build:android:preview": "eas build --profile preview --platform android --local",
-    "build:android:prod": "eas build --profile production --platform android --local"
+    "build:android:prod": "eas build --profile production --platform android --local",
+    "codex:skills:refresh": "python3 tools/codex-preferences/refresh.py",
+    "codex:skills:generate": "python3 tools/codex-preferences/generate_skills.py",
+    "codex:skills:audit": "python3 tools/codex-preferences/audit_codebase.py",
+    "codex:skills:report": "python3 tools/codex-preferences/refresh.py --report && python3 tools/codex-preferences/audit_codebase.py --report-only",
+    "codex:skills:accept": "python3 tools/codex-preferences/accept_candidate.py",
+    "codex:skills:cleanup-plan": "python3 tools/codex-preferences/audit_codebase.py --markdown"
   },
   "dependencies": {
     "@expo-google-fonts/space-grotesk": "^0.4.1",

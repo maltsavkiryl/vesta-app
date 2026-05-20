@@ -23,6 +23,11 @@ export function ProfileDetailScreen() {
   const canSaveCurrentSection = isDetailSectionEditable(section)
   const closeSection = () => {
     if (section === "join-employer") {
+      if (router.canGoBack()) {
+        router.back()
+        return
+      }
+
       router.replace("/profile/employers")
       return
     }

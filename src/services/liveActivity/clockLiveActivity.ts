@@ -46,9 +46,9 @@ export function createClockLiveActivityPayload(
     startedAt: clockSession.startedAt,
     breakStartedAt: clockSession.breakStartedAt,
     accumulatedBreakSeconds: clockSession.accumulatedBreakSeconds,
-    scheduledStart: clockSession.scheduledStart,
-    scheduledEnd: clockSession.scheduledEnd,
-    role: clockSession.role,
+    scheduledStart: clockSession.scheduledStart ?? "--:--",
+    scheduledEnd: clockSession.scheduledEnd ?? "--:--",
+    role: clockSession.role ?? "Timer",
     venueName: clockSession.venueName,
   }
 }

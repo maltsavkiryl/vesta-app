@@ -1,6 +1,5 @@
 import { createInitialState } from "@/core/mockState"
-import type { TimeEntry } from "@/core/models"
-import type { AppStoreState } from "@/core/models"
+import type { AppStoreState, ClockSession, Employer, Shift, TimeEntry } from "@/core/models"
 
 import { normalizeEmail, withStateAuthStatus } from "./app-state.reducer"
 import type {
@@ -26,7 +25,7 @@ export const DEMO_AUTH_CREDENTIALS = {
 
 export const LEGACY_APP_STATE_STORAGE_KEY = "vesta-mobile.app-state"
 export const MOCK_BACKEND_STORAGE_KEY = "vesta-mobile.mock-backend"
-export const MOCK_BACKEND_VERSION = 3
+export const MOCK_BACKEND_VERSION = 4
 const SEEDED_TIME_ENTRY_IDS = new Set(["time-1", "time-2", "time-3"])
 
 function cloneValue<T>(value: T): T {
@@ -46,6 +45,112 @@ function sanitizeEmployers<T>(employers: T[]): T[] {
     const { active: _active, ...sanitizedEmployer } = employer as T & { active?: boolean }
     return sanitizedEmployer as T
   })
+}
+
+function mergeById<T extends { id: string }>(items: T[], defaults: T[]) {
+  const defaultsById = new Map(defaults.map((item) => [item.id, cloneValue(item)]))
+
+  return items.map((item) => {
+    const defaultItem = defaultsById.get(item.id)
+    return defaultItem ? ({ ...defaultItem, ...item } as T) : item
+  })
+}
+
+function findEmployerIdByVenueName(venueName: string, employers: Employer[]) {
+  return employers.find((employer) => employer.name === venueName)?.id
+}
+
+function findShiftForTimeContext(
+  input: { date?: string; shiftId?: string; venueName: string },
+  shifts: Shift[],
+) {
+  if (input.shiftId) {
+    const matchedShift = shifts.find((shift) => shift.id === input.shiftId)
+    if (matchedShift) return matchedShift
+  }
+
+  return shifts.find(
+    (shift) => shift.venueName === input.venueName && (!input.date || shift.date === input.date),
+  )
+}
+
+function normalizeClockSession(
+  clockSession: ClockSession,
+  defaults: ClockSession,
+  employers: Employer[],
+  shifts: Shift[],
+): ClockSession {
+  const matchedShift = findShiftForTimeContext(
+    {
+      date: clockSession.startedAt?.slice(0, 10),
+      shiftId: clockSession.shiftId,
+      venueName: clockSession.venueName ?? defaults.venueName,
+    },
+    shifts,
+  )
+  const employerId =
+    clockSession.employerId ??
+    matchedShift?.employerId ??
+    findEmployerIdByVenueName(clockSession.venueName ?? defaults.venueName, employers) ??
+    defaults.employerId
+  const source = clockSession.source ?? (matchedShift ? "shift" : defaults.source)
+
+  return {
+    accumulatedBreakSeconds:
+      clockSession.accumulatedBreakSeconds ?? defaults.accumulatedBreakSeconds,
+    breakStartedAt: clockSession.breakStartedAt,
+    clockInLocation: cloneValue(clockSession.clockInLocation),
+    clockInProofPhoto: cloneValue(clockSession.clockInProofPhoto),
+    employerId,
+    events: cloneValue(clockSession.events ?? defaults.events),
+    role: clockSession.role ?? matchedShift?.role ?? defaults.role,
+    scheduledEnd:
+      source === "shift"
+        ? (clockSession.scheduledEnd ?? matchedShift?.endTime ?? defaults.scheduledEnd)
+        : clockSession.scheduledEnd,
+    scheduledStart:
+      source === "shift"
+        ? (clockSession.scheduledStart ?? matchedShift?.startTime ?? defaults.scheduledStart)
+        : clockSession.scheduledStart,
+    shiftId: source === "shift" ? (clockSession.shiftId ?? matchedShift?.id) : undefined,
+    source,
+    startedAt: clockSession.startedAt,
+    state: clockSession.state ?? defaults.state,
+    venueAddress: clockSession.venueAddress ?? matchedShift?.venueAddress ?? defaults.venueAddress,
+    venueName: clockSession.venueName ?? matchedShift?.venueName ?? defaults.venueName,
+  }
+}
+
+function normalizeTimeEntry(entry: TimeEntry, employers: Employer[], shifts: Shift[]): TimeEntry {
+  const matchedShift = findShiftForTimeContext(
+    {
+      date: entry.date,
+      shiftId: entry.shiftId,
+      venueName: entry.venueName,
+    },
+    shifts,
+  )
+  const employerId =
+    entry.employerId ??
+    matchedShift?.employerId ??
+    findEmployerIdByVenueName(entry.venueName, employers) ??
+    employers[0]?.id ??
+    "unknown-employer"
+  const source = entry.source ?? (matchedShift ? "shift" : "employer")
+
+  return {
+    ...entry,
+    employerId,
+    role: entry.role ?? matchedShift?.role,
+    scheduledEnd: source === "shift" ? (entry.scheduledEnd ?? matchedShift?.endTime) : undefined,
+    scheduledStart:
+      source === "shift" ? (entry.scheduledStart ?? matchedShift?.startTime) : undefined,
+    shiftId: source === "shift" ? (entry.shiftId ?? matchedShift?.id) : undefined,
+    shiftLabel: entry.shiftLabel || (source === "shift" ? "Clocked shift" : "Manual timer"),
+    source,
+    venueAddress: entry.venueAddress ?? matchedShift?.venueAddress ?? entry.venueName,
+    venueName: entry.venueName ?? matchedShift?.venueName ?? "Unknown workplace",
+  }
 }
 
 function createDefaultAggregates(): MockAccountAggregatesDto {
@@ -106,10 +211,25 @@ export function toAppStoreState(
 
 export function toPersistedAggregates(state: AppStoreState): MockAccountAggregatesDto {
   const snapshot = toAccountSnapshotDto(state)
+  const defaults = createInitialState()
+  const employerDirectory = sanitizeEmployers(
+    mergeById(cloneValue(snapshot.employerDirectory), defaults.employerDirectory),
+  )
+  const employers = sanitizeEmployers(mergeById(cloneValue(snapshot.employers), defaults.employers))
+  const shifts = mergeById(cloneValue(snapshot.shifts), defaults.shifts)
+  const clockSession = normalizeClockSession(
+    cloneValue(snapshot.clockSession),
+    defaults.clockSession,
+    employers,
+    shifts,
+  )
+  const timeEntries = cloneValue(snapshot.timeEntries).map((entry) =>
+    normalizeTimeEntry(entry, employers, shifts),
+  )
 
   const profile: ProfileAggregateDto = {
-    employerDirectory: sanitizeEmployers(cloneValue(snapshot.employerDirectory)),
-    employers: sanitizeEmployers(cloneValue(snapshot.employers)),
+    employerDirectory,
+    employers,
     lastPasswordResetEmail: snapshot.lastPasswordResetEmail,
     profile: cloneValue(snapshot.profile),
     version: 1,
@@ -119,13 +239,13 @@ export function toPersistedAggregates(state: AppStoreState): MockAccountAggregat
     availabilityTemplate: cloneValue(snapshot.availabilityTemplate),
     planningWindows: cloneValue(snapshot.planningWindows),
     requests: cloneValue(snapshot.requests),
-    shifts: cloneValue(snapshot.shifts),
+    shifts,
     version: 1,
   }
   const time: TimeAggregateDto = {
-    clockSession: cloneValue(snapshot.clockSession),
+    clockSession,
     earnings: cloneValue(snapshot.earnings),
-    timeEntries: cloneValue(snapshot.timeEntries),
+    timeEntries,
     version: 1,
   }
   const documents: DocumentsAggregateDto = {
@@ -164,6 +284,31 @@ export function toAppStoreStateFromAggregates(
   const documents = aggregates.documents ?? defaults.documents
   const notifications = aggregates.notifications ?? defaults.notifications
   const home = aggregates.home ?? defaults.home
+  const employerDirectory = sanitizeEmployers(
+    mergeById(
+      cloneValue(profile.employerDirectory ?? defaults.profile.employerDirectory),
+      defaults.profile.employerDirectory,
+    ),
+  )
+  const employers = sanitizeEmployers(
+    mergeById(
+      cloneValue(profile.employers ?? defaults.profile.employers),
+      defaults.profile.employers,
+    ),
+  )
+  const shifts = mergeById(
+    cloneValue(schedule.shifts ?? defaults.schedule.shifts),
+    defaults.schedule.shifts,
+  )
+  const clockSession = normalizeClockSession(
+    cloneValue(time.clockSession ?? defaults.time.clockSession),
+    defaults.time.clockSession,
+    employers,
+    shifts,
+  )
+  const timeEntries = cloneValue(time.timeEntries ?? defaults.time.timeEntries).map((entry) =>
+    normalizeTimeEntry(entry, employers, shifts),
+  )
 
   return withStateAuthStatus(
     {
@@ -173,13 +318,11 @@ export function toAppStoreStateFromAggregates(
       availabilityTemplate: cloneValue(
         schedule.availabilityTemplate ?? defaults.schedule.availabilityTemplate,
       ),
-      clockSession: cloneValue(time.clockSession ?? defaults.time.clockSession),
+      clockSession,
       documents: cloneValue(documents.documents ?? defaults.documents.documents),
       earnings: cloneValue(time.earnings ?? defaults.time.earnings),
-      employerDirectory: sanitizeEmployers(
-        cloneValue(profile.employerDirectory ?? defaults.profile.employerDirectory),
-      ),
-      employers: sanitizeEmployers(cloneValue(profile.employers ?? defaults.profile.employers)),
+      employerDirectory,
+      employers,
       highlights: cloneValue(home.highlights ?? defaults.home.highlights),
       lastPasswordResetEmail: profile.lastPasswordResetEmail,
       notifications: cloneValue(
@@ -191,12 +334,12 @@ export function toAppStoreStateFromAggregates(
       },
       planningWindows: cloneValue(schedule.planningWindows ?? defaults.schedule.planningWindows),
       requests: cloneValue(schedule.requests ?? defaults.schedule.requests),
-      shifts: cloneValue(schedule.shifts ?? defaults.schedule.shifts),
+      shifts,
       signedContractIds: cloneValue(
         documents.signedContractIds ?? defaults.documents.signedContractIds,
       ),
       tasks: cloneValue(home.tasks ?? defaults.home.tasks),
-      timeEntries: cloneValue(time.timeEntries ?? defaults.time.timeEntries),
+      timeEntries,
     },
     authStatus,
   )
@@ -275,24 +418,22 @@ export function createMockBackendDb(): MockBackendDbDto {
 export function migrateMockBackendDb(db: MockBackendDbDto): MockBackendDbDto {
   const defaults = createDefaultAggregates()
   const migratedAccounts = db.accounts.map((account) => {
-    const currentTime = account.aggregates.time ?? defaults.time
+    const normalizedState = toAppStoreStateFromAggregates(account.aggregates, "signedIn")
+    const normalizedAggregates = toPersistedAggregates(normalizedState)
+    const currentTime = normalizedAggregates.time ?? defaults.time
     const timeEntries = currentTime.timeEntries ?? defaults.time.timeEntries
     const filteredTimeEntries = timeEntries.filter((entry) => !SEEDED_TIME_ENTRY_IDS.has(entry.id))
-
-    if (filteredTimeEntries.length === timeEntries.length) {
-      return account
-    }
 
     return {
       ...account,
       aggregates: {
-        ...account.aggregates,
+        ...normalizedAggregates,
         home: {
-          ...(account.aggregates.home ?? defaults.home),
+          ...(normalizedAggregates.home ?? defaults.home),
           highlights:
             filteredTimeEntries.length === 0
               ? cloneValue(defaults.home.highlights)
-              : cloneValue((account.aggregates.home ?? defaults.home).highlights),
+              : cloneValue((normalizedAggregates.home ?? defaults.home).highlights),
         },
         time: {
           ...currentTime,

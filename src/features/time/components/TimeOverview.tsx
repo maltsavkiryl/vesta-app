@@ -9,10 +9,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated"
 
-import { useTimeDataQuery } from "@/features/time/data/time.queries"
-
 import { styles } from "./timeOverview.styles"
-import type { TimeOverviewCardController } from "./timeOverview.types"
+import type { IdleClockCardState, TimeOverviewCardController } from "./timeOverview.types"
 import {
   CARD_LIFT_SPRING,
   CARD_PRESS_IN_SPRING,
@@ -84,9 +82,9 @@ export function TimeOverviewCard({
   const cardContent =
     clockSession.state === "idle" ? (
       <IdleCardContent
-        clockSession={clockSession}
         collapsed={isCollapsed}
         collapseProgress={collapseProgress}
+        idleState={controller.idleState}
         onClockIn={controller.handleClockIn}
         onToggleCollapsed={collapsible ? handleToggleCollapsed : undefined}
         showCollapseToggle={showCollapseToggle}
@@ -132,18 +130,20 @@ export function TimeOverviewCard({
   )
 }
 
-export function IdleClockCard({ onClockIn }: { onClockIn: () => void }) {
-  const query = useTimeDataQuery()
-  const clockSession = query.data?.clockSession
+export function IdleClockCard({
+  idleState,
+  onClockIn,
+}: {
+  idleState: IdleClockCardState
+  onClockIn: () => void
+}) {
   const collapseProgress = useSharedValue(1)
-
-  if (!clockSession) return null
 
   return (
     <IdleCardContent
-      clockSession={clockSession}
       collapsed={false}
       collapseProgress={collapseProgress}
+      idleState={idleState}
       onClockIn={onClockIn}
     />
   )
@@ -157,8 +157,10 @@ export function ActiveClockCard({
   onStartBreak,
   status,
   totalBreakSeconds,
+  clockSession,
 }: {
   breakSeconds: number
+  clockSession: TimeOverviewCardController["state"]["clockSession"]
   elapsedSeconds: number
   onClockOut: () => void
   onEndBreak: () => void
@@ -166,11 +168,7 @@ export function ActiveClockCard({
   status: "working" | "onBreak"
   totalBreakSeconds: number
 }) {
-  const query = useTimeDataQuery()
-  const clockSession = query.data?.clockSession
   const collapseProgress = useSharedValue(1)
-
-  if (!clockSession) return null
 
   return (
     <ActiveCardContent

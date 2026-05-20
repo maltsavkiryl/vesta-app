@@ -18,13 +18,15 @@ jest.mock("@expo/vector-icons", () => ({
 jest.mock("react-native-keyboard-controller", () => {
   const React = require("react")
   const { ScrollView } = require("react-native")
+  const KeyboardAwareScrollView = React.forwardRef(({ children, ...props }: any, ref: any) => (
+    <ScrollView ref={ref} {...props}>
+      {children}
+    </ScrollView>
+  ))
+  KeyboardAwareScrollView.displayName = "KeyboardAwareScrollView"
 
   return {
-    KeyboardAwareScrollView: React.forwardRef(({ children, ...props }: any, ref: any) => (
-      <ScrollView ref={ref} {...props}>
-        {children}
-      </ScrollView>
-    )),
+    KeyboardAwareScrollView,
   }
 })
 
@@ -72,10 +74,12 @@ const sampleTimeEntry: TimeEntry = {
   clockInAt: "2099-05-20T18:00:00.000Z",
   clockOutAt: "2099-05-20T23:30:00.000Z",
   date: "2099-05-20",
+  employerId: "bistro-noir",
   earningsAmount: 82.5,
   events: [],
   grossSeconds: 19800,
   id: "entry-1",
+  source: "shift",
   shiftLabel: "Evening shift",
   status: "approved",
   venueAddress: "Grand Place 1",
@@ -109,11 +113,7 @@ describe("overview section actions", () => {
     const onViewAll = jest.fn()
 
     renderWithTheme(
-      <HomeTasksSection
-        tasks={[sampleTask]}
-        onComplete={() => undefined}
-        onViewAll={onViewAll}
-      />,
+      <HomeTasksSection tasks={[sampleTask]} onComplete={() => undefined} onViewAll={onViewAll} />,
     )
 
     fireEvent.press(screen.getByText("View all"))
@@ -180,12 +180,18 @@ describe("overview section actions", () => {
 
   it("shows an empty state when there are no upcoming shifts", () => {
     renderWithTheme(
-      <UpcomingShiftsSection shifts={[]} onShiftPress={() => undefined} onViewAll={() => undefined} />,
+      <UpcomingShiftsSection
+        shifts={[]}
+        onShiftPress={() => undefined}
+        onViewAll={() => undefined}
+      />,
     )
 
     expect(screen.getByText("No upcoming shifts")).toBeTruthy()
     expect(
-      screen.getByText("Your next assigned shifts will appear here as soon as planning is published."),
+      screen.getByText(
+        "Your next assigned shifts will appear here as soon as planning is published.",
+      ),
     ).toBeTruthy()
   })
 
@@ -207,7 +213,9 @@ describe("overview section actions", () => {
 
     expect(screen.getByText("No time entries yet")).toBeTruthy()
     expect(
-      screen.getByText("Your completed shifts will appear here once you start clocking time."),
+      screen.getByText(
+        "Your completed time entries will appear here once you start clocking time.",
+      ),
     ).toBeTruthy()
   })
 })
