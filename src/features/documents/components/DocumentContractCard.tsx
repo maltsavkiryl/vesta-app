@@ -3,8 +3,8 @@ import { Ionicons } from "@expo/vector-icons"
 
 import { Text, appLayout, useDesignTokens } from "@/ui"
 
+import { getDocumentStatusConfig } from "../documents.status"
 import type { Contract } from "../documents.types"
-import { getDocumentStatusConfig } from "../documents.utils"
 
 import { DocumentStatusIcon } from "./DocumentRowAffordances"
 

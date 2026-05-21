@@ -1,6 +1,6 @@
 import { ActionSheetIOS } from "react-native"
 
-import type { ClockEmployerOptionSheetItem } from "./showClockEmployerOptions"
+import type { ClockEmployerOptionSheetItem } from "./showClockEmployerOptions.types"
 
 export function showClockEmployerOptionsIos({
   options,

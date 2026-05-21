@@ -2,12 +2,15 @@ import { useEffect, useState } from "react"
 import { Pressable } from "react-native"
 import Animated, {
   Easing,
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated"
+
+import { fireHaptic } from "@/utils/haptics"
 
 import { styles } from "./timeOverview.styles"
 import type { IdleClockCardState, TimeOverviewCardController } from "./timeOverview.types"
@@ -22,6 +25,8 @@ import { ActiveCardContent } from "./TimeOverviewActiveCard"
 import { IdleCardContent } from "./TimeOverviewIdleCard"
 
 export { TimeHeader } from "./TimeOverviewShared"
+
+const CARD_STATE_LAYOUT = LinearTransition.springify().damping(24).stiffness(230)
 
 export function TimeOverviewCard({
   collapsible = false,
@@ -64,7 +69,10 @@ export function TimeOverviewCard({
     cardLift.value = withSpring(-0.75, CARD_LIFT_SPRING)
   }, [cardLift, cardScale, collapseProgress, collapsed, collapsible])
 
-  const handleToggleCollapsed = () => setCollapsed((value) => !value)
+  const handleToggleCollapsed = () => {
+    fireHaptic("toggle")
+    setCollapsed((value) => !value)
+  }
   const animateCardPressIn = () => {
     cardScale.value = withSpring(0.992, CARD_PRESS_IN_SPRING)
   }
@@ -101,12 +109,16 @@ export function TimeOverviewCard({
         onStartBreak={controller.handleStartBreak}
         onToggleCollapsed={collapsible ? handleToggleCollapsed : undefined}
         showCollapseToggle={showCollapseToggle}
-        status={clockSession.state}
+        status={clockSession.state === "onBreak" ? "onBreak" : "working"}
         totalBreakSeconds={controller.totalBreakSeconds}
       />
     )
 
-  const animatedCard = <Animated.View style={cardAnimatedStyle}>{cardContent}</Animated.View>
+  const animatedCard = (
+    <Animated.View layout={CARD_STATE_LAYOUT} style={cardAnimatedStyle}>
+      {cardContent}
+    </Animated.View>
+  )
 
   if (!collapsible) return animatedCard
 

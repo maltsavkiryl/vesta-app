@@ -96,12 +96,14 @@ export function MetricGrid({ items }: { items: Array<{ label: string; value: str
 
 export function EmptyState({
   actionLabel,
+  cardless = false,
   icon,
   onAction,
   subtitle,
   title,
 }: {
   actionLabel?: string
+  cardless?: boolean
   icon?: ReactNode
   onAction?: () => void
   subtitle: string
@@ -109,24 +111,28 @@ export function EmptyState({
 }) {
   const tokens = useDesignTokens()
 
-  return (
-    <SurfaceCard>
-      <View style={styles.emptyState}>
-        {icon ? <View style={[styles.emptyStateIcon, { backgroundColor: tokens.backgroundMuted }]}>{icon}</View> : null}
-        <Text size="sm" style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
-        <Text
-          size="xs"
-          style={{ color: tokens.textSecondary, textAlign: "center" }}
-          text={subtitle}
-        />
-        {actionLabel && onAction ? (
-          <View style={styles.emptyStateAction}>
-            <AppButton fullWidth label={actionLabel} onPress={onAction} variant="secondary" />
-          </View>
-        ) : null}
-      </View>
-    </SurfaceCard>
+  const content = (
+    <View style={styles.emptyState}>
+      {icon ? <View style={[styles.emptyStateIcon, { backgroundColor: tokens.backgroundMuted }]}>{icon}</View> : null}
+      <Text size="sm" style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
+      <Text
+        size="xs"
+        style={{ color: tokens.textSecondary, textAlign: "center" }}
+        text={subtitle}
+      />
+      {actionLabel && onAction ? (
+        <View style={styles.emptyStateAction}>
+          <AppButton fullWidth label={actionLabel} onPress={onAction} variant="secondary" />
+        </View>
+      ) : null}
+    </View>
   )
+
+  if (cardless) {
+    return content
+  }
+
+  return <SurfaceCard>{content}</SurfaceCard>
 }
 
 export function ProgressBar({

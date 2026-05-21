@@ -4,8 +4,8 @@ import { Ionicons } from "@expo/vector-icons"
 import type { DocumentItem } from "@/core/models"
 import { Banner, Text, appLayout, useDesignTokens } from "@/ui"
 
+import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.status"
 import type { Contract, Payslip } from "../documents.types"
-import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.utils"
 import { DocumentContractCard } from "./DocumentContractCard"
 import {
   DocumentRowTail,

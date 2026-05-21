@@ -1,4 +1,6 @@
-import type { Theme } from "./types"
+import { Appearance } from "react-native"
+
+import type { ThemeContextModeT, Theme } from "./types"
 
 const systemui = require("expo-system-ui")
 
@@ -14,12 +16,17 @@ export const setSystemUIBackgroundColor = (color: string) => {
   }
 }
 
+export const setNativeColorScheme = (themeOverride: ThemeContextModeT) => {
+  Appearance.setColorScheme(themeOverride ?? "unspecified")
+}
+
 /**
  * Set the app's native background color to match the theme.
  * This is only available if the app has installed expo-system-ui
  *
  * @param theme The theme object to use for the background color
  */
-export const setImperativeTheming = (theme: Theme) => {
+export const setImperativeTheming = (theme: Theme, themeOverride: ThemeContextModeT) => {
   setSystemUIBackgroundColor(theme.colors.background)
+  setNativeColorScheme(themeOverride)
 }

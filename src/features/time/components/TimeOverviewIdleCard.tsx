@@ -32,6 +32,7 @@ export function IdleCardContent({
 }) {
   const tokens = useDesignTokens()
   const detailHeight = useSharedValue(96)
+  const isCollapsible = Boolean(onToggleCollapsed)
   const idleDetailsAnimatedStyle = useAnimatedStyle(() => ({
     height: detailHeight.value * collapseProgress.value,
     marginBottom: interpolate(collapseProgress.value, [0, 1], [0, 12], Extrapolation.CLAMP),
@@ -102,39 +103,51 @@ export function IdleCardContent({
       </View>
 
       <View style={styles.idleLowerContent}>
-        <View
-          accessible={false}
-          importantForAccessibility="no-hide-descendants"
-          onLayout={(event) => {
-            const nextHeight = event.nativeEvent.layout.height
-            if (nextHeight > 0) {
-              detailHeight.value = nextHeight
-            }
-          }}
-          pointerEvents="none"
-          style={styles.hiddenMeasure}
-        >
-          <IdleDetails
-            detailLabel={idleState.detailLabel}
-            helperLabel={idleState.helperLabel}
-            warningColor={idleState.kind === "unavailable" ? tokens.warning : tokens.accent}
-          />
-        </View>
-
-        <Animated.View style={[styles.idleDetailsViewport, idleDetailsAnimatedStyle]}>
-          <Animated.View
-            pointerEvents={collapsed ? "none" : "auto"}
-            style={detailsContentAnimatedStyle}
-          >
-            <View importantForAccessibility={collapsed ? "no-hide-descendants" : "auto"}>
+        {isCollapsible ? (
+          <>
+            <View
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              onLayout={(event) => {
+                const nextHeight = event.nativeEvent.layout.height
+                if (nextHeight > 0) {
+                  detailHeight.value = nextHeight
+                }
+              }}
+              pointerEvents="none"
+              style={styles.hiddenMeasure}
+            >
               <IdleDetails
                 detailLabel={idleState.detailLabel}
                 helperLabel={idleState.helperLabel}
                 warningColor={idleState.kind === "unavailable" ? tokens.warning : tokens.accent}
               />
             </View>
-          </Animated.View>
-        </Animated.View>
+
+            <Animated.View style={[styles.idleDetailsViewport, idleDetailsAnimatedStyle]}>
+              <Animated.View
+                pointerEvents={collapsed ? "none" : "auto"}
+                style={detailsContentAnimatedStyle}
+              >
+                <View importantForAccessibility={collapsed ? "no-hide-descendants" : "auto"}>
+                  <IdleDetails
+                    detailLabel={idleState.detailLabel}
+                    helperLabel={idleState.helperLabel}
+                    warningColor={idleState.kind === "unavailable" ? tokens.warning : tokens.accent}
+                  />
+                </View>
+              </Animated.View>
+            </Animated.View>
+          </>
+        ) : (
+          <View style={styles.staticIdleDetails}>
+            <IdleDetails
+              detailLabel={idleState.detailLabel}
+              helperLabel={idleState.helperLabel}
+              warningColor={idleState.kind === "unavailable" ? tokens.warning : tokens.accent}
+            />
+          </View>
+        )}
 
         <InCardActionButton
           disabled={idleState.disabled}

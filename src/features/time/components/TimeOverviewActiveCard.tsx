@@ -1,16 +1,11 @@
+import { View } from "react-native"
 import { type SharedValue } from "react-native-reanimated"
 
-import { HeroCard, CollapsibleSection } from "./TimeOverviewShared"
-import {
-  ActiveCardLocation,
-  ActiveCardMetrics,
-} from "./TimeOverviewActiveCardStatus"
-import {
-  ActiveCardActions,
-  ActiveCardHeader,
-} from "./TimeOverviewActiveCardSections"
 import { styles } from "./timeOverview.styles"
 import type { TimeOverviewCardController } from "./timeOverview.types"
+import { ActiveCardActions, ActiveCardHeader } from "./TimeOverviewActiveCardSections"
+import { ActiveCardLocation, ActiveCardMetrics } from "./TimeOverviewActiveCardStatus"
+import { CollapsibleSection, HeroCard } from "./TimeOverviewShared"
 
 export function ActiveCardContent({
   breakSeconds,
@@ -40,6 +35,24 @@ export function ActiveCardContent({
   totalBreakSeconds: number
 }) {
   const isOnBreak = status === "onBreak"
+  const isCollapsible = Boolean(onToggleCollapsed)
+  const expandedContent = (
+    <>
+      <ActiveCardMetrics
+        clockSession={clockSession}
+        elapsedSeconds={elapsedSeconds}
+        isOnBreak={isOnBreak}
+        totalBreakSeconds={totalBreakSeconds}
+      />
+      <ActiveCardLocation clockSession={clockSession} />
+      <ActiveCardActions
+        isOnBreak={isOnBreak}
+        onClockOut={onClockOut}
+        onEndBreak={onEndBreak}
+        onStartBreak={onStartBreak}
+      />
+    </>
+  )
 
   return (
     <HeroCard
@@ -57,23 +70,13 @@ export function ActiveCardContent({
         showCollapseToggle={showCollapseToggle}
       />
 
-      <CollapsibleSection fallbackHeight={220} progress={collapseProgress}>
-        <>
-          <ActiveCardMetrics
-            clockSession={clockSession}
-            elapsedSeconds={elapsedSeconds}
-            isOnBreak={isOnBreak}
-            totalBreakSeconds={totalBreakSeconds}
-          />
-          <ActiveCardLocation clockSession={clockSession} />
-          <ActiveCardActions
-            isOnBreak={isOnBreak}
-            onClockOut={onClockOut}
-            onEndBreak={onEndBreak}
-            onStartBreak={onStartBreak}
-          />
-        </>
-      </CollapsibleSection>
+      {isCollapsible ? (
+        <CollapsibleSection fallbackHeight={220} progress={collapseProgress}>
+          {expandedContent}
+        </CollapsibleSection>
+      ) : (
+        <View style={styles.staticExpandedSection}>{expandedContent}</View>
+      )}
     </HeroCard>
   )
 }

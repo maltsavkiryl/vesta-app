@@ -71,12 +71,13 @@ module.exports = (_: ConfigContext): ExpoConfig => {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-logo.png",
-          imageWidth: 300,
+          image: "./assets/images/vesta-logo.png",
+          imageWidth: 96,
           resizeMode: "contain",
-          backgroundColor: "#FFFFFF",
+          backgroundColor: "#020408",
         },
       ],
+      "./plugins/withSplashGradient",
       [
         "react-native-edge-to-edge",
         {

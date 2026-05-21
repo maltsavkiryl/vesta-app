@@ -3,15 +3,15 @@ import { StyleSheet } from "react-native"
 import { timeHeroColors } from "./TimeHeroCard"
 
 export const styles = StyleSheet.create({
-  activeHeroValue: {
-    marginTop: 0,
-  },
   actionGrid: {
     flexDirection: "row",
     gap: 8,
   },
   actionSection: {
     paddingTop: 12,
+  },
+  activeHeroValue: {
+    marginTop: 0,
   },
   animatedSectionHost: {
     position: "relative",
@@ -138,6 +138,12 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 14,
+  },
+  staticExpandedSection: {
+    gap: 0,
+  },
+  staticIdleDetails: {
+    marginBottom: 12,
   },
   timerPanel: {
     alignItems: "flex-start",

@@ -2,7 +2,9 @@ import type { ReactNode } from "react"
 import { StyleSheet, View, type ViewStyle } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text, appTypography, useDesignTokens } from "@/ui"
+import { appTypography } from "../foundations/layout"
+import { useDesignTokens } from "../foundations/tokens"
+import { Text } from "../primitives/Text"
 
 export interface SuccessStateProps {
   /**

@@ -1,10 +1,6 @@
 import { Alert, Platform } from "react-native"
 
-export interface ClockEmployerOptionSheetItem {
-  description?: string
-  id: string
-  title: string
-}
+import type { ClockEmployerOptionSheetItem } from "./showClockEmployerOptions.types"
 
 export async function showClockEmployerOptions({
   options,
@@ -14,7 +10,7 @@ export async function showClockEmployerOptions({
   if (options.length === 0) return null
 
   if (Platform.OS === "ios") {
-    const { showClockEmployerOptionsIos } = await import("./showClockEmployerOptions.ios")
+    const { showClockEmployerOptionsIos } = await import("./showClockEmployerOptionsIos")
     return showClockEmployerOptionsIos({ options })
   }
 

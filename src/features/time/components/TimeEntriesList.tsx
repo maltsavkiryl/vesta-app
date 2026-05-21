@@ -76,6 +76,7 @@ export function TimeEntriesListScreen({
     >
       {totalEntries === 0 ? (
         <EmptyState
+          cardless
           icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
           subtitle="Completed shifts appear here after you clock out for the first time."
           title="Nothing in your history yet"

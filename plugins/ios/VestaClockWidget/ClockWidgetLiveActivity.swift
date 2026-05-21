@@ -42,6 +42,33 @@ private func scheduledEndTime(_ isoString: String) -> String {
   return display.string(from: date)
 }
 
+private func statusTitle(for state: ClockActivityAttributes.ContentState) -> String {
+  state.status == "onBreak" ? "On break" : "Working"
+}
+
+private func statusSymbolName(for state: ClockActivityAttributes.ContentState) -> String {
+  state.status == "onBreak" ? "pause.circle.fill" : "clock.fill"
+}
+
+private func statusTint(for state: ClockActivityAttributes.ContentState) -> Color {
+  state.status == "onBreak" ? .orange : .green
+}
+
+private func metadataLine(for attributes: ClockActivityAttributes) -> String {
+  let venueName = attributes.venueName.trimmingCharacters(in: .whitespacesAndNewlines)
+  let role = attributes.role.trimmingCharacters(in: .whitespacesAndNewlines)
+
+  if venueName.isEmpty {
+    return role
+  }
+
+  if role.isEmpty || role == "Timer" {
+    return venueName
+  }
+
+  return "\(venueName) · \(role)"
+}
+
 @ViewBuilder
 private func liveTimerText(for state: ClockActivityAttributes.ContentState) -> some View {
   if state.status == "onBreak", let breakStartedAt = parseISODate(state.breakStartedAt) {
@@ -53,6 +80,18 @@ private func liveTimerText(for state: ClockActivityAttributes.ContentState) -> s
   }
 }
 
+struct ClockStatusLabel: View {
+  let state: ClockActivityAttributes.ContentState
+
+  var body: some View {
+    Label(statusTitle(for: state), systemImage: statusSymbolName(for: state))
+      .font(.caption.bold())
+      .foregroundStyle(statusTint(for: state))
+      .labelStyle(.titleAndIcon)
+      .lineLimit(1)
+  }
+}
+
 // MARK: - Lock Screen view
 
 struct ClockLockScreenView: View {
@@ -60,44 +99,37 @@ struct ClockLockScreenView: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    let isOnBreak = state.status == "onBreak"
+    VStack(alignment: .leading, spacing: 8) {
+      HStack(alignment: .top, spacing: 12) {
+        VStack(alignment: .leading, spacing: 4) {
+          ClockStatusLabel(state: state)
 
-    VStack(alignment: .leading, spacing: 6) {
-      HStack {
-        Label(
-          isOnBreak ? "On break" : "Working",
-          systemImage: isOnBreak ? "pause.circle.fill" : "clock.fill"
-        )
-        .font(.headline)
-        .foregroundStyle(isOnBreak ? Color.orange : Color.green)
+          liveTimerText(for: state)
+            .font(.title2.monospacedDigit().bold())
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+        }
 
-        Spacer()
+        Spacer(minLength: 0)
 
-        liveTimerText(for: state)
-          .font(.title2.monospacedDigit().bold())
-          .foregroundStyle(.primary)
+        VStack(alignment: .trailing, spacing: 2) {
+          Text(scheduledEndTime(attributes.scheduledEnd))
+            .font(.headline.monospacedDigit())
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+          Text("Ends")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
       }
 
-      Divider()
-
-      HStack {
-        VStack(alignment: .leading, spacing: 2) {
-          Text(attributes.role)
-            .font(.caption.bold())
-            .lineLimit(1)
-          Text(attributes.venueName)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-        }
-        Spacer()
-        VStack(alignment: .trailing, spacing: 2) {
-          Text("Until")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-          Text(scheduledEndTime(attributes.scheduledEnd))
-            .font(.caption.bold().monospacedDigit())
-        }
+      let metadata = metadataLine(for: attributes)
+      if !metadata.isEmpty {
+        Text(metadata)
+          .font(.caption)
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
       }
     }
     .padding(.horizontal, 16)
@@ -111,9 +143,8 @@ struct ClockDynamicIslandCompactLeading: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    let isOnBreak = state.status == "onBreak"
-    Image(systemName: isOnBreak ? "pause.circle.fill" : "clock.fill")
-      .foregroundStyle(isOnBreak ? Color.orange : Color.green)
+    Image(systemName: statusSymbolName(for: state))
+      .foregroundStyle(statusTint(for: state))
       .font(.caption)
   }
 }
@@ -130,46 +161,55 @@ struct ClockDynamicIslandCompactTrailing: View {
   }
 }
 
+struct ClockDynamicIslandExpandedStatus: View {
+  let state: ClockActivityAttributes.ContentState
+
+  var body: some View {
+    ClockStatusLabel(state: state)
+      .font(.caption2.bold())
+  }
+}
+
+struct ClockDynamicIslandExpandedEndTime: View {
+  let attributes: ClockActivityAttributes
+
+  var body: some View {
+    VStack(alignment: .trailing, spacing: 1) {
+      Text("Ends")
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+      Text(scheduledEndTime(attributes.scheduledEnd))
+        .font(.caption.monospacedDigit())
+        .fontWeight(.semibold)
+        .foregroundStyle(.primary)
+        .lineLimit(1)
+    }
+  }
+}
+
 struct ClockDynamicIslandExpandedView: View {
   let attributes: ClockActivityAttributes
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    let isOnBreak = state.status == "onBreak"
+    VStack(alignment: .leading, spacing: 4) {
+      liveTimerText(for: state)
+        .font(.title3.monospacedDigit().bold())
+        .foregroundStyle(.primary)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
 
-    VStack(spacing: 8) {
-      HStack {
-        Label(
-          isOnBreak ? "On break" : "Working",
-          systemImage: isOnBreak ? "pause.circle.fill" : "clock.fill"
-        )
-        .foregroundStyle(isOnBreak ? Color.orange : Color.green)
-        .font(.subheadline.bold())
-
-        Spacer()
-
-        liveTimerText(for: state)
-          .font(.title3.monospacedDigit().bold())
-      }
-
-      HStack {
-        VStack(alignment: .leading, spacing: 2) {
-          Text(attributes.role)
-            .font(.caption.bold())
-            .lineLimit(1)
-          Text(attributes.venueName)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-        }
-        Spacer()
-        Text("Until \(scheduledEndTime(attributes.scheduledEnd))")
+      let metadata = metadataLine(for: attributes)
+      if !metadata.isEmpty {
+        Text(metadata)
           .font(.caption)
           .foregroundStyle(.secondary)
+          .lineLimit(1)
       }
     }
-    .padding(.horizontal)
-    .padding(.vertical, 8)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .padding(.top, 2)
+    .padding(.bottom, 8)
   }
 }
 
@@ -185,10 +225,10 @@ struct VestaClockWidget: Widget {
     } dynamicIsland: { context in
       DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
-          ClockDynamicIslandCompactLeading(state: context.state)
+          ClockDynamicIslandExpandedStatus(state: context.state)
         }
         DynamicIslandExpandedRegion(.trailing) {
-          ClockDynamicIslandCompactTrailing(state: context.state)
+          ClockDynamicIslandExpandedEndTime(attributes: context.attributes)
         }
         DynamicIslandExpandedRegion(.bottom) {
           ClockDynamicIslandExpandedView(
@@ -201,9 +241,8 @@ struct VestaClockWidget: Widget {
       } compactTrailing: {
         ClockDynamicIslandCompactTrailing(state: context.state)
       } minimal: {
-        let isOnBreak = context.state.status == "onBreak"
-        Image(systemName: isOnBreak ? "pause.circle.fill" : "clock.fill")
-          .foregroundStyle(isOnBreak ? Color.orange : Color.green)
+        Image(systemName: statusSymbolName(for: context.state))
+          .foregroundStyle(statusTint(for: context.state))
       }
     }
   }

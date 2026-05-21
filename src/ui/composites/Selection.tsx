@@ -66,15 +66,18 @@ export function SelectionChip({
   pressHaptic = "selection",
   selected,
   selectedVariant = "soft",
+  unselectedBackgroundColor,
 }: {
   label: string
   onPress: () => void
   pressHaptic?: PressHapticIntent | "none"
   selected: boolean
   selectedVariant?: "soft" | "solid"
+  unselectedBackgroundColor?: string
 }) {
   const tokens = useDesignTokens()
   const selectedBackgroundColor = selectedVariant === "solid" ? tokens.accent : tokens.accentSoft
+  const idleBackgroundColor = unselectedBackgroundColor ?? tokens.surfaceSecondary
   const textColor = selected
     ? selectedVariant === "solid"
       ? tokens.accentForeground
@@ -90,7 +93,7 @@ export function SelectionChip({
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? selectedBackgroundColor : tokens.surfaceSecondary,
+          backgroundColor: selected ? selectedBackgroundColor : idleBackgroundColor,
           borderColor: selected ? tokens.accent : tokens.border,
         },
       ]}

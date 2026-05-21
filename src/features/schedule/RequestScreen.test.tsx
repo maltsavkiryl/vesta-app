@@ -227,6 +227,15 @@ describe("RequestScreen", () => {
     )
   })
 
+  it("shows the note placeholder without a redundant note label", () => {
+    mockParams = { category: "shift_change" }
+
+    render(<RequestScreen />)
+
+    expect(screen.getByPlaceholderText("Anything your manager should know")).toBeTruthy()
+    expect(screen.queryByText("ADD A NOTE")).toBeNull()
+  })
+
   it("shows the success state after a successful submit", async () => {
     mockParams = { category: "shift_change", shiftId: "shift-1" }
 

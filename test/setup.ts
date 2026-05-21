@@ -218,6 +218,13 @@ jest.mock("react-native-reanimated", () => {
     Extrapolation: {
       CLAMP: "clamp",
     },
+    LinearTransition: {
+      springify: () => ({
+        damping: () => ({
+          stiffness: () => ({}),
+        }),
+      }),
+    },
     View: AnimatedView,
     createAnimatedComponent: (Component: unknown) => Component,
     interpolate,

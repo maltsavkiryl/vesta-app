@@ -1,4 +1,4 @@
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -100,7 +100,7 @@ export function RequestTargetSection({
         <Text size="xs" style={{ color: tokens.textSecondary }} text={targetSectionCopy.subtitle} />
         {category === "shift_change" ? (
           upcomingShifts.length > 0 ? (
-            <View>
+            <SurfaceCard style={styles.shiftListCard}>
               {upcomingShifts.map((shift, index) => {
                 const selected = selectedShiftId === shift.id
 
@@ -108,18 +108,19 @@ export function RequestTargetSection({
                   <SelectionRow
                     backgroundColor={selected ? tokens.accentSoft : tokens.surface}
                     dividerInset={16}
+                    grouped
                     isLast={index === upcomingShifts.length - 1}
                     key={shift.id}
                     onPress={() => onSelectShift(shift.id)}
                     selected={selected}
-                    style={{ borderRadius: 0, borderWidth: 0, minHeight: 74 }}
+                    style={styles.shiftRow}
                     subtitle={`${formatFullDate(shift.date)} · ${shift.role} · ${shift.venueName}`}
                     title={`${shift.dayLabel} · ${getShiftTimeRange(shift)}`}
                     trailing={selected ? <SelectionIndicator /> : null}
                   />
                 )
               })}
-            </View>
+            </SurfaceCard>
           ) : (
             <EmptyState
               subtitle="When a shift is scheduled, you can ask for a replacement or report a conflict here."
@@ -160,6 +161,8 @@ export function RequestReasonSection({
   setReason: (reason: string) => void
   title: string
 }) {
+  const tokens = useDesignTokens()
+
   return (
     <GroupedSection bodyStyle={sectionBodyStyle} title={title}>
       <View style={groupBodyStyle}>
@@ -173,6 +176,7 @@ export function RequestReasonSection({
                 onPress={() => setReason(selected ? "" : option)}
                 selected={selected}
                 selectedVariant="solid"
+                unselectedBackgroundColor={tokens.surface}
               />
             )
           })}
@@ -196,14 +200,13 @@ export function RequestNoteSection({
           caption="Optional context shown with your request."
           containerStyle={{ minHeight: 146 }}
           inputStyle={{ fontSize: 15, minHeight: 96, paddingTop: 2 }}
-          label="Add a note"
           multiline
           numberOfLines={4}
           onChangeText={setNote}
           placeholder="Anything your manager should know"
           textAlignVertical="top"
           value={note}
-          variant="muted"
+          variant="default"
         />
       </View>
     </GroupedSection>
@@ -211,6 +214,17 @@ export function RequestNoteSection({
 }
 
 const groupBodyStyle = { gap: 14 } as const
+
+const styles = StyleSheet.create({
+  shiftListCard: {
+    gap: 0,
+    overflow: "hidden",
+    padding: 0,
+  },
+  shiftRow: {
+    minHeight: 74,
+  },
+})
 
 const sectionBodyStyle = {
   backgroundColor: "transparent",
