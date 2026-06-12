@@ -43,29 +43,33 @@ A real employee signs in end-to-end against the backend (social or email/passwor
 
 - **`src/services/api/httpClient.ts` (new):** wraps the existing `apisauce` instance (`src/services/api/index.ts`). Adds:
   - request transform injecting `Authorization: Bearer <accessToken>`;
-  - response interceptor: on `401`, call `/auth/refresh` **once**, retry the original request, else clear session and surface auth error;
-  - `withCredentials` so the backend's HTTP-only refresh-token cookie is sent/stored;
-  - access token kept in memory and persisted to **`expo-secure-store`**; cleared on sign-out.
+  - response interceptor: on `401`, run **silent re-auth once** (refresh Entra `id_token` → `employees/login` → `select-employer` → new backend JWT), retry the original request, else clear session and surface auth error;
+  - backend JWT kept in memory and persisted to **`expo-secure-store`**; cleared on sign-out. The Entra refresh token is held by `expo-auth-session`'s token store.
 - **`src/services/auth/oidc.ts` (new):** `expo-auth-session` PKCE flow against the Entra External ID authority. Returns the Entra `id_token`. Social and local email/password are IdPs configured *inside* the Entra user flow — the app calls one authorize endpoint; Entra renders provider choice. Native Apple/Google buttons are a later enhancement, not required for this slice.
 - **`createHttpAuthRepository()` + `createHttpProfileRepository()` (new in `repositories.ts`):** replace the throwing stubs (`repositories.ts:562-621`). Flip `repositories.ts:682` to `Config.API_URL ? "http" : "mock"`.
 - **Auth flow mapping (`AuthRepository`):**
   - `signIn` / social → OIDC → `POST /api/v1/auth/employees/login` (returns memberships) → `POST /api/v1/auth/employees/select-employer` (scoped token + refresh cookie). When exactly one membership exists, auto-select; otherwise present an employer picker.
   - `register`, `requestPasswordReset`, `resetPassword` → redirect into the Entra hosted user flow (signup / reset) rather than POSTing credentials to our API. Mobile screens become "continue with email" entry points.
-  - `getSession` → read stored access token; if expired, silent `/auth/refresh`; map to `AppSession`.
-  - `signOut` → `POST /api/v1/auth/revoke` + clear secure storage + clear cookie.
+  - `getSession` → read stored backend JWT; if expired, silent re-auth (Entra refresh → login → select-employer); map to `AppSession`.
+  - `signOut` → clear secure storage + sign out of `expo-auth-session` (revoke/clear Entra tokens). (`POST /auth/revoke` is employer-only and not called for employees.)
   - `changePassword` → Entra hosted flow (or hidden for this slice).
 - **Profile (`ProfileRepository`):** `getProfile` → `GET /api/v1/employee` (`EmployeeDto`) mapped via a new transformer to the domain `UserProfile`; `updateProfile` → `PUT /api/v1/employee` (`UpdateMyEmployeeDto`). `getEmployers`/`joinEmployer` deferred to a later slice (employer-join is invite-driven on the backend); for Slice 0 they may remain mock-backed or return the membership list from login.
 - **`accountId` semantics:** the mock repositories are `accountId`-keyed. With a real backend the JWT identifies the user, so HTTP repositories ignore the passed `accountId` (the token is the identity). The repository interfaces are unchanged to avoid churn; this is documented at the seam.
 - **DTO boundary:** per project rule, no generated `*Dto` types leak into Vue/RN domain code — every backend DTO is mapped to a domain model in a transformer in the service layer.
 
-### Backend work
+### Token refresh model (corrected during planning)
 
-1. **Refresh token for employee scoped session (the one real fix).** `employees/select-employer` (`AuthController.cs:187`) and `SelectEmployerSessionUseCase` (`SelectEmployerSessionUseCase.cs:38`) currently return only an `AccessTokenDto` — no refresh token, unlike employer login (`AuthController.cs:96-97`). Issue and append a refresh-token cookie for the employee scoped token so the mobile app can silently refresh. Apply the same to `employee-invitations/accept` for consistency.
-2. **Development-only dev-token path.** Add a Development-gated `IExternalIdTokenValidator` implementation that accepts a signed dev token encoding `{ objectId, email, name }`, enabling integration tests of login → select-employer → profile without a live Entra tenant. Selected via configuration; never registered in non-Development environments.
-3. **Dev seed.** Ensure a Development employee with an employer membership and an Entra object-id matching the dev token exists, so `employees/login` returns a membership and `select-employer` succeeds.
-4. **Config contract.** Document required Entra settings (authority/tenant, employee app client id, user-flow/policy name, scopes/audience) in `appsettings` + a short ops note. No secrets committed.
+The backend's refresh infrastructure is **employer-only**: `RefreshUseCase` rotates a refresh token, loads an employer `User` by integer `UserId`, requires an identity account, and always re-mints an **employer** token via `CreateEmployerToken`. Mobile employees are `EmployeeMobileAccount`s keyed by Entra object-id — they have no `User`/`UserId` and no identity account — so they cannot use this path. `employees/select-employer` correctly returns an access token with **no** refresh-token cookie.
 
-Email/password, signup, and password reset are handled by the Entra hosted user flow (same `id_token` path); **no backend credential endpoints are added**.
+Therefore the **Entra refresh token (managed by `expo-auth-session`) is the long-lived credential**. The backend employee JWT is intentionally short-lived (5 min, `JwtTokenService.CreateEmployeeToken`). When it expires, the mobile app silently: refreshes the Entra `id_token` via `expo-auth-session`, then re-runs `POST /auth/employees/login` → `POST /auth/employees/select-employer` to obtain a fresh backend JWT. No backend refresh-token changes are required, and there is no refresh cookie to manage on mobile.
+
+### Backend work (Slice 0)
+
+1. **Development-only dev-token path.** Add a Development-gated `IExternalIdTokenValidator` that accepts a dev token encoding `{ objectId, email, name }`, enabling integration of login → select-employer → profile without a live Entra tenant. Registered in `AddInfraIdentity` only when a config flag (`Auth:EnableDevTokens`) is set; never in non-Development.
+2. **Dev seed.** Ensure a Development employee with an employer membership and an Entra object-id matching the dev token exists, so `employees/login` returns a membership and `select-employer` succeeds.
+3. **Config contract.** Document required Entra settings (authority/tenant, employee app client id, user-flow/policy name, scopes/audience) in `appsettings` + a short ops note. No secrets committed.
+
+No change to `select-employer`, `RefreshUseCase`, or any credential endpoints. Email/password, signup, and password reset are handled by the Entra hosted user flow (same `id_token` path); **no backend credential endpoints are added**.
 
 ### Components & boundaries
 
@@ -84,9 +88,9 @@ Email/password, signup, and password reset are handled by the Entra hosted user 
 
 ### Testing strategy
 
-- **Backend:** unit tests for refresh-on-select-employer and the dev-token validator; existing auth use-case tests remain green; `dotnet build` + `dotnet test` pass.
-- **Mobile:** `pnpm check` + `pnpm lint:check` pass; unit tests for `httpClient` (token inject, 401→refresh→retry), `oidc` (mocked), and the profile transformer, following `maes-mobile-testing` conventions.
-- **Manual E2E:** run app against local API; sign in via dev path; land on home with real profile; force token expiry to prove silent refresh; sign out clears session.
+- **Backend:** unit test for the dev-token validator; existing auth use-case tests remain green; `dotnet build` + `dotnet test` pass.
+- **Mobile:** `pnpm check` + `pnpm lint:check` pass; unit tests for `httpClient` (token inject, 401→silent-re-auth→retry), the auth service (login→select-employer orchestration, mocked), and the profile transformer, following `maes-mobile-testing` conventions.
+- **Manual E2E:** run app against local API; sign in via dev path; land on home with real profile; force token expiry to prove silent re-auth; sign out clears session.
 
 ### Exit criteria
 
