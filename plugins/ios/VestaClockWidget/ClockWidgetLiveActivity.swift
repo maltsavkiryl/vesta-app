@@ -139,7 +139,7 @@ struct ClockLockScreenView: View {
 
 // MARK: - Dynamic Island views
 
-struct ClockDynamicIslandCompactLeading: View {
+struct ClockDynamicIslandIcon: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
@@ -149,7 +149,7 @@ struct ClockDynamicIslandCompactLeading: View {
   }
 }
 
-struct ClockDynamicIslandCompactTrailing: View {
+struct ClockDynamicIslandTimer: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
@@ -161,55 +161,29 @@ struct ClockDynamicIslandCompactTrailing: View {
   }
 }
 
-struct ClockDynamicIslandExpandedStatus: View {
+struct ClockDynamicIslandCompactView: View {
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    ClockStatusLabel(state: state)
-      .font(.caption2.bold())
-  }
-}
-
-struct ClockDynamicIslandExpandedEndTime: View {
-  let attributes: ClockActivityAttributes
-
-  var body: some View {
-    VStack(alignment: .trailing, spacing: 1) {
-      Text("Ends")
-        .font(.caption2)
-        .foregroundStyle(.secondary)
-      Text(scheduledEndTime(attributes.scheduledEnd))
-        .font(.caption.monospacedDigit())
-        .fontWeight(.semibold)
-        .foregroundStyle(.primary)
-        .lineLimit(1)
+    HStack(spacing: 6) {
+      ClockDynamicIslandIcon(state: state)
+      ClockDynamicIslandTimer(state: state)
     }
   }
 }
 
 struct ClockDynamicIslandExpandedView: View {
-  let attributes: ClockActivityAttributes
   let state: ClockActivityAttributes.ContentState
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
+    HStack(spacing: 8) {
+      ClockDynamicIslandIcon(state: state)
       liveTimerText(for: state)
         .font(.title3.monospacedDigit().bold())
         .foregroundStyle(.primary)
         .lineLimit(1)
         .minimumScaleFactor(0.8)
-
-      let metadata = metadataLine(for: attributes)
-      if !metadata.isEmpty {
-        Text(metadata)
-          .font(.caption)
-          .foregroundStyle(.secondary)
-          .lineLimit(1)
-      }
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .padding(.top, 2)
-    .padding(.bottom, 8)
   }
 }
 
@@ -224,25 +198,15 @@ struct VestaClockWidget: Widget {
       )
     } dynamicIsland: { context in
       DynamicIsland {
-        DynamicIslandExpandedRegion(.leading) {
-          ClockDynamicIslandExpandedStatus(state: context.state)
-        }
-        DynamicIslandExpandedRegion(.trailing) {
-          ClockDynamicIslandExpandedEndTime(attributes: context.attributes)
-        }
-        DynamicIslandExpandedRegion(.bottom) {
-          ClockDynamicIslandExpandedView(
-            attributes: context.attributes,
-            state: context.state
-          )
+        DynamicIslandExpandedRegion(.center) {
+          ClockDynamicIslandExpandedView(state: context.state)
         }
       } compactLeading: {
-        ClockDynamicIslandCompactLeading(state: context.state)
+        EmptyView()
       } compactTrailing: {
-        ClockDynamicIslandCompactTrailing(state: context.state)
+        ClockDynamicIslandCompactView(state: context.state)
       } minimal: {
-        Image(systemName: statusSymbolName(for: context.state))
-          .foregroundStyle(statusTint(for: context.state))
+        ClockDynamicIslandIcon(state: context.state)
       }
     }
   }

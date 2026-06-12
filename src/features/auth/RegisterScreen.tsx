@@ -1,17 +1,14 @@
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { StyleSheet, View } from "react-native"
 
-import { Button, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
+import { Button } from "@/ui"
 
 import { AuthAccessoryButton } from "./AuthAccessoryButton"
+import { AuthFormLayout, AUTH_SCREEN_PALETTE } from "./AuthFormLayout"
 import { AuthError } from "./AuthScaffold"
-import { AuthLogo } from "./AuthLogo"
 import { AuthTextField } from "./AuthTextField"
 import { useRegisterScreen } from "./useRegisterScreen"
 
 export function RegisterScreen() {
-  const insets = useSafeAreaInsets()
-  const tokens = useDesignTokens()
   const {
     confirmPassword,
     email,
@@ -30,160 +27,141 @@ export function RegisterScreen() {
     toggleShowPassword,
   } = useRegisterScreen()
 
+  const sharedFieldStyle = [
+    {
+      backgroundColor: AUTH_SCREEN_PALETTE.fieldBackground,
+      borderColor: AUTH_SCREEN_PALETTE.fieldBorder,
+    },
+  ]
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={[styles.screen, { backgroundColor: tokens.backgroundMuted }]}
+    <AuthFormLayout
+      onBack={() => router.replace("/(auth)/sign-in")}
+      subtitle="Add your details to continue."
+      title="Create account"
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingBottom: Math.max(insets.bottom, 18),
-            paddingTop: insets.top + 30,
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <MotionView style={styles.header}>
-          <AuthLogo style={styles.logo} />
-          <Text
-            text="Create account"
-            weight="bold"
-            style={[appTypography.authTitle, styles.centerText, { color: tokens.textPrimary }]}
-          />
-          <Text
-            text="Add your details to continue."
-            style={[
-              appTypography.authSubtitle,
-              styles.subtitle,
-              styles.centerText,
-              { color: tokens.textSecondary },
-            ]}
-          />
-        </MotionView>
-
-        <MotionView delay={70} style={styles.form}>
-          <View style={styles.nameRow}>
-            <AuthTextField
-              accessibilityLabel="First name"
-              autoCapitalize="words"
-              autoComplete="given-name"
-              containerStyle={styles.nameField}
-              onChangeText={setFirstName}
-              label="First name"
-              labelCase="default"
-              placeholder="First name"
-              returnKeyType="next"
-              showLabel={false}
-              textContentType="givenName"
-              value={firstName}
-            />
-            <AuthTextField
-              accessibilityLabel="Last name"
-              autoCapitalize="words"
-              autoComplete="family-name"
-              containerStyle={styles.nameField}
-              onChangeText={setLastName}
-              label="Last name"
-              labelCase="default"
-              placeholder="Last name"
-              returnKeyType="next"
-              showLabel={false}
-              textContentType="familyName"
-              value={lastName}
-            />
-          </View>
-
+      <View style={styles.form}>
+        <View style={styles.nameRow}>
           <AuthTextField
-            accessibilityLabel="Email"
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            label="Email"
+            accessibilityLabel="First name"
+            autoCapitalize="words"
+            autoComplete="given-name"
+            containerStyle={[sharedFieldStyle, styles.nameField]}
+            onChangeText={setFirstName}
+            label="First name"
             labelCase="default"
-            onChangeText={setEmail}
-            placeholder="Email"
+            placeholder="First name"
+            placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
             returnKeyType="next"
             showLabel={false}
-            textContentType="username"
-            value={email}
+            style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+            textContentType="givenName"
+            value={firstName}
           />
-
           <AuthTextField
-            accessibilityLabel="Password"
-            autoCapitalize="none"
-            autoComplete="new-password"
-            label="Password"
+            accessibilityLabel="Last name"
+            autoCapitalize="words"
+            autoComplete="family-name"
+            containerStyle={[sharedFieldStyle, styles.nameField]}
+            onChangeText={setLastName}
+            label="Last name"
             labelCase="default"
-            onChangeText={setPassword}
-            placeholder="Password"
+            placeholder="Last name"
+            placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
             returnKeyType="next"
-            secureTextEntry={!showPassword}
             showLabel={false}
-            textContentType="newPassword"
-            value={password}
-            rightAccessory={
-              <AuthAccessoryButton
-                accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-                icon={showPassword ? "eye-off-outline" : "eye-outline"}
-                onPress={toggleShowPassword}
-              />
-            }
+            style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+            textContentType="familyName"
+            value={lastName}
           />
+        </View>
 
-          <AuthTextField
-            accessibilityLabel="Confirm password"
-            autoCapitalize="none"
-            autoComplete="new-password"
-            label="Confirm password"
-            labelCase="default"
-            onChangeText={setConfirmPassword}
-            onSubmitEditing={handleSubmit}
-            placeholder="Confirm password"
-            returnKeyType="done"
-            secureTextEntry={!showPassword}
-            showLabel={false}
-            textContentType="newPassword"
-            value={confirmPassword}
-          />
+        <AuthTextField
+          accessibilityLabel="Email"
+          autoCapitalize="none"
+          autoComplete="email"
+          containerStyle={sharedFieldStyle}
+          keyboardType="email-address"
+          label="Email"
+          labelCase="default"
+          onChangeText={setEmail}
+          placeholder="Email"
+          placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
+          returnKeyType="next"
+          showLabel={false}
+          style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+          textContentType="username"
+          value={email}
+        />
 
-          <AuthError message={error} />
+        <AuthTextField
+          accessibilityLabel="Password"
+          autoCapitalize="none"
+          autoComplete="new-password"
+          containerStyle={sharedFieldStyle}
+          label="Password"
+          labelCase="default"
+          onChangeText={setPassword}
+          placeholder="Password"
+          placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
+          returnKeyType="next"
+          secureTextEntry={!showPassword}
+          showLabel={false}
+          style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+          textContentType="newPassword"
+          value={password}
+          rightAccessory={
+            <AuthAccessoryButton
+              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+              icon={showPassword ? "eye-off-outline" : "eye-outline"}
+              onPress={toggleShowPassword}
+              style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}
+            />
+          }
+        />
 
-          <Button fullWidth label="Create account" onPress={handleSubmit} pressHaptic="none" />
-          <Button
-            fullWidth
-            label="Sign in instead"
-            onPress={() => router.replace("/(auth)/sign-in")}
-            variant="secondary"
-          />
-        </MotionView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <AuthTextField
+          accessibilityLabel="Confirm password"
+          autoCapitalize="none"
+          containerStyle={sharedFieldStyle}
+          label="Confirm password"
+          labelCase="default"
+          onChangeText={setConfirmPassword}
+          onSubmitEditing={handleSubmit}
+          placeholder="Confirm password"
+          placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
+          returnKeyType="done"
+          secureTextEntry={!showPassword}
+          showLabel={false}
+          style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+          textContentType="password"
+          value={confirmPassword}
+        />
+
+        <AuthError message={error} />
+
+        <Button fullWidth label="Create account" onPress={handleSubmit} pressHaptic="none" />
+        <Button
+          fullWidth
+          label="Sign in instead"
+          onPress={() => router.replace("/(auth)/sign-in")}
+          variant="secondary"
+        />
+      </View>
+    </AuthFormLayout>
   )
 }
 
 const styles = StyleSheet.create({
-  centerText: {
-    textAlign: "center",
-  },
-  content: {
-    flexGrow: 1,
+  clearButton: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 20,
     justifyContent: "center",
-    paddingHorizontal: 40,
+    width: 20,
   },
   form: {
-    gap: 9,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  logo: {
-    height: 76,
-    marginBottom: 18,
-    width: 76,
+    gap: 12,
   },
   nameField: {
     flex: 1,
@@ -191,11 +169,5 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: "row",
     gap: 9,
-  },
-  screen: {
-    flex: 1,
-  },
-  subtitle: {
-    marginTop: 6,
   },
 })

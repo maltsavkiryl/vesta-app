@@ -25,6 +25,7 @@ export default function AuthLayout() {
       }}
     >
       <Stack.Screen name="sign-in" />
+      <Stack.Screen name="sign-in-email" />
       <Stack.Screen name="register" />
       <Stack.Screen name="forgot-password" />
       <Stack.Screen name="onboarding" />

@@ -1,5 +1,5 @@
 import { ReactNode } from "react"
-import { StyleProp, TextInputProps, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, TextInputProps, ViewStyle } from "react-native"
 
 import { TextField } from "@/ui"
 import type { Tone } from "@/ui/foundations/variants"
@@ -25,13 +25,18 @@ export function AuthTextField({
   variant = "muted",
   ...props
 }: AuthTextFieldProps) {
+  const hasVisibleLabel = showLabel && Boolean(label)
+
   return (
     <TextField
       accessibilityLabel={props.accessibilityLabel ?? label}
       autoCorrect={false}
-      containerStyle={containerStyle}
-      inputStyle={style}
-      label={showLabel ? label : undefined}
+      containerStyle={[
+        hasVisibleLabel ? styles.labeledField : styles.bareField,
+        containerStyle,
+      ]}
+      inputStyle={[hasVisibleLabel ? styles.labeledInput : styles.bareInput, style]}
+      label={hasVisibleLabel ? label : undefined}
       labelCase={labelCase}
       rightAccessory={rightAccessory}
       tone={tone}
@@ -40,3 +45,23 @@ export function AuthTextField({
     />
   )
 }
+
+const styles = StyleSheet.create({
+  bareField: {
+    minHeight: 52,
+  },
+  bareInput: {
+    fontSize: 15,
+    lineHeight: 20,
+    minHeight: 20,
+  },
+  labeledField: {
+    minHeight: 62,
+    paddingVertical: 9,
+  },
+  labeledInput: {
+    fontSize: 15,
+    lineHeight: 20,
+    minHeight: 22,
+  },
+})

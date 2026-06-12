@@ -1,0 +1,157 @@
+import { Pressable, StyleSheet, View } from "react-native"
+
+import { Button, Text, useDesignTokens } from "@/ui"
+
+import { AuthAccessoryButton } from "./AuthAccessoryButton"
+import { AuthFormLayout, AUTH_SCREEN_PALETTE } from "./AuthFormLayout"
+import { AuthError } from "./AuthScaffold"
+import { AuthTextField } from "./AuthTextField"
+import { useSignInScreen } from "./useSignInScreen"
+
+export function SignInEmailScreen() {
+  const tokens = useDesignTokens()
+  const {
+    clearEmail,
+    clearPassword,
+    email,
+    error,
+    handleContinue,
+    handleEmailChange,
+    handlePasswordChange,
+    password,
+    router,
+  } = useSignInScreen()
+
+  return (
+    <AuthFormLayout
+      onBack={() => {
+        if (router.canGoBack()) {
+          router.back()
+          return
+        }
+
+        router.replace("/(auth)/sign-in")
+      }}
+      subtitle="Use the same work account you use for planning and timesheets."
+      title="Log in with email"
+    >
+      <View style={styles.form}>
+        <AuthTextField
+          autoCapitalize="none"
+          autoComplete="email"
+          containerStyle={styles.field}
+          keyboardType="email-address"
+          label="Email"
+          labelCase="default"
+          onChangeText={handleEmailChange}
+          onSubmitEditing={handleContinue}
+          placeholder="Email"
+          placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
+          returnKeyType="next"
+          showLabel={false}
+          style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+          textContentType="username"
+          value={email}
+          rightAccessory={
+            email.length > 0 ? (
+              <AuthAccessoryButton
+                accessibilityLabel="Clear email"
+                icon="close"
+                onPress={clearEmail}
+                style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}
+              />
+            ) : null
+          }
+        />
+
+        <AuthTextField
+          autoCapitalize="none"
+          autoComplete="off"
+          containerStyle={styles.field}
+          label="Password"
+          labelCase="default"
+          onChangeText={handlePasswordChange}
+          onSubmitEditing={handleContinue}
+          placeholder="Password"
+          placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
+          returnKeyType="done"
+          secureTextEntry
+          showLabel={false}
+          style={{ color: AUTH_SCREEN_PALETTE.fieldText }}
+          textContentType="password"
+          value={password}
+          rightAccessory={
+            password.length > 0 ? (
+              <AuthAccessoryButton
+                accessibilityLabel="Clear password"
+                icon="close"
+                onPress={clearPassword}
+                style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}
+              />
+            ) : null
+          }
+        />
+
+        <Pressable
+          hitSlop={8}
+          onPress={() => router.push("/(auth)/forgot-password")}
+          style={styles.inlineLinkRow}
+        >
+          <Text
+            text="Forgot password?"
+            size="xxs"
+            weight="medium"
+            style={{ color: tokens.accent }}
+          />
+        </Pressable>
+
+        <AuthError message={error} />
+
+        <Button fullWidth label="Log in with email" onPress={handleContinue} pressHaptic="none" />
+
+        <View style={styles.dividerRow}>
+          <View style={[styles.dividerLine, { backgroundColor: AUTH_SCREEN_PALETTE.divider }]} />
+          <Text text="or" size="xxs" style={{ color: AUTH_SCREEN_PALETTE.panelMuted }} />
+          <View style={[styles.dividerLine, { backgroundColor: AUTH_SCREEN_PALETTE.divider }]} />
+        </View>
+
+        <Button
+          fullWidth
+          label="Create account"
+          onPress={() => router.replace("/(auth)/register")}
+          variant="secondary"
+        />
+      </View>
+    </AuthFormLayout>
+  )
+}
+
+const styles = StyleSheet.create({
+  clearButton: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 20,
+    justifyContent: "center",
+    width: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+  dividerRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  field: {
+    backgroundColor: AUTH_SCREEN_PALETTE.fieldBackground,
+    borderColor: AUTH_SCREEN_PALETTE.fieldBorder,
+  },
+  form: {
+    alignItems: "stretch",
+    gap: 12,
+  },
+  inlineLinkRow: {
+    alignItems: "flex-end",
+  },
+})
