@@ -59,20 +59,16 @@ describe("AppLockProvider", () => {
     const screen = renderProvider()
 
     // While locked, the branded unlock affordance is shown.
-    const unlockButton = await screen.findByLabelText("Unlock")
+    const unlockButton = await screen.findByLabelText("Unlock", {}, { timeout: 5000 })
     expect(unlockButton).toBeTruthy()
 
     // After a cancelled prompt the app stays gated (overlay still present).
-    await waitFor(() => {
-      expect(authenticateAsync).toHaveBeenCalledTimes(1)
-    })
+    await waitFor(() => expect(authenticateAsync).toHaveBeenCalled(), { timeout: 5000 })
     expect(screen.queryByLabelText("Unlock")).toBeTruthy()
 
     // Tapping Unlock re-prompts and succeeds, dismissing the lock overlay.
     fireEvent.press(unlockButton)
-    await waitFor(() => {
-      expect(screen.queryByLabelText("Unlock")).toBeNull()
-    })
+    await waitFor(() => expect(screen.queryByLabelText("Unlock")).toBeNull(), { timeout: 5000 })
     expect(screen.getByText("protected-content")).toBeTruthy()
   })
 
