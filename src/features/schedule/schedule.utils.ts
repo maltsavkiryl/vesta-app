@@ -1,3 +1,4 @@
+import { getLocalToday } from "@/core/date"
 import type {
   AppStoreState,
   AvailabilityOverride,
@@ -100,7 +101,7 @@ export function getNextIncompleteAvailabilityDate(
 }
 
 export function getUpcomingShifts(shifts: Shift[], fromDate?: string) {
-  const baseline = fromDate ?? new Date().toISOString().slice(0, 10)
+  const baseline = fromDate ?? getLocalToday()
   return shifts.filter((shift) => shift.date >= baseline)
 }
 
@@ -117,7 +118,9 @@ export function buildMonthGrid(anchorDate: Date) {
   const year = anchorDate.getFullYear()
   const month = anchorDate.getMonth()
   const firstDay = new Date(year, month, 1)
-  const firstOffset = firstDay.getDay()
+  // Monday-first (EU): shift Sunday (0) to the last column, Monday (1) to the
+  // first. Matches the Monday-first availability model (`getWeekdayKey`).
+  const firstOffset = (firstDay.getDay() + 6) % 7
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const cells: Array<string | null> = []
 

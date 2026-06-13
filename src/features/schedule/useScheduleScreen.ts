@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { useRouter } from "expo-router"
 
+import { getLocalToday } from "@/core/date"
 import type { Shift } from "@/core/models"
 import { useAppAction } from "@/features/actions/useAppAction"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
@@ -16,7 +17,7 @@ export function useScheduleScreen() {
   const { submitPlanningWindow } = useScheduleActions()
   const { state } = useScheduleStateQuery()
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalToday()
   const [selectedDate, setSelectedDate] = useState(today)
   const [monthAnchor, setMonthAnchor] = useState(() => getMonthAnchor(today))
   const planningState = useSchedulePlanningState({
