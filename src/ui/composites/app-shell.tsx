@@ -3,6 +3,7 @@
 import { PropsWithChildren, ReactNode, useMemo } from "react"
 import {
   Platform,
+  RefreshControl,
   ScrollView,
   type ScrollViewProps,
   type StyleProp,
@@ -17,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useDesignTokens, type DesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
 import { firePressHaptic, type PressHapticIntent } from "@/utils/haptics"
+
 import { MotionView } from "./app-motion"
 
 type AppScrollScreenVariant = "default" | "grouped"
@@ -29,12 +31,16 @@ export function AppScrollScreen({
   children,
   contentInsetAdjustmentBehavior = "automatic",
   contentContainerStyle,
+  onRefresh,
+  refreshing = false,
   topEdgeTreatment = "auto",
   topInset = "safe",
   variant = "default",
   ...props
 }: PropsWithChildren<
   ScrollViewProps & {
+    onRefresh?: () => void
+    refreshing?: boolean
     topEdgeTreatment?: TopEdgeTreatment
     topInset?: "safe" | "none"
     variant?: AppScrollScreenVariant
@@ -44,12 +50,21 @@ export function AppScrollScreen({
   const tokens = useDesignTokens()
   const backgroundColor = variant === "grouped" ? tokens.groupedBackground : tokens.background
   const shouldShowTopEdgeTreatment = topInset === "safe" && topEdgeTreatment === "auto"
+  const refreshControl = onRefresh ? (
+    <RefreshControl
+      colors={[tokens.accent]}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+      tintColor={tokens.accent}
+    />
+  ) : undefined
 
   return (
     <View style={[styles.flex, { backgroundColor }]}>
       <ScrollView
         {...props}
         contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
+        refreshControl={refreshControl}
         contentContainerStyle={[
           styles.screenContent,
           {
