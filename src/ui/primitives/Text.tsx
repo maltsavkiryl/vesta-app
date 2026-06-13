@@ -1,6 +1,8 @@
 import { ReactNode, forwardRef, type ForwardedRef } from "react"
 import {
+  PixelRatio,
   type StyleProp,
+  StyleSheet,
   // eslint-disable-next-line no-restricted-imports
   Text as RNText,
   type TextProps as RNTextProps,
@@ -30,7 +32,18 @@ export interface TextProps extends RNTextProps {
 }
 
 export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
-  const { weight, size, tx, txOptions, text, children, style: styleOverride, ...rest } = props
+  const {
+    weight,
+    size,
+    tx,
+    txOptions,
+    text,
+    children,
+    style: styleOverride,
+    allowFontScaling = true,
+    maxFontSizeMultiplier,
+    ...rest
+  } = props
   const { themed } = useAppTheme()
 
   const i18nText = tx && translate(tx, txOptions)
@@ -45,12 +58,48 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
     styleOverride,
   ]
 
+  // Dynamic Type: cap how far text can scale (smaller cap for large display
+  // text so it doesn't blow out layout, larger cap for body copy), and grow
+  // lineHeight with the OS font scale so tall glyphs don't clip on big-text
+  // settings. At scale 1 (the default) every value is identical to the base
+  // design, so the static look is unchanged.
+  const flattened = (StyleSheet.flatten(styles) ?? {}) as TextStyle
+  const resolvedFontSize =
+    typeof flattened.fontSize === "number" ? flattened.fontSize : sizeStyles.sm.fontSize
+  const fontCap = maxFontSizeMultiplier ?? resolveMaxFontSizeMultiplier(resolvedFontSize)
+
+  let scaledLineHeightStyle: TextStyle | undefined
+  if (allowFontScaling && typeof flattened.lineHeight === "number") {
+    const effectiveScale = Math.min(PixelRatio.getFontScale(), fontCap)
+    if (effectiveScale > 1) {
+      scaledLineHeightStyle = { lineHeight: flattened.lineHeight * effectiveScale }
+    }
+  }
+
   return (
-    <RNText {...rest} ref={ref} style={styles}>
+    <RNText
+      {...rest}
+      ref={ref}
+      allowFontScaling={allowFontScaling}
+      maxFontSizeMultiplier={fontCap}
+      style={[styles, scaledLineHeightStyle]}
+    >
       {content}
     </RNText>
   )
 })
+
+/**
+ * Dynamic Type scaling caps by role/size. Large display copy gets a tighter cap
+ * (layout breaks sooner), body/detail copy is allowed to grow further for
+ * low-vision users. Callers can override via the `maxFontSizeMultiplier` prop.
+ */
+function resolveMaxFontSizeMultiplier(fontSize: number): number {
+  if (fontSize >= 30) return 1.3 // display / hero / heading
+  if (fontSize >= 22) return 1.4 // titles
+  if (fontSize >= 17) return 1.5 // subheading / large body
+  return 1.6 // body, captions, labels
+}
 
 const sizeStyles = {
   xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,

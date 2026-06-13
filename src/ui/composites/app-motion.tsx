@@ -96,11 +96,13 @@ export function usePressScale({
 }
 
 export function MotionPressable({
+  accessibilityLabel,
   children,
   delay = 0,
   onPress,
   style,
 }: PropsWithChildren<{
+  accessibilityLabel?: string
   delay?: number
   onPress?: () => void
   style?: StyleProp<ViewStyle>
@@ -109,7 +111,12 @@ export function MotionPressable({
 
   return (
     <MotionView delay={delay} style={style}>
-      <Pressable onPress={onPress} {...pressHandlers}>
+      <Pressable
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        onPress={onPress}
+        {...pressHandlers}
+      >
         <AnimatedView style={animatedStyle}>{children}</AnimatedView>
       </Pressable>
     </MotionView>

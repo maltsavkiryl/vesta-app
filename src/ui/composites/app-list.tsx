@@ -4,7 +4,12 @@ import { Platform, Pressable, type StyleProp, StyleSheet, View, type ViewStyle }
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
 import { firePressHaptic, type PressHapticIntent } from "@/utils/haptics"
+
 import { MotionView } from "./app-motion"
+
+// Inline text actions are visually small; expand their touch target to >=44pt.
+// See the a11y conventions note in `app-actions.tsx`.
+const LIST_ACTION_HIT_SLOP = 8
 
 export function GroupedSection({
   actionLabel,
@@ -42,7 +47,9 @@ export function GroupedSection({
           )}
           {actionLabel && onAction ? (
             <Pressable
+              accessibilityLabel={actionLabel}
               accessibilityRole="button"
+              hitSlop={LIST_ACTION_HIT_SLOP}
               onPress={() => {
                 firePressHaptic(actionHaptic)
                 onAction()
@@ -72,6 +79,7 @@ export function GroupedSection({
 }
 
 export function ListRow({
+  accessibilityLabel,
   destructive,
   isLast,
   leading,
@@ -81,6 +89,7 @@ export function ListRow({
   title,
   trailing,
 }: {
+  accessibilityLabel?: string
   destructive?: boolean
   isLast?: boolean
   leading?: ReactNode
@@ -121,6 +130,7 @@ export function ListRow({
   if (onPress) {
     return (
       <Pressable
+        accessibilityLabel={accessibilityLabel ?? title}
         accessibilityRole="button"
         onPress={() => {
           firePressHaptic(pressHaptic)
@@ -182,6 +192,7 @@ export function DetailRow({
 }
 
 export function ActionRow({
+  accessibilityLabel,
   leading,
   onPress,
   pressHaptic = "selection",
@@ -189,6 +200,7 @@ export function ActionRow({
   title,
   trailing,
 }: {
+  accessibilityLabel?: string
   leading?: ReactNode
   onPress: () => void
   pressHaptic?: PressHapticIntent | "none"
@@ -200,6 +212,7 @@ export function ActionRow({
 
   return (
     <Pressable
+      accessibilityLabel={accessibilityLabel ?? title}
       accessibilityRole="button"
       onPress={() => {
         firePressHaptic(pressHaptic)

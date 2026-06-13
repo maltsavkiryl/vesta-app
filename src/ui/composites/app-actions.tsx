@@ -10,6 +10,23 @@ import { firePressHaptic, type PressHapticIntent } from "@/utils/haptics"
 import { usePressScale } from "./app-motion"
 import { getTonePalette, type AppTone } from "./appTone"
 
+/**
+ * Accessibility conventions for shared interactive primitives
+ * ----------------------------------------------------------
+ * Every pressable in the design system MUST:
+ *  - set `accessibilityRole="button"` (screen readers announce it as a button),
+ *  - expose an `accessibilityLabel` (falls back to the visible label),
+ *  - forward `accessibilityState` (e.g. `{ disabled }`),
+ *  - guarantee a >=44pt touch target — visually-smaller controls (icon buttons,
+ *    inline text actions) add `hitSlop` to reach the 44pt minimum.
+ * Screens inherit this for free by composing these primitives; per-screen
+ * labels for dynamic content are handled in F7.
+ */
+
+// Expands a sub-44pt control's touch target to the 44pt minimum (icon button is
+// 34pt: 34 + 2*6 = 46 >= 44). Inline text actions reuse the same slop.
+const MIN_TOUCH_HIT_SLOP = 6
+
 type AppButtonVariant = "primary" | "secondary" | "danger"
 
 export function SectionTitle({
@@ -48,7 +65,9 @@ export function SectionTitle({
         ) : null}
         {actionLabel && actionHandler ? (
           <Pressable
+            accessibilityLabel={actionLabel}
             accessibilityRole="button"
+            hitSlop={MIN_TOUCH_HIT_SLOP}
             onPress={() => {
               firePressHaptic(actionHaptic)
               actionHandler()
@@ -66,6 +85,7 @@ export function SectionTitle({
 }
 
 export function AppButton({
+  accessibilityLabel,
   disabled,
   fullWidth = false,
   label,
@@ -73,6 +93,7 @@ export function AppButton({
   pressHaptic = "selection",
   variant = "primary",
 }: {
+  accessibilityLabel?: string
   disabled?: boolean
   fullWidth?: boolean
   label: string
@@ -133,7 +154,9 @@ export function AppButton({
   return (
     <Animated.View style={[fullWidth ? styles.buttonFullWidth : null, animatedStyle]}>
       <Pressable
+        accessibilityLabel={accessibilityLabel ?? label}
         accessibilityRole="button"
+        accessibilityState={{ disabled: Boolean(disabled) }}
         disabled={disabled}
         onPress={() => {
           firePressHaptic(pressHaptic)
@@ -185,7 +208,9 @@ export function InCardActionButton({
   return (
     <Animated.View style={animatedStyle}>
       <Pressable
+        accessibilityLabel={label}
         accessibilityRole="button"
+        accessibilityState={{ disabled: Boolean(disabled) }}
         disabled={disabled}
         onPress={(event) => {
           if (stopPropagation) event.stopPropagation()
@@ -202,12 +227,7 @@ export function InCardActionButton({
         {...pressHandlers}
       >
         {icon}
-        <Text
-          size="xs"
-          style={{ color: tokens.accentForeground }}
-          text={label}
-          weight="semiBold"
-        />
+        <Text size="xs" style={{ color: tokens.accentForeground }} text={label} weight="semiBold" />
       </Pressable>
     </Animated.View>
   )
@@ -238,6 +258,7 @@ export function IconButton({
       <Pressable
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
+        hitSlop={MIN_TOUCH_HIT_SLOP}
         onPress={() => {
           firePressHaptic(pressHaptic)
           onPress()
