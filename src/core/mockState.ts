@@ -487,17 +487,17 @@ export function createInitialState(): AppStoreState {
     earnings: {
       monthLabel: "May 2026",
       targetAmount: 2400,
-      earnedAmount: 0,
-      shiftsWorked: 0,
-      hoursWorked: 0,
-      averageHourlyRate: 12.02,
+      earnedAmount: 1486.5,
+      shiftsWorked: 14,
+      hoursWorked: 123.5,
+      averageHourlyRate: 12.04,
     },
     highlights: [
       {
         id: "highlight-1",
         title: "Earned this month",
-        value: "EUR 0.00",
-        subtitle: "0% of your monthly target",
+        value: "EUR 1,486.50",
+        subtitle: "62% of your monthly target",
       },
       {
         id: "highlight-2",

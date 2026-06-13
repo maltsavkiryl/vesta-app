@@ -139,9 +139,13 @@ export function HomeScreen() {
 
         <MotionView delay={250}>
           <EarningsSummaryCard
+            averageHourlyRate={home?.earnings.averageHourlyRate ?? 0}
             earnedAmount={home?.earnings.earnedAmount ?? 0}
+            hoursWorked={home?.earnings.hoursWorked ?? 0}
             monthLabel={home?.earnings.monthLabel ?? ""}
             onPayslipPress={openLatestPayslip}
+            shiftsWorked={home?.earnings.shiftsWorked ?? 0}
+            targetAmount={home?.earnings.targetAmount ?? 0}
           />
         </MotionView>
       </View>
