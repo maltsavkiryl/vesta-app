@@ -1,5 +1,6 @@
 import { format } from "date-fns"
 
+import { getDateFnsLocale } from "./format"
 import type { ClockSession, Shift } from "./models"
 
 export function parseDateValue(value: string | Date | number) {
@@ -9,17 +10,17 @@ export function parseDateValue(value: string | Date | number) {
 
 export function formatFullDate(dateString: string) {
   const date = parseDateValue(dateString)
-  return date ? format(date, "EEEE, MMMM d") : "Unknown date"
+  return date ? format(date, "EEEE, MMMM d", { locale: getDateFnsLocale() }) : "Unknown date"
 }
 
 export function formatShortDate(dateString: string) {
   const date = parseDateValue(dateString)
-  return date ? format(date, "MMM d") : "Unknown date"
+  return date ? format(date, "MMM d", { locale: getDateFnsLocale() }) : "Unknown date"
 }
 
 export function formatMonthLabel(dateString: string) {
   const date = parseDateValue(dateString)
-  return date ? format(date, "MMMM yyyy") : "Unknown month"
+  return date ? format(date, "MMMM yyyy", { locale: getDateFnsLocale() }) : "Unknown month"
 }
 
 export function formatTimeLabel(date: Date) {
