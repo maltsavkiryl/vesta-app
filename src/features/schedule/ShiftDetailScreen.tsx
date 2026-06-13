@@ -1,11 +1,6 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { StyleSheet } from "react-native"
 
-import {
-  AppScrollScreen,
-  useDesignTokens,
-} from "@/ui"
+import { isToday } from "@/core/date"
 import {
   ShiftActionNeededSection,
   ShiftChangeSummaryCallout,
@@ -17,6 +12,7 @@ import {
   ShiftRequestActions,
 } from "@/features/schedule/ShiftDetailSections"
 import { useShiftDetailScreen } from "@/features/schedule/useShiftDetailScreen"
+import { AppScrollScreen, useDesignTokens } from "@/ui"
 
 export function ShiftDetailScreen() {
   const tokens = useDesignTokens()
@@ -54,13 +50,13 @@ export function ShiftDetailScreen() {
 
       <ShiftPlanSection shift={screen.shift} />
 
-      {screen.shift.note ? (
-        <ShiftManagerNoteSection note={screen.shift.note} />
-      ) : null}
+      {screen.shift.note ? <ShiftManagerNoteSection note={screen.shift.note} /> : null}
 
       <ShiftRequestActions shift={screen.shift} />
 
-      {screen.shift.dayLabel === "Today" ? (
+      {/* Derive "is this today" from the real date; fall back to the baked
+          dayLabel only when a shift has no date. */}
+      {(screen.shift.date ? isToday(screen.shift.date) : screen.shift.dayLabel === "Today") ? (
         <ShiftOpenTimeAction />
       ) : null}
     </AppScrollScreen>

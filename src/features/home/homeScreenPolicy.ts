@@ -1,3 +1,4 @@
+import { getRelativeDayLabel } from "@/core/date"
 import type { NotificationItem, Shift } from "@/core/models"
 
 import type { TaskItem } from "./components/HomeTaskSections"
@@ -22,7 +23,7 @@ export function deriveHomeScreenPolicy({
   const homeSummary = priorityTask
     ? ""
     : nextShift
-      ? `Next shift ${nextShift.dayLabel} at ${nextShift.startTime}`
+      ? `Next shift ${nextShift.date ? getRelativeDayLabel(nextShift.date) : nextShift.dayLabel} at ${nextShift.startTime}`
       : unreadCount > 0
         ? `${unreadCount} update${unreadCount === 1 ? "" : "s"} waiting`
         : "You're clear for now"
