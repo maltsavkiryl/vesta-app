@@ -20,5 +20,16 @@ export function useScheduleQuery() {
 export function useScheduleStateQuery() {
   const query = useScheduleQuery()
 
-  return useMemo(() => ({ state: query.data }), [query.data])
+  // Surface loading/error/refetch alongside data so screens can render
+  // skeletons, an error + retry state, and pull-to-refresh instead of silently
+  // falling back to fabricated defaults while the fetch is in flight.
+  return useMemo(
+    () => ({
+      state: query.data,
+      isError: query.isError,
+      isLoading: query.isLoading,
+      refetch: query.refetch,
+    }),
+    [query.data, query.isError, query.isLoading, query.refetch],
+  )
 }

@@ -4,6 +4,7 @@ import { isToday } from "@/core/date"
 import {
   ShiftActionNeededSection,
   ShiftChangeSummaryCallout,
+  ShiftDeclinedSection,
   ShiftDetailEmptyState,
   ShiftDetailHero,
   ShiftManagerNoteSection,
@@ -43,7 +44,13 @@ export function ShiftDetailScreen() {
         <ShiftActionNeededSection
           callout={changeSummaryCallout}
           onAcknowledge={screen.handleAcknowledgeUpdate}
+          onDecline={screen.handleDeclineShift}
         />
+      ) : screen.shift.responseStatus === "declined" ? (
+        <>
+          {changeSummaryCallout}
+          <ShiftDeclinedSection />
+        </>
       ) : (
         changeSummaryCallout
       )}
