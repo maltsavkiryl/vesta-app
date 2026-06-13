@@ -4,9 +4,13 @@ import { type SharedValue } from "react-native-reanimated"
 
 import { Text, appTypography, useDesignTokens } from "@/ui"
 
-import { formatSeconds } from "../time.utils"
+import { formatHours, formatSeconds } from "../time.utils"
 import { timeHeroColors } from "./TimeHeroCard"
-import { ActiveCardLocation, ActiveCardMetrics } from "./TimeOverviewActiveCardStatus"
+import {
+  ActiveCardLocation,
+  ActiveCardMetrics,
+  EarningsTicker,
+} from "./TimeOverviewActiveCardStatus"
 import { styles } from "./timeOverview.styles"
 import type { TimeOverviewCardController } from "./timeOverview.types"
 import { CollapseToggle, HeroStatusPill } from "./TimeOverviewShared"
@@ -14,38 +18,54 @@ import { CollapseToggle, HeroStatusPill } from "./TimeOverviewShared"
 type ClockSession = TimeOverviewCardController["state"]["clockSession"]
 
 export function ActiveCardHeader({
+  averageHourlyRate,
   breakSeconds,
   clockSession,
   collapsed,
   collapseProgress,
   elapsedSeconds,
   isOnBreak,
+  liveEarnings,
   onToggleCollapsed,
+  payableSeconds,
   showCollapseToggle,
 }: {
+  averageHourlyRate: number
   breakSeconds: number
   clockSession: ClockSession
   collapsed: boolean
   collapseProgress: SharedValue<number>
   elapsedSeconds: number
   isOnBreak: boolean
+  liveEarnings: number
   onToggleCollapsed?: () => void
+  payableSeconds: number
   showCollapseToggle: boolean
 }) {
   const tokens = useDesignTokens()
-  const secondaryLabel =
+  const venueLabel =
     clockSession.source === "shift" &&
     clockSession.scheduledStart &&
     clockSession.scheduledEnd
       ? `${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${clockSession.venueName}`
-      : `${clockSession.venueName} timer`
+      : clockSession.venueName
+  // The big timer is the honest payable (worked-minus-break) figure — the same
+  // value that drives the live earnings ticker and clock-out pay. Total time on
+  // shift is shown beneath so nothing is hidden.
+  const heroSeconds = isOnBreak ? breakSeconds : payableSeconds
+  const onShiftLabel = `On shift ${formatHours(elapsedSeconds)} · ${venueLabel}`
 
   return (
     <View style={styles.heroTopRow}>
       <View style={styles.heroPrimaryStack}>
         <Text
-          text={formatSeconds(isOnBreak ? breakSeconds : elapsedSeconds)}
+          text={formatSeconds(heroSeconds)}
           weight="bold"
+          accessibilityLabel={
+            isOnBreak
+              ? `On break ${formatHours(breakSeconds)}`
+              : `Payable time ${formatHours(payableSeconds)}`
+          }
           style={[
             appTypography.heroValue,
             styles.heroValue,
@@ -53,8 +73,13 @@ export function ActiveCardHeader({
             { color: isOnBreak ? tokens.warning : timeHeroColors.primaryText },
           ]}
         />
+        <EarningsTicker
+          earnings={liveEarnings}
+          hourlyRate={averageHourlyRate}
+          isOnBreak={isOnBreak}
+        />
         <Text
-          text={secondaryLabel}
+          text={isOnBreak ? venueLabel : onShiftLabel}
           numberOfLines={1}
           size="xs"
           style={{ color: timeHeroColors.secondaryText }}

@@ -3,6 +3,7 @@ import { useRouter } from "expo-router"
 
 import { getClockSnapshot } from "@/core/date"
 import { createInitialState } from "@/core/mockState"
+import { computeAccruedEarnings } from "@/features/time/components/timeOverview.utils"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import type { IdleClockCardState } from "@/features/time/components/timeOverview.types"
@@ -130,11 +131,14 @@ export function useTimeCardController() {
       )
     : 0
   const totalBreakSeconds = snapshot.breakSeconds
+  const averageHourlyRate = state.earnings.averageHourlyRate
+  const payableSeconds = snapshot.payableSeconds
+  const liveEarnings = computeAccruedEarnings(payableSeconds, averageHourlyRate)
   const idleState = useMemo(
     () => buildIdleClockCardState(resolveClockStart({ employers, profileRole, shifts })),
     [employers, profileRole, shifts],
   )
-  const { handleClockIn, handleEndBreak, handleStartBreak } = useTimeClockActions({
+  const { clockInPending, handleClockIn, handleEndBreak, handleStartBreak } = useTimeClockActions({
     employers,
     endBreak,
     profileRole,
@@ -144,15 +148,19 @@ export function useTimeCardController() {
   })
 
   return {
+    averageHourlyRate,
+    clockInPending,
     elapsedSeconds,
     handleClockIn,
     handleEndBreak,
     handleStartBreak,
     idleState,
+    liveEarnings,
     openClockOut: () => {
       fireHaptic("selection")
       router.push("/(app)/clock-out" as never)
     },
+    payableSeconds,
     snapshot,
     state,
     totalBreakSeconds,

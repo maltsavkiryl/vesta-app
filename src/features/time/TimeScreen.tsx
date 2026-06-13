@@ -21,14 +21,18 @@ export function TimeEntriesScreen() {
 
 export function TimeScreen() {
   const {
+    averageHourlyRate,
+    clockInPending,
     elapsedSeconds,
     handleClockIn,
     handleEndBreak,
     handleStartBreak,
     idleState,
+    liveEarnings,
     openClockOut,
     openEntry,
     openTimeEntries,
+    payableSeconds,
     snapshot,
     state,
     totalBreakSeconds,
@@ -41,12 +45,16 @@ export function TimeScreen() {
       <MotionView delay={55}>
         <TimeOverviewCard
           controller={{
+            averageHourlyRate,
+            clockInPending,
             elapsedSeconds,
             handleClockIn,
             handleEndBreak,
             handleStartBreak,
             idleState,
+            liveEarnings,
             openClockOut,
+            payableSeconds,
             snapshot,
             state,
             totalBreakSeconds,
