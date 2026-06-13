@@ -1,3 +1,4 @@
+import { getLocalToday, getRelativeDayLabel } from "./date"
 import type {
   AppStoreState,
   AvailabilityOverride,
@@ -8,6 +9,25 @@ import type {
   UserProfile,
 } from "./models"
 import { buildTimeEntryFromClockSession } from "./timeEntries"
+
+/**
+ * Resolves a `yyyy-MM-dd` string a given number of days from the local today.
+ * Seeded schedule data is anchored relative to "now" (not hard-coded calendar
+ * dates) so the agenda + planning cockpit always demo with live, upcoming data.
+ */
+function offsetFromToday(days: number): string {
+  const [year, month, day] = getLocalToday().split("-").map(Number)
+  const date = new Date(year, month - 1, day + days, 12)
+  const isoMonth = String(date.getMonth() + 1).padStart(2, "0")
+  const isoDay = String(date.getDate()).padStart(2, "0")
+  return `${date.getFullYear()}-${isoMonth}-${isoDay}`
+}
+
+/** A deadline timestamp `days` from today at the given local hour. */
+function deadlineFromToday(days: number, hour = 18): string {
+  const [year, month, day] = getLocalToday().split("-").map(Number)
+  return new Date(year, month - 1, day + days, hour, 0, 0).toISOString()
+}
 
 const employerDirectory: Employer[] = [
   {
@@ -180,12 +200,24 @@ const profile: UserProfile = {
   },
 }
 
+// Anchored relative to the local today so the agenda + next-shift hero always
+// have live, upcoming shifts to render. `dayLabel` is baked at seed time for
+// legacy callers; date-driven UI should prefer `getRelativeDayLabel(shift.date)`.
+const shiftDates = {
+  shift1: offsetFromToday(0),
+  shift2: offsetFromToday(1),
+  shift3: offsetFromToday(2),
+  shift4: offsetFromToday(4),
+  shift5: offsetFromToday(6),
+  shift6: offsetFromToday(9),
+} as const
+
 const shifts: Shift[] = [
   {
     id: "shift-1",
     employerId: "bistro-noir",
-    date: "2026-05-17",
-    dayLabel: "Today",
+    date: shiftDates.shift1,
+    dayLabel: getRelativeDayLabel(shiftDates.shift1),
     startTime: "17:00",
     endTime: "23:00",
     role: "Waiter",
@@ -198,8 +230,8 @@ const shifts: Shift[] = [
   {
     id: "shift-2",
     employerId: "bistro-noir",
-    date: "2026-05-18",
-    dayLabel: "Mon",
+    date: shiftDates.shift2,
+    dayLabel: getRelativeDayLabel(shiftDates.shift2),
     startTime: "12:00",
     endTime: "18:00",
     role: "Waiter",
@@ -211,8 +243,8 @@ const shifts: Shift[] = [
   {
     id: "shift-3",
     employerId: "bistro-noir",
-    date: "2026-05-20",
-    dayLabel: "Wed",
+    date: shiftDates.shift3,
+    dayLabel: getRelativeDayLabel(shiftDates.shift3),
     startTime: "18:00",
     endTime: "23:30",
     role: "Waiter",
@@ -228,8 +260,8 @@ const shifts: Shift[] = [
   {
     id: "shift-4",
     employerId: "bistro-noir",
-    date: "2026-05-22",
-    dayLabel: "Fri",
+    date: shiftDates.shift4,
+    dayLabel: getRelativeDayLabel(shiftDates.shift4),
     startTime: "17:00",
     endTime: "00:00",
     role: "Bartender",
@@ -237,15 +269,13 @@ const shifts: Shift[] = [
     venueAddress: "Rue de la Loi 123, Brussels",
     status: "pending",
     coworkers: ["Mila R.", "Jonas T."],
-    changeSummary: "Manager asked you to confirm this extra Friday bar shift.",
-    requiresResponse: true,
-    responseStatus: "pending",
+    changeSummary: "Manager added this extra Friday bar shift to the rota.",
   },
   {
     id: "shift-5",
     employerId: "bistro-noir",
-    date: "2026-05-24",
-    dayLabel: "Sun",
+    date: shiftDates.shift5,
+    dayLabel: getRelativeDayLabel(shiftDates.shift5),
     startTime: "11:00",
     endTime: "17:00",
     role: "Waiter",
@@ -257,8 +287,8 @@ const shifts: Shift[] = [
   {
     id: "shift-6",
     employerId: "bistro-noir",
-    date: "2026-05-27",
-    dayLabel: "Wed",
+    date: shiftDates.shift6,
+    dayLabel: getRelativeDayLabel(shiftDates.shift6),
     startTime: "17:00",
     endTime: "23:00",
     role: "Waiter",
@@ -279,37 +309,50 @@ const availabilityTemplate: AvailabilityTemplate = {
   sunday: { status: "available", startTime: "11:00", endTime: "18:00" },
 }
 
+// The open planning window spans today+3..today+9. Three of those seven days
+// carry an explicit override, so real coverage reads 3/7 (not 100%) and the
+// cockpit has something to chip away at.
+const planningWindowStart = offsetFromToday(3)
+const planningWindowEnd = offsetFromToday(9)
+
 const availabilityOverrides: Record<string, AvailabilityOverride> = {
-  "2026-05-18": { date: "2026-05-18", status: "available", startTime: "12:00", endTime: "23:00" },
-  "2026-05-19": { date: "2026-05-19", status: "preferred", startTime: "17:00", endTime: "23:00" },
-  "2026-05-20": { date: "2026-05-20", status: "available", startTime: "17:00", endTime: "23:30" },
-  "2026-05-21": {
-    date: "2026-05-21",
+  [offsetFromToday(3)]: {
+    date: offsetFromToday(3),
+    status: "available",
+    startTime: "12:00",
+    endTime: "23:00",
+  },
+  [offsetFromToday(4)]: {
+    date: offsetFromToday(4),
+    status: "preferred",
+    startTime: "17:00",
+    endTime: "00:00",
+  },
+  [offsetFromToday(5)]: {
+    date: offsetFromToday(5),
     status: "unavailable",
     startTime: "09:00",
     endTime: "17:00",
     note: "Exam evening",
   },
-  "2026-05-22": { date: "2026-05-22", status: "preferred", startTime: "17:00", endTime: "00:00" },
-  "2026-05-23": { date: "2026-05-23", status: "preferred", startTime: "12:00", endTime: "23:00" },
 }
 
 const planningWindows: PlanningWindow[] = [
   {
     id: "planning-window-1",
     label: "Next week",
-    startDate: "2026-05-18",
-    endDate: "2026-05-24",
-    deadline: "2026-05-18T18:00:00.000Z",
+    startDate: planningWindowStart,
+    endDate: planningWindowEnd,
+    deadline: deadlineFromToday(2),
     status: "open",
   },
   {
     id: "planning-window-2",
-    label: "May 25 - May 31",
-    startDate: "2026-05-25",
-    endDate: "2026-05-31",
-    deadline: "2026-05-24T18:00:00.000Z",
-    submittedAt: "2026-05-15T10:30:00.000Z",
+    label: "Last week",
+    startDate: offsetFromToday(-10),
+    endDate: offsetFromToday(-4),
+    deadline: deadlineFromToday(-11),
+    submittedAt: deadlineFromToday(-12),
     status: "submitted",
   },
 ]
