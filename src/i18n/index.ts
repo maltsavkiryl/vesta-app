@@ -4,51 +4,56 @@ import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import "intl-pluralrules"
 
-// if English isn't your default language, move Translations to the appropriate language file.
-import ar from "./ar"
+import { loadString, saveString } from "@/utils/storage"
+
 import en, { Translations } from "./en"
-import es from "./es"
 import fr from "./fr"
-import hi from "./hi"
-import ja from "./ja"
-import ko from "./ko"
+import nl from "./nl"
 
-const fallbackLocale = "en-US"
+// The Belgian market locales the app ships with. `nl` is treated as nl-BE and
+// `fr` as fr-BE in copy and formatting; English is the fallback.
+export const supportedLocales = ["en", "nl", "fr"] as const
+export type AppLocale = (typeof supportedLocales)[number]
 
-const systemLocales = Localization.getLocales()
+const fallbackLocale: AppLocale = "en"
 
-const resources = { ar, en, ko, es, fr, ja, hi }
-const supportedTags = Object.keys(resources)
+// Where a user-chosen language override is persisted so it survives restarts.
+export const LANGUAGE_STORAGE_KEY = "vesta.language"
 
-// Checks to see if the device locale matches any of the supported locales
-// Device locale may be more specific and still match (e.g., en-US matches en)
-const systemTagMatchesSupportedTags = (deviceTag: string) => {
-  const primaryTag = deviceTag.split("-")[0]
-  return supportedTags.includes(primaryTag)
+const resources = { en, fr, nl }
+
+const isSupportedLocale = (value: string | null | undefined): value is AppLocale =>
+  !!value && (supportedLocales as readonly string[]).includes(value)
+
+/** Maps any BCP-47 tag (e.g. "nl-BE", "fr-FR") to a supported locale, else the fallback. */
+export const mapToSupportedLocale = (languageTag?: string | null): AppLocale => {
+  const primaryTag = languageTag?.split("-")[0]?.toLowerCase()
+  return isSupportedLocale(primaryTag) ? primaryTag : fallbackLocale
 }
 
-const pickSupportedLocale: () => Localization.Locale | undefined = () => {
-  return systemLocales.find((locale) => systemTagMatchesSupportedTags(locale.languageTag))
+const detectDeviceLocale = (): AppLocale => {
+  const match = Localization.getLocales().find((locale) =>
+    isSupportedLocale(locale.languageTag?.split("-")[0]?.toLowerCase()),
+  )
+  return match ? mapToSupportedLocale(match.languageTag) : fallbackLocale
 }
 
-const locale = pickSupportedLocale()
-
-export let isRTL = false
-
-// Need to set RTL ASAP to ensure the app is rendered correctly. Waiting for i18n to init is too late.
-if (locale?.languageTag && locale?.textDirection === "rtl") {
-  I18nManager.allowRTL(true)
-  isRTL = true
-} else {
-  I18nManager.allowRTL(false)
+/** Resolution order: persisted user override → device locale → fallback (en). */
+export const resolveInitialLocale = (): AppLocale => {
+  const stored = loadString(LANGUAGE_STORAGE_KEY)
+  return isSupportedLocale(stored) ? stored : detectDeviceLocale()
 }
+
+// None of the supported locales are RTL, but we keep the export for callers.
+export const isRTL = false
+I18nManager.allowRTL(false)
 
 export const initI18n = async () => {
   i18n.use(initReactI18next)
 
   await i18n.init({
     resources,
-    lng: locale?.languageTag ?? fallbackLocale,
+    lng: resolveInitialLocale(),
     fallbackLng: fallbackLocale,
     interpolation: {
       escapeValue: false,
@@ -56,6 +61,12 @@ export const initI18n = async () => {
   })
 
   return i18n
+}
+
+/** Switches the in-app language and persists the override for the next launch. */
+export const changeAppLanguage = async (locale: AppLocale) => {
+  saveString(LANGUAGE_STORAGE_KEY, locale)
+  await i18n.changeLanguage(locale)
 }
 
 /**

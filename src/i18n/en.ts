@@ -1,27 +1,59 @@
 const en = {
   common: {
-    ok: "OK!",
-    cancel: "Cancel",
-    back: "Back",
-  },
-  welcomeScreen: {
-    postscript:
-      "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
-    readyForLaunch: "Your app, almost ready for launch!",
-    exciting: "(ohh, this is exciting!)",
+    actions: {
+      back: "Back",
+      cancel: "Cancel",
+      close: "Close",
+      done: "Done",
+      ok: "OK",
+      retry: "Retry",
+      save: "Save",
+    },
+    states: {
+      empty: "Nothing here yet",
+      error: "Something went wrong",
+      loading: "Loading…",
+      retry: "Try again",
+    },
   },
   errorScreen: {
-    title: "Something went wrong!",
     friendlySubtitle:
-      "This is the screen that your users will see in production when an error is thrown. You'll want to customize this message (located in `app/i18n/en.ts`) and probably the layout as well (`app/screens/ErrorScreen`). If you want to remove this entirely, check `app/app.tsx` for the <ErrorBoundary> component.",
-    reset: "RESET APP",
+      "The app ran into an unexpected problem. You can try again — if it keeps happening, please contact Vesta support.",
+    reset: "Restart app",
+    title: "Something went wrong",
   },
-  emptyStateComponent: {
-    generic: {
-      heading: "So empty... so sad",
-      content: "No data found yet. Try clicking the button to refresh or reload the app.",
-      button: "Let's try this again",
+  notifications: {
+    actions: {
+      editTemplate: "Edit template",
+      open: "Open",
+      reviewContract: "Review contract",
+      reviewContracts: "Review contracts",
+      reviewDocuments: "Review documents",
+      reviewPayslip: "Review payslip",
+      reviewPayslips: "Review payslips",
+      reviewPlanning: "Review planning",
+      reviewProfile: "Review profile",
+      reviewRequest: "Review request",
+      reviewShift: "Review shift",
+      reviewTime: "Review time",
+      setHours: "Set hours",
+      uploadNow: "Upload now",
+      viewShift: "View shift",
+      viewTasks: "View tasks",
+      viewUpdate: "View update",
     },
+    clearAll: "Clear all notifications",
+    emptyBody:
+      "No notifications right now. We'll let you know when something needs your attention.",
+    emptyTitle: "All caught up",
+    groups: {
+      earlier: "Earlier this week",
+      today: "Today",
+      yesterday: "Yesterday",
+    },
+    markAllRead: "Mark all read",
+    title: "Notifications",
+    unread: "{{count}} unread",
   },
 }
 
