@@ -1,10 +1,10 @@
+import { ensureSeededAccount, getAccountState } from "@/services/app/app.store"
+
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn(async () => null),
   setItemAsync: jest.fn(async () => {}),
   deleteItemAsync: jest.fn(async () => {}),
 }))
-
-import { ensureSeededAccount, getAccountState } from "@/services/app/app.store"
 
 describe("ensureSeededAccount", () => {
   it("creates a usable mock account for an unknown real accountId", () => {

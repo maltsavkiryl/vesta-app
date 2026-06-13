@@ -1,6 +1,10 @@
 import type { ApisauceInstance } from "apisauce"
 
-import { decodeJwtExp, type AccessTokenResponse, type EmployeeLoginResponse } from "@/features/auth/data/auth.api"
+import {
+  decodeJwtExp,
+  type AccessTokenResponse,
+  type EmployeeLoginResponse,
+} from "@/features/auth/data/auth.api"
 import type { AuthError } from "@/features/auth/data/auth.errors"
 import { failure, success, type Result } from "@/shared/result"
 
@@ -15,7 +19,9 @@ function expiresAtMs(token: AccessTokenResponse): number {
 }
 
 export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
-  async function exchange(idToken: string): Promise<Result<string, AuthError>> {
+  async function exchange(
+    idToken: string,
+  ): Promise<Result<{ accountId: string; profileComplete: boolean }, AuthError>> {
     const login = await authApi.post<EmployeeLoginResponse>("/auth/employees/login", { idToken })
     if (!login.ok || !login.data)
       return failure<AuthError>({ type: "invalid-credentials", message: "Sign-in failed." })
@@ -39,15 +45,29 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
     await tokenStore.set({
       accessToken: selected.data.access_token,
       expiresAt: expiresAtMs(selected.data),
+      accountId: employerUniqueCode,
+      profileComplete: selected.data.profile_complete,
     })
     currentAccountId = employerUniqueCode
-    return success(employerUniqueCode)
+    return success({
+      accountId: employerUniqueCode,
+      profileComplete: selected.data.profile_complete,
+    })
   }
 
   return {
-    async signIn(): Promise<Result<string, AuthError>> {
+    async signIn(): Promise<Result<{ accountId: string; profileComplete: boolean }, AuthError>> {
       const idToken = await acquireIdToken()
       return exchange(idToken)
+    },
+    async loadSession(): Promise<{ accountId: string; profileComplete: boolean } | null> {
+      const token = await tokenStore.load()
+      if (!token) {
+        currentAccountId = null
+        return null
+      }
+      currentAccountId = token.accountId
+      return { accountId: token.accountId, profileComplete: token.profileComplete }
     },
     async reauthenticate(): Promise<boolean> {
       try {

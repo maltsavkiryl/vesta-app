@@ -1,5 +1,5 @@
-import type { MockBackendSessionDto } from "@/services/app/app.types"
 import type { AppSession } from "@/services/app/app.session"
+import type { MockBackendSessionDto } from "@/services/app/app.types"
 
 import type { AuthSessionDto } from "./auth.dto"
 

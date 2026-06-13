@@ -32,7 +32,11 @@ const BaseConfig: ConfigBaseProps = {
     devObjectId: "dev-employee-oid",
     devEmail: "demo.employee@vesta.local",
     devName: "Demo Employee",
-    entra: { authority: "", clientId: "", scopes: ["openid", "profile", "email", "offline_access"] },
+    entra: {
+      authority: "",
+      clientId: "",
+      scopes: ["openid", "profile", "email", "offline_access"],
+    },
   },
 
   // This feature is particularly useful in development mode, but

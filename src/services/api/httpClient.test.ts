@@ -1,15 +1,21 @@
+import { tokenStore } from "@/services/auth/tokenStore"
+
+import { createHttpClient } from "./httpClient"
+
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn(async () => null),
   setItemAsync: jest.fn(async () => {}),
   deleteItemAsync: jest.fn(async () => {}),
 }))
 
-import { tokenStore } from "@/services/auth/tokenStore"
-import { createHttpClient } from "./httpClient"
-
 describe("httpClient", () => {
   it("retries once after re-auth on 401", async () => {
-    await tokenStore.set({ accessToken: "stale", expiresAt: Date.now() + 60000 })
+    await tokenStore.set({
+      accessToken: "stale",
+      expiresAt: Date.now() + 60000,
+      accountId: "emp-1",
+      profileComplete: true,
+    })
     let calls = 0
     const apisauce: any = {
       get: jest.fn(async () => {
@@ -20,7 +26,12 @@ describe("httpClient", () => {
       }),
     }
     const reauthenticate = jest.fn(async () => {
-      await tokenStore.set({ accessToken: "fresh", expiresAt: Date.now() + 60000 })
+      await tokenStore.set({
+        accessToken: "fresh",
+        expiresAt: Date.now() + 60000,
+        accountId: "emp-1",
+        profileComplete: true,
+      })
       return true
     })
     const client = createHttpClient(apisauce, reauthenticate)
@@ -31,7 +42,12 @@ describe("httpClient", () => {
   })
 
   it("does not loop when re-auth fails", async () => {
-    await tokenStore.set({ accessToken: "stale", expiresAt: Date.now() + 60000 })
+    await tokenStore.set({
+      accessToken: "stale",
+      expiresAt: Date.now() + 60000,
+      accountId: "emp-1",
+      profileComplete: true,
+    })
     const apisauce: any = {
       get: jest.fn(async () => ({ ok: false, status: 401, problem: "CLIENT_ERROR" })),
     }
@@ -43,10 +59,18 @@ describe("httpClient", () => {
   })
 
   it("retries once but returns 401 if retry still unauthorized", async () => {
-    await tokenStore.set({ accessToken: "stale", expiresAt: Date.now() + 60000 })
+    await tokenStore.set({
+      accessToken: "stale",
+      expiresAt: Date.now() + 60000,
+      accountId: "emp-1",
+      profileComplete: true,
+    })
     let calls = 0
     const apisauce: any = {
-      get: jest.fn(async () => { calls += 1; return { ok: false, status: 401, problem: "CLIENT_ERROR" } }),
+      get: jest.fn(async () => {
+        calls += 1
+        return { ok: false, status: 401, problem: "CLIENT_ERROR" }
+      }),
     }
     const reauthenticate = jest.fn(async () => true)
     const client = createHttpClient(apisauce, reauthenticate)

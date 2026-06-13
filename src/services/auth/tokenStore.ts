@@ -5,6 +5,8 @@ const KEY = "vesta-mobile.backend-token"
 export interface BackendToken {
   accessToken: string
   expiresAt: number // epoch ms
+  accountId: string
+  profileComplete: boolean
 }
 
 let cache: BackendToken | null = null
@@ -21,6 +23,12 @@ export const tokenStore = {
   },
   getAccessToken(): string | null {
     return cache?.accessToken ?? null
+  },
+  getAccountId(): string | null {
+    return cache?.accountId ?? null
+  },
+  getProfileComplete(): boolean {
+    return cache?.profileComplete ?? false
   },
   isExpired(nowMs: number): boolean {
     return !cache || cache.expiresAt <= nowMs

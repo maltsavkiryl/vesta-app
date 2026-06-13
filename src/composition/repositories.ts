@@ -568,9 +568,9 @@ function createApiRepositories() {
       async signIn() {
         const result = await authService.signIn()
         if (!result.ok) return result
-        ensureSeededAccount(result.data)
-        setSession({ accountId: result.data, signedInAt: new Date().toISOString() })
-        return success(buildSessionForAccount(result.data))
+        ensureSeededAccount(result.data.accountId)
+        setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
+        return success(toAppSession(getSession(), !result.data.profileComplete))
       },
       async signOut() {
         await authService.signOut()
@@ -578,9 +578,11 @@ function createApiRepositories() {
         return toAppSession({ accountId: null })
       },
       async getSession() {
-        const accountId = authService.getCurrentAccountId()
-        if (!accountId) return toAppSession({ accountId: null })
-        return buildSessionForAccount(accountId)
+        const restored = await authService.loadSession()
+        if (!restored) return toAppSession({ accountId: null })
+        ensureSeededAccount(restored.accountId)
+        setSession({ accountId: restored.accountId, signedInAt: new Date().toISOString() })
+        return toAppSession(getSession(), !restored.profileComplete)
       },
       register: async () =>
         failure<AuthError>({ type: "validation", message: "Use Continue with email." }),

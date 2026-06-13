@@ -37,7 +37,10 @@ export interface UpdateMyEmployeeDto {
 }
 
 function joinStreet(street?: string | null, houseNumber?: string | null): string {
-  return [street, houseNumber].filter((part) => part != null && part !== "").join(" ").trim()
+  return [street, houseNumber]
+    .filter((part) => part != null && part !== "")
+    .join(" ")
+    .trim()
 }
 
 /**
@@ -62,7 +65,8 @@ export function toUserProfile(dto: EmployeeDto, base?: Partial<UserProfile>): Us
     nationality: base?.nationality ?? "",
     homeCity: dto.address?.city ?? base?.homeCity ?? "",
     address: {
-      street: joinStreet(dto.address?.street, dto.address?.houseNumber) || (base?.address?.street ?? ""),
+      street:
+        joinStreet(dto.address?.street, dto.address?.houseNumber) || (base?.address?.street ?? ""),
       postalCode: dto.address?.zipCode ?? base?.address?.postalCode ?? "",
       city: dto.address?.city ?? base?.address?.city ?? "",
       country: dto.address?.country ?? base?.address?.country ?? "",
@@ -123,7 +127,8 @@ export function toUpdateMyEmployeeDto(profile: Partial<UserProfile>): UpdateMyEm
   if (profile.phone !== undefined) dto.phoneNumber = profile.phone
   if (profile.language !== undefined) dto.culture = profile.language
   if (profile.bankAccount?.iban !== undefined) dto.iban = profile.bankAccount.iban
-  if (profile.legal?.socialSecurityNumber !== undefined) dto.ssin = profile.legal.socialSecurityNumber
+  if (profile.legal?.socialSecurityNumber !== undefined)
+    dto.ssin = profile.legal.socialSecurityNumber
 
   if (profile.address !== undefined) {
     dto.address = {

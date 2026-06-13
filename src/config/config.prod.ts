@@ -16,6 +16,10 @@ export default {
     devObjectId: "dev-employee-oid",
     devEmail: "demo.employee@vesta.local",
     devName: "Demo Employee",
-    entra: { authority: "", clientId: "", scopes: ["openid", "profile", "email", "offline_access"] },
+    entra: {
+      authority: "",
+      clientId: "",
+      scopes: ["openid", "profile", "email", "offline_access"],
+    },
   },
 }

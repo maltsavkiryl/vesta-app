@@ -1,3 +1,5 @@
+import { acquireIdToken, refreshIdToken } from "./identityProvider"
+
 jest.mock("@/config", () => ({
   __esModule: true,
   default: {
@@ -10,8 +12,6 @@ jest.mock("@/config", () => ({
     },
   },
 }))
-
-import { acquireIdToken, refreshIdToken } from "./identityProvider"
 
 function decode(token: string) {
   const padded = token.replace(/-/g, "+").replace(/_/g, "/")
