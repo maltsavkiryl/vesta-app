@@ -9,6 +9,7 @@ import {
   HomeUpdatesSection,
 } from "@/features/home/components/HomeTaskSections"
 import { HomeTimeCard } from "@/features/home/components/HomeTimeCard"
+import { PayrollProfileNudge } from "@/features/home/components/PayrollProfileNudge"
 import { UpcomingShiftsSection } from "@/features/home/components/UpcomingShiftsSection"
 import { useHomeScreen } from "@/features/home/useHomeScreen"
 import { AppScrollScreen, EmptyState, MotionView, useDesignTokens } from "@/ui"
@@ -46,13 +47,17 @@ export function HomeScreen() {
     isLoading,
     refetch,
     homeSummary,
+    dismissPayrollNudge,
     openLatestPayslip,
     openNotifications,
+    openPayrollProfile,
     openSchedule,
     openShift,
     openTasks,
+    payrollProfileGaps,
     pendingTasks,
     runAction,
+    shouldShowPayrollNudge,
     shouldShowTasksSection,
     shouldShowUpdatesSection,
     upcomingShifts,
@@ -105,6 +110,14 @@ export function HomeScreen() {
       </MotionView>
 
       <View style={styles.stack}>
+        {shouldShowPayrollNudge ? (
+          <PayrollProfileNudge
+            gaps={payrollProfileGaps}
+            onPress={openPayrollProfile}
+            onDismiss={dismissPayrollNudge}
+          />
+        ) : null}
+
         <MotionView delay={50}>
           <HomeTimeCard />
         </MotionView>

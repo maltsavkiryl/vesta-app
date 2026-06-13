@@ -5,9 +5,23 @@ import type { AppNavigationRoute, Shift } from "@/core/models"
 import { useAppAction } from "@/features/actions/useAppAction"
 import { payslips } from "@/features/documents/documents.data"
 import { useHomeQuery } from "@/features/home/data/home.queries"
+import { useProfileQuery } from "@/features/profile/data/profile.queries"
+import { getPayrollProfileGaps } from "@/features/profile/payrollProfile"
 
 import type { TaskItem } from "./components/HomeTaskSections"
 import { deriveHomeScreenPolicy, sortTasksByUrgency } from "./homeScreenPolicy"
+
+// Maps the first payroll gap to the profile-detail section that edits it, so the
+// nudge deep-links employees straight to the field that's holding up payroll.
+const GAP_SECTION_ROUTE: Record<string, string> = {
+  firstName: "/profile/personal",
+  lastName: "/profile/personal",
+  email: "/profile/contact",
+  phone: "/profile/contact",
+  iban: "/profile/banking",
+  ssin: "/profile/legal",
+  address: "/profile/address",
+}
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -20,8 +34,10 @@ function getGreeting() {
 export function useHomeScreen() {
   const router = useRouter()
   const { data: home, isError, isLoading, refetch } = useHomeQuery()
+  const { data: profile, isLoading: isProfileLoading } = useProfileQuery()
   const { runAction } = useAppAction()
   const [greeting, setGreeting] = useState(getGreeting())
+  const [payrollNudgeDismissed, setPayrollNudgeDismissed] = useState(false)
   const latestPayslip = payslips[0]
 
   useEffect(() => {
@@ -49,6 +65,22 @@ export function useHomeScreen() {
   )
   const completeTask = useCallback((task: TaskItem) => void runAction(task.action), [runAction])
 
+  const payrollProfileGaps = useMemo(
+    () => (profile ? getPayrollProfileGaps(profile) : []),
+    [profile],
+  )
+  // Loaded, has gaps, and not dismissed this session. We never persist the
+  // dismissal — payroll matters, so it's fine for the nudge to return next launch.
+  const shouldShowPayrollNudge =
+    !isProfileLoading && payrollProfileGaps.length > 0 && !payrollNudgeDismissed
+  const dismissPayrollNudge = useCallback(() => setPayrollNudgeDismissed(true), [])
+  const openPayrollProfile = useCallback(() => {
+    const route = payrollProfileGaps[0]
+      ? (GAP_SECTION_ROUTE[payrollProfileGaps[0].key] ?? "/profile/personal")
+      : "/profile/personal"
+    router.push(route as never)
+  }, [payrollProfileGaps, router])
+
   return {
     completeTask,
     greeting,
@@ -63,9 +95,13 @@ export function useHomeScreen() {
       if (!latestPayslip) return
       router.push(`/(app)/document-payslip/${latestPayslip.id}` as never)
     },
+    openPayrollProfile,
     openSchedule: () => navigate("/(app)/(tabs)/schedule"),
     openShift,
     openTasks: () => navigate("/(app)/tasks"),
+    payrollProfileGaps,
+    dismissPayrollNudge,
+    shouldShowPayrollNudge,
     pendingTasks,
     priorityTask: policy.priorityTask,
     runAction,
