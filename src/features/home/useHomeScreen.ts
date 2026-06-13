@@ -7,7 +7,7 @@ import { payslips } from "@/features/documents/documents.data"
 import { useHomeQuery } from "@/features/home/data/home.queries"
 
 import type { TaskItem } from "./components/HomeTaskSections"
-import { deriveHomeScreenPolicy } from "./homeScreenPolicy"
+import { deriveHomeScreenPolicy, sortTasksByUrgency } from "./homeScreenPolicy"
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -31,7 +31,7 @@ export function useHomeScreen() {
 
   const upcomingShifts = home?.shifts.slice(1, 7) ?? []
   const pendingTasks = useMemo(
-    () => (home?.tasks ?? []).filter((task) => !task.completed),
+    () => sortTasksByUrgency((home?.tasks ?? []).filter((task) => !task.completed)),
     [home?.tasks],
   )
   const unreadCount = home?.unreadNotifications ?? 0
