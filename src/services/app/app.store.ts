@@ -6,6 +6,7 @@ import { load, remove, save } from "@/utils/storage"
 import { isValidTimeEntry } from "./app-state.reducer"
 import {
   createMockBackendDb,
+  createSeededAccountRecord,
   LEGACY_APP_STATE_STORAGE_KEY,
   MOCK_BACKEND_STORAGE_KEY,
   MOCK_BACKEND_VERSION,
@@ -151,6 +152,29 @@ export function prependAccount(account: MockAccountDto, session: MockBackendSess
     session: nextDb.session,
     state: buildAccountState(account, "signedIn"),
   }
+}
+
+/**
+ * Bridge a real (HTTP) account id into the mock backend so that still-mock
+ * features (schedule, time, documents, etc.) have a usable seeded account to
+ * read from. Idempotent: a second call for the same id is a no-op.
+ */
+export function ensureSeededAccount(accountId: string): void {
+  const db = ensureDb()
+  if (db.accounts.some((account) => account.id === accountId)) return
+
+  const email = `${accountId}@vesta.local`
+  const seededAccount: MockAccountDto = {
+    ...createSeededAccountRecord({
+      email,
+      firstName: "",
+      lastName: "",
+      password: "",
+    }),
+    id: accountId,
+  }
+
+  writeDb({ ...db, accounts: [seededAccount, ...db.accounts] })
 }
 
 export function commitAccountPasswordChange(

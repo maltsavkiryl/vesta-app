@@ -11,6 +11,7 @@ export default {
   SUPPORT_EMAIL: "support@vesta.services",
 
   AUTH: {
+    apiKey: "",
     devTokenEnabled: false,
     devObjectId: "dev-employee-oid",
     devEmail: "demo.employee@vesta.local",

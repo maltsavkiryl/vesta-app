@@ -8,7 +8,9 @@
 import { ApisauceInstance, create } from "apisauce"
 
 import Config from "@/config"
+import { createAuthService } from "@/services/auth/authService"
 
+import { createHttpClient } from "./httpClient"
 import type { ApiConfig } from "./types"
 
 /**
@@ -44,3 +46,14 @@ export class Api {
 
 // Singleton instance of the API for convenience
 export const api = new Api()
+
+// Every request to the backend must carry the API key and api-version.
+api.apisauce.setHeader("X-Api-Key", Config.AUTH.apiKey)
+api.apisauce.addRequestTransform((request) => {
+  request.params = { "api-version": "1.0", ...(request.params ?? {}) }
+})
+
+// Auth-bound services. Created AFTER the header/transform setup so every
+// request these issue inherits the API key and api-version configuration.
+export const authService = createAuthService(api.apisauce)
+export const httpClient = createHttpClient(api.apisauce, () => authService.reauthenticate())

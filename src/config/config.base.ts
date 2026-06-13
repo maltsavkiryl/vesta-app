@@ -3,6 +3,7 @@ export interface ConfigBaseProps {
   DEMO_AUTH_ENABLED: boolean
   SUPPORT_EMAIL: string
   AUTH: {
+    apiKey: string
     devTokenEnabled: boolean
     devObjectId: string
     devEmail: string
@@ -26,6 +27,7 @@ const BaseConfig: ConfigBaseProps = {
   SUPPORT_EMAIL: "support@vesta.services",
 
   AUTH: {
+    apiKey: "",
     devTokenEnabled: false,
     devObjectId: "dev-employee-oid",
     devEmail: "demo.employee@vesta.local",

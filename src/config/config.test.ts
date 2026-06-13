@@ -2,6 +2,7 @@ import Config from "@/config"
 
 describe("auth config", () => {
   it("exposes an AUTH block with the dev-token flag and entra fields", () => {
+    expect(typeof Config.AUTH.apiKey).toBe("string")
     expect(typeof Config.AUTH.devTokenEnabled).toBe("boolean")
     expect(typeof Config.AUTH.entra.authority).toBe("string")
     expect(typeof Config.AUTH.entra.clientId).toBe("string")
