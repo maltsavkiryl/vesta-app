@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons"
 
+import type { AppLocale } from "@/i18n"
+
 export type ProfileOverviewSection = "personal" | "employment" | "settings" | "support"
 export type ProfileRoute =
   | "/profile/personal"
@@ -40,7 +42,16 @@ export type SectionKey =
 
 export type JoinMode = "code" | "search"
 
-export const LANGUAGE_OPTIONS = ["English (UK)", "Nederlands", "Français"] as const
+export interface LanguageOption {
+  label: string
+  value: AppLocale
+}
+
+export const LANGUAGE_OPTIONS: readonly LanguageOption[] = [
+  { label: "Nederlands", value: "nl" },
+  { label: "Français", value: "fr" },
+  { label: "English", value: "en" },
+]
 
 export const PROFILE_OVERVIEW_TITLES: Record<ProfileOverviewSection, string> = {
   employment: "Work",

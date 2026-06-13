@@ -4,14 +4,15 @@ import type { NotificationItem } from "@/core/models"
 import { useAppAction } from "@/features/actions/useAppAction"
 import { useNotificationActions } from "@/features/notifications/data/notifications.mutations"
 import { useNotificationsStateQuery } from "@/features/notifications/data/notifications.queries"
+import type { TxKeyPath } from "@/i18n"
 
-export const groupLabels = {
-  earlier: "Earlier this week",
-  today: "Today",
-  yesterday: "Yesterday",
-} as const
+export const groupLabelTx = {
+  earlier: "notifications:groups.earlier",
+  today: "notifications:groups.today",
+  yesterday: "notifications:groups.yesterday",
+} satisfies Record<string, TxKeyPath>
 
-export type NotificationGroupKey = keyof typeof groupLabels
+export type NotificationGroupKey = keyof typeof groupLabelTx
 
 export function groupNotification(notification: NotificationItem): NotificationGroupKey {
   if (notification.relativeTime.includes("h") || notification.relativeTime.includes("m")) {

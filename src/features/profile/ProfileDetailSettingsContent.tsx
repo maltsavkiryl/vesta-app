@@ -10,12 +10,9 @@ import {
   SecuritySection,
   SupportSection,
 } from "@/features/profile/ProfileDetailSections"
-import {
-  AppearanceSection,
-  LANGUAGE_OPTIONS,
-  MotionSection,
-} from "@/features/profile/sections/ProfileSectionShared"
+import { AppearanceSection, MotionSection } from "@/features/profile/sections/ProfileSectionShared"
 import { openSupportComposer, reportProblem } from "@/features/profile/supportEmail"
+import { changeAppLanguage } from "@/i18n"
 import { useAppSession } from "@/providers/app-provider"
 
 import type { SectionKey } from "./profileSections"
@@ -98,8 +95,11 @@ export const SETTINGS_SECTION_CONTENT: Partial<
     editable: false,
     render: ({ state, tokens, updateProfile }) => (
       <LanguageSection
-        currentLanguage={state.profile.language as (typeof LANGUAGE_OPTIONS)[number]}
-        onSelectLanguage={(language) => updateProfile({ language })}
+        currentLanguage={state.profile.language}
+        onSelectLanguage={(language) => {
+          updateProfile({ language })
+          void changeAppLanguage(language)
+        }}
         tokens={tokens}
       />
     ),

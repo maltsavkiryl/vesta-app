@@ -145,7 +145,7 @@ const profile: UserProfile = {
   },
   onboardingComplete: true,
   bio: "Front-of-house employee balancing hospitality, availability planning, and shift swaps.",
-  language: "English (UK)",
+  language: "en",
   motionPreference: "system",
   themePreference: "system",
   security: {
