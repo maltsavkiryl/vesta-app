@@ -70,6 +70,7 @@ module.exports = (_: ConfigContext): ExpoConfig => {
       "expo-font",
       "expo-web-browser",
       "expo-secure-store",
+      "expo-notifications",
       [
         "expo-splash-screen",
         {
