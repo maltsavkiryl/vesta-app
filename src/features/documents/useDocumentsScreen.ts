@@ -8,7 +8,7 @@ import { isRequiredDocument, matchesQuery } from "./documents.utils"
 import { showDocumentUploadOptions } from "./documentUploadFlow"
 
 export function useDocumentsScreen() {
-  const { documents, contracts } = useDocumentsStateQuery()
+  const { documents, contracts, isError, isLoading, refetch } = useDocumentsStateQuery()
   const { uploadDocument } = useDocumentActions()
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
@@ -48,10 +48,13 @@ export function useDocumentsScreen() {
     filteredContracts,
     filteredDocuments,
     filteredPayslips,
+    isError,
+    isLoading,
     isSearching,
     missingCount,
     openUploadOptions,
     query,
+    refetch,
     setIsSearching,
     setQuery,
   }

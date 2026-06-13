@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 
 import { EarningsSummaryCard } from "@/features/home/components/EarningsSummaryCard"
 import { HomeHeader } from "@/features/home/components/HomeHeader"
+import { HomeScreenSkeleton } from "@/features/home/components/HomeScreenSkeleton"
 import {
   HomeTasksDrawerGroups,
   HomeTasksSection,
@@ -10,7 +11,8 @@ import {
 import { HomeTimeCard } from "@/features/home/components/HomeTimeCard"
 import { UpcomingShiftsSection } from "@/features/home/components/UpcomingShiftsSection"
 import { useHomeScreen } from "@/features/home/useHomeScreen"
-import { AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
+import { AppScrollScreen, EmptyState, MotionView, useDesignTokens } from "@/ui"
+import { useRefreshHandler } from "@/utils/useRefreshHandler"
 
 export function HomeTasksScreen() {
   const tokens = useDesignTokens()
@@ -40,6 +42,9 @@ export function HomeScreen() {
     completeTask,
     greeting,
     home,
+    isError,
+    isLoading,
+    refetch,
     homeSummary,
     openLatestPayslip,
     openNotifications,
@@ -52,9 +57,43 @@ export function HomeScreen() {
     shouldShowUpdatesSection,
     upcomingShifts,
   } = useHomeScreen()
+  const { onRefresh, refreshing } = useRefreshHandler(refetch)
+
+  if (isLoading && !home) {
+    return (
+      <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
+        <HomeScreenSkeleton />
+      </AppScrollScreen>
+    )
+  }
+
+  if (isError && !home) {
+    return (
+      <AppScrollScreen
+        variant="grouped"
+        contentContainerStyle={styles.screenContent}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+      >
+        <View style={styles.errorState}>
+          <EmptyState
+            actionLabel="Try again"
+            onAction={onRefresh}
+            subtitle="We couldn't load your home overview. Check your connection and try again."
+            title="Something went wrong"
+          />
+        </View>
+      </AppScrollScreen>
+    )
+  }
 
   return (
-    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
+    <AppScrollScreen
+      variant="grouped"
+      contentContainerStyle={styles.screenContent}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+    >
       <MotionView>
         <HomeHeader
           firstName={home?.profile.firstName ?? ""}
@@ -111,6 +150,9 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorState: {
+    marginTop: 24,
+  },
   nativeSheetContent: {
     gap: 16,
     paddingBottom: 36,

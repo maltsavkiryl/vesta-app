@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "expo-router"
 
 import type { AppNavigationRoute, Shift } from "@/core/models"
-import { payslips } from "@/features/documents/documents.data"
 import { useAppAction } from "@/features/actions/useAppAction"
+import { payslips } from "@/features/documents/documents.data"
 import { useHomeQuery } from "@/features/home/data/home.queries"
 
 import type { TaskItem } from "./components/HomeTaskSections"
@@ -19,7 +19,7 @@ function getGreeting() {
 
 export function useHomeScreen() {
   const router = useRouter()
-  const home = useHomeQuery()
+  const { data: home, isError, isLoading, refetch } = useHomeQuery()
   const { runAction } = useAppAction()
   const [greeting, setGreeting] = useState(getGreeting())
   const latestPayslip = payslips[0]
@@ -53,6 +53,9 @@ export function useHomeScreen() {
     completeTask,
     greeting,
     home,
+    isError,
+    isLoading,
+    refetch,
     homeSummary: policy.homeSummary,
     nextShift: policy.nextShift,
     openNotifications: () => navigate("/notifications"),
