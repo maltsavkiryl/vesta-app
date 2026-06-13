@@ -15,6 +15,7 @@ export function SignInEmailScreen() {
     clearPassword,
     email,
     error,
+    fillDemoCredentials,
     handleContinue,
     handleEmailChange,
     handlePasswordChange,
@@ -121,6 +122,23 @@ export function SignInEmailScreen() {
           onPress={() => router.replace("/(auth)/register")}
           variant="secondary"
         />
+
+        {__DEV__ && fillDemoCredentials ? (
+          <Pressable
+            accessibilityLabel="Fill demo credentials"
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={fillDemoCredentials}
+            style={styles.inlineLinkRow}
+          >
+            <Text
+              text="Fill demo credentials (dev)"
+              size="xxs"
+              weight="medium"
+              style={{ color: tokens.accent }}
+            />
+          </Pressable>
+        ) : null}
       </View>
     </AuthFormLayout>
   )
