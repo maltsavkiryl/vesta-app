@@ -7,9 +7,9 @@ import {
   useDesignTokens,
 } from "@/ui"
 import {
+  ClockOutCelebration,
   ClockOutContent,
   ClockOutEmptyState,
-  ClockOutSuccessState,
 } from "@/features/time/ClockOutSections"
 import { useClockOutScreen } from "@/features/time/useClockOutScreen"
 
@@ -39,8 +39,8 @@ export function ClockOutScreen() {
       style={{ backgroundColor: tokens.groupedBackground }}
       topInset="none"
     >
-      {screen.confirmed ? (
-        <ClockOutSuccessState earnings={screen.summary.earnings} workedLabel={screen.summary.workedLabel} />
+      {screen.confirmed && screen.celebration ? (
+        <ClockOutCelebration data={screen.celebration} onDone={screen.handleDismiss} />
       ) : (
         <ClockOutContent onFinish={screen.handleFinish} onKeepWorking={router.back} summary={screen.summary} />
       )}

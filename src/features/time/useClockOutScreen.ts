@@ -16,13 +16,20 @@ export function useClockOutScreen() {
   const clockSession = query.data?.clockSession
   // Real, per-employee pay rate sourced from the time overview earnings summary.
   const hourlyRate = query.data?.earnings.averageHourlyRate ?? 0
+  const shiftsWorked = query.data?.earnings.shiftsWorked ?? 0
   const summary = useClockSummary()
   const [confirmed, setConfirmed] = useState(false)
 
+  const handleDismiss = () => {
+    router.replace("/(app)/(tabs)/time")
+  }
+
   if (!clockSession) {
     return {
+      celebration: null,
       clockSession,
       confirmed,
+      handleDismiss,
       handleFinish: async () => {},
       summary: null,
     }
@@ -43,13 +50,21 @@ export function useClockOutScreen() {
     }
 
     fireHaptic("success")
+    // No auto-redirect — the celebration is a moment the employee dismisses.
     setConfirmed(true)
-    setTimeout(() => router.replace("/(app)/(tabs)/time"), 900)
   }
 
   return {
+    // The just-finished shift counts toward the running monthly total.
+    celebration: {
+      breakLabel: formatDurationLabel(summary.breakSeconds),
+      earnedToday: earnings,
+      shiftsWorked: shiftsWorked + 1,
+      workedLabel,
+    },
     clockSession,
     confirmed,
+    handleDismiss,
     handleFinish,
     summary: {
       breakLabel: formatDurationLabel(summary.breakSeconds),
