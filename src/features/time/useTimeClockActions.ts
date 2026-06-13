@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { Alert } from "react-native"
 
 import type { Employer, Shift, UserProfile } from "@/core/models"
@@ -7,7 +7,7 @@ import { formatClockStartDistance, resolveClockStart } from "@/features/time/dat
 import { fireHaptic } from "@/utils/haptics"
 
 import { showClockEmployerOptions } from "./showClockEmployerOptions"
-import { captureLocationSnapshot, captureOptionalClockInPhoto } from "./timeCapture"
+import { captureClockInProofPhoto, captureLocationSnapshot } from "./timeCapture"
 
 export function useTimeClockActions({
   employers,
@@ -24,55 +24,73 @@ export function useTimeClockActions({
   startBreak: ReturnType<typeof useTimeActions>["startBreak"]
   startClock: ReturnType<typeof useTimeActions>["startClock"]
 }) {
+  // Drives an inline "Getting location…" affordance on the CTA instead of a
+  // frozen button, so clock-in feels responsive while we resolve context.
+  const [clockInPending, setClockInPending] = useState(false)
+
   const handleClockIn = useCallback(async () => {
-    const occurredAt = new Date().toISOString()
-    const location = await captureLocationSnapshot()
-    const resolution = resolveClockStart({
-      employers,
-      location,
-      profileRole,
-      shifts,
-    })
-    if (!resolution.ok) {
-      fireHaptic("error")
-      Alert.alert("Clock-in unavailable", resolution.error.message)
-      return
-    }
-
-    let selectedOption = resolution.data.recommendedOption
-    if (resolution.data.mode === "multiple-employers") {
-      const selectedEmployerId = await showClockEmployerOptions({
-        options: resolution.data.options.map((option) => ({
-          description: option.inGeofence
-            ? "In geofence"
-            : (formatClockStartDistance(option.distanceMeters) ?? option.locationLabel),
-          id: option.employerId,
-          title: option.employerName,
-        })),
+    if (clockInPending) return
+    setClockInPending(true)
+    try {
+      const occurredAt = new Date().toISOString()
+      const location = await captureLocationSnapshot()
+      const resolution = resolveClockStart({
+        employers,
+        location,
+        profileRole,
+        shifts,
       })
-      if (!selectedEmployerId) return
-      selectedOption =
-        resolution.data.options.find((option) => option.employerId === selectedEmployerId) ??
-        selectedOption
+      if (!resolution.ok) {
+        fireHaptic("error")
+        Alert.alert("Clock-in unavailable", resolution.error.message)
+        return
+      }
+
+      let selectedOption = resolution.data.recommendedOption
+      if (resolution.data.mode === "multiple-employers") {
+        const selectedEmployerId = await showClockEmployerOptions({
+          options: resolution.data.options.map((option) => ({
+            description: option.inGeofence
+              ? "In geofence"
+              : (formatClockStartDistance(option.distanceMeters) ?? option.locationLabel),
+            id: option.employerId,
+            title: option.employerName,
+          })),
+        })
+        if (!selectedEmployerId) return
+        selectedOption =
+          resolution.data.options.find((option) => option.employerId === selectedEmployerId) ??
+          selectedOption
+      }
+
+      // Only employers that explicitly require photo proof prompt for a selfie.
+      // The default (proofRequired falsy) skips the camera entirely.
+      const selectedEmployer = employers.find(
+        (employer) => employer.id === selectedOption.context.employerId,
+      )
+      let proofPhoto: Awaited<ReturnType<typeof captureClockInProofPhoto>> | undefined
+      if (selectedEmployer?.clockConfig.proofRequired) {
+        proofPhoto = await captureClockInProofPhoto()
+        if (proofPhoto === null) return
+      }
+
+      const result = await startClock({
+        clockContext: selectedOption.context,
+        occurredAt,
+        location,
+        proofPhoto: proofPhoto ?? undefined,
+      })
+      if (!result.ok) {
+        fireHaptic("error")
+        Alert.alert("Clock-in unavailable", result.error.message)
+        return
+      }
+
+      fireHaptic("success")
+    } finally {
+      setClockInPending(false)
     }
-
-    const proofPhoto = await captureOptionalClockInPhoto()
-    if (proofPhoto === null) return
-
-    const result = await startClock({
-      clockContext: selectedOption.context,
-      occurredAt,
-      location,
-      proofPhoto,
-    })
-    if (!result.ok) {
-      fireHaptic("error")
-      Alert.alert("Clock-in unavailable", result.error.message)
-      return
-    }
-
-    fireHaptic("success")
-  }, [employers, profileRole, shifts, startClock])
+  }, [clockInPending, employers, profileRole, shifts, startClock])
 
   const handleStartBreak = useCallback(async () => {
     const result = await startBreak({
@@ -103,6 +121,7 @@ export function useTimeClockActions({
   }, [endBreak])
 
   return {
+    clockInPending,
     handleClockIn,
     handleEndBreak,
     handleStartBreak,

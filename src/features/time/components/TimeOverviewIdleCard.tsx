@@ -21,6 +21,7 @@ export function IdleCardContent({
   idleState,
   onClockIn,
   onToggleCollapsed,
+  pending = false,
   showCollapseToggle = true,
 }: {
   collapsed: boolean
@@ -28,6 +29,7 @@ export function IdleCardContent({
   idleState: IdleClockCardState
   onClockIn: () => void
   onToggleCollapsed?: () => void
+  pending?: boolean
   showCollapseToggle?: boolean
 }) {
   const tokens = useDesignTokens()
@@ -150,8 +152,8 @@ export function IdleCardContent({
         )}
 
         <InCardActionButton
-          disabled={idleState.disabled}
-          label={idleState.actionLabel}
+          disabled={idleState.disabled || pending}
+          label={pending ? "Getting location…" : idleState.actionLabel}
           onPress={onClockIn}
           stopPropagation
         />
