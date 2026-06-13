@@ -2,12 +2,8 @@ import { StyleSheet, View } from "react-native"
 
 import type { NotificationItem } from "@/core/models"
 import { ListCard, SectionBlock, Text, useDesignTokens } from "@/ui"
-import {
-  completedTaskHistory,
-  TaskRow,
-  type TaskItem,
-  UpdateRow,
-} from "./HomeTaskSectionRows"
+
+import { completedTaskHistory, TaskRow, type TaskItem, UpdateRow } from "./HomeTaskSectionRows"
 
 export type { TaskItem } from "./HomeTaskSectionRows"
 

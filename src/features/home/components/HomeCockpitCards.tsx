@@ -39,7 +39,11 @@ export function HomeCockpitPrimaryCard({ action }: { action: CockpitAction }) {
             weight="bold"
             style={[styles.primaryTitle, { color: tokens.textPrimary }]}
           />
-          <Text text={action.subtitle} size="xs" style={[styles.primarySubtitle, { color: tokens.textSecondary }]} />
+          <Text
+            text={action.subtitle}
+            size="xs"
+            style={[styles.primarySubtitle, { color: tokens.textSecondary }]}
+          />
         </View>
 
         <View
@@ -48,7 +52,12 @@ export function HomeCockpitPrimaryCard({ action }: { action: CockpitAction }) {
             { backgroundColor: tokens.backgroundMuted, borderColor: `${tokens.accent}10` },
           ]}
         >
-          <Text text={action.label} size="xs" weight="semiBold" style={{ color: tokens.textPrimary }} />
+          <Text
+            text={action.label}
+            size="xs"
+            weight="semiBold"
+            style={{ color: tokens.textPrimary }}
+          />
           <Ionicons color={tokens.accent} name="arrow-forward-outline" size={16} />
         </View>
       </SurfaceCard>
@@ -72,7 +81,10 @@ export function HomeCockpitMiniCard({
   const tokens = useDesignTokens()
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.miniPressable, pressed && styles.pressed]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.miniPressable, pressed && styles.pressed]}
+    >
       <SurfaceCard elevated style={styles.miniCard}>
         <View style={styles.miniHeader}>
           <View style={[styles.iconTile, { backgroundColor: `${tone}14` }]}>

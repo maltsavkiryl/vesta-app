@@ -8,7 +8,12 @@ const originalConsoleError = console.error
 
 let mockParams: { category?: string; shiftId?: string } = {}
 let mockState: {
-  planningWindows: Array<{ deadline: string; endDate: string; startDate: string; status: "open" | "closed" | "submitted" }>
+  planningWindows: Array<{
+    deadline: string
+    endDate: string
+    startDate: string
+    status: "open" | "closed" | "submitted"
+  }>
   shifts: Array<{
     date: string
     dayLabel: string
@@ -103,7 +108,9 @@ jest.mock("@/theme/context", () => ({
       return Object.assign(
         {},
         ...entries.map((entry) =>
-          typeof entry === "function" ? entry({ colors: { text: "#1C1C1E" }, isDark: false }) : entry,
+          typeof entry === "function"
+            ? entry({ colors: { text: "#1C1C1E" }, isDark: false })
+            : entry,
         ),
       )
     },
@@ -187,7 +194,11 @@ describe("RequestScreen", () => {
 
     const submitButton = screen.getByRole("button", { name: "Send shift swap" })
 
-    expect(screen.getByText("Pick the exact shift that needs support so everyone reviews the right context.")).toBeTruthy()
+    expect(
+      screen.getByText(
+        "Pick the exact shift that needs support so everyone reviews the right context.",
+      ),
+    ).toBeTruthy()
     fireEvent.press(submitButton)
     expect(mockCreateRequest).not.toHaveBeenCalled()
 

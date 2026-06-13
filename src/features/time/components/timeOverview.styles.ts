@@ -41,11 +41,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     width: 32,
   },
-  earningsTickerRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 6,
-  },
   dangerAction: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -57,6 +52,11 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 14,
+  },
+  earningsTickerRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
   },
   flex: {
     flex: 1,

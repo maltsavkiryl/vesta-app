@@ -10,8 +10,8 @@ import Animated, {
 
 import { formatDurationLabel, formatTimeValue } from "@/core/date"
 import { formatCurrency } from "@/core/format"
-import { ProgressBar, Text, useDesignTokens } from "@/ui"
 import { useAppMotion } from "@/providers/motion-provider"
+import { ProgressBar, Text, useDesignTokens } from "@/ui"
 
 import { formatSeconds } from "../time.utils"
 import { timeHeroColors } from "./TimeHeroCard"

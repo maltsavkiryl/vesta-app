@@ -226,9 +226,7 @@ describe("overview section actions", () => {
 
     expect(screen.getByText("Nothing in your history yet")).toBeTruthy()
     expect(
-      screen.getByText(
-        "Completed shifts appear here after you clock out for the first time.",
-      ),
+      screen.getByText("Completed shifts appear here after you clock out for the first time."),
     ).toBeTruthy()
   })
 })

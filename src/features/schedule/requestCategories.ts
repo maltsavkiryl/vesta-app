@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons"
 import type { ButtonProps } from "@expo/ui/swift-ui"
+import { Ionicons } from "@expo/vector-icons"
 
 import type { RequestCategory, RequestType } from "@/core/models"
 

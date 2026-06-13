@@ -6,13 +6,9 @@ import { Text, appTypography, useDesignTokens } from "@/ui"
 
 import { formatHours, formatSeconds } from "../time.utils"
 import { timeHeroColors } from "./TimeHeroCard"
-import {
-  ActiveCardLocation,
-  ActiveCardMetrics,
-  EarningsTicker,
-} from "./TimeOverviewActiveCardStatus"
 import { styles } from "./timeOverview.styles"
 import type { TimeOverviewCardController } from "./timeOverview.types"
+import { EarningsTicker } from "./TimeOverviewActiveCardStatus"
 import { CollapseToggle, HeroStatusPill } from "./TimeOverviewShared"
 
 type ClockSession = TimeOverviewCardController["state"]["clockSession"]
@@ -44,9 +40,7 @@ export function ActiveCardHeader({
 }) {
   const tokens = useDesignTokens()
   const venueLabel =
-    clockSession.source === "shift" &&
-    clockSession.scheduledStart &&
-    clockSession.scheduledEnd
+    clockSession.source === "shift" && clockSession.scheduledStart && clockSession.scheduledEnd
       ? `${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${clockSession.venueName}`
       : clockSession.venueName
   // The big timer is the honest payable (worked-minus-break) figure — the same

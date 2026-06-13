@@ -66,7 +66,10 @@ describe("useTimeClockActions clock-in proof", () => {
         inGeofence: true,
         locationLabel: "Here",
       }
-      return { ok: true, data: { mode: "single-employer", options: [option], recommendedOption: option } }
+      return {
+        ok: true,
+        data: { mode: "single-employer", options: [option], recommendedOption: option },
+      }
     })
   })
 

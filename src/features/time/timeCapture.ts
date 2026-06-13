@@ -31,7 +31,10 @@ export function buildAddressLabel(components: {
   return parts
     .filter((part, index, values) => {
       const normalizedPart = normalizeAddressPart(part)
-      return values.findIndex((candidate) => normalizeAddressPart(candidate) === normalizedPart) === index
+      return (
+        values.findIndex((candidate) => normalizeAddressPart(candidate) === normalizedPart) ===
+        index
+      )
     })
     .join(", ")
 }

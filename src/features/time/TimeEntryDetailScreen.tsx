@@ -1,10 +1,6 @@
 import { StyleSheet } from "react-native"
-import { Stack, useLocalSearchParams } from "expo-router"
+import { Stack } from "expo-router"
 
-import {
-  AppScrollScreen,
-  useDesignTokens,
-} from "@/ui"
 import { formatShortDate } from "@/core/date"
 import {
   TimeEntryBreaksSection,
@@ -16,10 +12,9 @@ import {
   TimeEntryTimelineSection,
 } from "@/features/time/TimeEntryDetailSections"
 import { useTimeEntryDetailScreen } from "@/features/time/useTimeEntryDetailScreen"
+import { AppScrollScreen } from "@/ui"
 
 export function TimeEntryDetailScreen() {
-  const tokens = useDesignTokens()
-  const { id } = useLocalSearchParams<{ id: string }>()
   const screen = useTimeEntryDetailScreen()
 
   if (!screen.entry) {

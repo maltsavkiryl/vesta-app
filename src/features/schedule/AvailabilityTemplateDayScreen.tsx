@@ -1,12 +1,12 @@
 import { StyleSheet, View } from "react-native"
 import { Stack } from "expo-router"
 
-import { availabilityWeekdayLabels } from "@/features/schedule/schedule.utils"
 import {
   AvailabilityHoursSection,
   AvailabilityStatusSection,
 } from "@/features/schedule/AvailabilityScreenSections"
 import { AvailabilityTemplateTotalSpan } from "@/features/schedule/AvailabilityTemplateSections"
+import { availabilityWeekdayLabels } from "@/features/schedule/schedule.utils"
 import { useAvailabilityTemplateDayScreen } from "@/features/schedule/useAvailabilityTemplateDayScreen"
 import { AppScrollScreen, useDesignTokens } from "@/ui"
 

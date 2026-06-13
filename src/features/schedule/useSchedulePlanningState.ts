@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 
+import type { ScheduleOverview } from "@/features/schedule/data/schedule.repository"
 import {
   buildMonthGrid,
   getActivePlanningWindow,
@@ -9,7 +10,6 @@ import {
   getRequestsForDate,
   getShiftsForDate,
 } from "@/features/schedule/schedule.utils"
-import type { ScheduleOverview } from "@/features/schedule/data/schedule.repository"
 
 const DEFAULT_DAY_STATE = {
   availabilityStatus: "available" as const,
@@ -114,7 +114,8 @@ export function useSchedulePlanningState({
   const selectedDateShiftNote =
     selectedDayShifts.length > 1 ? `${selectedDayShifts.length} shifts are listed below.` : null
 
-  const getDayState = (date: string) => (state ? getCalendarDayState(state, date) : DEFAULT_DAY_STATE)
+  const getDayState = (date: string) =>
+    state ? getCalendarDayState(state, date) : DEFAULT_DAY_STATE
 
   return {
     activePlanningWindow,

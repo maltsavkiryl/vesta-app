@@ -102,7 +102,9 @@ describe("schedule empty states", () => {
 
     expect(screen.getByText("Nothing pending")).toBeTruthy()
     expect(
-      screen.getByText("Requests you send from planning appear here while they are being reviewed."),
+      screen.getByText(
+        "Requests you send from planning appear here while they are being reviewed.",
+      ),
     ).toBeTruthy()
   })
 
@@ -111,7 +113,9 @@ describe("schedule empty states", () => {
 
     expect(screen.getByText("Shift no longer available")).toBeTruthy()
     expect(
-      screen.getByText("This shift is no longer in your planning. It may have been removed or changed."),
+      screen.getByText(
+        "This shift is no longer in your planning. It may have been removed or changed.",
+      ),
     ).toBeTruthy()
     expect(screen.getByText("Back to Planning")).toBeTruthy()
   })

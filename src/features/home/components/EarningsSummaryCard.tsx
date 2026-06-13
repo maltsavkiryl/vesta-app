@@ -66,7 +66,9 @@ export function EarningsSummaryCard({
       : `${formatCurrency(averageHourlyRate)}/hr average`
 
   const accessibilityLabel = `${monthLabel} earnings ${formatCurrency(earnedAmount)}${
-    targetAmount > 0 ? `, ${progressPercent} percent of your ${formatCurrency(targetAmount)} target` : ""
+    targetAmount > 0
+      ? `, ${progressPercent} percent of your ${formatCurrency(targetAmount)} target`
+      : ""
   }. ${hoursLabel} worked across ${shiftsWorked} shift${shiftsWorked === 1 ? "" : "s"}.`
 
   return (

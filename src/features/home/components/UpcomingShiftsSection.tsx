@@ -22,7 +22,12 @@ function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => vo
       ]}
     >
       <View style={styles.upcomingHeader}>
-        <Text text={shift.dayLabel} size="xxs" weight="medium" style={{ color: tokens.textMuted }} />
+        <Text
+          text={shift.dayLabel}
+          size="xxs"
+          weight="medium"
+          style={{ color: tokens.textMuted }}
+        />
       </View>
 
       <Text
@@ -118,13 +123,13 @@ const styles = StyleSheet.create({
   upcomingHeader: {
     marginBottom: 2,
   },
-  upcomingRail: {
-    marginHorizontal: -16,
-  },
   upcomingList: {
     paddingBottom: 6,
     paddingHorizontal: 16,
     paddingTop: 2,
+  },
+  upcomingRail: {
+    marginHorizontal: -16,
   },
   upcomingSeparator: {
     marginRight: 10,

@@ -22,7 +22,12 @@ export function HomeHeader({
     <View style={styles.header}>
       <View style={styles.flex}>
         <View style={styles.topRow}>
-          <Text text={greeting} size="xxs" weight="medium" style={{ color: tokens.textSecondary }} />
+          <Text
+            text={greeting}
+            size="xxs"
+            weight="medium"
+            style={{ color: tokens.textSecondary }}
+          />
         </View>
         <Text
           text={firstName}
@@ -30,7 +35,11 @@ export function HomeHeader({
           style={[styles.headerTitle, { color: tokens.textPrimary }]}
         />
         {summary ? (
-          <Text text={summary} size="xs" style={[styles.summary, { color: tokens.textSecondary }]} />
+          <Text
+            text={summary}
+            size="xs"
+            style={[styles.summary, { color: tokens.textSecondary }]}
+          />
         ) : null}
       </View>
 
@@ -77,8 +86,8 @@ const styles = StyleSheet.create({
   notificationButton: {
     alignItems: "center",
     borderCurve: "continuous",
-    borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 19,
+    borderWidth: StyleSheet.hairlineWidth,
     height: 38,
     justifyContent: "center",
     shadowOffset: { width: 0, height: 8 },

@@ -1,5 +1,5 @@
-import { fireEvent, render } from "@testing-library/react-native"
 import * as Haptics from "expo-haptics"
+import { fireEvent, render } from "@testing-library/react-native"
 
 import { createInitialState } from "@/core/mockState"
 import { ThemeProvider } from "@/ui"
