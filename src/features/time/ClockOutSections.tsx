@@ -57,13 +57,17 @@ export function ClockOutSuccessState({
             text={workedLabel}
             weight="bold"
           />
-          <Text size="xxs" style={[styles.statLabel, { color: tokens.textSecondary }]} text="Worked" />
+          <Text
+            size="xxs"
+            style={[styles.statLabel, { color: tokens.textSecondary }]}
+            text="Worked"
+          />
         </View>
         <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
         <View style={styles.statBlock}>
           <Text
             style={[appTypography.successTitle, { color: tokens.success }]}
-            text={`€${earnings}`}
+            text={earnings}
             weight="bold"
           />
           <Text
@@ -115,7 +119,11 @@ export function ClockOutContent({
       </GroupedSection>
 
       <GroupedSection title="Pay estimate">
-        <ClockOutPaySummary earnings={summary.earnings} workedLabel={summary.workedLabel} />
+        <ClockOutPaySummary
+          earnings={summary.earnings}
+          rateLabel={summary.rateLabel}
+          workedLabel={summary.workedLabel}
+        />
       </GroupedSection>
 
       <View style={styles.footerBlock}>
@@ -135,7 +143,15 @@ export function ClockOutContent({
   )
 }
 
-function ClockOutPaySummary({ earnings, workedLabel }: { earnings: string; workedLabel: string }) {
+function ClockOutPaySummary({
+  earnings,
+  rateLabel,
+  workedLabel,
+}: {
+  earnings: string
+  rateLabel: string
+  workedLabel: string
+}) {
   const tokens = useDesignTokens()
 
   return (
@@ -150,14 +166,10 @@ function ClockOutPaySummary({ earnings, workedLabel }: { earnings: string; worke
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={`€12.02/hr x ${workedLabel}`}
+          text={`${rateLabel} x ${workedLabel}`}
         />
       </View>
-      <Text
-        style={[styles.payValue, { color: tokens.success }]}
-        text={`€${earnings}`}
-        weight="bold"
-      />
+      <Text style={[styles.payValue, { color: tokens.success }]} text={earnings} weight="bold" />
     </View>
   )
 }
