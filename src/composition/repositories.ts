@@ -570,7 +570,9 @@ function createApiRepositories() {
         if (!result.ok) return result
         ensureSeededAccount(result.data.accountId)
         setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
-        return success(toAppSession(getSession(), !result.data.profileComplete))
+        // First-run onboarding is local app state, not the backend payroll-profile
+        // completeness (which the lightweight wizard cannot satisfy).
+        return success(buildSessionForAccount(result.data.accountId))
       },
       async signOut() {
         await authService.signOut()
@@ -582,7 +584,7 @@ function createApiRepositories() {
         if (!restored) return toAppSession({ accountId: null })
         ensureSeededAccount(restored.accountId)
         setSession({ accountId: restored.accountId, signedInAt: new Date().toISOString() })
-        return toAppSession(getSession(), !restored.profileComplete)
+        return buildSessionForAccount(restored.accountId)
       },
       register: async () =>
         failure<AuthError>({ type: "validation", message: "Use Continue with email." }),
@@ -601,7 +603,16 @@ function createApiRepositories() {
           type: "validation",
           message: "Password change is handled by the identity provider.",
         }),
-      completeOnboarding: async (accountId: string) => success(buildSessionForAccount(accountId)),
+      async completeOnboarding(accountId: string, input: CompleteOnboardingInput) {
+        const nextState = commitAccountAction(
+          accountId,
+          { type: "completeOnboarding", payload: input },
+          applyAppAction,
+        )
+        return success(
+          buildSessionForAccount(nextState.authStatus === "signedIn" ? accountId : null),
+        )
+      },
     } satisfies AuthRepository,
     profile: {
       async getProfile() {
