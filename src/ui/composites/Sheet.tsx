@@ -1,11 +1,5 @@
 import { ReactNode, useEffect, useState } from "react"
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  View,
-  type DimensionValue,
-} from "react-native"
+import { Modal, Pressable, StyleSheet, View, type DimensionValue } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, {
   runOnJS,
@@ -17,10 +11,9 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAppMotion } from "@/providers/motion-provider"
+import { SPRING_SNAPPY } from "@/ui/foundations/motion"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
-
-import { SPRING_SNAPPY } from "@/ui/foundations/motion"
 
 export interface SheetProps {
   isOpen: boolean
@@ -127,7 +120,11 @@ export function Sheet({
     >
       {/* Backdrop */}
       <Animated.View
-        style={[StyleSheet.absoluteFill, { backgroundColor: tokens.overlay }, animatedBackdropStyle]}
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: tokens.overlay },
+          animatedBackdropStyle,
+        ]}
       >
         <Pressable
           accessibilityRole="button"
@@ -191,8 +188,8 @@ const styles = StyleSheet.create({
   },
   handleContainer: {
     alignItems: "center",
-    paddingTop: 10,
     paddingBottom: 6,
+    paddingTop: 10,
   },
   sheet: {
     bottom: 0,

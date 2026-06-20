@@ -27,16 +27,12 @@ export const planningQueryKeys = {
   all: (accountId: string | null) => ["planning", accountId] as const,
   schedule: (accountId: string | null, params: GetScheduleParams) =>
     ["planning", accountId, "schedule", params] as const,
-  availability: (accountId: string | null) =>
-    ["planning", accountId, "availability"] as const,
-  todos: (accountId: string | null) =>
-    ["planning", accountId, "todos"] as const,
+  availability: (accountId: string | null) => ["planning", accountId, "availability"] as const,
+  todos: (accountId: string | null) => ["planning", accountId, "todos"] as const,
   calls: (accountId: string | null, params: GetOpenCallsParams) =>
     ["planning", accountId, "calls", params] as const,
-  requests: (accountId: string | null) =>
-    ["planning", accountId, "requests"] as const,
-  leave: (accountId: string | null) =>
-    ["planning", accountId, "leave"] as const,
+  requests: (accountId: string | null) => ["planning", accountId, "requests"] as const,
+  leave: (accountId: string | null) => ["planning", accountId, "leave"] as const,
   swapCandidates: (accountId: string | null, shiftUniqueCode: string | null) =>
     ["planning", accountId, "swap-candidates", shiftUniqueCode] as const,
 }

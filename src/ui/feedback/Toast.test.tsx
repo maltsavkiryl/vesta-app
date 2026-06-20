@@ -1,5 +1,5 @@
+import { type ReactNode, useEffect } from "react"
 import { render, act } from "@testing-library/react-native"
-import React from "react"
 
 import { ThemeProvider } from "@/theme/context"
 
@@ -9,7 +9,7 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 44, bottom: 34, left: 0, right: 0 }),
 }))
 
-function AllProviders({ children }: { children: React.ReactNode }) {
+function AllProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider initialContext="light">
       <ToastProvider>{children}</ToastProvider>
@@ -19,7 +19,7 @@ function AllProviders({ children }: { children: React.ReactNode }) {
 
 function ToastTrigger({ onReady }: { onReady: (hooks: ReturnType<typeof useToast>) => void }) {
   const toast = useToast()
-  React.useEffect(() => {
+  useEffect(() => {
     onReady(toast)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

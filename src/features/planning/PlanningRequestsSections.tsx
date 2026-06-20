@@ -1,8 +1,9 @@
-import Animated from "react-native-reanimated"
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { Pressable } from "react-native"
+import Animated from "react-native-reanimated"
+
 import type { MyRequests, ShiftChangeRequest, ShiftSwapRequest } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import {
   ActionRow,
   EmptyState,
@@ -13,9 +14,10 @@ import {
   useDesignTokens,
 } from "@/ui"
 import { MotionView, usePressScale } from "@/ui/composites/app-motion"
-import { useListItemEntrance } from "@/ui/foundations/motion"
 import type { AppTone } from "@/ui/composites/appTone"
-import { translate } from "@/i18n/translate"
+import { useListItemEntrance } from "@/ui/foundations/motion"
+
+const TRANSPARENT = "transparent" as const
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -61,10 +63,7 @@ export function PlanningRequestShortcuts({
   const { animatedStyle: entrance1 } = useListItemEntrance(1, { baseDelay: 0, step: 50 })
 
   return (
-    <GroupedSection
-      bodyStyle={styles.noCardBody}
-      title={translate("planning:requests.newRequest")}
-    >
+    <GroupedSection bodyStyle={styles.noCardBody} title={translate("planning:requests.newRequest")}>
       <View style={styles.shortcutsStack}>
         <Animated.View style={entrance0}>
           <ActionRow
@@ -80,7 +79,9 @@ export function PlanningRequestShortcuts({
             onPress={onNewShiftSwap}
             subtitle={translate("planning:requests.swapSubtitle")}
             title={translate("planning:requests.shiftSwap")}
-            trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
           />
         </Animated.View>
         <Animated.View style={entrance1}>
@@ -97,7 +98,9 @@ export function PlanningRequestShortcuts({
             onPress={onNewChangeRequest}
             subtitle={translate("planning:requests.changeSubtitle")}
             title={translate("planning:requests.changeRequest")}
-            trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
           />
         </Animated.View>
       </View>
@@ -126,17 +129,9 @@ function DecideButton({
         ? tokens.dangerSoft
         : tokens.backgroundMuted
   const textColor =
-    tone === "accept"
-      ? tokens.success
-      : tone === "reject"
-        ? tokens.danger
-        : tokens.textSecondary
+    tone === "accept" ? tokens.success : tone === "reject" ? tokens.danger : tokens.textSecondary
   const borderColor =
-    tone === "accept"
-      ? tokens.success
-      : tone === "reject"
-        ? tokens.danger
-        : tokens.border
+    tone === "accept" ? tokens.success : tone === "reject" ? tokens.danger : tokens.border
 
   return (
     <Pressable
@@ -156,12 +151,7 @@ function DecideButton({
           animatedStyle,
         ]}
       >
-        <Text
-          size="xxs"
-          style={{ color: textColor }}
-          text={label}
-          weight="semiBold"
-        />
+        <Text size="xxs" style={{ color: textColor }} text={label} weight="semiBold" />
       </Animated.View>
     </Pressable>
   )
@@ -264,11 +254,7 @@ export function PlanningChangeRequestRow({
           />
         </View>
         {request.requestedDate ? (
-          <Text
-            size="xxs"
-            style={{ color: tokens.textSecondary }}
-            text={request.requestedDate}
-          />
+          <Text size="xxs" style={{ color: tokens.textSecondary }} text={request.requestedDate} />
         ) : null}
         {request.note ? (
           <Text
@@ -305,7 +291,7 @@ export function PlanningRequestsListSection({
         <View style={styles.emptyBody}>
           <Text
             size="xs"
-            style={{ color: tokens.textMuted, textAlign: "center" }}
+            style={[styles.emptyText, { color: tokens.textMuted }]}
             text={translate("planning:requests.noRequestsSubtitle")}
           />
         </View>
@@ -317,10 +303,7 @@ export function PlanningRequestsListSection({
   let globalIndex = 0
 
   return (
-    <GroupedSection
-      bodyStyle={styles.noCardBody}
-      title={translate("planning:requests.title")}
-    >
+    <GroupedSection bodyStyle={styles.noCardBody} title={translate("planning:requests.title")}>
       <View style={styles.requestsList}>
         {requests.swapRequests.map((req) => {
           const idx = globalIndex++
@@ -337,9 +320,7 @@ export function PlanningRequestsListSection({
         })}
         {requests.changeRequests.map((req) => {
           const idx = globalIndex++
-          return (
-            <PlanningChangeRequestRow key={req.id} index={idx} request={req} />
-          )
+          return <PlanningChangeRequestRow key={req.id} index={idx} request={req} />
         })}
       </View>
     </GroupedSection>
@@ -402,8 +383,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 20,
   },
+  emptyText: {
+    textAlign: "center",
+  },
   noCardBody: {
-    backgroundColor: "transparent",
+    backgroundColor: TRANSPARENT,
     borderWidth: 0,
     elevation: 0,
     overflow: "visible" as const,

@@ -53,7 +53,13 @@ jest.mock("@react-native-community/datetimepicker", () => {
   const { View } = require("react-native")
   return {
     __esModule: true,
-    default: ({ onChange, value }: { onChange?: Function; value: Date }) => {
+    default: ({
+      onChange,
+      value,
+    }: {
+      onChange?: (event: unknown, date?: Date) => void
+      value: Date
+    }) => {
       void onChange
       void value
       return React.createElement(View, { testID: "date-time-picker" })
@@ -237,7 +243,12 @@ describe("PlanningShiftsScreen", () => {
   })
 
   it("renders error state when query errors with no data", () => {
-    mockScheduleQuery.mockReturnValue({ state: null, isLoading: false, isError: true, refetch: jest.fn() })
+    mockScheduleQuery.mockReturnValue({
+      state: null,
+      isLoading: false,
+      isError: true,
+      refetch: jest.fn(),
+    })
     const { PlanningShiftsScreen } = require("./PlanningShiftsScreen")
     render(<PlanningShiftsScreen />)
     // Real English text from en.ts planning.schedule.loadError
@@ -266,18 +277,14 @@ describe("PlanningTodosScreen", () => {
   })
 
   it("renders pending todo item", () => {
-    mockTodosQuery.mockReturnValue(
-      idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }),
-    )
+    mockTodosQuery.mockReturnValue(idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }))
     const { PlanningTodosScreen } = require("./PlanningTodosScreen")
     render(<PlanningTodosScreen />)
     expect(screen.getByText("Check stock levels")).toBeTruthy()
   })
 
   it("calls completeTodo mutation when checkbox pressed on pending todo", async () => {
-    mockTodosQuery.mockReturnValue(
-      idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }),
-    )
+    mockTodosQuery.mockReturnValue(idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }))
     const { PlanningTodosScreen } = require("./PlanningTodosScreen")
     render(<PlanningTodosScreen />)
     const checkbox = screen.getByRole("checkbox", { name: "Check stock levels" })
@@ -338,9 +345,7 @@ describe("Signature moments", () => {
   })
 
   it("calls completeTodo mutation on checkbox press (check-off signature moment)", async () => {
-    mockTodosQuery.mockReturnValue(
-      idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }),
-    )
+    mockTodosQuery.mockReturnValue(idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }))
     const { PlanningTodosScreen } = require("./PlanningTodosScreen")
     render(<PlanningTodosScreen />)
     const checkbox = screen.getByRole("checkbox", { name: "Check stock levels" })
@@ -464,7 +469,10 @@ describe("PlanningSwapNewScreen", () => {
   })
 
   it("shows error row when mutation returns ok: false", async () => {
-    mockCreateShiftSwapMutation.mockResolvedValue({ ok: false, error: { type: "validation", message: "fail" } })
+    mockCreateShiftSwapMutation.mockResolvedValue({
+      ok: false,
+      error: { type: "validation", message: "fail" },
+    })
     mockSwapCandidatesQuery.mockReturnValue(idleQuery([SAMPLE_CANDIDATE]))
     const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
     render(<PlanningSwapNewScreen />)
@@ -547,7 +555,10 @@ describe("PlanningChangeNewScreen", () => {
   })
 
   it("shows error row when mutation returns ok: false", async () => {
-    mockCreateShiftChangeMutation.mockResolvedValue({ ok: false, error: { type: "validation", message: "fail" } })
+    mockCreateShiftChangeMutation.mockResolvedValue({
+      ok: false,
+      error: { type: "validation", message: "fail" },
+    })
     const { PlanningChangeNewScreen } = require("./PlanningChangeNewScreen")
     render(<PlanningChangeNewScreen />)
 
@@ -597,7 +608,12 @@ describe("PlanningLeaveScreen", () => {
   })
 
   it("renders error state when entitlement query errors", () => {
-    mockLeaveQuery.mockReturnValue({ state: null, isLoading: false, isError: true, refetch: jest.fn() })
+    mockLeaveQuery.mockReturnValue({
+      state: null,
+      isLoading: false,
+      isError: true,
+      refetch: jest.fn(),
+    })
     const { PlanningLeaveScreen } = require("./PlanningLeaveScreen")
     render(<PlanningLeaveScreen />)
     // Real English text from en.ts planning.schedule.loadError

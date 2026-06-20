@@ -17,10 +17,9 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAppMotion } from "@/providers/motion-provider"
+import { SPRING_SNAPPY } from "@/ui/foundations/motion"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
-
-import { SPRING_SNAPPY } from "@/ui/foundations/motion"
 
 export type ToastVariant = "success" | "error" | "info" | "warning"
 
@@ -49,10 +48,7 @@ const VARIANT_ICONS: Record<ToastVariant, string> = {
   warning: "⚠",
 }
 
-function getVariantColors(
-  variant: ToastVariant,
-  tokens: ReturnType<typeof useDesignTokens>,
-) {
+function getVariantColors(variant: ToastVariant, tokens: ReturnType<typeof useDesignTokens>) {
   switch (variant) {
     case "success":
       return { bg: tokens.successSoft, text: tokens.success }
@@ -170,13 +166,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         >
           <Text
             size="sm"
-            style={{ color: getVariantColors(current.variant, tokens).text, marginRight: 6 }}
+            style={[{ color: getVariantColors(current.variant, tokens).text }, styles.icon]}
             text={VARIANT_ICONS[current.variant]}
             weight="semiBold"
           />
           <Text
             size="sm"
-            style={{ color: getVariantColors(current.variant, tokens).text, flex: 1 }}
+            style={[{ color: getVariantColors(current.variant, tokens).text }, styles.message]}
             text={current.message}
           />
         </Animated.View>
@@ -224,6 +220,12 @@ export function useToast(): {
 }
 
 const styles = StyleSheet.create({
+  icon: {
+    marginRight: 6,
+  },
+  message: {
+    flex: 1,
+  },
   toastContainer: {
     alignItems: "center",
     flexDirection: "row",

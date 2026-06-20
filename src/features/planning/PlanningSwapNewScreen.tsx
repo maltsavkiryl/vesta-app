@@ -1,16 +1,26 @@
 import { useEffect } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
+
+import { formatShortDate, getShiftTimeRange } from "@/core/date"
 import type { PlanningSwapCandidate, Shift } from "@/core/models"
-import { AppButton, AppScrollScreen, GroupedSection, Skeleton, SuccessState, TextField, useDesignTokens } from "@/ui"
-import { useToast } from "@/ui/feedback"
-import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
-import { getShiftTimeRange, formatShortDate } from "@/core/date"
+import {
+  AppButton,
+  AppScrollScreen,
+  GroupedSection,
+  Skeleton,
+  SuccessState,
+  TextField,
+  useDesignTokens,
+} from "@/ui"
+import { useToast } from "@/ui/feedback"
 import { useListItemEntrance, useCelebratePulse } from "@/ui/foundations/motion"
-import { usePlanningSwapNewScreen } from "./usePlanningSwapNewScreen"
+import { Text } from "@/ui/primitives/Text"
 import { fireHaptic } from "@/utils/haptics"
+
+import { usePlanningSwapNewScreen } from "./usePlanningSwapNewScreen"
 
 function ShiftPickerRow({
   index,
@@ -50,12 +60,19 @@ function ShiftPickerRow({
           ]}
         >
           <View style={styles.shiftRowContent}>
-            <Text size="xs" style={{ color: tokens.textPrimary }} text={formatShortDate(shift.date)} weight="medium" />
-            <Text size="xxs" style={{ color: tokens.textSecondary }} text={getShiftTimeRange(shift)} />
+            <Text
+              size="xs"
+              style={{ color: tokens.textPrimary }}
+              text={formatShortDate(shift.date)}
+              weight="medium"
+            />
+            <Text
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+              text={getShiftTimeRange(shift)}
+            />
           </View>
-          {isSelected ? (
-            <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
-          ) : null}
+          {isSelected ? <Ionicons color={tokens.accent} name="checkmark-circle" size={18} /> : null}
         </Pressable>
       </Animated.View>
     </Animated.View>
@@ -102,13 +119,24 @@ function CandidatePickerRow({
           ]}
         >
           <View style={styles.shiftRowContent}>
-            <Text size="xs" style={{ color: tokens.textPrimary }} text={candidate.employeeName} weight="medium" />
-            <Text size="xxs" style={{ color: tokens.textSecondary }} text={`${formatShortDate(candidate.shiftDate)}  ${timeRange}`} />
-            <Text size="xxs" style={{ color: tokens.textMuted }} text={`${candidate.taskName} · ${candidate.city}`} />
+            <Text
+              size="xs"
+              style={{ color: tokens.textPrimary }}
+              text={candidate.employeeName}
+              weight="medium"
+            />
+            <Text
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+              text={`${formatShortDate(candidate.shiftDate)}  ${timeRange}`}
+            />
+            <Text
+              size="xxs"
+              style={{ color: tokens.textMuted }}
+              text={`${candidate.taskName} · ${candidate.city}`}
+            />
           </View>
-          {isSelected ? (
-            <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
-          ) : null}
+          {isSelected ? <Ionicons color={tokens.accent} name="checkmark-circle" size={18} /> : null}
         </Pressable>
       </Animated.View>
     </Animated.View>
@@ -132,7 +160,11 @@ export function PlanningSwapNewScreen() {
     return (
       <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
         <SuccessState title={translate("planning:requests.submitSuccess")}>
-          <AppButton label={translate("common:actions.close")} onPress={screen.handleDismiss} variant="secondary" />
+          <AppButton
+            label={translate("common:actions.close")}
+            onPress={screen.handleDismiss}
+            variant="secondary"
+          />
         </SuccessState>
       </AppScrollScreen>
     )
@@ -142,7 +174,11 @@ export function PlanningSwapNewScreen() {
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
       <GroupedSection title={translate("planning:requests.shiftSwap")}>
         {screen.myShifts.length === 0 && !screen.isLoading ? (
-          <Text size="xs" style={{ color: tokens.textMuted, padding: 16 }} text={translate("planning:schedule.noShifts")} />
+          <Text
+            size="xs"
+            style={[styles.emptyText, { color: tokens.textMuted }]}
+            text={translate("planning:schedule.noShifts")}
+          />
         ) : (
           <View style={styles.shiftList}>
             {screen.myShifts.map((shift, index) => (
@@ -162,7 +198,7 @@ export function PlanningSwapNewScreen() {
         {!screen.selectedShiftId ? (
           <Text
             size="xs"
-            style={{ color: tokens.textMuted, padding: 16 }}
+            style={[styles.emptyText, { color: tokens.textMuted }]}
             text={translate("planning:requests.pickShiftFirst")}
           />
         ) : screen.isCandidatesLoading ? (
@@ -174,12 +210,16 @@ export function PlanningSwapNewScreen() {
         ) : screen.isCandidatesError ? (
           <View style={[styles.errorRow, { backgroundColor: tokens.dangerSoft }]}>
             <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
-            <Text size="xxs" style={{ color: tokens.danger }} text={translate("planning:requests.submitError")} />
+            <Text
+              size="xxs"
+              style={{ color: tokens.danger }}
+              text={translate("planning:requests.submitError")}
+            />
           </View>
         ) : screen.candidateList.length === 0 ? (
           <Text
             size="xs"
-            style={{ color: tokens.textMuted, padding: 16 }}
+            style={[styles.emptyText, { color: tokens.textMuted }]}
             text={translate("planning:requests.noSwapCandidates")}
           />
         ) : (
@@ -221,7 +261,9 @@ export function PlanningSwapNewScreen() {
         fullWidth
         isLoading={screen.isSubmitting}
         label={translate("planning:requests.shiftSwap")}
-        onPress={() => { void screen.handleSubmit() }}
+        onPress={() => {
+          void screen.handleSubmit()
+        }}
         pressHaptic="none"
       />
     </AppScrollScreen>
@@ -229,6 +271,9 @@ export function PlanningSwapNewScreen() {
 }
 
 const styles = StyleSheet.create({
+  emptyText: {
+    padding: 16,
+  },
   errorRow: {
     alignItems: "center",
     borderCurve: "continuous",

@@ -67,9 +67,7 @@ describe("shared interactive primitives accessibility", () => {
   })
 
   it("StatusBadge is accessible with a label", () => {
-    const { getByLabelText } = renderUI(
-      <StatusBadge label="In behandeling" tone="warning" />,
-    )
+    const { getByLabelText } = renderUI(<StatusBadge label="In behandeling" tone="warning" />)
     const node = getByLabelText("In behandeling")
     expect(node.props.accessible).toBe(true)
   })

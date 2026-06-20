@@ -9,24 +9,19 @@
  * existing /(app)/availability/* stack screens.
  */
 import { useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { Pressable } from "react-native"
 
-import {
-  AppSegmentedControl,
-  Text,
-  useDesignTokens,
-} from "@/ui"
-import { MotionView } from "@/ui/composites"
 import { translate } from "@/i18n/translate"
+import { AppSegmentedControl, Text, useDesignTokens } from "@/ui"
+import { MotionView } from "@/ui/composites"
 
+import { PlanningCallsScreen } from "./PlanningCallsScreen"
+import { PlanningLeaveScreen } from "./PlanningLeaveScreen"
+import { PlanningRequestsScreen } from "./PlanningRequestsScreen"
 import { PlanningShiftsScreen } from "./PlanningShiftsScreen"
 import { PlanningTodosScreen } from "./PlanningTodosScreen"
-import { PlanningCallsScreen } from "./PlanningCallsScreen"
-import { PlanningRequestsScreen } from "./PlanningRequestsScreen"
-import { PlanningLeaveScreen } from "./PlanningLeaveScreen"
 
 type PlanningTab = "shifts" | "todos" | "calls" | "requests" | "leave"
 
@@ -95,19 +90,21 @@ export function PlanningHubScreen() {
       </View>
 
       {/* Tab content — keep all mounted for instant tab switch */}
-      <View style={[styles.tabPane, { display: activeTab === "shifts" ? "flex" : "none" }]}>
+      <View style={[styles.tabPane, activeTab === "shifts" ? styles.tabVisible : styles.tabHidden]}>
         <PlanningShiftsScreen />
       </View>
-      <View style={[styles.tabPane, { display: activeTab === "todos" ? "flex" : "none" }]}>
+      <View style={[styles.tabPane, activeTab === "todos" ? styles.tabVisible : styles.tabHidden]}>
         <PlanningTodosScreen />
       </View>
-      <View style={[styles.tabPane, { display: activeTab === "calls" ? "flex" : "none" }]}>
+      <View style={[styles.tabPane, activeTab === "calls" ? styles.tabVisible : styles.tabHidden]}>
         <PlanningCallsScreen />
       </View>
-      <View style={[styles.tabPane, { display: activeTab === "requests" ? "flex" : "none" }]}>
+      <View
+        style={[styles.tabPane, activeTab === "requests" ? styles.tabVisible : styles.tabHidden]}
+      >
         <PlanningRequestsScreen />
       </View>
-      <View style={[styles.tabPane, { display: activeTab === "leave" ? "flex" : "none" }]}>
+      <View style={[styles.tabPane, activeTab === "leave" ? styles.tabVisible : styles.tabHidden]}>
         <PlanningLeaveScreen />
       </View>
     </View>
@@ -146,7 +143,13 @@ const styles = StyleSheet.create({
   segmentWrapper: {
     // full-width
   },
+  tabHidden: {
+    display: "none",
+  },
   tabPane: {
     flex: 1,
+  },
+  tabVisible: {
+    display: "flex",
   },
 })

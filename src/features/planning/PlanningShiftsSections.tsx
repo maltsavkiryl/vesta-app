@@ -1,14 +1,14 @@
-import Animated from "react-native-reanimated"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { getShiftTimeRange, formatShortDate, getRelativeDayLabel, isToday } from "@/core/date"
+import Animated from "react-native-reanimated"
+
+import { formatShortDate, getRelativeDayLabel, getShiftTimeRange, isToday } from "@/core/date"
 import type { Shift } from "@/core/models"
 import type { AgendaSection } from "@/features/schedule/schedule.utils"
-import { EmptyState, SectionTitle, Skeleton, useDesignTokens } from "@/ui"
-import { SurfaceCard, Text } from "@/ui"
 import { translate } from "@/i18n/translate"
-import { useListItemEntrance } from "@/ui/foundations/motion"
+import { EmptyState, SectionTitle, Skeleton, SurfaceCard, Text, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
+import { useListItemEntrance } from "@/ui/foundations/motion"
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -68,6 +68,9 @@ export function PlanningShiftCard({
 
   const dayLabel = getRelativeDayLabel(shift.date)
   const isTodayShift = isToday(shift.date)
+  const todayCardStyle = isTodayShift
+    ? [styles.shiftCardToday, { borderColor: tokens.accentSoft }]
+    : null
 
   return (
     <Animated.View style={entranceStyle}>
@@ -80,13 +83,7 @@ export function PlanningShiftCard({
         <Animated.View style={pressStyle}>
           <SurfaceCard
             elevationLevel={isTodayShift ? 1 : 0}
-            style={[
-              styles.shiftCard,
-              isTodayShift && {
-                borderColor: tokens.accentSoft,
-                borderWidth: 1,
-              },
-            ]}
+            style={[styles.shiftCard, todayCardStyle]}
           >
             {/* Date row */}
             <View style={styles.shiftHeader}>
@@ -245,6 +242,9 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
+  },
+  shiftCardToday: {
+    borderWidth: 1,
   },
   shiftFooter: {
     flexDirection: "row",

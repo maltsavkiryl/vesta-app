@@ -1,5 +1,5 @@
-import { fireEvent, render } from "@testing-library/react-native"
 import * as Haptics from "expo-haptics"
+import { fireEvent, render } from "@testing-library/react-native"
 
 import { ThemeProvider } from "@/theme/context"
 

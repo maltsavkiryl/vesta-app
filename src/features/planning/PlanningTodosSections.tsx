@@ -1,12 +1,15 @@
-import Animated from "react-native-reanimated"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
+
 import type { PlanningTodo } from "@/core/models"
-import { EmptyState, GroupedSection, Skeleton, useDesignTokens } from "@/ui"
-import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
+import { EmptyState, GroupedSection, Skeleton, useDesignTokens } from "@/ui"
 import { useListItemEntrance, useCelebratePulse } from "@/ui/foundations/motion"
+import { Text } from "@/ui/primitives/Text"
 import { fireHaptic } from "@/utils/haptics"
+
+const TRANSPARENT = "transparent" as const
 
 // ─── Brief card ───────────────────────────────────────────────────────────────
 
@@ -106,14 +109,12 @@ export function PlanningTodoItem({
             style={[
               styles.checkbox,
               {
-                backgroundColor: done ? tokens.success : "transparent",
+                backgroundColor: done ? tokens.success : TRANSPARENT,
                 borderColor: done ? tokens.success : tokens.border,
               },
             ]}
           >
-            {done ? (
-              <Ionicons color={tokens.surface} name="checkmark" size={13} />
-            ) : null}
+            {done ? <Ionicons color={tokens.surface} name="checkmark" size={13} /> : null}
           </View>
         </Animated.View>
 

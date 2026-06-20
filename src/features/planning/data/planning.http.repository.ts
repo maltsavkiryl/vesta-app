@@ -19,14 +19,28 @@ import type {
   PlanningCall,
   PlanningSwapCandidate,
   PlanningTodosResult,
+  PlanningWindow,
   RequestItem,
   Shift,
 } from "@/core/models"
+import type { ScheduleError } from "@/features/schedule/data/schedule.errors"
+import type {
+  ScheduleOverview,
+  CreateRequestInput,
+} from "@/features/schedule/data/schedule.repository"
 import type { HttpClient } from "@/services/api/httpClient"
 import { failure, success, type Result } from "@/shared/result"
-import type { ScheduleOverview, CreateRequestInput } from "@/features/schedule/data/schedule.repository"
-import type { ScheduleError } from "@/features/schedule/data/schedule.errors"
 
+import type {
+  EmployeeAvailabilityDto,
+  KioskTodosResultDto,
+  MyLeaveEntitlementDto,
+  MyRequestsDto,
+  PlanningCallDto,
+  ShiftDto,
+  ShiftSwapCandidateDto,
+  UpdateEmployeeAvailabilityDto,
+} from "./planning.dto"
 import type { PlanningError } from "./planning.errors"
 import type {
   ClaimCallInput,
@@ -38,16 +52,6 @@ import type {
   GetScheduleParams,
   PlanningRepository,
 } from "./planning.repository"
-import type {
-  EmployeeAvailabilityDto,
-  KioskTodosResultDto,
-  MyLeaveEntitlementDto,
-  MyRequestsDto,
-  PlanningCallDto,
-  ShiftDto,
-  ShiftSwapCandidateDto,
-  UpdateEmployeeAvailabilityDto,
-} from "./planning.dto"
 import {
   fromAvailabilityOverride,
   fromAvailabilityTemplate,
@@ -60,17 +64,21 @@ import {
   toShifts,
   toSwapCandidates,
 } from "./planning.transformer"
-import type { PlanningWindow } from "@/core/models"
 
 // ---------------------------------------------------------------------------
 // Error helpers
 // ---------------------------------------------------------------------------
 
-function toPlanningError(status: number | null | undefined, fallbackMessage: string): PlanningError {
+function toPlanningError(
+  status: number | null | undefined,
+  fallbackMessage: string,
+): PlanningError {
   if (status === 403) return { type: "forbidden", message: "Access denied." }
   if (status === 404) return { type: "not-found", message: "Resource not found." }
-  if (status === 409) return { type: "conflict", message: "This action conflicts with an existing state." }
-  if (status === 422) return { type: "already-claimed", message: "This call has already been claimed." }
+  if (status === 409)
+    return { type: "conflict", message: "This action conflicts with an existing state." }
+  if (status === 422)
+    return { type: "already-claimed", message: "This call has already been claimed." }
   if (status === 400) return { type: "validation", message: fallbackMessage }
   return { type: "validation", message: fallbackMessage }
 }
@@ -108,35 +116,50 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     _accountId: string,
     _input: CreateRequestInput,
   ): Promise<Result<RequestItem, ScheduleError>> {
-    return failure<ScheduleError>({ type: "validation", message: "Not implemented in planning HTTP repo." })
+    return failure<ScheduleError>({
+      type: "validation",
+      message: "Not implemented in planning HTTP repo.",
+    })
   }
 
   async function respondToShift(
     _accountId: string,
     _shiftId: string,
   ): Promise<Result<Shift, ScheduleError>> {
-    return failure<ScheduleError>({ type: "not-found", message: "Not implemented in planning HTTP repo." })
+    return failure<ScheduleError>({
+      type: "not-found",
+      message: "Not implemented in planning HTTP repo.",
+    })
   }
 
   async function saveAvailabilityOverride(
     _accountId: string,
     _day: AvailabilityOverride,
   ): Promise<Result<AvailabilityOverride, ScheduleError>> {
-    return failure<ScheduleError>({ type: "validation", message: "Use saveMyAvailability for HTTP updates." })
+    return failure<ScheduleError>({
+      type: "validation",
+      message: "Use saveMyAvailability for HTTP updates.",
+    })
   }
 
   async function saveAvailabilityTemplate(
     _accountId: string,
     _template: AvailabilityTemplate,
   ): Promise<Result<AvailabilityTemplate, ScheduleError>> {
-    return failure<ScheduleError>({ type: "validation", message: "Use saveMyAvailability for HTTP updates." })
+    return failure<ScheduleError>({
+      type: "validation",
+      message: "Use saveMyAvailability for HTTP updates.",
+    })
   }
 
   async function submitPlanningWindow(
     _accountId: string,
     _planningWindowId: string,
   ): Promise<Result<PlanningWindow, ScheduleError>> {
-    return failure<ScheduleError>({ type: "not-found", message: "Not implemented in planning HTTP repo." })
+    return failure<ScheduleError>({
+      type: "not-found",
+      message: "Not implemented in planning HTTP repo.",
+    })
   }
 
   // ---------------------------------------------------------------------------
@@ -192,17 +215,13 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   }
 
   async function completeTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>> {
-    const res = await httpClient.post<void>(
-      `/employee/planning/todos/${input.todoCode}/complete`,
-    )
+    const res = await httpClient.post<void>(`/employee/planning/todos/${input.todoCode}/complete`)
     if (res.ok) return success(undefined)
     return failure(toPlanningError(res.status, "Could not complete todo."))
   }
 
   async function uncompleteTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>> {
-    const res = await httpClient.post<void>(
-      `/employee/planning/todos/${input.todoCode}/uncomplete`,
-    )
+    const res = await httpClient.post<void>(`/employee/planning/todos/${input.todoCode}/uncomplete`)
     if (res.ok) return success(undefined)
     return failure(toPlanningError(res.status, "Could not uncomplete todo."))
   }
@@ -258,7 +277,9 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   // Shift Swaps  (POST /employee/planning/shift-swaps/*)
   // ---------------------------------------------------------------------------
 
-  async function createShiftSwap(params: CreateShiftSwapParams): Promise<Result<void, PlanningError>> {
+  async function createShiftSwap(
+    params: CreateShiftSwapParams,
+  ): Promise<Result<void, PlanningError>> {
     const res = await httpClient.post<void>("/employee/planning/shift-swaps", {
       requesterShiftUniqueCode: params.input.requesterShiftId,
       targetShiftUniqueCode: params.input.targetShiftId,
@@ -268,7 +289,9 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     return failure(toPlanningError(res.status, "Could not create shift swap request."))
   }
 
-  async function decideShiftSwap(params: DecideShiftSwapParams): Promise<Result<void, PlanningError>> {
+  async function decideShiftSwap(
+    params: DecideShiftSwapParams,
+  ): Promise<Result<void, PlanningError>> {
     const res = await httpClient.post<void>(
       `/employee/planning/shift-swaps/${params.swapCode}/decide`,
       { accept: params.accept, note: params.note ?? null },
@@ -278,9 +301,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   }
 
   async function cancelShiftSwap(swapCode: string): Promise<Result<void, PlanningError>> {
-    const res = await httpClient.post<void>(
-      `/employee/planning/shift-swaps/${swapCode}/cancel`,
-    )
+    const res = await httpClient.post<void>(`/employee/planning/shift-swaps/${swapCode}/cancel`)
     if (res.ok) return success(undefined)
     return failure(toPlanningError(res.status, "Could not cancel shift swap."))
   }
@@ -289,7 +310,9 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   // Shift Changes  (POST /employee/planning/shift-changes)
   // ---------------------------------------------------------------------------
 
-  async function createShiftChange(params: CreateShiftChangeParams): Promise<Result<void, PlanningError>> {
+  async function createShiftChange(
+    params: CreateShiftChangeParams,
+  ): Promise<Result<void, PlanningError>> {
     const res = await httpClient.post<void>("/employee/planning/shift-changes", {
       shiftUniqueCode: params.input.shiftId,
       requestedDate: params.input.requestedDate ?? null,
