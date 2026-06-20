@@ -107,6 +107,14 @@ const en = {
       editDate: "Edit selected date",
       selfServiceDisabled: "Self-service availability is not enabled by your employer.",
       editAccessibilityLabel: "Edit availability",
+      weeklyDefaultTitle: "Weekly default",
+      forThisDate: "Availability for this date",
+      availableHours: "Available hours",
+      noteLabel: "Note",
+      notePlaceholder: "Optional context for your manager",
+      resetToDefault: "Reset to weekly default",
+      saveSuccess: "Availability saved!",
+      forbiddenTitle: "Self-service not enabled",
     },
     requests: {
       title: "My Requests",
@@ -132,6 +140,8 @@ const en = {
       requestedDate: "Requested date",
       requestedStartTime: "Start time",
       requestedEndTime: "End time",
+      swapDecided: "Swap decided",
+      swapCancelled: "Request cancelled",
     },
     leave: {
       title: "Leave",

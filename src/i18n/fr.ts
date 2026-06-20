@@ -109,6 +109,14 @@ const fr: Translations = {
       editDate: "Modifier la date sélectionnée",
       selfServiceDisabled: "La disponibilité en libre-service n'est pas activée par votre employeur.",
       editAccessibilityLabel: "Modifier la disponibilité",
+      weeklyDefaultTitle: "Modèle hebdomadaire",
+      forThisDate: "Disponibilité pour cette date",
+      availableHours: "Heures disponibles",
+      noteLabel: "Note",
+      notePlaceholder: "Contexte optionnel pour votre manager",
+      resetToDefault: "Réinitialiser au modèle hebdomadaire",
+      saveSuccess: "Disponibilité enregistrée !",
+      forbiddenTitle: "Libre-service non activé",
     },
     requests: {
       title: "Mes demandes",
@@ -134,6 +142,8 @@ const fr: Translations = {
       requestedDate: "Date demandée",
       requestedStartTime: "Heure de début",
       requestedEndTime: "Heure de fin",
+      swapDecided: "Échange décidé",
+      swapCancelled: "Demande annulée",
     },
     leave: {
       title: "Congés",

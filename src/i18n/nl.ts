@@ -109,6 +109,14 @@ const nl: Translations = {
       editDate: "Geselecteerde datum bewerken",
       selfServiceDisabled: "Zelf beschikbaarheid instellen is niet ingeschakeld door je werkgever.",
       editAccessibilityLabel: "Beschikbaarheid bewerken",
+      weeklyDefaultTitle: "Wekelijks sjabloon",
+      forThisDate: "Beschikbaarheid voor deze datum",
+      availableHours: "Beschikbare uren",
+      noteLabel: "Notitie",
+      notePlaceholder: "Optionele toelichting voor je manager",
+      resetToDefault: "Terugzetten naar wekelijks sjabloon",
+      saveSuccess: "Beschikbaarheid opgeslagen!",
+      forbiddenTitle: "Zelf instellen niet ingeschakeld",
     },
     requests: {
       title: "Mijn aanvragen",
@@ -134,6 +142,8 @@ const nl: Translations = {
       requestedDate: "Gewenste datum",
       requestedStartTime: "Starttijd",
       requestedEndTime: "Eindtijd",
+      swapDecided: "Ruil besloten",
+      swapCancelled: "Aanvraag geannuleerd",
     },
     leave: {
       title: "Verlof",
