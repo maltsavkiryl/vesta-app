@@ -15,7 +15,12 @@ export function Pill({ label, tone = "neutral" }: { label: string; tone?: AppTon
   const palette = getTonePalette(tokens, tone)
 
   return (
-    <View style={[styles.pill, { backgroundColor: palette.backgroundColor }]}>
+    <View
+      accessible
+      accessibilityLabel={label}
+      accessibilityRole="text"
+      style={[styles.pill, { backgroundColor: palette.backgroundColor }]}
+    >
       <Text size="xxs" style={{ color: palette.color }} text={label} weight="medium" />
     </View>
   )
@@ -26,8 +31,18 @@ export function StatusBadge({ label, tone = "neutral" }: { label: string; tone?:
   const palette = getTonePalette(tokens, tone)
 
   return (
-    <View style={[styles.statusBadge, { backgroundColor: palette.backgroundColor }]}>
-      <View style={[styles.statusDot, { backgroundColor: palette.color }]} />
+    <View
+      accessible
+      accessibilityLabel={label}
+      accessibilityRole="text"
+      style={[styles.statusBadge, { backgroundColor: palette.backgroundColor }]}
+    >
+      {/* Dot is decorative — hidden from screen readers */}
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.statusDot, { backgroundColor: palette.color }]}
+      />
       <Text size="xxs" style={{ color: palette.color }} text={label} weight="semiBold" />
     </View>
   )
@@ -53,6 +68,9 @@ export function MetaPill({
 
   return (
     <View
+      accessible
+      accessibilityLabel={label}
+      accessibilityRole="text"
       style={[
         styles.metaPill,
         { backgroundColor: backgroundColor ?? palette.backgroundColor },

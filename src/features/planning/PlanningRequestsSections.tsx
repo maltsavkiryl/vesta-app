@@ -69,7 +69,11 @@ export function PlanningRequestShortcuts({
         <Animated.View style={entrance0}>
           <ActionRow
             leading={
-              <View style={[styles.shortcutIcon, { backgroundColor: tokens.accentMuted }]}>
+              <View
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+                style={[styles.shortcutIcon, { backgroundColor: tokens.accentMuted }]}
+              >
                 <Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />
               </View>
             }
@@ -82,7 +86,11 @@ export function PlanningRequestShortcuts({
         <Animated.View style={entrance1}>
           <ActionRow
             leading={
-              <View style={[styles.shortcutIcon, { backgroundColor: tokens.accentMuted }]}>
+              <View
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+                style={[styles.shortcutIcon, { backgroundColor: tokens.accentMuted }]}
+              >
                 <Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />
               </View>
             }
@@ -132,7 +140,9 @@ function DecideButton({
 
   return (
     <Pressable
+      accessibilityLabel={label}
       accessibilityRole="button"
+      hitSlop={6}
       onPress={onPress}
       {...pressHandlers}
     >
@@ -381,7 +391,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: 10, // increased from 6 to improve touch target height
   },
   decideRow: {
     flexDirection: "row",

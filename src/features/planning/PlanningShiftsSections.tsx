@@ -106,7 +106,10 @@ export function PlanningShiftCard({
                   text={formatShortDate(shift.date)}
                 />
               </View>
-              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
+              {/* Decorative chevron — hidden from screen readers */}
+              <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={14} />
+              </View>
             </View>
 
             {/* Time — hero size */}
@@ -120,7 +123,10 @@ export function PlanningShiftCard({
             {/* Venue + role chips */}
             <View style={styles.shiftFooter}>
               <View style={[styles.chip, { backgroundColor: tokens.accentMuted }]}>
-                <Ionicons color={tokens.accent} name="business-outline" size={12} />
+                {/* Decorative building icon — hidden from screen readers */}
+                <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  <Ionicons color={tokens.accent} name="business-outline" size={12} />
+                </View>
                 <Text
                   size="xxs"
                   style={{ color: tokens.accent }}
@@ -142,7 +148,10 @@ export function PlanningShiftCard({
             {/* Optional note preview */}
             {shift.note ? (
               <View style={styles.noteRow}>
-                <Ionicons color={tokens.textMuted} name="document-text-outline" size={12} />
+                {/* Decorative note icon — hidden from screen readers */}
+                <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  <Ionicons color={tokens.textMuted} name="document-text-outline" size={12} />
+                </View>
                 <Text
                   size="xxs"
                   style={{ color: tokens.textMuted }}
