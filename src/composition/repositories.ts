@@ -27,6 +27,8 @@ import type {
   CreateRequestInput,
   ScheduleRepository,
 } from "@/features/schedule/data/schedule.repository"
+import { createPlanningHttpRepository } from "@/features/planning/data/planning.http.repository"
+import type { PlanningRepository } from "@/features/planning/data/planning.repository"
 import type { ClockError } from "@/features/time/data/time.errors"
 import type { TimeRepository } from "@/features/time/data/time.repository"
 import { authService, httpClient } from "@/services/api"
@@ -640,6 +642,8 @@ export interface AppRepositories {
   documents: DocumentsRepository
   home: HomeRepository
   notifications: NotificationsRepository
+  /** planning is optional — set to null/undefined when no API URL is configured. */
+  planning: PlanningRepository | null
   profile: ProfileRepository
   schedule: ScheduleRepository
   time: TimeRepository
@@ -653,6 +657,7 @@ export function createAppRepositories(): AppRepositories {
       documents: createMockDocumentsRepository(),
       home: createMockHomeRepository(),
       notifications: createMockNotificationsRepository(),
+      planning: null,
       profile: createMockProfileRepository(),
       schedule: createMockScheduleRepository(),
       time: createMockTimeRepository(),
@@ -666,6 +671,7 @@ export function createAppRepositories(): AppRepositories {
     documents: createMockDocumentsRepository(),
     home: createMockHomeRepository(),
     notifications: createMockNotificationsRepository(),
+    planning: createPlanningHttpRepository(httpClient),
     schedule: createMockScheduleRepository(),
     time: createMockTimeRepository(),
   }
