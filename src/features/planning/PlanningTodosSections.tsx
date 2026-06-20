@@ -5,14 +5,34 @@ import { Ionicons } from "@expo/vector-icons"
 import type { PlanningTodo } from "@/core/models"
 import { EmptyState, GroupedSection, useDesignTokens } from "@/ui"
 import { Text } from "@/ui/primitives/Text"
+import { translate } from "@/i18n/translate"
+
+export function PlanningTodosBrief({ dressNote, note }: { dressNote?: string; note?: string }) {
+  const tokens = useDesignTokens()
+  if (!dressNote && !note) return null
+  return (
+    <GroupedSection title={translate("planning:todos.brief")}>
+      <View style={styles.briefBody}>
+        {dressNote ? (
+          <Text size="xs" style={{ color: tokens.textPrimary }} text={dressNote} />
+        ) : null}
+        {note ? (
+          <Text size="xs" style={{ color: tokens.textSecondary }} text={note} />
+        ) : null}
+      </View>
+    </GroupedSection>
+  )
+}
 
 export function PlanningTodoItem({
   isCompleting,
   onComplete,
+  onUncomplete,
   todo,
 }: {
   isCompleting: boolean
   onComplete: (id: string) => void
+  onUncomplete: (id: string) => void
   todo: PlanningTodo
 }) {
   const tokens = useDesignTokens()
@@ -20,13 +40,15 @@ export function PlanningTodoItem({
   const checkColor = done ? tokens.success : tokens.backgroundMuted
   const borderColor = done ? tokens.success : tokens.border
 
+  void checkColor
+
   return (
     <Pressable
       accessibilityRole="checkbox"
       accessibilityState={{ checked: done }}
       accessibilityLabel={todo.label}
-      disabled={done || isCompleting}
-      onPress={() => onComplete(todo.id)}
+      disabled={isCompleting}
+      onPress={() => (done ? onUncomplete(todo.id) : onComplete(todo.id))}
       style={({ pressed }) => [styles.todoRow, { opacity: pressed ? 0.7 : 1 }]}
     >
       <View
@@ -60,11 +82,13 @@ export function PlanningTodoItem({
 export function PlanningTodosSection({
   isCompleting,
   onComplete,
+  onUncomplete,
   title,
   todos,
 }: {
   isCompleting: boolean
   onComplete: (id: string) => void
+  onUncomplete: (id: string) => void
   title: string
   todos: PlanningTodo[]
 }) {
@@ -78,6 +102,7 @@ export function PlanningTodosSection({
             key={todo.id}
             isCompleting={isCompleting}
             onComplete={onComplete}
+            onUncomplete={onUncomplete}
             todo={todo}
           />
         ))}
@@ -91,13 +116,18 @@ export function PlanningTodosEmpty() {
   return (
     <EmptyState
       icon={<Ionicons color={tokens.textMuted} name="checkmark-done-outline" size={18} />}
-      subtitle="Je hebt vandaag geen taken. Geniet van je shift!"
-      title="Geen taken vandaag"
+      subtitle={translate("planning:todos.noTasksSubtitle")}
+      title={translate("planning:todos.noTasksTitle")}
     />
   )
 }
 
 const styles = StyleSheet.create({
+  briefBody: {
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
   checkbox: {
     alignItems: "center",
     borderCurve: "continuous",

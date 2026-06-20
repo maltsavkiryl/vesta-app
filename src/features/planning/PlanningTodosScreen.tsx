@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
+import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
-import { PlanningTodosEmpty, PlanningTodosSection } from "./PlanningTodosSections"
+import { PlanningTodosBrief, PlanningTodosEmpty, PlanningTodosSection } from "./PlanningTodosSections"
 import { usePlanningTodosScreen } from "./usePlanningTodosScreen"
 
 export function PlanningTodosScreen() {
@@ -18,13 +19,13 @@ export function PlanningTodosScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title="Taken voor vandaag" />
+        <PageHeader delay={0} title={translate("planning:todos.title")} />
         <EmptyState
-          actionLabel="Opnieuw proberen"
+          actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
           onAction={onRefresh}
-          subtitle="Kon je taken niet laden. Controleer je verbinding en probeer opnieuw."
-          title="Er is iets misgegaan"
+          subtitle={translate("planning:schedule.loadErrorSubtitle")}
+          title={translate("planning:schedule.loadError")}
         />
       </AppScrollScreen>
     )
@@ -39,23 +40,30 @@ export function PlanningTodosScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title="Taken voor vandaag" />
+      <PageHeader delay={0} title={translate("planning:todos.title")} />
       {!hasTodos && !screen.isLoading ? (
         <PlanningTodosEmpty />
       ) : (
         <>
+          <PlanningTodosBrief dressNote={screen.dressNote} note={screen.note} />
           <PlanningTodosSection
-            isCompleting={screen.isCompleting}
+            isCompleting={screen.isCompleting || screen.isUncompleting}
             onComplete={(id) => {
               void screen.handleComplete(id)
+            }}
+            onUncomplete={(id) => {
+              void screen.handleUncomplete(id)
             }}
             title="Te doen"
             todos={screen.pendingTodos}
           />
           <PlanningTodosSection
-            isCompleting={screen.isCompleting}
+            isCompleting={screen.isCompleting || screen.isUncompleting}
             onComplete={(id) => {
               void screen.handleComplete(id)
+            }}
+            onUncomplete={(id) => {
+              void screen.handleUncomplete(id)
             }}
             title="Klaar"
             todos={screen.completedTodos}

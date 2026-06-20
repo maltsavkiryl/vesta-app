@@ -7,7 +7,7 @@
  */
 import { useAppSession } from "@/providers/app-provider"
 import { usePlanningTodosQuery } from "@/features/planning/data/planning.queries"
-import { useCompleteTodoMutation } from "@/features/planning/data/planning.mutations"
+import { useCompleteTodoMutation, useUncompleteTodoMutation } from "@/features/planning/data/planning.mutations"
 import { getLocalToday } from "@/core/date"
 
 export function usePlanningTodosScreen() {
@@ -16,10 +16,16 @@ export function usePlanningTodosScreen() {
 
   const query = usePlanningTodosQuery()
   const completeMutation = useCompleteTodoMutation()
+  const uncompleteMutation = useUncompleteTodoMutation()
 
   const handleComplete = async (todoId: string) => {
     if (!accountId) return
     await completeMutation.mutateAsync({ todoCode: todoId })
+  }
+
+  const handleUncomplete = async (todoId: string) => {
+    if (!accountId) return
+    await uncompleteMutation.mutateAsync({ todoCode: todoId })
   }
 
   const result = query.state ?? null
@@ -31,9 +37,12 @@ export function usePlanningTodosScreen() {
     completedTodos,
     dressNote: result?.dressNote,
     handleComplete,
+    handleUncomplete,
     isCompleting: completeMutation.isPending,
     isError: query.isError,
     isLoading: query.isLoading,
+    isUncompleting: uncompleteMutation.isPending,
+    note: result?.note,
     pendingTodos,
     refetch: query.refetch,
     today,
