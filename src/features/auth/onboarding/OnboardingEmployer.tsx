@@ -109,7 +109,11 @@ export function OnboardingEmployer({
         <View
           style={[
             styles.employerPreview,
-            { backgroundColor: tokens.surfaceSecondary, borderColor: tokens.border },
+            {
+              backgroundColor: tokens.surfaceSecondary,
+              borderColor: tokens.border,
+              ...tokens.elevation1,
+            },
           ]}
         >
           <View style={styles.employerHeader}>

@@ -10,6 +10,7 @@ import {
   useAppTheme,
   useDesignTokens,
 } from "@/ui"
+import { translate } from "@/i18n/translate"
 
 import {
   ContractActionRow,
@@ -46,7 +47,7 @@ export function ContractDetailScreen() {
       <Stack.Screen
         options={{
           ...headerActions,
-          title: mode === "sign" ? "Sign contract" : "Contract",
+          title: mode === "sign" ? translate("documents:signContract") : translate("documents:title"),
         }}
       />
       {contract ? (
@@ -73,11 +74,11 @@ export function ContractDetailScreen() {
         </>
       ) : (
         <EmptyState
-          actionLabel="Back"
+          actionLabel={translate("common:actions.back")}
           icon={<Ionicons color={tokens.textMuted} name="document-text-outline" size={18} />}
           onAction={() => router.back()}
-          subtitle="This contract is no longer available in your local documents list."
-          title="Contract not found"
+          subtitle={translate("documents:contractNotFoundSubtitle")}
+          title={translate("documents:contractNotFound")}
         />
       )}
     </AppScrollScreen>

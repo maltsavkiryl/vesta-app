@@ -74,7 +74,7 @@ export function DocumentsHeader({
             onPress={onUploadPress}
             tone="accent"
             variant="solid"
-            style={[styles.uploadIconButton, { shadowColor: tokens.accent }]}
+            style={[{ ...tokens.elevation2, shadowColor: tokens.accent }]}
           >
             <Ionicons color={tokens.accentForeground} name="add" size={18} />
           </IconButton>
@@ -107,9 +107,5 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 0,
   },
-  uploadIconButton: {
-    shadowOffset: { height: 8, width: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-  },
+
 })

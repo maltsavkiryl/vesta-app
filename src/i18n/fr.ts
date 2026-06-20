@@ -233,6 +233,50 @@ const fr: Translations = {
       stepsLeftPlural: "{{count}} étapes restantes",
     },
   },
+  documents: {
+    title: "Documents",
+    netPay: "SALAIRE NET",
+    breakdown: "DÉTAIL",
+    payslipNotFound: "Fiche de paie introuvable",
+    payslipNotFoundSubtitle:
+      "Cette fiche de paie n'est plus disponible dans la liste locale actuelle.",
+    contractNotFound: "Contrat introuvable",
+    contractNotFoundSubtitle:
+      "Ce contrat n'est plus disponible dans votre liste de documents locale.",
+    documentNotFound: "Document introuvable",
+    documentNotFoundSubtitle:
+      "Ce fichier téléversé n'est plus disponible dans le stockage local.",
+    paidOn: "Payé le {{date}}",
+    yourSignature: "VOTRE SIGNATURE",
+    signaturePlaceholder: "Saisissez votre nom légal complet...",
+    signatureDisclaimer:
+      "En signant, vous confirmez avoir lu et accepté toutes les conditions de ce document.",
+    downloadAction: "Télécharger",
+    signContract: "Signer le contrat",
+    shareFile: "Partager le fichier",
+    uploadDetails: "Détails du téléversement",
+    status: "Statut",
+    underReview: "En cours d'examen",
+    uploaded: "Téléversé",
+    fileName: "Nom du fichier",
+    format: "Format",
+    loadError: "Impossible de charger les documents",
+    loadErrorSubtitle: "Vérifiez votre connexion et réessayez.",
+    searchPlaceholder: "Rechercher des documents...",
+    markAllReadSuccess: "Toutes les notifications marquées comme lues",
+  },
+  employers: {
+    scanQrTitle: "Scanner le QR code de l'employeur",
+    scanQrSubtitle: "Utilisez un QR code contenant uniquement le code d'invitation à 6 chiffres.",
+    scanQrCode: "Scanner le QR code",
+    cameraNeeded: "Accès à la caméra requis",
+    cameraNeededSubtitle:
+      "Autorisez l'accès à la caméra pour scanner un QR code d'invitation employeur à 6 chiffres.",
+    allowCamera: "Autoriser la caméra",
+    invalidQrTitle: "QR code invalide",
+    invalidQrSubtitle: "Ce QR code ne contient pas de code d'invitation à 6 chiffres.",
+    closeScanner: "Fermer le scanner",
+  },
 }
 
 export default fr

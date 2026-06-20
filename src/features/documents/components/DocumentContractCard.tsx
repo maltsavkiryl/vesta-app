@@ -1,7 +1,9 @@
 import { Pressable, StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 
 import { Text, appLayout, useDesignTokens } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
 
 import { getDocumentStatusConfig } from "../documents.status"
 import type { Contract } from "../documents.types"
@@ -23,7 +25,12 @@ export function DocumentContractCard({
   const status = getDocumentStatusConfig(tokens, contract.status)
 
   return (
-    <View style={[styles.contractCard, { backgroundColor: tokens.surface }]}>
+    <View
+      style={[
+        styles.contractCard,
+        { backgroundColor: tokens.surface, ...tokens.elevation1 },
+      ]}
+    >
       <View style={styles.contractHeader}>
         <DocumentStatusIcon
           backgroundColor={status.backgroundColor}
@@ -50,7 +57,7 @@ export function DocumentContractCard({
           icon="eye-outline"
           label="View"
           onPress={onView}
-          style={[
+          baseStyle={[
             styles.contractSecondary,
             { backgroundColor: tokens.background, borderColor: tokens.border },
           ]}
@@ -61,7 +68,7 @@ export function DocumentContractCard({
             icon="pencil-outline"
             label="Review & sign"
             onPress={onSign}
-            style={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
+            baseStyle={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
             textColor={tokens.accentForeground}
             weight="semiBold"
           />
@@ -70,7 +77,7 @@ export function DocumentContractCard({
             icon="download-outline"
             label="Download"
             onPress={onDownload}
-            style={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
+            baseStyle={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
             textColor={tokens.accentForeground}
             weight="semiBold"
           />
@@ -84,26 +91,50 @@ function ContractActionButton({
   icon,
   label,
   onPress,
-  style,
+  baseStyle,
   textColor,
   weight = "medium",
 }: {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   onPress: () => void
-  style: object | object[]
+  baseStyle: object | object[]
   textColor: string
   weight?: "medium" | "semiBold"
 }) {
+  const { animatedStyle, pressHandlers } = usePressScale({})
+
   return (
-    <Pressable onPress={onPress} style={style}>
-      <Ionicons color={textColor} name={icon} size={14} />
-      <Text text={label} size="xxs" weight={weight} style={{ color: textColor }} />
-    </Pressable>
+    <Animated.View style={[styles.actionFlex, animatedStyle]}>
+      <Pressable
+        onPress={onPress}
+        style={[
+          styles.actionBase,
+          ...(Array.isArray(baseStyle) ? baseStyle : [baseStyle]),
+        ]}
+        {...pressHandlers}
+      >
+        <Ionicons color={textColor} name={icon} size={14} />
+        <Text text={label} size="xxs" weight={weight} style={{ color: textColor }} />
+      </Pressable>
+    </Animated.View>
   )
 }
 
 const styles = StyleSheet.create({
+  actionBase: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 11,
+    flex: 1,
+    flexDirection: "row",
+    gap: 5,
+    justifyContent: "center",
+    padding: 10,
+  },
+  actionFlex: {
+    flex: 1,
+  },
   contractActions: {
     flexDirection: "row",
     gap: 8,
@@ -120,25 +151,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   contractPrimary: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
-    flex: 2,
-    flexDirection: "row",
-    gap: 5,
-    justifyContent: "center",
-    padding: 10,
+    borderWidth: 0,
   },
   contractSecondary: {
-    alignItems: "center",
-    borderCurve: "continuous",
-    borderRadius: 11,
     borderWidth: 1,
-    flex: 1,
-    flexDirection: "row",
-    gap: 5,
-    justifyContent: "center",
-    padding: 10,
   },
   flex: {
     flex: 1,

@@ -233,6 +233,48 @@ const nl: Translations = {
       stepsLeftPlural: "{{count}} stappen over",
     },
   },
+  documents: {
+    title: "Documenten",
+    netPay: "NETTOLOON",
+    breakdown: "OVERZICHT",
+    payslipNotFound: "Loonbrief niet gevonden",
+    payslipNotFoundSubtitle: "Deze loonbrief is niet meer beschikbaar in de huidige lokale lijst.",
+    contractNotFound: "Contract niet gevonden",
+    contractNotFoundSubtitle:
+      "Dit contract is niet meer beschikbaar in je lokale documentenlijst.",
+    documentNotFound: "Document niet gevonden",
+    documentNotFoundSubtitle: "Dit geüploade bestand is niet meer beschikbaar in lokale opslag.",
+    paidOn: "Betaald op {{date}}",
+    yourSignature: "JOUW HANDTEKENING",
+    signaturePlaceholder: "Typ je volledige juridische naam...",
+    signatureDisclaimer:
+      "Door te ondertekenen bevestig je dat je alle voorwaarden van dit document hebt gelezen en ermee akkoord gaat.",
+    downloadAction: "Downloaden",
+    signContract: "Contract ondertekenen",
+    shareFile: "Bestand delen",
+    uploadDetails: "Uploadgegevens",
+    status: "Status",
+    underReview: "In beoordeling",
+    uploaded: "Geüpload",
+    fileName: "Bestandsnaam",
+    format: "Formaat",
+    loadError: "Documenten konden niet worden geladen",
+    loadErrorSubtitle: "Controleer je verbinding en probeer opnieuw.",
+    searchPlaceholder: "Documenten zoeken...",
+    markAllReadSuccess: "Alle meldingen als gelezen gemarkeerd",
+  },
+  employers: {
+    scanQrTitle: "Scan de werkgever-QR-code",
+    scanQrSubtitle: "Gebruik een QR-code die alleen de 6-cijferige uitnodigingscode bevat.",
+    scanQrCode: "QR-code scannen",
+    cameraNeeded: "Cameratoegang vereist",
+    cameraNeededSubtitle:
+      "Sta cameratoegang toe om een 6-cijferige werkgever-uitnodigings-QR-code te scannen.",
+    allowCamera: "Camera toestaan",
+    invalidQrTitle: "Ongeldige QR-code",
+    invalidQrSubtitle: "Deze QR-code bevat geen 6-cijferige uitnodigingscode.",
+    closeScanner: "Scanner sluiten",
+  },
 }
 
 export default nl

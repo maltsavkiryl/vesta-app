@@ -1,12 +1,13 @@
-/* eslint-disable react-native/no-color-literals */
-
 import { Pressable, StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { NotificationItem, NotificationKind } from "@/core/models"
 import type { TxKeyPath } from "@/i18n"
 import { Text, useDesignTokens } from "@/ui"
 import type { DesignTokens } from "@/ui"
+import { MotionPressable } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
 
 import { getNotificationActionLabelKey } from "./notificationActionLabel"
 import { groupLabelTx, type NotificationGroupKey } from "./useNotificationsScreen"
@@ -27,12 +28,24 @@ function getNotificationTone(tokens: DesignTokens, kind: NotificationKind) {
   return tokens.accent
 }
 
+function getNotificationIconBg(tokens: DesignTokens, kind: NotificationKind): string {
+  if (kind === "documents") return tokens.dangerSoft
+  if (kind === "payroll") return tokens.successSoft
+  if (kind === "clock" || kind === "availability") return tokens.warningSoft
+  return tokens.accentMuted
+}
+
 export function NotificationsEmptyState() {
   const tokens = useDesignTokens()
 
   return (
     <View style={styles.emptyState}>
-      <View style={[styles.emptyIcon, { backgroundColor: tokens.surface }]}>
+      <View
+        style={[
+          styles.emptyIcon,
+          { backgroundColor: tokens.surface, ...tokens.elevation1 },
+        ]}
+      >
         <Ionicons color={tokens.textMuted} name="notifications-outline" size={30} />
       </View>
       <Text
@@ -68,17 +81,17 @@ export function NotificationsUnreadActions({
           txOptions={{ count: unreadCount }}
           size="xxs"
           weight="medium"
-          style={styles.whiteText}
+          style={{ color: tokens.accentForeground }}
         />
       </View>
-      <Pressable onPress={onMarkAllRead}>
+      <MotionPressable onPress={onMarkAllRead}>
         <Text
           tx="notifications:markAllRead"
           size="xxs"
           weight="medium"
           style={{ color: tokens.accent }}
         />
-      </Pressable>
+      </MotionPressable>
     </View>
   )
 }
@@ -115,28 +128,33 @@ export function NotificationsClearAll({
   visible: boolean
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle, pressHandlers } = usePressScale({})
   if (!visible) return null
 
   return (
-    <Pressable
-      onPress={onClearAll}
-      style={[
-        styles.clearAllButton,
-        { backgroundColor: `${tokens.danger}08`, borderColor: `${tokens.danger}18` },
-      ]}
-    >
-      <Ionicons color={tokens.danger} name="trash-outline" size={15} />
-      <Text
-        tx="notifications:clearAll"
-        size="xs"
-        weight="medium"
-        style={{ color: tokens.danger }}
-      />
-    </Pressable>
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onClearAll}
+        style={[
+          styles.clearAllButton,
+          { backgroundColor: tokens.dangerSoft, borderColor: tokens.danger },
+        ]}
+        {...pressHandlers}
+      >
+        <Ionicons color={tokens.danger} name="trash-outline" size={15} />
+        <Text
+          tx="notifications:clearAll"
+          size="xs"
+          weight="medium"
+          style={{ color: tokens.danger }}
+        />
+      </Pressable>
+    </Animated.View>
   )
 }
 
-function NotificationRow({
+function NotificationRowItem({
   item,
   onDismiss,
   onPress,
@@ -147,62 +165,79 @@ function NotificationRow({
 }) {
   const tokens = useDesignTokens()
   const color = getNotificationTone(tokens, item.kind)
+  const iconBg = getNotificationIconBg(tokens, item.kind)
   const actionLabelTx = getNotificationActionLabelKey(item.action)
+  const { animatedStyle, pressHandlers } = usePressScale({})
 
   return (
     <View
       style={[
         styles.notificationRow,
         {
-          backgroundColor: item.unread ? `${tokens.accent}08` : tokens.transparent,
+          backgroundColor: item.unread ? tokens.accentMuted : tokens.transparent,
           borderBottomColor: tokens.border,
         },
       ]}
     >
-      <Pressable onPress={onPress} style={styles.notificationMain}>
-        <View style={[styles.notificationIcon, { backgroundColor: `${color}14` }]}>
-          <Ionicons color={color} name={iconByKind[item.kind]} size={18} />
-        </View>
-        <View style={styles.flex}>
-          <View style={styles.notificationTitleRow}>
-            <Text
-              text={item.title}
-              size="xs"
-              weight={item.unread ? "semiBold" : "medium"}
-              style={[styles.flex, { color: tokens.textPrimary }]}
-            />
-            <View style={styles.notificationMeta}>
-              <Text
-                text={item.relativeTime}
-                size="xxs"
-                style={[styles.metaText, { color: tokens.textMuted }]}
-              />
-              {item.unread ? (
-                <View style={[styles.dot, { backgroundColor: tokens.accent }]} />
-              ) : null}
-            </View>
+      <Animated.View style={[styles.notificationPressWrapper, animatedStyle]}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onPress}
+          style={styles.notificationMain}
+          {...pressHandlers}
+        >
+          <View style={[styles.notificationIcon, { backgroundColor: iconBg }]}>
+            <Ionicons color={color} name={iconByKind[item.kind]} size={18} />
           </View>
-          <Text
-            text={item.body}
-            size="xxs"
-            style={[styles.bodyText, { color: tokens.textSecondary }]}
-          />
-          {actionLabelTx ? (
-            <View style={[styles.cta, { backgroundColor: `${tokens.accent}10` }]}>
+          <View style={styles.flex}>
+            <View style={styles.notificationTitleRow}>
               <Text
-                tx={actionLabelTx}
-                size="xxs"
-                weight="semiBold"
-                style={{ color: tokens.accent }}
+                text={item.title}
+                size="xs"
+                weight={item.unread ? "semiBold" : "medium"}
+                style={[styles.flex, { color: tokens.textPrimary }]}
               />
-              <Ionicons color={tokens.accent} name="chevron-forward-outline" size={12} />
+              <View style={styles.notificationMeta}>
+                <Text
+                  text={item.relativeTime}
+                  size="xxs"
+                  style={[styles.metaText, { color: tokens.textMuted }]}
+                />
+                {item.unread ? (
+                  <View style={[styles.dot, { backgroundColor: tokens.accent }]} />
+                ) : null}
+              </View>
             </View>
-          ) : null}
-        </View>
-      </Pressable>
-      <Pressable hitSlop={10} onPress={onDismiss} style={styles.dismissButton}>
+            <Text
+              text={item.body}
+              size="xxs"
+              style={[styles.bodyText, { color: tokens.textSecondary }]}
+            />
+            {actionLabelTx ? (
+              <View style={[styles.cta, { backgroundColor: tokens.accentMuted }]}>
+                <Text
+                  tx={actionLabelTx}
+                  size="xxs"
+                  weight="semiBold"
+                  style={{ color: tokens.accent }}
+                />
+                <Ionicons color={tokens.accent} name="chevron-forward-outline" size={12} />
+              </View>
+            ) : null}
+          </View>
+        </Pressable>
+      </Animated.View>
+      <Animated.View
+        accessible
+        accessibilityLabel="Dismiss notification"
+        accessibilityRole="button"
+        onStartShouldSetResponder={() => true}
+        onResponderRelease={onDismiss}
+        hitSlop={10}
+        style={styles.dismissButton}
+      >
         <Ionicons color={tokens.textMuted} name="close-outline" size={13} />
-      </Pressable>
+      </Animated.View>
     </View>
   )
 }
@@ -229,9 +264,14 @@ function NotificationGroup({
         weight="semiBold"
         style={[styles.groupLabel, { color: tokens.textMuted }]}
       />
-      <View style={[styles.groupCard, { backgroundColor: tokens.surface }]}>
+      <View
+        style={[
+          styles.groupCard,
+          { backgroundColor: tokens.surface, ...tokens.elevation1 },
+        ]}
+      >
         {items.map((item) => (
-          <NotificationRow
+          <NotificationRowItem
             key={item.id}
             item={item}
             onDismiss={() => onDismiss(item.id)}
@@ -289,6 +329,7 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     alignItems: "center",
+    borderCurve: "continuous",
     borderRadius: 36,
     height: 72,
     justifyContent: "center",
@@ -345,6 +386,9 @@ const styles = StyleSheet.create({
     gap: 7,
     marginLeft: 10,
   },
+  notificationPressWrapper: {
+    flex: 1,
+  },
   notificationRow: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
@@ -361,8 +405,5 @@ const styles = StyleSheet.create({
     minWidth: 72,
     paddingHorizontal: 12,
     paddingVertical: 5,
-  },
-  whiteText: {
-    color: "#FFFFFF",
   },
 })

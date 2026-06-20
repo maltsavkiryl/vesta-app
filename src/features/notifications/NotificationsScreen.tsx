@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-color-literals, react-native/no-inline-styles */
-
 import { StyleSheet, View } from "react-native"
 
 import { AppScrollScreen, appLayout, useDesignTokens } from "@/ui"

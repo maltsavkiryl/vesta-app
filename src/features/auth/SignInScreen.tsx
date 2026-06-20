@@ -1,12 +1,42 @@
 import { Pressable, StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { MotionView, Text } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
 
 import { AuthBackgroundLayers, AUTH_SCREEN_PALETTE } from "./AuthFormLayout"
 import { AuthLogo } from "./AuthLogo"
+
+function SignInButton({
+  accessibilityLabel,
+  children,
+  onPress,
+  style,
+}: {
+  accessibilityLabel: string
+  children: React.ReactNode
+  onPress: () => void
+  style: object | object[]
+}) {
+  const { animatedStyle, pressHandlers } = usePressScale({ pressedScale: 0.97 })
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        onPress={onPress}
+        style={Array.isArray(style) ? StyleSheet.flatten(style) : style}
+        {...pressHandlers}
+      >
+        {children}
+      </Pressable>
+    </Animated.View>
+  )
+}
 
 export function SignInScreen() {
   const insets = useSafeAreaInsets()
@@ -47,16 +77,12 @@ export function SignInScreen() {
           </View>
 
           <View style={styles.buttonGroup}>
-            <Pressable
+            <SignInButton
               accessibilityLabel="Log in with email"
-              accessibilityRole="button"
               onPress={startSignIn}
-              style={({ pressed }) => [
+              style={[
                 styles.emailButton,
-                {
-                  backgroundColor: AUTH_SCREEN_PALETTE.emailButtonBg,
-                  opacity: pressed ? 0.88 : 1,
-                },
+                { backgroundColor: AUTH_SCREEN_PALETTE.emailButtonBg },
               ]}
             >
               <Text
@@ -65,7 +91,7 @@ export function SignInScreen() {
                 weight="semiBold"
                 style={{ color: AUTH_SCREEN_PALETTE.emailButtonText }}
               />
-            </Pressable>
+            </SignInButton>
 
             <View style={styles.dividerRow}>
               <View
@@ -81,16 +107,14 @@ export function SignInScreen() {
               />
             </View>
 
-            <Pressable
+            <SignInButton
               accessibilityLabel="Continue with Apple"
-              accessibilityRole="button"
               onPress={startSignIn}
-              style={({ pressed }) => [
+              style={[
                 styles.socialButton,
                 {
                   backgroundColor: AUTH_SCREEN_PALETTE.socialBg,
                   borderColor: AUTH_SCREEN_PALETTE.socialBorder,
-                  opacity: pressed ? 0.88 : 1,
                 },
               ]}
             >
@@ -101,18 +125,16 @@ export function SignInScreen() {
                 weight="medium"
                 style={{ color: AUTH_SCREEN_PALETTE.socialText }}
               />
-            </Pressable>
+            </SignInButton>
 
-            <Pressable
+            <SignInButton
               accessibilityLabel="Continue with Google"
-              accessibilityRole="button"
               onPress={startSignIn}
-              style={({ pressed }) => [
+              style={[
                 styles.socialButton,
                 {
                   backgroundColor: AUTH_SCREEN_PALETTE.socialBg,
                   borderColor: AUTH_SCREEN_PALETTE.socialBorder,
-                  opacity: pressed ? 0.88 : 1,
                 },
               ]}
             >
@@ -123,7 +145,7 @@ export function SignInScreen() {
                 weight="medium"
                 style={{ color: AUTH_SCREEN_PALETTE.socialText }}
               />
-            </Pressable>
+            </SignInButton>
           </View>
         </MotionView>
       </View>

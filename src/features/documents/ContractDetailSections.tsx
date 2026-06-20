@@ -1,8 +1,11 @@
 import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { DocumentContract } from "@/features/documents/data/documents.repository"
 import { Banner, Text, appTypography, useDesignTokens } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
+import { translate } from "@/i18n/translate"
 
 import { shareContractPdf } from "./documentShare"
 
@@ -18,7 +21,7 @@ export function ContractDetailHero({
   return (
     <View>
       <Text
-        text={mode === "sign" ? "Sign contract" : contract.name}
+        text={mode === "sign" ? translate("documents:signContract") : contract.name}
         weight="bold"
         style={[appTypography.detailTitle, { color: tokens.textPrimary }]}
       />
@@ -41,7 +44,12 @@ export function ContractPreview({
   const tokens = useDesignTokens()
 
   return (
-    <View style={[styles.preview, { backgroundColor: tokens.surface }]}>
+    <View
+      style={[
+        styles.preview,
+        { backgroundColor: tokens.surface, ...tokens.elevation1 },
+      ]}
+    >
       <Text
         text={body}
         size="xxs"
@@ -68,14 +76,14 @@ export function ContractSignatureSection({
   return (
     <>
       <Text
-        text="YOUR SIGNATURE"
+        tx="documents:yourSignature"
         size="xxs"
         weight="semiBold"
         style={[styles.caps, { color: tokens.textMuted }]}
       />
       <TextInput
         onChangeText={onChangeSignature}
-        placeholder="Type your full legal name..."
+        placeholder={translate("documents:signaturePlaceholder")}
         placeholderTextColor={tokens.textMuted}
         style={[
           styles.signatureInput,
@@ -89,7 +97,7 @@ export function ContractSignatureSection({
       />
       <Banner tone="warning">
         <Text
-          text="By signing, you confirm you have read and agree to all terms of this document."
+          tx="documents:signatureDisclaimer"
           size="xxs"
           style={{ color: tokens.warning }}
         />
@@ -107,48 +115,62 @@ export function ContractActionRow({
 }) {
   const tokens = useDesignTokens()
   const isPending = contract.status === "pending"
+  const { animatedStyle: downloadAnim, pressHandlers: downloadHandlers } = usePressScale({})
+  const { animatedStyle: signAnim, pressHandlers: signHandlers } = usePressScale({})
 
   return (
     <View style={styles.actions}>
-      <Pressable
-        onPress={() => {
-          void shareContractPdf(contract)
-        }}
-        style={[
-          isPending ? styles.secondaryAction : styles.primaryAction,
-          isPending
-            ? { backgroundColor: tokens.surface, borderColor: tokens.border }
-            : { backgroundColor: tokens.accent },
-        ]}
-      >
-        <Ionicons
-          color={isPending ? tokens.textPrimary : tokens.accentForeground}
-          name="download-outline"
-          size={14}
-        />
-        <Text
-          text="Download"
-          size="xxs"
-          weight={isPending ? "medium" : "semiBold"}
-          style={{ color: isPending ? tokens.textPrimary : tokens.accentForeground }}
-        />
-      </Pressable>
-      {isPending ? (
-        <Pressable onPress={onSign} style={[styles.primaryAction, { backgroundColor: tokens.accent }]}>
-          <Ionicons color={tokens.accentForeground} name="pencil-outline" size={14} />
+      <Animated.View style={[styles.actionFlex, downloadAnim]}>
+        <Pressable
+          onPress={() => {
+            void shareContractPdf(contract)
+          }}
+          style={[
+            isPending ? styles.secondaryAction : styles.primaryAction,
+            isPending
+              ? { backgroundColor: tokens.surface, borderColor: tokens.border }
+              : { backgroundColor: tokens.accent },
+          ]}
+          {...downloadHandlers}
+        >
+          <Ionicons
+            color={isPending ? tokens.textPrimary : tokens.accentForeground}
+            name="download-outline"
+            size={14}
+          />
           <Text
-            text="Sign contract"
+            tx="documents:downloadAction"
             size="xxs"
-            weight="semiBold"
-            style={{ color: tokens.accentForeground }}
+            weight={isPending ? "medium" : "semiBold"}
+            style={{ color: isPending ? tokens.textPrimary : tokens.accentForeground }}
           />
         </Pressable>
+      </Animated.View>
+      {isPending ? (
+        <Animated.View style={[styles.actionFlex, signAnim]}>
+          <Pressable
+            onPress={onSign}
+            style={[styles.primaryAction, { backgroundColor: tokens.accent }]}
+            {...signHandlers}
+          >
+            <Ionicons color={tokens.accentForeground} name="pencil-outline" size={14} />
+            <Text
+              tx="documents:signContract"
+              size="xxs"
+              weight="semiBold"
+              style={{ color: tokens.accentForeground }}
+            />
+          </Pressable>
+        </Animated.View>
       ) : null}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  actionFlex: {
+    flex: 1,
+  },
   actions: {
     flexDirection: "row",
     gap: 8,
@@ -169,7 +191,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderCurve: "continuous",
     borderRadius: 11,
-    flex: 2,
+    flex: 1,
     flexDirection: "row",
     gap: 5,
     justifyContent: "center",
