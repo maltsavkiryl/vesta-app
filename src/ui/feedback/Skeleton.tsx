@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import {
   type DimensionValue,
   type LayoutChangeEvent,
@@ -42,10 +42,11 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: Ske
   const tokens = useDesignTokens()
   const motion = useAppMotion()
   const progress = useSharedValue(0)
-  const [containerWidth, setContainerWidth] = useState(0)
+  // Use a shared value so useAnimatedStyle worklet can access it on the UI thread
+  const containerWidthSV = useSharedValue(0)
 
   const handleLayout = (event: LayoutChangeEvent) => {
-    setContainerWidth(event.nativeEvent.layout.width)
+    containerWidthSV.value = event.nativeEvent.layout.width
   }
 
   useEffect(() => {
@@ -65,10 +66,10 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: Ske
   }, [motion.shouldReduceMotion, progress])
 
   const shimmerStyle = useAnimatedStyle(() => {
-    if (containerWidth === 0) return { transform: [{ translateX: 0 }] }
-    // Translate from -containerWidth to +containerWidth
-    const translateX = -containerWidth + progress.value * containerWidth * 2
-    return { transform: [{ translateX }] }
+    const cw = containerWidthSV.value
+    if (cw === 0) return { transform: [{ translateX: 0 }] }
+    // Translate from -cw to +cw
+    return { transform: [{ translateX: -cw + progress.value * cw * 2 }] }
   })
 
   const shimmerColors: [string, string, string] = tokens.isDark
@@ -104,18 +105,12 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: Ske
         style,
       ]}
     >
-      {containerWidth > 0 ? (
-        <AnimatedLinearGradient
-          colors={shimmerColors}
-          end={{ x: 1, y: 0 }}
-          start={{ x: 0, y: 0 }}
-          style={[
-            StyleSheet.absoluteFill,
-            { width: containerWidth },
-            shimmerStyle,
-          ]}
-        />
-      ) : null}
+      <AnimatedLinearGradient
+        colors={shimmerColors}
+        end={{ x: 1, y: 0 }}
+        start={{ x: 0, y: 0 }}
+        style={[StyleSheet.absoluteFill, shimmerStyle]}
+      />
     </View>
   )
 }

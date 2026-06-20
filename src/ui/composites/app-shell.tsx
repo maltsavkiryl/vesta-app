@@ -191,14 +191,8 @@ export function SurfaceCard({
   style?: StyleProp<ViewStyle>
 }>) {
   const tokens = useDesignTokens()
-  const elevationStyle =
-    elevationLevel === 1
-      ? tokens.elevation1
-      : elevationLevel === 2
-        ? tokens.elevation2
-        : elevationLevel === 3
-          ? tokens.elevation3
-          : null
+  const elevationMap = { 0: null, 1: tokens.elevation1, 2: tokens.elevation2, 3: tokens.elevation3 } as const
+  const elevationStyle = elevationMap[elevationLevel]
 
   return (
     <View

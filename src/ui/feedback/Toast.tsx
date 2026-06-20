@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { StyleSheet } from "react-native"
+import { AccessibilityInfo, StyleSheet } from "react-native"
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -69,12 +69,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [queue, setQueue] = useState<ToastItem[]>([])
   const [current, setCurrent] = useState<ToastItem | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isMountedRef = useRef(true)
   const { shouldReduceMotion } = useAppMotion()
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
 
   const translateY = useSharedValue(-100)
   const opacity = useSharedValue(0)
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      if (timerRef.current) clearTimeout(timerRef.current)
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+    }
+  }, [])
 
   const showToast = useCallback(
     (message: string, variant: ToastVariant = "info", duration = 3500) => {
@@ -96,21 +107,27 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const dismiss = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
+    if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
 
     if (shouldReduceMotion) {
       translateY.value = -100
       opacity.value = 0
-      setCurrent(null)
+      if (isMountedRef.current) setCurrent(null)
       return
     }
 
     translateY.value = withSpring(-100, SPRING_SNAPPY)
     opacity.value = withTiming(0, { duration: 160 })
-    setTimeout(() => setCurrent(null), 300)
+    dismissTimerRef.current = setTimeout(() => {
+      if (isMountedRef.current) setCurrent(null)
+    }, 300)
   }, [shouldReduceMotion, translateY, opacity])
 
   useEffect(() => {
     if (!current) return
+
+    // Announce to screen readers
+    AccessibilityInfo.announceForAccessibility(current.message)
 
     if (shouldReduceMotion) {
       translateY.value = 0
@@ -138,12 +155,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {current ? (
         <Animated.View
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
           style={[
             styles.toastContainer,
             {
               top: insets.top + 8,
               backgroundColor: getVariantColors(current.variant, tokens).bg,
               borderRadius: tokens.radiusMd,
+              ...tokens.elevation3,
             },
             animatedStyle,
           ]}
@@ -206,17 +226,12 @@ export function useToast(): {
 const styles = StyleSheet.create({
   toastContainer: {
     alignItems: "center",
-    elevation: 12,
     flexDirection: "row",
     left: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
     position: "absolute",
     right: 16,
-    shadowColor: "rgba(0,0,0,0.2)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
     zIndex: 9999,
   },
 })

@@ -53,10 +53,6 @@ export function Sheet({
   const backdropOpacity = useSharedValue(isOpen ? 0.52 : 0)
   const dragOffset = useSharedValue(0)
 
-  const closeSheet = () => {
-    onClose()
-  }
-
   const animateClose = (callback: () => void) => {
     if (shouldReduceMotion) {
       backdropOpacity.value = 0
@@ -98,7 +94,7 @@ export function Sheet({
     })
     .onEnd((event) => {
       if (event.translationY > DISMISS_THRESHOLD) {
-        runOnJS(closeSheet)()
+        runOnJS(onClose)()
       } else {
         dragOffset.value = 0
         translateY.value = withSpring(0, SPRING_SNAPPY)
@@ -144,6 +140,7 @@ export function Sheet({
       {/* Sheet panel */}
       <GestureDetector gesture={panGesture}>
         <Animated.View
+          accessibilityLiveRegion="polite"
           style={[
             styles.sheet,
             {
@@ -155,8 +152,14 @@ export function Sheet({
             animatedSheetStyle,
           ]}
         >
-          {/* Drag handle */}
-          <View style={styles.handleContainer}>
+          {/* Drag handle — announced by VoiceOver/TalkBack so users know the sheet is dismissible */}
+          <View
+            accessible
+            accessibilityHint="Drag down to close"
+            accessibilityLabel="Drag handle"
+            accessibilityRole="adjustable"
+            style={styles.handleContainer}
+          >
             <View style={[styles.handle, { backgroundColor: tokens.separator }]} />
           </View>
 
