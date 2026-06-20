@@ -9,6 +9,7 @@ import type {
 } from "@/features/auth/data/auth.repository"
 import { toAppSession, type AppSession } from "@/features/auth/data/auth.transformer"
 import type { DocumentUploadError } from "@/features/documents/data/documents.errors"
+import { createDocumentsHttpRepository } from "@/features/documents/data/documents.http.repository"
 import type {
   DocumentContract,
   DocumentsRepository,
@@ -468,6 +469,10 @@ function createMockDocumentsRepository(): DocumentsRepository {
     async getDocuments(accountId) {
       return getSignedInState(accountId).documents
     },
+    async getDocumentDownloadUrl(accountId, documentId) {
+      const document = getSignedInState(accountId).documents.find((item) => item.id === documentId)
+      return document?.uploadedUri ?? null
+    },
     async signContract(accountId, contractId) {
       const nextState = commitAccountAction(
         accountId,
@@ -669,7 +674,7 @@ export function createAppRepositories(): AppRepositories {
   return {
     auth: httpRepos.auth,
     profile: httpRepos.profile,
-    documents: createMockDocumentsRepository(),
+    documents: createDocumentsHttpRepository(httpClient, createMockDocumentsRepository()),
     home: createMockHomeRepository(),
     notifications: createNotificationsHttpRepository(httpClient),
     planning: createPlanningHttpRepository(httpClient),
