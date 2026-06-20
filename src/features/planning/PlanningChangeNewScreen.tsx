@@ -1,15 +1,17 @@
-/* eslint-disable react-native/no-inline-styles */
-
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import type { Shift } from "@/core/models"
-import { AppButton, AppScrollScreen, GroupedSection, SurfaceCard, TextField, useDesignTokens } from "@/ui"
+import { AppButton, AppScrollScreen, GroupedSection, SuccessState, TextField, useDesignTokens } from "@/ui"
+import { useToast } from "@/ui/feedback"
 import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
 import { getShiftTimeRange, formatShortDate, formatLocalDate, formatTimeLabel } from "@/core/date"
+import { useListItemEntrance, useCelebratePulse } from "@/ui/foundations/motion"
 import { usePlanningChangeNewScreen } from "./usePlanningChangeNewScreen"
+import { fireHaptic } from "@/utils/haptics"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -29,46 +31,64 @@ function parseTimeString(s: string): Date {
 // ── Shift picker row ──────────────────────────────────────────────────────────
 
 function ShiftPickerRow({
+  index,
   isSelected,
   onSelect,
   shift,
 }: {
+  index: number
   isSelected: boolean
   onSelect: () => void
   shift: Shift
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 20, step: 36 })
+  const { animatedStyle: pulseStyle, triggerPulse } = useCelebratePulse()
+
+  useEffect(() => {
+    if (isSelected) {
+      triggerPulse()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSelected])
+
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ checked: isSelected }}
-      onPress={onSelect}
-      style={({ pressed }) => [
-        styles.shiftRow,
-        {
-          borderColor: isSelected ? tokens.accent : tokens.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
-      <View style={styles.shiftRowContent}>
-        <Text size="xs" style={{ color: tokens.textPrimary }} text={formatShortDate(shift.date)} weight="medium" />
-        <Text size="xxs" style={{ color: tokens.textSecondary }} text={getShiftTimeRange(shift)} />
-      </View>
-      {isSelected ? (
-        <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
-      ) : null}
-    </Pressable>
+    <Animated.View style={entranceStyle}>
+      <Animated.View style={pulseStyle}>
+        <Pressable
+          accessibilityRole="radio"
+          accessibilityState={{ checked: isSelected }}
+          onPress={onSelect}
+          style={[
+            styles.shiftRow,
+            {
+              borderColor: isSelected ? tokens.accent : tokens.border,
+              backgroundColor: isSelected ? tokens.accentMuted : tokens.surface,
+            },
+          ]}
+        >
+          <View style={styles.shiftRowContent}>
+            <Text size="xs" style={{ color: tokens.textPrimary }} text={formatShortDate(shift.date)} weight="medium" />
+            <Text size="xxs" style={{ color: tokens.textSecondary }} text={getShiftTimeRange(shift)} />
+          </View>
+          {isSelected ? (
+            <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
+          ) : null}
+        </Pressable>
+      </Animated.View>
+    </Animated.View>
   )
 }
 
 // ── Date/time picker row ──────────────────────────────────────────────────────
 
 function PickerRow({
+  isActive,
   label,
   onPress,
   value,
 }: {
+  isActive: boolean
   label: string
   onPress: () => void
   value: string
@@ -78,9 +98,14 @@ function PickerRow({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         styles.pickerRow,
-        { borderColor: tokens.border, opacity: pressed ? 0.7 : 1 },
+        {
+          borderColor: tokens.border,
+          backgroundColor: isActive ? tokens.accentMuted : "transparent",
+          borderLeftColor: isActive ? tokens.accent : "transparent",
+          borderLeftWidth: isActive ? 3 : 0,
+        },
       ]}
     >
       <Text size="xxs" style={{ color: tokens.textMuted }} text={label.toUpperCase()} weight="medium" />
@@ -98,11 +123,20 @@ function PickerRow({
 export function PlanningChangeNewScreen() {
   const tokens = useDesignTokens()
   const screen = usePlanningChangeNewScreen()
+  const { showSuccess } = useToast()
 
   // Local Date state for the pickers (derived from / synced to the hook strings)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showStartPicker, setShowStartPicker] = useState(false)
   const [showEndPicker, setShowEndPicker] = useState(false)
+
+  useEffect(() => {
+    if (screen.success) {
+      fireHaptic("success")
+      showSuccess(translate("planning:requests.submitSuccess"))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen.success])
 
   const dateValue = screen.requestedDate
     ? parseDateString(screen.requestedDate)
@@ -117,16 +151,9 @@ export function PlanningChangeNewScreen() {
   if (screen.success) {
     return (
       <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-        <SurfaceCard style={styles.successCard}>
-          <Ionicons color={tokens.success} name="checkmark-circle" size={32} />
-          <Text
-            size="sm"
-            style={{ color: tokens.success }}
-            text={translate("planning:requests.submitSuccess")}
-            weight="semiBold"
-          />
+        <SuccessState title={translate("planning:requests.submitSuccess")}>
           <AppButton label={translate("common:actions.close")} onPress={screen.handleDismiss} variant="secondary" />
-        </SurfaceCard>
+        </SuccessState>
       </AppScrollScreen>
     )
   }
@@ -138,9 +165,10 @@ export function PlanningChangeNewScreen() {
           <Text size="xs" style={{ color: tokens.textMuted, padding: 16 }} text={translate("planning:schedule.noShifts")} />
         ) : (
           <View style={styles.shiftList}>
-            {screen.myShifts.map((shift) => (
+            {screen.myShifts.map((shift, index) => (
               <ShiftPickerRow
                 key={shift.id}
+                index={index}
                 isSelected={screen.selectedShiftId === shift.id}
                 onSelect={() => screen.setSelectedShiftId(shift.id)}
                 shift={shift}
@@ -153,6 +181,7 @@ export function PlanningChangeNewScreen() {
       <GroupedSection title={translate("planning:requests.desiredChange")}>
         <View style={styles.pickerStack}>
           <PickerRow
+            isActive={showDatePicker}
             label={translate("planning:requests.requestedDate")}
             onPress={() => {
               setShowStartPicker(false)
@@ -174,6 +203,7 @@ export function PlanningChangeNewScreen() {
           ) : null}
 
           <PickerRow
+            isActive={showStartPicker}
             label={translate("planning:requests.requestedStartTime")}
             onPress={() => {
               setShowDatePicker(false)
@@ -196,6 +226,7 @@ export function PlanningChangeNewScreen() {
           ) : null}
 
           <PickerRow
+            isActive={showEndPicker}
             label={translate("planning:requests.requestedEndTime")}
             onPress={() => {
               setShowDatePicker(false)
@@ -232,7 +263,7 @@ export function PlanningChangeNewScreen() {
       </View>
 
       {screen.error ? (
-        <View style={[styles.errorRow, { backgroundColor: `${tokens.danger}10` }]}>
+        <View style={[styles.errorRow, { backgroundColor: tokens.dangerSoft }]}>
           <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
           <Text size="xxs" style={{ color: tokens.danger }} text={screen.error} />
         </View>
@@ -241,7 +272,8 @@ export function PlanningChangeNewScreen() {
       <AppButton
         disabled={!screen.canSubmit || screen.isSubmitting}
         fullWidth
-        label={screen.isSubmitting ? translate("planning:requests.submitting") : translate("planning:requests.changeRequest")}
+        isLoading={screen.isSubmitting}
+        label={translate("planning:requests.changeRequest")}
         onPress={() => {
           void screen.handleSubmit()
         }}
@@ -296,12 +328,6 @@ const styles = StyleSheet.create({
   shiftRowContent: {
     flex: 1,
     gap: 2,
-  },
-  successCard: {
-    alignItems: "center",
-    gap: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 24,
   },
   textAreaInput: {
     minHeight: 64,
