@@ -83,6 +83,7 @@ const mockTodosQuery = jest.fn()
 const mockCallsQuery = jest.fn()
 const mockRequestsQuery = jest.fn()
 const mockLeaveQuery = jest.fn()
+const mockSwapCandidatesQuery = jest.fn()
 
 jest.mock("@/features/planning/data/planning.queries", () => ({
   usePlanningScheduleQuery: (...args: any[]) => mockScheduleQuery(...args),
@@ -90,6 +91,7 @@ jest.mock("@/features/planning/data/planning.queries", () => ({
   usePlanningCallsQuery: (...args: any[]) => mockCallsQuery(...args),
   useMyRequestsQuery: (...args: any[]) => mockRequestsQuery(...args),
   useLeaveEntitlementQuery: (...args: any[]) => mockLeaveQuery(...args),
+  usePlanningSwapCandidatesQuery: (...args: any[]) => mockSwapCandidatesQuery(...args),
   planningQueryKeys: {
     all: (id: string) => ["planning", id],
     schedule: (id: string, p: any) => ["planning", id, "schedule", p],
@@ -98,6 +100,7 @@ jest.mock("@/features/planning/data/planning.queries", () => ({
     requests: (id: string) => ["planning", id, "requests"],
     leave: (id: string) => ["planning", id, "leave"],
     availability: (id: string) => ["planning", id, "availability"],
+    swapCandidates: (id: string, code: string | null) => ["planning", id, "swap-candidates", code],
   },
 }))
 
@@ -180,6 +183,20 @@ const SAMPLE_ENTITLEMENT = {
   totalDays: 25,
   entitlementHours: 0,
   source: 1,
+}
+
+const SAMPLE_CANDIDATE = {
+  shiftId: "candidate-shift-001",
+  employeeId: "employee-001",
+  employeeName: "Jane Doe",
+  shiftDate: "2099-07-16",
+  startTime: "08:00",
+  endTime: "16:00",
+  teamId: "team-001",
+  teamName: "Morning Team",
+  taskId: "task-001",
+  taskName: "Cashier",
+  city: "Brussels",
 }
 
 // ── Idle query factory ────────────────────────────────────────────────────────
@@ -359,6 +376,8 @@ describe("PlanningSwapNewScreen", () => {
     jest.clearAllMocks()
     mockCreateShiftSwapMutation.mockResolvedValue({ ok: true })
     mockScheduleQuery.mockReturnValue(idleQuery([SAMPLE_SHIFT]))
+    // Default: no shift selected yet → candidates query idle with no data
+    mockSwapCandidatesQuery.mockReturnValue(idleQuery(null))
   })
 
   it("submit button is disabled without a shift selected", () => {
@@ -369,31 +388,64 @@ describe("PlanningSwapNewScreen", () => {
     expect(submitBtn.props.accessibilityState?.disabled).toBe(true)
   })
 
-  it("submit button is disabled with shift selected but no target shift ID", () => {
+  it("shows 'pick your shift first' prompt before a shift is selected", () => {
+    const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
+    render(<PlanningSwapNewScreen />)
+    // Real English text from en.ts planning.requests.pickShiftFirst
+    expect(screen.getByText(/Select your shift above to see available swaps/)).toBeTruthy()
+  })
+
+  it("submit button is disabled with shift selected but no candidate chosen", () => {
+    mockSwapCandidatesQuery.mockReturnValue(idleQuery([]))
     const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
     render(<PlanningSwapNewScreen />)
 
     // Select a shift row (radio button)
-    const shiftRow = screen.getByRole("radio", { name: /./i })
-    fireEvent.press(shiftRow)
+    const shiftRows = screen.getAllByRole("radio")
+    fireEvent.press(shiftRows[0])
 
     // Real English text from en.ts planning.requests.shiftSwap
     const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
     expect(submitBtn.props.accessibilityState?.disabled).toBe(true)
   })
 
-  it("submit enabled and calls mutation when shift + targetShiftId are entered", async () => {
+  it("shows empty state when candidates list is empty after shift selection", () => {
+    mockSwapCandidatesQuery.mockReturnValue(idleQuery([]))
     const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
     render(<PlanningSwapNewScreen />)
 
-    // Select a shift
-    const shiftRow = screen.getByRole("radio", { name: /./i })
-    fireEvent.press(shiftRow)
+    const shiftRows = screen.getAllByRole("radio")
+    fireEvent.press(shiftRows[0])
 
-    // Two TextFields exist: targetShiftId and note. Both are empty.
-    // Type into the first one (target shift ID).
-    const inputs = screen.getAllByDisplayValue("")
-    fireEvent.changeText(inputs[0], "shift-xyz-999")
+    // Real English text from en.ts planning.requests.noSwapCandidates
+    expect(screen.getByText(/No swappable shifts found/)).toBeTruthy()
+  })
+
+  it("renders candidate rows after shift selection", () => {
+    mockSwapCandidatesQuery.mockReturnValue(idleQuery([SAMPLE_CANDIDATE]))
+    const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
+    render(<PlanningSwapNewScreen />)
+
+    const shiftRows = screen.getAllByRole("radio")
+    fireEvent.press(shiftRows[0])
+
+    // Candidate employee name should appear
+    expect(screen.getByText("Jane Doe")).toBeTruthy()
+  })
+
+  it("submit enabled and calls mutation when my shift + candidate are selected", async () => {
+    mockSwapCandidatesQuery.mockReturnValue(idleQuery([SAMPLE_CANDIDATE]))
+    const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
+    render(<PlanningSwapNewScreen />)
+
+    // Select my shift (first radio)
+    const shiftRows = screen.getAllByRole("radio")
+    fireEvent.press(shiftRows[0])
+
+    // Select candidate (second radio that appears — "Jane Doe")
+    const allRadios = screen.getAllByRole("radio")
+    // The candidate row is the second radio
+    fireEvent.press(allRadios[1])
 
     // Real English text from en.ts planning.requests.shiftSwap
     const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
@@ -405,7 +457,7 @@ describe("PlanningSwapNewScreen", () => {
     expect(mockCreateShiftSwapMutation).toHaveBeenCalledWith({
       input: {
         requesterShiftId: "shift-001",
-        targetShiftId: "shift-xyz-999",
+        targetShiftId: "candidate-shift-001",
         note: undefined,
       },
     })
@@ -413,14 +465,15 @@ describe("PlanningSwapNewScreen", () => {
 
   it("shows error row when mutation returns ok: false", async () => {
     mockCreateShiftSwapMutation.mockResolvedValue({ ok: false, error: { type: "validation", message: "fail" } })
+    mockSwapCandidatesQuery.mockReturnValue(idleQuery([SAMPLE_CANDIDATE]))
     const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
     render(<PlanningSwapNewScreen />)
 
-    const shiftRow = screen.getByRole("radio", { name: /./i })
-    fireEvent.press(shiftRow)
+    const shiftRows = screen.getAllByRole("radio")
+    fireEvent.press(shiftRows[0])
 
-    const inputs = screen.getAllByDisplayValue("")
-    fireEvent.changeText(inputs[0], "shift-fail-999")
+    const allRadios = screen.getAllByRole("radio")
+    fireEvent.press(allRadios[1])
 
     // Real English text from en.ts planning.requests.shiftSwap
     const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
