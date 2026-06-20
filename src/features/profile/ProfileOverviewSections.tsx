@@ -1,6 +1,11 @@
+import { useEffect } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
+
+import { translate } from "@/i18n/translate"
+import { useCelebratePulse } from "@/ui/foundations/motion"
 
 import { ListCard, ListCardItem } from "@/ui"
 import { Pill, ProgressBar, SectionBlock, SurfaceCard, Text, useDesignTokens } from "@/ui"
@@ -10,12 +15,23 @@ import type { ProfileSetupStatus } from "./profileSetupStatus"
 
 export function ProfileCompletenessCard({ setupStatus }: { setupStatus: ProfileSetupStatus }) {
   const tokens = useDesignTokens()
+  const { animatedStyle: pulseStyle, triggerPulse } = useCelebratePulse()
+  const remainingCount = setupStatus.remainingCount
   const badgeLabel =
-    setupStatus.remainingCount === 0
-      ? "Complete"
-      : `${setupStatus.remainingCount} step${setupStatus.remainingCount === 1 ? "" : "s"} left`
+    remainingCount === 0
+      ? translate("profile:completeness.complete")
+      : remainingCount === 1
+        ? translate("profile:completeness.stepsLeft", { count: remainingCount })
+        : translate("profile:completeness.stepsLeftPlural", { count: remainingCount })
+
+  useEffect(() => {
+    if (remainingCount === 0) {
+      triggerPulse()
+    }
+  }, [remainingCount])
 
   return (
+    <Animated.View style={pulseStyle}>
     <SurfaceCard style={styles.completenessCard}>
       <View style={styles.progressHeader}>
         <View style={styles.headerCopy}>
@@ -31,6 +47,7 @@ export function ProfileCompletenessCard({ setupStatus }: { setupStatus: ProfileS
       </View>
       <ProgressBar progress={setupStatus.progress} />
     </SurfaceCard>
+    </Animated.View>
   )
 }
 
