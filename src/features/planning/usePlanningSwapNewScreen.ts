@@ -2,7 +2,7 @@ import { useState, useMemo } from "react"
 import { useRouter } from "expo-router"
 import { getLocalToday, addLocalDays } from "@/core/date"
 import { translate } from "@/i18n/translate"
-import { usePlanningScheduleQuery } from "@/features/planning/data/planning.queries"
+import { usePlanningScheduleQuery, usePlanningSwapCandidatesQuery } from "@/features/planning/data/planning.queries"
 import { useCreateShiftSwapMutation } from "@/features/planning/data/planning.mutations"
 
 export function usePlanningSwapNewScreen() {
@@ -13,21 +13,34 @@ export function usePlanningSwapNewScreen() {
   const mutation = useCreateShiftSwapMutation()
 
   const [selectedShiftId, setSelectedShiftId] = useState<string | null>(null)
-  const [targetShiftCode, setTargetShiftCode] = useState("")
+  const [selectedCandidateShiftId, setSelectedCandidateShiftId] = useState<string | null>(null)
   const [note, setNote] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  const {
+    state: candidates,
+    isLoading: isCandidatesLoading,
+    isError: isCandidatesError,
+  } = usePlanningSwapCandidatesQuery(selectedShiftId)
+
   const myShifts = useMemo(() => shifts ?? [], [shifts])
-  const canSubmit = Boolean(selectedShiftId && targetShiftCode.trim())
+  const candidateList = useMemo(() => candidates ?? [], [candidates])
+  const canSubmit = Boolean(selectedShiftId && selectedCandidateShiftId)
+
+  const handleSelectShift = (shiftId: string) => {
+    setSelectedShiftId(shiftId)
+    // Clear candidate selection when my shift changes
+    setSelectedCandidateShiftId(null)
+  }
 
   const handleSubmit = async () => {
-    if (!selectedShiftId || !targetShiftCode.trim()) return
+    if (!selectedShiftId || !selectedCandidateShiftId) return
     setError(null)
     const result = await mutation.mutateAsync({
       input: {
         requesterShiftId: selectedShiftId,
-        targetShiftId: targetShiftCode.trim(),
+        targetShiftId: selectedCandidateShiftId,
         note: note.trim() || undefined,
       },
     })
@@ -41,20 +54,23 @@ export function usePlanningSwapNewScreen() {
   const handleDismiss = () => router.back()
 
   return {
+    candidateList,
     canSubmit,
     error,
     handleDismiss,
+    handleSelectShift,
     handleSubmit,
+    isCandidatesError,
+    isCandidatesLoading,
     isLoading,
     isSubmitting: mutation.isPending,
     myShifts,
     note,
+    selectedCandidateShiftId,
     selectedShiftId,
     setNote,
-    setSelectedShiftId,
-    setTargetShiftCode,
+    setSelectedCandidateShiftId,
     success,
-    targetShiftCode,
   }
 }
 
