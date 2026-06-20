@@ -146,15 +146,35 @@ jest.mock("react-native-mmkv", () => {
   }
 })
 
-jest.mock("i18next", () => ({
-  currentLocale: "en",
-  t: (key: string, params: Record<string, string>) => {
-    return `${key} ${JSON.stringify(params)}`
-  },
-  translate: (key: string, params: Record<string, string>) => {
-    return `${key} ${JSON.stringify(params)}`
-  },
-}))
+jest.mock("i18next", () => {
+  // Resolve a namespaced i18n key (e.g. "home:upcoming.empty") against the en translations.
+  // Falls back to returning the raw key if the path isn't found.
+  function resolveKey(key: string, params?: Record<string, unknown>): string {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const en = require("../src/i18n/en").default as Record<string, unknown>
+    const [ns, ...rest] = key.split(":")
+    const path = rest.length > 0 ? [ns, ...rest[0].split(".")] : ns.split(".")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let node: any = en
+    for (const segment of path) {
+      if (node == null || typeof node !== "object") return key
+      node = node[segment]
+    }
+    if (typeof node !== "string") return key
+    if (!params) return node
+    // Simple {{variable}} interpolation
+    return node.replace(/\{\{(\w+)\}\}/g, (_, name) =>
+      params[name] != null ? String(params[name]) : `{{${name}}}`,
+    )
+  }
+
+  return {
+    currentLocale: "en",
+    isInitialized: true,
+    t: resolveKey,
+    translate: resolveKey,
+  }
+})
 
 jest.mock("expo-localization", () => ({
   ...jest.requireActual("expo-localization"),

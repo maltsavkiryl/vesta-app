@@ -67,12 +67,21 @@ function getToneColor(tokens: DesignTokens, tone: Tone) {
   }[tone]
 }
 
+function getToneSoftColor(tokens: DesignTokens, tone: Tone) {
+  return {
+    accent: tokens.accentMuted,
+    danger: tokens.dangerSoft,
+    success: tokens.successSoft,
+    warning: tokens.warningSoft,
+  }[tone]
+}
+
 function ToneIcon({ name, tone }: { name: IconName; tone: Tone }) {
   const tokens = useDesignTokens()
   const color = getToneColor(tokens, tone)
 
   return (
-    <View style={[styles.iconTile, { backgroundColor: `${color}14` }]}>
+    <View style={[styles.iconTile, { backgroundColor: getToneSoftColor(tokens, tone) }]}>
       <Ionicons color={color} name={name} size={17} />
     </View>
   )
@@ -114,7 +123,7 @@ export const TaskRow = memo(function TaskRow({
           <View style={styles.taskActions}>
             <Pressable
               onPress={onComplete}
-              style={[styles.taskButton, { backgroundColor: `${tokens.accent}14` }]}
+              style={[styles.taskButton, { backgroundColor: tokens.accentMuted }]}
             >
               <Text
                 text={item.actionLabel}

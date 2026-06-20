@@ -206,8 +206,8 @@ describe("PlanningShiftsScreen", () => {
     mockScheduleQuery.mockReturnValue(idleQuery([]))
     const { PlanningShiftsScreen } = require("./PlanningShiftsScreen")
     render(<PlanningShiftsScreen />)
-    // The empty state title key — match exact key (not the subtitle which has "Subtitle" suffix)
-    const nodes = screen.getAllByText(/planning:schedule\.noShifts/)
+    // The empty state title — real English text from en.ts planning.schedule.noShifts
+    const nodes = screen.getAllByText(/No upcoming shifts/)
     expect(nodes.length).toBeGreaterThan(0)
   })
 
@@ -223,7 +223,8 @@ describe("PlanningShiftsScreen", () => {
     mockScheduleQuery.mockReturnValue({ state: null, isLoading: false, isError: true, refetch: jest.fn() })
     const { PlanningShiftsScreen } = require("./PlanningShiftsScreen")
     render(<PlanningShiftsScreen />)
-    const nodes = screen.getAllByText(/planning:schedule\.loadError/)
+    // Real English text from en.ts planning.schedule.loadError
+    const nodes = screen.getAllByText(/Couldn't load your schedule/)
     expect(nodes.length).toBeGreaterThan(0)
   })
 })
@@ -243,7 +244,8 @@ describe("PlanningTodosScreen", () => {
     mockTodosQuery.mockReturnValue(idleQuery({ todos: [], dressNote: null, note: null }))
     const { PlanningTodosScreen } = require("./PlanningTodosScreen")
     render(<PlanningTodosScreen />)
-    expect(screen.getByText(/planning:todos\.noTasksTitle/)).toBeTruthy()
+    // Real English text from en.ts planning.todos.noTasksTitle
+    expect(screen.getByText(/No tasks today/)).toBeTruthy()
   })
 
   it("renders pending todo item", () => {
@@ -283,7 +285,8 @@ describe("PlanningCallsScreen", () => {
     mockCallsQuery.mockReturnValue(idleQuery([]))
     const { PlanningCallsScreen } = require("./PlanningCallsScreen")
     render(<PlanningCallsScreen />)
-    expect(screen.getByText(/planning:calls\.noCallsTitle/)).toBeTruthy()
+    // Real English text from en.ts planning.calls.noCallsTitle
+    expect(screen.getByText(/No open calls/)).toBeTruthy()
   })
 
   it("renders call card when calls are returned", () => {
@@ -297,7 +300,8 @@ describe("PlanningCallsScreen", () => {
     mockCallsQuery.mockReturnValue(idleQuery([SAMPLE_CALL]))
     const { PlanningCallsScreen } = require("./PlanningCallsScreen")
     render(<PlanningCallsScreen />)
-    const claimButton = screen.getByRole("button", { name: /planning:calls\.claim/ })
+    // Real English text from en.ts planning.calls.claim
+    const claimButton = screen.getByRole("button", { name: /Claim/ })
     fireEvent.press(claimButton)
     await Promise.resolve()
     expect(mockClaimCallMutation).toHaveBeenCalledWith({
@@ -334,7 +338,8 @@ describe("Signature moments", () => {
     mockCallsQuery.mockReturnValue(idleQuery([SAMPLE_CALL]))
     const { PlanningCallsScreen } = require("./PlanningCallsScreen")
     render(<PlanningCallsScreen />)
-    const claimButton = screen.getByRole("button", { name: /planning:calls\.claim/ })
+    // Real English text from en.ts planning.calls.claim
+    const claimButton = screen.getByRole("button", { name: /Claim/ })
     fireEvent.press(claimButton)
     await Promise.resolve()
     expect(mockClaimCallMutation).toHaveBeenCalledWith({
@@ -359,7 +364,8 @@ describe("PlanningSwapNewScreen", () => {
   it("submit button is disabled without a shift selected", () => {
     const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
     render(<PlanningSwapNewScreen />)
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.shiftSwap/ })
+    // Real English text from en.ts planning.requests.shiftSwap
+    const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
     expect(submitBtn.props.accessibilityState?.disabled).toBe(true)
   })
 
@@ -371,7 +377,8 @@ describe("PlanningSwapNewScreen", () => {
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
 
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.shiftSwap/ })
+    // Real English text from en.ts planning.requests.shiftSwap
+    const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
     expect(submitBtn.props.accessibilityState?.disabled).toBe(true)
   })
 
@@ -388,7 +395,8 @@ describe("PlanningSwapNewScreen", () => {
     const inputs = screen.getAllByDisplayValue("")
     fireEvent.changeText(inputs[0], "shift-xyz-999")
 
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.shiftSwap/ })
+    // Real English text from en.ts planning.requests.shiftSwap
+    const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
     expect(submitBtn.props.accessibilityState?.disabled).toBe(false)
 
     fireEvent.press(submitBtn)
@@ -414,13 +422,14 @@ describe("PlanningSwapNewScreen", () => {
     const inputs = screen.getAllByDisplayValue("")
     fireEvent.changeText(inputs[0], "shift-fail-999")
 
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.shiftSwap/ })
+    // Real English text from en.ts planning.requests.shiftSwap
+    const submitBtn = screen.getByRole("button", { name: /Shift swap/ })
     await act(async () => {
       fireEvent.press(submitBtn)
     })
 
-    // Error row appears (i18n key for submitError)
-    expect(screen.getByText(/planning:requests\.submitError/)).toBeTruthy()
+    // Error row appears — real English text from en.ts planning.requests.submitError
+    expect(screen.getByText(/Couldn't submit request/)).toBeTruthy()
   })
 })
 
@@ -438,7 +447,8 @@ describe("PlanningChangeNewScreen", () => {
   it("submit button is disabled without a shift selected", () => {
     const { PlanningChangeNewScreen } = require("./PlanningChangeNewScreen")
     render(<PlanningChangeNewScreen />)
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.changeRequest/ })
+    // Real English text from en.ts planning.requests.changeRequest
+    const submitBtn = screen.getByRole("button", { name: /Change request/ })
     expect(submitBtn.props.accessibilityState?.disabled).toBe(true)
   })
 
@@ -449,7 +459,8 @@ describe("PlanningChangeNewScreen", () => {
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
 
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.changeRequest/ })
+    // Real English text from en.ts planning.requests.changeRequest
+    const submitBtn = screen.getByRole("button", { name: /Change request/ })
     expect(submitBtn.props.accessibilityState?.disabled).toBe(false)
   })
 
@@ -460,7 +471,8 @@ describe("PlanningChangeNewScreen", () => {
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
 
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.changeRequest/ })
+    // Real English text from en.ts planning.requests.changeRequest
+    const submitBtn = screen.getByRole("button", { name: /Change request/ })
     fireEvent.press(submitBtn)
     await Promise.resolve()
 
@@ -472,10 +484,13 @@ describe("PlanningChangeNewScreen", () => {
   it("renders pressable date/time picker rows", () => {
     const { PlanningChangeNewScreen } = require("./PlanningChangeNewScreen")
     render(<PlanningChangeNewScreen />)
-    // Picker rows render as buttons with translated label text
-    expect(screen.getByText(/planning:requests\.requestedDate/i)).toBeTruthy()
-    expect(screen.getByText(/planning:requests\.requestedStartTime/i)).toBeTruthy()
-    expect(screen.getByText(/planning:requests\.requestedEndTime/i)).toBeTruthy()
+    // Picker rows render as buttons with real translated label text
+    // planning.requests.requestedDate => "Requested date"
+    // planning.requests.requestedStartTime => "Start time"
+    // planning.requests.requestedEndTime => "End time"
+    expect(screen.getByText(/Requested date/i)).toBeTruthy()
+    expect(screen.getByText(/Start time/i)).toBeTruthy()
+    expect(screen.getByText(/End time/i)).toBeTruthy()
   })
 
   it("shows error row when mutation returns ok: false", async () => {
@@ -486,12 +501,14 @@ describe("PlanningChangeNewScreen", () => {
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
 
-    const submitBtn = screen.getByRole("button", { name: /planning:requests\.changeRequest/ })
+    // Real English text from en.ts planning.requests.changeRequest
+    const submitBtn = screen.getByRole("button", { name: /Change request/ })
     await act(async () => {
       fireEvent.press(submitBtn)
     })
 
-    expect(screen.getByText(/planning:requests\.submitError/)).toBeTruthy()
+    // Real English text from en.ts planning.requests.submitError
+    expect(screen.getByText(/Couldn't submit request/)).toBeTruthy()
   })
 })
 
@@ -508,17 +525,18 @@ describe("PlanningLeaveScreen", () => {
     mockLeaveQuery.mockReturnValue(idleQuery(null))
     const { PlanningLeaveScreen } = require("./PlanningLeaveScreen")
     render(<PlanningLeaveScreen />)
-    expect(screen.getByText(/planning:leave\.noLeaveTitle/)).toBeTruthy()
+    // Real English text from en.ts planning.leave.noLeaveTitle
+    expect(screen.getByText(/No leave balance/)).toBeTruthy()
   })
 
   it("renders leave balance card with translated metric labels", () => {
     mockLeaveQuery.mockReturnValue(idleQuery(SAMPLE_ENTITLEMENT))
     const { PlanningLeaveScreen } = require("./PlanningLeaveScreen")
     render(<PlanningLeaveScreen />)
-    // Metric labels use translate() — mocked i18n returns key strings
-    expect(screen.getByText(/planning:leave\.statutory/)).toBeTruthy()
-    expect(screen.getByText(/planning:leave\.employer/)).toBeTruthy()
-    expect(screen.getByText(/planning:leave\.total/)).toBeTruthy()
+    // Real English metric labels from en.ts planning.leave.*
+    expect(screen.getByText(/Statutory/)).toBeTruthy()
+    expect(screen.getByText(/Employer/)).toBeTruthy()
+    expect(screen.getByText(/Total/)).toBeTruthy()
     // Values from fixture
     expect(screen.getByText("20d")).toBeTruthy()
     expect(screen.getByText("5d")).toBeTruthy()
@@ -529,7 +547,8 @@ describe("PlanningLeaveScreen", () => {
     mockLeaveQuery.mockReturnValue({ state: null, isLoading: false, isError: true, refetch: jest.fn() })
     const { PlanningLeaveScreen } = require("./PlanningLeaveScreen")
     render(<PlanningLeaveScreen />)
-    const nodes = screen.getAllByText(/planning:schedule\.loadError/)
+    // Real English text from en.ts planning.schedule.loadError
+    const nodes = screen.getAllByText(/Couldn't load your schedule/)
     expect(nodes.length).toBeGreaterThan(0)
   })
 })

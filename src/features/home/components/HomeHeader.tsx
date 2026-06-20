@@ -50,7 +50,7 @@ export function HomeHeader({
             {
               backgroundColor: tokens.surface,
               borderColor: tokens.border,
-              shadowColor: tokens.shadow,
+              ...tokens.elevation1,
             },
           ]}
         >
@@ -90,9 +90,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     height: 38,
     justifyContent: "center",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
     width: 38,
   },
   notificationDot: {

@@ -1,6 +1,10 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 import { format } from "date-fns"
+
+import { translate } from "@/i18n/translate"
+import { useListItemEntrance } from "@/ui/foundations/motion"
 
 import { parseDateValue } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
@@ -33,13 +37,14 @@ export function RecentEntries({
   const tokens = useDesignTokens()
 
   return (
-    <SectionBlock title="Recent entries" actionLabel="View all" onAction={onViewAll}>
+    <SectionBlock title={translate("time:recentEntries")} actionLabel={translate("time:viewAll")} onAction={onViewAll}>
       {entries.length > 0 ? (
         <ListCard style={styles.entriesCard}>
           {entries.slice(0, 4).map((entry, index, items) => (
             <EntryRow
               key={entry.id}
               entry={entry}
+              index={index}
               isLast={index === items.length - 1}
               onPress={() => onOpenEntry(entry)}
             />
@@ -48,8 +53,8 @@ export function RecentEntries({
       ) : (
         <EmptyState
           icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
-          subtitle="Clock in and out from the Time tab to start building your work history."
-          title="No entries yet"
+          subtitle={translate("time:noEntriesSubtitle")}
+          title={translate("time:noEntriesTitle")}
         />
       )}
     </SectionBlock>
@@ -78,13 +83,13 @@ export function TimeEntriesListScreen({
         <EmptyState
           cardless
           icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
-          subtitle="Completed shifts appear here after you clock out for the first time."
-          title="Nothing in your history yet"
+          subtitle={translate("time:historyEmptySubtitle")}
+          title={translate("time:historyEmptyTitle")}
         />
       ) : (
         <>
           <Text
-            text={`${totalEntries} entries total`}
+            text={translate("time:entriesTotal", { count: totalEntries })}
             size="xs"
             style={{ color: tokens.textSecondary }}
           />
@@ -94,7 +99,7 @@ export function TimeEntriesListScreen({
               title={month}
               trailing={
                 <Text
-                  text={`${monthEntries.length} entries`}
+                  text={translate("time:monthEntries", { count: monthEntries.length })}
                   size="xxs"
                   style={{ color: tokens.textMuted }}
                 />
@@ -105,6 +110,7 @@ export function TimeEntriesListScreen({
                   <EntryRow
                     key={entry.id}
                     entry={entry}
+                    index={index}
                     isLast={index === monthEntries.length - 1}
                     onPress={() => onOpenEntry(entry)}
                     showEarnings
@@ -121,16 +127,19 @@ export function TimeEntriesListScreen({
 
 function EntryRow({
   entry,
+  index = 0,
   isLast,
   onPress,
   showEarnings,
 }: {
   entry: TimeEntry
+  index?: number
   isLast?: boolean
   onPress: () => void
   showEarnings?: boolean
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 0, step: 35 })
   const date = parseDateValue(entry.clockInAt)
   const weekday = date ? format(date, "EEE") : "--"
   const day = date ? format(date, "d") : "--"
@@ -143,21 +152,23 @@ function EntryRow({
   const trailingTone = showEarnings ? tokens.textPrimary : statusColor
 
   return (
-    <ListCardItem
-      isLast={isLast}
-      leading={<DateBadge label={weekday} value={day} variant="plain" />}
-      onPress={onPress}
-      subtitle={`${entry.shiftLabel} · ${getTimeEntryWorkedLabel(entry)}`}
-      subtitleStyle={{ color: tokens.textSecondary }}
-      title={getTimeEntryTimeRangeLabel(entry)}
-      titleStyle={{ color: tokens.textPrimary }}
-      trailing={
-        <View style={styles.entryStatus}>
-          <Text text={trailingLabel} size="xs" weight="semiBold" style={{ color: trailingTone }} />
-          <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-        </View>
-      }
-    />
+    <Animated.View style={entranceStyle}>
+      <ListCardItem
+        isLast={isLast}
+        leading={<DateBadge label={weekday} value={day} variant="plain" />}
+        onPress={onPress}
+        subtitle={`${entry.shiftLabel} · ${getTimeEntryWorkedLabel(entry)}`}
+        subtitleStyle={{ color: tokens.textSecondary }}
+        title={getTimeEntryTimeRangeLabel(entry)}
+        titleStyle={{ color: tokens.textPrimary }}
+        trailing={
+          <View style={styles.entryStatus}>
+            <Text text={trailingLabel} size="xs" weight="semiBold" style={{ color: trailingTone }} />
+            <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+          </View>
+        }
+      />
+    </Animated.View>
   )
 }
 

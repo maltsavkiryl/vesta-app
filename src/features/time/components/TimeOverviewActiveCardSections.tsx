@@ -120,7 +120,7 @@ export function ActiveCardActions({
           }}
           style={[
             styles.breakButton,
-            { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}24` },
+            { backgroundColor: tokens.warningSoft, borderColor: tokens.warning },
           ]}
         >
           <Ionicons color={tokens.warning} name="play-outline" size={17} />
@@ -136,14 +136,12 @@ export function ActiveCardActions({
             style={[
               styles.secondaryAction,
               {
-                backgroundColor: tokens.isDark
-                  ? `${tokens.accentForeground}0D`
-                  : `${tokens.accentForeground}10`,
-                borderColor: `${tokens.accentForeground}12`,
+                backgroundColor: tokens.surfaceSecondary,
+                borderColor: tokens.border,
               },
             ]}
           >
-            <Ionicons color={`${tokens.accentForeground}BF`} name="cafe-outline" size={16} />
+            <Ionicons color={tokens.accentForeground} name="cafe-outline" size={16} />
             <Text
               text="Start break"
               size="xs"
@@ -158,7 +156,7 @@ export function ActiveCardActions({
             }}
             style={[
               styles.dangerAction,
-              { backgroundColor: tokens.danger, borderColor: `${tokens.danger}D9` },
+              { backgroundColor: tokens.danger, borderColor: tokens.danger },
             ]}
           >
             <Ionicons color={tokens.accentForeground} name="log-out-outline" size={17} />

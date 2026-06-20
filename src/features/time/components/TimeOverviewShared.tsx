@@ -9,6 +9,7 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated"
 
+import { translate } from "@/i18n/translate"
 import { MetaPill, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
 import { getTonePalette } from "@/ui/composites/appTone"
 
@@ -98,7 +99,7 @@ export function TimeHeader({
   return (
     <MotionView delay={delay} style={styles.header}>
       <Text
-        text="Time"
+        text={translate("time:title")}
         weight="bold"
         style={[appTypography.pageTitle, { color: tokens.textPrimary }]}
       />
