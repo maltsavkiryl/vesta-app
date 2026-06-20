@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
-import { AppScrollScreen, appLayout, useDesignTokens } from "@/ui"
+import { AppScrollScreen, Text, appLayout, useDesignTokens } from "@/ui"
 
 import {
   NotificationsClearAll,
@@ -30,6 +30,12 @@ export function NotificationsScreen() {
       variant="grouped"
       style={{ backgroundColor: tokens.groupedBackground }}
     >
+      <Text
+        preset="heading"
+        text="Inbox"
+        weight="bold"
+        style={[styles.title, { color: tokens.textPrimary }]}
+      />
       {notifications.length === 0 ? (
         <NotificationsEmptyState />
       ) : (
@@ -64,5 +70,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 36,
     paddingHorizontal: appLayout.screenPaddingHorizontal,
+  },
+  title: {
+    fontSize: 28,
+    lineHeight: 32,
+    marginBottom: 12,
+    marginTop: 4,
   },
 })
