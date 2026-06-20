@@ -108,7 +108,7 @@ export function PlanningCallCard({
           style={[
             styles.callCard,
             isClaimed && {
-              borderColor: `${tokens.success}22`,
+              borderColor: tokens.successSoft,
             },
           ]}
         >

@@ -79,6 +79,8 @@ const fr: Translations = {
       noShiftsSubtitle: "Votre planning est vide. Les nouveaux services apparaîtront ici une fois planifiés.",
       loadError: "Impossible de charger votre planning",
       loadErrorSubtitle: "Vérifiez votre connexion et réessayez.",
+      openInMaps: "Ouvrir dans Plans",
+      openInMapsA11y: "Ouvrir le lieu dans Plans",
     },
     calls: {
       title: "Appels ouverts",

@@ -77,6 +77,8 @@ const en = {
       noShiftsSubtitle: "Your schedule is clear. New shifts will appear here once planned.",
       loadError: "Couldn't load your schedule",
       loadErrorSubtitle: "Check your connection and try again.",
+      openInMaps: "Open in Maps",
+      openInMapsA11y: "Open venue in Maps",
     },
     calls: {
       title: "Open Calls",

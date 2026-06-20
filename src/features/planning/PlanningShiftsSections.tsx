@@ -1,7 +1,7 @@
 import Animated from "react-native-reanimated"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { getShiftTimeRange, formatShortDate, getRelativeDayLabel } from "@/core/date"
+import { getShiftTimeRange, formatShortDate, getRelativeDayLabel, isToday } from "@/core/date"
 import type { Shift } from "@/core/models"
 import type { AgendaSection } from "@/features/schedule/schedule.utils"
 import { EmptyState, SectionTitle, Skeleton, useDesignTokens } from "@/ui"
@@ -67,7 +67,7 @@ export function PlanningShiftCard({
   const { animatedStyle: pressStyle, pressHandlers } = usePressScale({ pressedScale: 0.975 })
 
   const dayLabel = getRelativeDayLabel(shift.date)
-  const isToday = dayLabel.toLowerCase() === "today" || dayLabel.toLowerCase() === "vandaag" || dayLabel.toLowerCase() === "aujourd'hui"
+  const isTodayShift = isToday(shift.date)
 
   return (
     <Animated.View style={entranceStyle}>
@@ -79,11 +79,11 @@ export function PlanningShiftCard({
       >
         <Animated.View style={pressStyle}>
           <SurfaceCard
-            elevationLevel={isToday ? 1 : 0}
+            elevationLevel={isTodayShift ? 1 : 0}
             style={[
               styles.shiftCard,
-              isToday && {
-                borderColor: `${tokens.accent}28`,
+              isTodayShift && {
+                borderColor: tokens.accentSoft,
                 borderWidth: 1,
               },
             ]}
@@ -95,7 +95,7 @@ export function PlanningShiftCard({
                   size="xxs"
                   style={[
                     styles.dayLabel,
-                    { color: isToday ? tokens.accent : tokens.textMuted },
+                    { color: isTodayShift ? tokens.accent : tokens.textMuted },
                   ]}
                   text={dayLabel.toUpperCase()}
                   weight="semiBold"

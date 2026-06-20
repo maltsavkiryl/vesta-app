@@ -18,13 +18,21 @@ export function PlanningRequestsScreen() {
   const { showSuccess } = useToast()
 
   const handleDecideSwap = async (swapCode: string, accept: boolean) => {
-    await screen.handleDecideSwap(swapCode, accept)
-    showSuccess(translate("planning:requests.swapDecided"))
+    try {
+      await screen.handleDecideSwap(swapCode, accept)
+      showSuccess(translate("planning:requests.swapDecided"))
+    } catch {
+      // Mutation errors are surfaced inline; swallow here to prevent unhandled rejection
+    }
   }
 
   const handleCancelSwap = async (swapCode: string) => {
-    await screen.handleCancelSwap(swapCode)
-    showSuccess(translate("planning:requests.swapCancelled"))
+    try {
+      await screen.handleCancelSwap(swapCode)
+      showSuccess(translate("planning:requests.swapCancelled"))
+    } catch {
+      // Mutation errors are surfaced inline; swallow here to prevent unhandled rejection
+    }
   }
 
   const isFirstLoad =

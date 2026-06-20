@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatFullDate, getShiftTimeRange } from "@/core/date"
+import { translate } from "@/i18n/translate"
 import type { Shift } from "@/core/models"
 import {
   ActionRow,
@@ -89,7 +90,7 @@ export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void;
           leading={<Ionicons color={tokens.textSecondary} name="business-outline" size={13} />}
         />
         <Pressable
-          accessibilityLabel="Open venue in Maps"
+          accessibilityLabel={translate("planning:schedule.openInMapsA11y")}
           accessibilityRole="button"
           onPress={onOpenMaps}
           style={({ pressed }) => [
@@ -104,7 +105,7 @@ export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void;
           <Text
             size="xxs"
             style={{ color: tokens.accent }}
-            text="Open in Maps"
+            text={translate("planning:schedule.openInMaps")}
             weight="medium"
           />
         </Pressable>

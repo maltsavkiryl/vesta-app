@@ -79,6 +79,8 @@ const nl: Translations = {
       noShiftsSubtitle: "Je planning is leeg. Nieuwe shifts verschijnen hier zodra ze ingepland zijn.",
       loadError: "Kon je planning niet laden",
       loadErrorSubtitle: "Controleer je verbinding en probeer opnieuw.",
+      openInMaps: "Openen in Kaarten",
+      openInMapsA11y: "Locatie openen in Kaarten",
     },
     calls: {
       title: "Open oproepen",
