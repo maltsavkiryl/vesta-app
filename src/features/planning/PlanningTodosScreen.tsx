@@ -1,9 +1,14 @@
 import { StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
+import { AppScrollScreen, EmptyState, GroupedSection, PageHeader, useDesignTokens } from "@/ui"
 import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
-import { PlanningTodosBrief, PlanningTodosEmpty, PlanningTodosSection } from "./PlanningTodosSections"
+import {
+  PlanningTodosBrief,
+  PlanningTodosEmpty,
+  PlanningTodosSection,
+  PlanningTodosSkeleton,
+} from "./PlanningTodosSections"
 import { usePlanningTodosScreen } from "./usePlanningTodosScreen"
 
 export function PlanningTodosScreen() {
@@ -31,6 +36,7 @@ export function PlanningTodosScreen() {
     )
   }
 
+  const isFirstLoad = screen.isLoading && screen.todos.length === 0
   const hasTodos = screen.todos.length > 0
 
   return (
@@ -41,7 +47,11 @@ export function PlanningTodosScreen() {
       refreshing={refreshing}
     >
       <PageHeader delay={0} title={translate("planning:todos.title")} />
-      {!hasTodos && !screen.isLoading ? (
+      {isFirstLoad ? (
+        <GroupedSection title={translate("planning:todos.sectionTodo")}>
+          <PlanningTodosSkeleton />
+        </GroupedSection>
+      ) : !hasTodos ? (
         <PlanningTodosEmpty />
       ) : (
         <>
