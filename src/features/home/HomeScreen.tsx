@@ -12,6 +12,7 @@ import { HomeTimeCard } from "@/features/home/components/HomeTimeCard"
 import { PayrollProfileNudge } from "@/features/home/components/PayrollProfileNudge"
 import { UpcomingShiftsSection } from "@/features/home/components/UpcomingShiftsSection"
 import { useHomeScreen } from "@/features/home/useHomeScreen"
+import { translate } from "@/i18n/translate"
 import { AppScrollScreen, EmptyState, MotionView, useDesignTokens } from "@/ui"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
 
@@ -82,10 +83,10 @@ export function HomeScreen() {
       >
         <View style={styles.errorState}>
           <EmptyState
-            actionLabel="Try again"
+            actionLabel={translate("common:states.retry")}
             onAction={onRefresh}
-            subtitle="We couldn't load your home overview. Check your connection and try again."
-            title="Something went wrong"
+            subtitle={translate("home:errorSubtitle")}
+            title={translate("home:errorTitle")}
           />
         </View>
       </AppScrollScreen>

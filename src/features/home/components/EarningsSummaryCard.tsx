@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatCurrency, formatNumber } from "@/core/format"
+import { translate } from "@/i18n/translate"
 import { ProgressBar, Text, useDesignTokens } from "@/ui"
 
 function formatHoursWorked(hours: number) {
@@ -34,9 +35,9 @@ export function EarningsSummaryCard({
     () => ({
       backgroundColor: tokens.surface,
       borderColor: tokens.border,
-      shadowColor: tokens.shadow,
+      ...tokens.elevation1,
     }),
-    [tokens.border, tokens.shadow, tokens.surface],
+    [tokens.border, tokens.elevation1, tokens.surface],
   )
   const amountStyle = useMemo(
     () => [styles.earningsAmount, { color: tokens.textPrimary }],
@@ -58,12 +59,13 @@ export function EarningsSummaryCard({
   const hoursLabel = formatHoursWorked(hoursWorked)
 
   const remainingLabel = reachedTarget
-    ? "Monthly target reached — nice work"
+    ? translate("home:earnings.targetReached")
     : targetAmount > 0
-      ? `${formatCurrency(Math.max(targetAmount - earnedAmount, 0))} to your ${formatCurrency(
-          targetAmount,
-        )} target`
-      : `${formatCurrency(averageHourlyRate)}/hr average`
+      ? translate("home:earnings.remaining", {
+          remaining: formatCurrency(Math.max(targetAmount - earnedAmount, 0)),
+          target: formatCurrency(targetAmount),
+        })
+      : translate("home:earnings.averageRate", { rate: formatCurrency(averageHourlyRate) })
 
   const accessibilityLabel = `${monthLabel} earnings ${formatCurrency(earnedAmount)}${
     targetAmount > 0
@@ -80,7 +82,7 @@ export function EarningsSummaryCard({
     >
       <View style={styles.earningsTop}>
         <View style={styles.flex}>
-          <Text text={`${monthLabel} earnings`} size="xxs" style={labelStyle} />
+          <Text text={translate("home:earnings.title", { month: monthLabel })} size="xxs" style={labelStyle} />
           <Text text={formatCurrency(earnedAmount)} weight="bold" style={amountStyle} />
         </View>
         {targetAmount > 0 ? (
@@ -110,7 +112,7 @@ export function EarningsSummaryCard({
       <View accessible={false} style={[styles.statsRow, { borderTopColor: tokens.border }]}>
         <View style={styles.statBlock}>
           <Text text={hoursLabel} weight="semiBold" style={{ color: tokens.textPrimary }} />
-          <Text text="Hours worked" size="xxs" style={labelStyle} />
+          <Text text={translate("home:earnings.hoursWorked")} size="xxs" style={labelStyle} />
         </View>
         <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
         <View style={styles.statBlock}>
@@ -119,18 +121,18 @@ export function EarningsSummaryCard({
             weight="semiBold"
             style={{ color: tokens.textPrimary }}
           />
-          <Text text="Shifts worked" size="xxs" style={labelStyle} />
+          <Text text={translate("home:earnings.shiftsWorked")} size="xxs" style={labelStyle} />
         </View>
       </View>
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="View latest payslip"
+        accessibilityLabel={translate("home:earnings.viewPayslip")}
         onPress={onPayslipPress}
         style={styles.payslipLink}
       >
         <Ionicons color={tokens.accent} name="card-outline" size={14} />
-        <Text text="View latest payslip" size="xxs" weight="medium" style={linkStyle} />
+        <Text text={translate("home:earnings.viewPayslip")} size="xxs" weight="medium" style={linkStyle} />
         <Ionicons color={tokens.accent} name="chevron-forward-outline" size={14} />
       </Pressable>
     </View>
@@ -147,12 +149,8 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    elevation: 1,
     gap: 14,
     padding: 16,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
   },
   earningsTop: {
     alignItems: "flex-start",

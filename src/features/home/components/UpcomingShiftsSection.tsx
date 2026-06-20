@@ -1,57 +1,73 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import type { Shift } from "@/core/models"
+import { translate } from "@/i18n/translate"
+import { useListItemEntrance } from "@/ui/foundations/motion"
+import { usePressScale } from "@/ui/composites/app-motion"
 import { EmptyState, SectionBlock, Text, useDesignTokens } from "@/ui"
 
-function UpcomingShiftCard({ shift, onPress }: { shift: Shift; onPress: () => void }) {
+function UpcomingShiftCard({
+  index,
+  shift,
+  onPress,
+}: {
+  index: number
+  shift: Shift
+  onPress: () => void
+}) {
   const tokens = useDesignTokens()
+  const { animatedStyle: pressStyle, pressHandlers } = usePressScale({ pressedScale: 0.975 })
+  const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 30, step: 40 })
   const dayNumber = shift.date.split("-")[2]
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.upcomingCard,
-        {
-          backgroundColor: pressed ? tokens.backgroundMuted : tokens.surface,
-          borderColor: tokens.border,
-          shadowColor: tokens.shadow,
-          transform: [{ scale: pressed ? 0.99 : 1 }],
-        },
-      ]}
-    >
-      <View style={styles.upcomingHeader}>
-        <Text
-          text={shift.dayLabel}
-          size="xxs"
-          weight="medium"
-          style={{ color: tokens.textMuted }}
-        />
-      </View>
-
-      <Text
-        text={dayNumber}
-        weight="bold"
-        style={[styles.dayNumber, { color: tokens.textPrimary }]}
-      />
-
-      <View style={styles.copyStack}>
-        <Text
-          text={`${shift.startTime} - ${shift.endTime}`}
-          size="xxs"
-          weight="medium"
-          style={{ color: tokens.textSecondary }}
-        />
+    <Animated.View style={[entranceStyle, pressStyle]}>
+      <Pressable
+        onPress={onPress}
+        {...pressHandlers}
+        style={[
+          styles.upcomingCard,
+          {
+            backgroundColor: tokens.surface,
+            borderColor: tokens.border,
+            ...tokens.elevation1,
+          },
+        ]}
+      >
+        <View style={styles.upcomingHeader}>
+          <Text
+            text={shift.dayLabel}
+            size="xxs"
+            weight="medium"
+            style={{ color: tokens.textMuted }}
+          />
+        </View>
 
         <Text
-          text={shift.venueName}
-          numberOfLines={1}
-          size="xxs"
-          style={{ color: tokens.textMuted }}
+          text={dayNumber}
+          weight="bold"
+          style={[styles.dayNumber, { color: tokens.textPrimary }]}
         />
-      </View>
-    </Pressable>
+
+        <View style={styles.copyStack}>
+          <Text
+            text={`${shift.startTime} - ${shift.endTime}`}
+            size="xxs"
+            weight="medium"
+            style={{ color: tokens.textSecondary }}
+          />
+
+          <Text
+            text={shift.venueName}
+            numberOfLines={1}
+            size="xxs"
+            style={{ color: tokens.textMuted }}
+          />
+        </View>
+      </Pressable>
+    </Animated.View>
   )
 }
 
@@ -67,7 +83,11 @@ export function UpcomingShiftsSection({
   const tokens = useDesignTokens()
 
   return (
-    <SectionBlock title="Upcoming" actionLabel="View all" onAction={onViewAll}>
+    <SectionBlock
+      title={translate("home:upcoming.title")}
+      actionLabel={translate("home:upcoming.viewAll")}
+      onAction={onViewAll}
+    >
       {shifts.length > 0 ? (
         <View style={styles.upcomingRail}>
           <ScrollView
@@ -80,7 +100,7 @@ export function UpcomingShiftsSection({
                 key={shift.id}
                 style={index === shifts.length - 1 ? undefined : styles.upcomingSeparator}
               >
-                <UpcomingShiftCard shift={shift} onPress={() => onShiftPress(shift)} />
+                <UpcomingShiftCard index={index} shift={shift} onPress={() => onShiftPress(shift)} />
               </View>
             ))}
           </ScrollView>
@@ -88,8 +108,8 @@ export function UpcomingShiftsSection({
       ) : (
         <EmptyState
           icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
-          subtitle="Your next assigned shifts will appear here as soon as planning is published."
-          title="No upcoming shifts"
+          subtitle={translate("home:upcoming.emptySubtitle")}
+          title={translate("home:upcoming.empty")}
         />
       )}
     </SectionBlock>
@@ -110,14 +130,10 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     borderRadius: 20,
     borderWidth: StyleSheet.hairlineWidth,
-    elevation: 1,
     minHeight: 156,
     overflow: "hidden",
     paddingHorizontal: 14,
     paddingVertical: 14,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.05,
-    shadowRadius: 14,
     width: 136,
   },
   upcomingHeader: {

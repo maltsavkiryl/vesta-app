@@ -16,18 +16,18 @@ export function HomeCockpitPrimaryCard({ action }: { action: CockpitAction }) {
           styles.primaryCard,
           {
             backgroundColor: tokens.surfaceElevated,
-            borderColor: `${tokens.accent}18`,
+            borderColor: tokens.accentMuted,
           },
         ]}
       >
         <View style={styles.primaryHeader}>
           <MetaPill
-            backgroundColor={`${tokens.accent}10`}
+            backgroundColor={tokens.accentMuted}
             label="Top focus"
             leading={<Ionicons color={tokens.accent} name="sparkles-outline" size={12} />}
             textStyle={{ color: tokens.accent }}
           />
-          <View style={[styles.primaryIconShell, { backgroundColor: `${tokens.accent}12` }]}>
+          <View style={[styles.primaryIconShell, { backgroundColor: tokens.accentMuted }]}>
             <Ionicons color={tokens.accent} name={action.icon} size={18} />
           </View>
         </View>
@@ -49,7 +49,7 @@ export function HomeCockpitPrimaryCard({ action }: { action: CockpitAction }) {
         <View
           style={[
             styles.primaryFooter,
-            { backgroundColor: tokens.backgroundMuted, borderColor: `${tokens.accent}10` },
+            { backgroundColor: tokens.backgroundMuted, borderColor: tokens.accentMuted },
           ]}
         >
           <Text
