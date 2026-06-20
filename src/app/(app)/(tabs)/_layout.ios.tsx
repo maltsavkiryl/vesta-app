@@ -54,6 +54,14 @@ export default function TabLayout() {
           />
         </NativeTabs.Trigger>
 
+        <NativeTabs.Trigger name="inbox">
+          <NativeTabs.Trigger.Label>Inbox</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon
+            sf={{ default: "envelope", selected: "envelope.fill" }}
+            md="mail"
+          />
+        </NativeTabs.Trigger>
+
         <NativeTabs.Trigger name="profile">
           <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
