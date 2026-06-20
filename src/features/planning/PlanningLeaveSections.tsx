@@ -1,23 +1,20 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import type { LeaveBalance, LeaveRequest, LeaveRequestStatus } from "@/core/models"
+import type { LeaveEntitlement } from "@/core/models"
 import {
   AppButton,
   EmptyState,
-  GroupedSection,
   MetricGrid,
-  StatusBadge,
   SurfaceCard,
   useDesignTokens,
 } from "@/ui"
 import { Text } from "@/ui/primitives/Text"
-import type { AppTone } from "@/ui/composites/appTone"
 
-// ── Leave balance card ────────────────────────────────────────────────────────
+// ── Leave entitlement card ────────────────────────────────────────────────────
 
-export function PlanningLeaveBalanceCard({ balance }: { balance: LeaveBalance }) {
+export function PlanningLeaveBalanceCard({ entitlement }: { entitlement: LeaveEntitlement }) {
   const tokens = useDesignTokens()
-  const year = balance.calendarYear
+  const year = entitlement.calendarYear
 
   return (
     <SurfaceCard style={styles.balanceCard}>
@@ -32,9 +29,10 @@ export function PlanningLeaveBalanceCard({ balance }: { balance: LeaveBalance })
       </View>
       <MetricGrid
         items={[
-          { label: "Wettelijk", value: `${balance.statutoryDays}d` },
-          { label: "Werkgever", value: `${balance.employerPolicyDays}d` },
-          { label: "Totaal", value: `${balance.totalDays}d` },
+          { label: "Wettelijk", value: `${entitlement.statutoryDays}d` },
+          { label: "Werkgever", value: `${entitlement.employerPolicyDays}d` },
+          { label: "Totaal", value: `${entitlement.totalDays}d` },
+          { label: "Uren", value: `${entitlement.entitlementHours}u` },
         ]}
       />
       <Text
@@ -58,91 +56,10 @@ export function PlanningLeaveBalanceEmpty() {
   )
 }
 
-// ── Leave requests list ───────────────────────────────────────────────────────
-
-function getLeaveStatusTone(status: LeaveRequestStatus): AppTone {
-  switch (status) {
-    case "approved":
-      return "success"
-    case "rejected":
-      return "danger"
-    case "submitted":
-      return "warning"
-    default:
-      return "neutral"
-  }
-}
-
-function getLeaveStatusLabel(status: LeaveRequestStatus): string {
-  switch (status) {
-    case "approved":
-      return "Goedgekeurd"
-    case "rejected":
-      return "Afgewezen"
-    case "submitted":
-      return "In behandeling"
-    case "cancelled":
-      return "Geannuleerd"
-    default:
-      return status
-  }
-}
-
-export function PlanningLeaveRequestRow({ request }: { request: LeaveRequest }) {
-  const tokens = useDesignTokens()
-
-  return (
-    <View style={styles.requestRow}>
-      <View style={styles.requestInfo}>
-        <Text
-          size="xs"
-          style={{ color: tokens.textPrimary }}
-          text={request.leaveTypeName ?? "Verlof"}
-          weight="medium"
-        />
-        <Text
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-          text={`${request.startDate} – ${request.endDate}`}
-        />
-      </View>
-      <StatusBadge
-        label={getLeaveStatusLabel(request.status)}
-        tone={getLeaveStatusTone(request.status)}
-      />
-    </View>
-  )
-}
-
-export function PlanningLeaveRequestsSection({ requests }: { requests: LeaveRequest[] }) {
-  const tokens = useDesignTokens()
-
-  if (requests.length === 0) {
-    return (
-      <GroupedSection title="Ingediende aanvragen">
-        <View style={styles.emptyRequests}>
-          <Text
-            size="xs"
-            style={{ color: tokens.textMuted, textAlign: "center" }}
-            text="Nog geen verlofaanvragen."
-          />
-        </View>
-      </GroupedSection>
-    )
-  }
-
-  return (
-    <GroupedSection title="Ingediende aanvragen">
-      <View style={styles.requestsList}>
-        {requests.map((req) => (
-          <PlanningLeaveRequestRow key={req.id} request={req} />
-        ))}
-      </View>
-    </GroupedSection>
-  )
-}
-
 // ── New leave request form ────────────────────────────────────────────────────
+// Note: POST /employee/planning/leave does not exist in the API contract.
+// The leave screen is read-only. This form component is kept as a stub for
+// potential future use but is not wired up.
 
 export function PlanningNewLeaveCard({
   createError,
@@ -189,35 +106,33 @@ export function PlanningNewLeaveCard({
   }
 
   return (
-    <GroupedSection title="Verlof aanvragen">
-      <View style={styles.formBody}>
-        <View style={styles.dateRow}>
-          <View style={styles.dateField}>
-            <Text size="xxs" style={{ color: tokens.textSecondary }} text="BEGINDATUM" weight="semiBold" />
-            <Text size="sm" style={{ color: tokens.textPrimary }} text={startDate} weight="medium" />
-          </View>
-          <View style={styles.dateField}>
-            <Text size="xxs" style={{ color: tokens.textSecondary }} text="EINDDATUM" weight="semiBold" />
-            <Text size="sm" style={{ color: tokens.textPrimary }} text={endDate} weight="medium" />
-          </View>
+    <SurfaceCard style={styles.formBody}>
+      <View style={styles.dateRow}>
+        <View style={styles.dateField}>
+          <Text size="xxs" style={{ color: tokens.textSecondary }} text="BEGINDATUM" weight="semiBold" />
+          <Text size="sm" style={{ color: tokens.textPrimary }} text={startDate} weight="medium" />
         </View>
-
-        {createError ? (
-          <View style={[styles.errorRow, { backgroundColor: `${tokens.danger}10` }]}>
-            <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
-            <Text size="xxs" style={{ color: tokens.danger }} text={createError} />
-          </View>
-        ) : null}
-
-        <AppButton
-          disabled={isCreating}
-          fullWidth
-          label={isCreating ? "Indienen…" : "Verlof aanvragen"}
-          onPress={onSubmit}
-          pressHaptic="none"
-        />
+        <View style={styles.dateField}>
+          <Text size="xxs" style={{ color: tokens.textSecondary }} text="EINDDATUM" weight="semiBold" />
+          <Text size="sm" style={{ color: tokens.textPrimary }} text={endDate} weight="medium" />
+        </View>
       </View>
-    </GroupedSection>
+
+      {createError ? (
+        <View style={[styles.errorRow, { backgroundColor: `${tokens.danger}10` }]}>
+          <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
+          <Text size="xxs" style={{ color: tokens.danger }} text={createError} />
+        </View>
+      ) : null}
+
+      <AppButton
+        disabled={isCreating}
+        fullWidth
+        label={isCreating ? "Indienen…" : "Verlof aanvragen"}
+        onPress={onSubmit}
+        pressHaptic="none"
+      />
+    </SurfaceCard>
   )
 }
 
@@ -240,10 +155,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
   },
-  emptyRequests: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
   errorRow: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -257,22 +168,6 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
-  },
-  requestInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  requestRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between",
-    minHeight: 56,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  requestsList: {
-    gap: 0,
   },
   successCard: {
     gap: 14,

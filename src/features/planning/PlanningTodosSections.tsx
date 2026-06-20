@@ -16,15 +16,16 @@ export function PlanningTodoItem({
   todo: PlanningTodo
 }) {
   const tokens = useDesignTokens()
-  const checkColor = todo.isComplete ? tokens.success : tokens.backgroundMuted
-  const borderColor = todo.isComplete ? tokens.success : tokens.border
+  const done = todo.isCompletedByMe
+  const checkColor = done ? tokens.success : tokens.backgroundMuted
+  const borderColor = done ? tokens.success : tokens.border
 
   return (
     <Pressable
       accessibilityRole="checkbox"
-      accessibilityState={{ checked: todo.isComplete }}
+      accessibilityState={{ checked: done }}
       accessibilityLabel={todo.label}
-      disabled={todo.isComplete || isCompleting}
+      disabled={done || isCompleting}
       onPress={() => onComplete(todo.id)}
       style={({ pressed }) => [styles.todoRow, { opacity: pressed ? 0.7 : 1 }]}
     >
@@ -32,12 +33,12 @@ export function PlanningTodoItem({
         style={[
           styles.checkbox,
           {
-            backgroundColor: todo.isComplete ? tokens.success : "transparent",
+            backgroundColor: done ? tokens.success : "transparent",
             borderColor,
           },
         ]}
       >
-        {todo.isComplete ? (
+        {done ? (
           <Ionicons color={tokens.surface} name="checkmark" size={12} />
         ) : null}
       </View>
@@ -45,19 +46,12 @@ export function PlanningTodoItem({
         <Text
           size="sm"
           style={[
-            { color: todo.isComplete ? tokens.textMuted : tokens.textPrimary },
-            todo.isComplete ? styles.strikethrough : undefined,
+            { color: done ? tokens.textMuted : tokens.textPrimary },
+            done ? styles.strikethrough : undefined,
           ]}
           text={todo.label}
-          weight={todo.isComplete ? "normal" : "medium"}
+          weight={done ? "normal" : "medium"}
         />
-        {todo.requiredCount > 1 ? (
-          <Text
-            size="xxs"
-            style={{ color: tokens.textMuted }}
-            text={`${todo.completedCount}/${todo.requiredCount} vereist`}
-          />
-        ) : null}
       </View>
     </Pressable>
   )

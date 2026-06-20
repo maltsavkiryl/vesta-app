@@ -1,8 +1,7 @@
 import { useMemo } from "react"
 import { useRouter } from "expo-router"
 import { getLocalToday } from "@/core/date"
-import { usePlanningShiftsQuery } from "@/features/planning/data/planning.queries"
-import { usePlanningEmployeeCode } from "@/features/planning/usePlanningEmployeeCode"
+import { usePlanningScheduleQuery } from "@/features/planning/data/planning.queries"
 import type { Shift } from "@/core/models"
 import { groupUpcomingShiftsByWeek } from "@/features/schedule/schedule.utils"
 
@@ -14,14 +13,12 @@ function addDays(dateString: string, days: number): string {
 
 export function usePlanningShiftsScreen() {
   const router = useRouter()
-  const employeeCode = usePlanningEmployeeCode()
   const today = getLocalToday()
   const to = addDays(today, 14) // 2-week horizon
 
-  const query = usePlanningShiftsQuery({
+  const query = usePlanningScheduleQuery({
     from: today,
     to,
-    employeeCode: employeeCode ?? undefined,
   })
 
   const shifts = useMemo(() => query.state ?? [], [query.state])

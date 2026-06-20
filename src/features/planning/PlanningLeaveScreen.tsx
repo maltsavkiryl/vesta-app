@@ -5,8 +5,6 @@ import { useRefreshHandler } from "@/utils/useRefreshHandler"
 import {
   PlanningLeaveBalanceCard,
   PlanningLeaveBalanceEmpty,
-  PlanningLeaveRequestsSection,
-  PlanningNewLeaveCard,
 } from "./PlanningLeaveSections"
 import { usePlanningLeaveScreen } from "./usePlanningLeaveScreen"
 
@@ -15,7 +13,7 @@ export function PlanningLeaveScreen() {
   const screen = usePlanningLeaveScreen()
   const { onRefresh, refreshing } = useRefreshHandler(screen.refetch)
 
-  if (screen.isError && screen.balances.length === 0 && screen.requests.length === 0) {
+  if (screen.isError && !screen.entitlement) {
     return (
       <AppScrollScreen
         variant="grouped"
@@ -44,27 +42,11 @@ export function PlanningLeaveScreen() {
     >
       <PageHeader delay={0} title="Verlof" />
 
-      {screen.currentYearBalance ? (
-        <PlanningLeaveBalanceCard balance={screen.currentYearBalance} />
+      {screen.entitlement ? (
+        <PlanningLeaveBalanceCard entitlement={screen.entitlement} />
       ) : !screen.isLoading ? (
         <PlanningLeaveBalanceEmpty />
       ) : null}
-
-      <PlanningNewLeaveCard
-        createError={screen.createError}
-        createSuccess={screen.createSuccess}
-        endDate={screen.form.endDate}
-        isCreating={screen.isCreating}
-        notes={screen.form.notes}
-        onDismissSuccess={screen.dismissSuccess}
-        onSubmit={() => { void screen.handleCreateLeave() }}
-        setEndDate={(v) => screen.setForm((f) => ({ ...f, endDate: v }))}
-        setNotes={(v) => screen.setForm((f) => ({ ...f, notes: v }))}
-        setStartDate={(v) => screen.setForm((f) => ({ ...f, startDate: v }))}
-        startDate={screen.form.startDate}
-      />
-
-      <PlanningLeaveRequestsSection requests={screen.requests} />
     </AppScrollScreen>
   )
 }

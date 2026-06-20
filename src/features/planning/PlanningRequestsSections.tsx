@@ -1,14 +1,13 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import type { LeaveRequest, LeaveRequestStatus, RequestItem, RequestStatus } from "@/core/models"
+import type { MyRequests, ShiftChangeRequest, ShiftSwapRequest } from "@/core/models"
 import {
   ActionRow,
-  AppButton,
+  AppButton as _AppButton,
   EmptyState,
   GroupedSection,
-  SectionTitle,
   StatusBadge,
-  SurfaceCard,
+  SurfaceCard as _SurfaceCard,
   Text,
   useDesignTokens,
 } from "@/ui"
@@ -16,51 +15,29 @@ import type { AppTone } from "@/ui/composites/appTone"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function getLeaveStatusTone(status: LeaveRequestStatus): AppTone {
-  switch (status) {
+function getRequestStatusTone(status: string): AppTone {
+  switch (status.toLowerCase()) {
     case "approved":
+    case "accepted":
       return "success"
     case "rejected":
+    case "declined":
       return "danger"
-    case "submitted":
-      return "warning"
     default:
-      return "neutral"
+      return "warning"
   }
 }
 
-function getLeaveStatusLabel(status: LeaveRequestStatus): string {
-  switch (status) {
+function getRequestStatusLabel(status: string): string {
+  switch (status.toLowerCase()) {
     case "approved":
+    case "accepted":
       return "Goedgekeurd"
     case "rejected":
+    case "declined":
       return "Afgewezen"
-    case "submitted":
-      return "In behandeling"
     case "cancelled":
       return "Geannuleerd"
-    default:
-      return status
-  }
-}
-
-function getRequestStatusTone(status: RequestStatus): AppTone {
-  switch (status) {
-    case "approved":
-      return "success"
-    case "denied":
-      return "danger"
-    default:
-      return "warning"
-  }
-}
-
-function getRequestStatusLabel(status: RequestStatus): string {
-  switch (status) {
-    case "approved":
-      return "Goedgekeurd"
-    case "denied":
-      return "Afgewezen"
     default:
       return "In behandeling"
   }
@@ -93,7 +70,7 @@ export function PlanningRequestShortcuts({
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />}
           onPress={onNewChangeRequest}
-          subtitle="Meld een conflict of vraag verlof aan"
+          subtitle="Meld een conflict of vraag een wijziging aan"
           title="Wijziging aanvragen"
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
@@ -102,9 +79,9 @@ export function PlanningRequestShortcuts({
   )
 }
 
-// ── Leave requests ────────────────────────────────────────────────────────────
+// ── Shift swap request row ────────────────────────────────────────────────────
 
-export function PlanningLeaveRequestRow({ request }: { request: LeaveRequest }) {
+export function PlanningSwapRequestRow({ request }: { request: ShiftSwapRequest }) {
   const tokens = useDesignTokens()
 
   return (
@@ -113,34 +90,26 @@ export function PlanningLeaveRequestRow({ request }: { request: LeaveRequest }) 
         <Text
           size="xs"
           style={{ color: tokens.textPrimary }}
-          text={request.leaveTypeName ?? "Verlof"}
+          text="Shift ruilen"
           weight="medium"
         />
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={`${request.startDate} – ${request.endDate}`}
+          text={`Aangevraagd op ${request.createdAt.slice(0, 10)}`}
         />
-        {request.decisionNotes ? (
-          <Text
-            numberOfLines={2}
-            size="xxs"
-            style={{ color: tokens.textMuted }}
-            text={request.decisionNotes}
-          />
-        ) : null}
       </View>
       <StatusBadge
-        label={getLeaveStatusLabel(request.status)}
-        tone={getLeaveStatusTone(request.status)}
+        label={getRequestStatusLabel(request.status)}
+        tone={getRequestStatusTone(request.status)}
       />
     </View>
   )
 }
 
-// ── Schedule requests (shift swap / change) ───────────────────────────────────
+// ── Shift change request row ──────────────────────────────────────────────────
 
-export function PlanningScheduleRequestRow({ request }: { request: RequestItem }) {
+export function PlanningChangeRequestRow({ request }: { request: ShiftChangeRequest }) {
   const tokens = useDesignTokens()
 
   return (
@@ -149,14 +118,24 @@ export function PlanningScheduleRequestRow({ request }: { request: RequestItem }
         <Text
           size="xs"
           style={{ color: tokens.textPrimary }}
-          text={request.type}
+          text="Shift wijziging"
           weight="medium"
         />
-        <Text
-          size="xxs"
-          style={{ color: tokens.textSecondary }}
-          text={request.target.label}
-        />
+        {request.requestedDate ? (
+          <Text
+            size="xxs"
+            style={{ color: tokens.textSecondary }}
+            text={request.requestedDate}
+          />
+        ) : null}
+        {request.note ? (
+          <Text
+            numberOfLines={2}
+            size="xxs"
+            style={{ color: tokens.textMuted }}
+            text={request.note}
+          />
+        ) : null}
       </View>
       <StatusBadge
         label={getRequestStatusLabel(request.status)}
@@ -168,15 +147,9 @@ export function PlanningScheduleRequestRow({ request }: { request: RequestItem }
 
 // ── Combined requests section ─────────────────────────────────────────────────
 
-export function PlanningRequestsListSection({
-  leaveRequests,
-  scheduleRequests,
-}: {
-  leaveRequests: LeaveRequest[]
-  scheduleRequests: RequestItem[]
-}) {
+export function PlanningRequestsListSection({ requests }: { requests: MyRequests }) {
   const tokens = useDesignTokens()
-  const hasAny = leaveRequests.length > 0 || scheduleRequests.length > 0
+  const hasAny = requests.swapRequests.length > 0 || requests.changeRequests.length > 0
 
   if (!hasAny) {
     return (
@@ -195,11 +168,11 @@ export function PlanningRequestsListSection({
   return (
     <GroupedSection title="Mijn aanvragen">
       <View style={styles.requestsList}>
-        {leaveRequests.map((req) => (
-          <PlanningLeaveRequestRow key={req.id} request={req} />
+        {requests.swapRequests.map((req) => (
+          <PlanningSwapRequestRow key={req.id} request={req} />
         ))}
-        {scheduleRequests.map((req) => (
-          <PlanningScheduleRequestRow key={req.id} request={req} />
+        {requests.changeRequests.map((req) => (
+          <PlanningChangeRequestRow key={req.id} request={req} />
         ))}
       </View>
     </GroupedSection>

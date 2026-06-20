@@ -1,29 +1,27 @@
 /**
  * Screen-hook for Open Calls (Open oproepen).
  *
- * DATA GAP: establishmentCode is required by the calls query but the employee
- * profile has no "my establishment" shorthand. We fall back to accountId
- * (employer unique code) — the API may return an empty list if the employee
- * belongs to a different establishment code.
+ * Uses GET /employee/planning/calls/open — self-scoped, no establishment code
+ * needed in the URL. The employee's JWT identifies them.
+ *
+ * The claim mutation still requires employerCode + establishmentCode because
+ * the claim endpoint is: POST /employers/{emp}/establishments/{est}/calls/{code}/claim.
+ * These are passed directly from the PlanningCall domain model (which the
+ * HTTP repo populates from the employee's active employer context).
  */
 import { useState } from "react"
 import { useAppSession } from "@/providers/app-provider"
 import { usePlanningCallsQuery } from "@/features/planning/data/planning.queries"
 import { useClaimCallMutation } from "@/features/planning/data/planning.mutations"
-import type { GetCallsParams } from "@/features/planning/data/planning.repository"
 
-export type ClaimState = "idle" | "claiming" | "claimed" | "error" | "already-claimed" | "forbidden"
+export type ClaimState = "idle" | "claiming" | "claimed" | "error" | "already-claimed" | "forbidden" | "conflict"
 
 export function usePlanningCallsScreen() {
   const { accountId } = useAppSession()
   const [claimStates, setClaimStates] = useState<Record<string, ClaimState>>({})
 
-  // Fall back to accountId as establishmentCode — see DATA GAP comment above.
-  const callsParams: GetCallsParams = {
-    establishmentCode: accountId ?? "",
-  }
-
-  const query = usePlanningCallsQuery(callsParams)
+  // Self-scoped: no establishment code required
+  const query = usePlanningCallsQuery()
   const claimMutation = useClaimCallMutation()
 
   const handleClaim = async (callId: string, employerCode: string, establishmentCode: string) => {
@@ -40,6 +38,8 @@ export function usePlanningCallsScreen() {
         setClaimStates((prev) => ({ ...prev, [callId]: "already-claimed" }))
       } else if (errorType === "forbidden") {
         setClaimStates((prev) => ({ ...prev, [callId]: "forbidden" }))
+      } else if (errorType === "conflict") {
+        setClaimStates((prev) => ({ ...prev, [callId]: "conflict" }))
       } else {
         setClaimStates((prev) => ({ ...prev, [callId]: "error" }))
       }

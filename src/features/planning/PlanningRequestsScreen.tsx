@@ -48,8 +48,7 @@ export function PlanningRequestsScreen() {
       />
 
       <PlanningRequestsListSection
-        leaveRequests={screen.leaveRequests}
-        scheduleRequests={screen.scheduleRequests}
+        requests={screen.requests}
       />
     </AppScrollScreen>
   )
