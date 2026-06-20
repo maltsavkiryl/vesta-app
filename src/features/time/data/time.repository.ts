@@ -13,14 +13,6 @@ export interface ClockCommandInput {
 export interface TimeOverview {
   clockSession: ClockSession
   timeEntries: TimeEntry[]
-  earnings: {
-    averageHourlyRate: number
-    earnedAmount: number
-    hoursWorked: number
-    monthLabel: string
-    shiftsWorked: number
-    targetAmount: number
-  }
 }
 
 export interface TimeRepository {

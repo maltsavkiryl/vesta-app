@@ -7,7 +7,6 @@ import type { TimeEntry, TimeEntryEvent } from "@/core/models"
 import {
   getBreakSegments,
   getTimeEntryBreakLabel,
-  getTimeEntryEarningsLabel,
   getTimeEntryEventLabel,
   getTimeEntryGrossLabel,
   getTimeEntryTimeRangeLabel,
@@ -90,8 +89,7 @@ export function TimeEntrySummarySection({ entry }: { entry: TimeEntry }) {
     <GroupedSection title="Shift summary">
       <DetailRow label="Worked" value={getTimeEntryWorkedLabel(entry)} />
       <DetailRow label="Breaks" value={getTimeEntryBreakLabel(entry)} />
-      <DetailRow label="Gross span" value={getTimeEntryGrossLabel(entry)} />
-      <DetailRow isLast label="Estimated pay" value={getTimeEntryEarningsLabel(entry)} />
+      <DetailRow isLast label="Gross span" value={getTimeEntryGrossLabel(entry)} />
     </GroupedSection>
   )
 }

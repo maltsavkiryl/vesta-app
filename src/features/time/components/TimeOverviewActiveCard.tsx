@@ -8,13 +8,11 @@ import { ActiveCardLocation, ActiveCardMetrics } from "./TimeOverviewActiveCardS
 import { CollapsibleSection, HeroCard } from "./TimeOverviewShared"
 
 export function ActiveCardContent({
-  averageHourlyRate,
   breakSeconds,
   collapsed,
   collapseProgress,
   elapsedSeconds,
   clockSession,
-  liveEarnings,
   onClockOut,
   onEndBreak,
   onStartBreak,
@@ -24,13 +22,11 @@ export function ActiveCardContent({
   status,
   totalBreakSeconds,
 }: {
-  averageHourlyRate: number
   breakSeconds: number
   collapsed: boolean
   collapseProgress: SharedValue<number>
   elapsedSeconds: number
   clockSession: TimeOverviewCardController["state"]["clockSession"]
-  liveEarnings: number
   onClockOut: () => void
   onEndBreak: () => void
   onStartBreak: () => void
@@ -66,14 +62,12 @@ export function ActiveCardContent({
       gradientVariant="compact"
     >
       <ActiveCardHeader
-        averageHourlyRate={averageHourlyRate}
         breakSeconds={breakSeconds}
         clockSession={clockSession}
         collapsed={collapsed}
         collapseProgress={collapseProgress}
         elapsedSeconds={elapsedSeconds}
         isOnBreak={isOnBreak}
-        liveEarnings={liveEarnings}
         onToggleCollapsed={onToggleCollapsed}
         payableSeconds={payableSeconds}
         showCollapseToggle={showCollapseToggle}

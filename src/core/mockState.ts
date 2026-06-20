@@ -484,14 +484,6 @@ export function createInitialState(): AppStoreState {
       venueAddress: "Rue de la Loi 123, Brussels",
       events: [],
     },
-    earnings: {
-      monthLabel: "May 2026",
-      targetAmount: 2400,
-      earnedAmount: 1486.5,
-      shiftsWorked: 14,
-      hoursWorked: 123.5,
-      averageHourlyRate: 12.04,
-    },
     highlights: [
       {
         id: "highlight-1",

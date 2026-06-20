@@ -1,6 +1,5 @@
 import { StyleSheet, View } from "react-native"
 
-import { EarningsSummaryCard } from "@/features/home/components/EarningsSummaryCard"
 import { HomeHeader } from "@/features/home/components/HomeHeader"
 import { HomeScreenSkeleton } from "@/features/home/components/HomeScreenSkeleton"
 import {
@@ -49,7 +48,6 @@ export function HomeScreen() {
     refetch,
     homeSummary,
     dismissPayrollNudge,
-    openLatestPayslip,
     openNotifications,
     openPayrollProfile,
     openSchedule,
@@ -150,18 +148,6 @@ export function HomeScreen() {
             />
           </MotionView>
         ) : null}
-
-        <MotionView delay={250}>
-          <EarningsSummaryCard
-            averageHourlyRate={home?.earnings.averageHourlyRate ?? 0}
-            earnedAmount={home?.earnings.earnedAmount ?? 0}
-            hoursWorked={home?.earnings.hoursWorked ?? 0}
-            monthLabel={home?.earnings.monthLabel ?? ""}
-            onPayslipPress={openLatestPayslip}
-            shiftsWorked={home?.earnings.shiftsWorked ?? 0}
-            targetAmount={home?.earnings.targetAmount ?? 0}
-          />
-        </MotionView>
       </View>
     </AppScrollScreen>
   )

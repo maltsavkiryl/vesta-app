@@ -1,7 +1,5 @@
 import { format } from "date-fns"
 
-import { formatCurrency } from "@/utils/formatters"
-
 import { formatTimeValue, parseDateValue } from "./date"
 import { formatDurationLabel } from "./date"
 import type {
@@ -11,8 +9,6 @@ import type {
   TimeEntryEvent,
   TimeEntryEventType,
 } from "./models"
-
-const DEFAULT_HOURLY_RATE = 12.02
 
 export interface TimeEntryBreakSegment {
   id: string
@@ -48,12 +44,10 @@ export function buildTimeEntryFromClockSession({
   clockOutAt,
   clockOutLocation,
   clockSession,
-  hourlyRate = DEFAULT_HOURLY_RATE,
 }: {
   clockSession: ClockSession
   clockOutAt: string
   clockOutLocation?: LocationSnapshot
-  hourlyRate?: number
 }): TimeEntry {
   const clockOutEvent = buildTimeEntryEvent({
     location: clockOutLocation,
@@ -84,7 +78,6 @@ export function buildTimeEntryFromClockSession({
     grossSeconds,
     workedSeconds,
     breakSeconds,
-    earningsAmount: (workedSeconds / 3600) * hourlyRate,
     status: "review",
     events,
     clockInProofPhoto: clockSession.clockInProofPhoto,
@@ -105,10 +98,6 @@ export function getTimeEntryBreakLabel(entry: TimeEntry) {
 
 export function getTimeEntryGrossLabel(entry: TimeEntry) {
   return formatDurationLabel(entry.grossSeconds)
-}
-
-export function getTimeEntryEarningsLabel(entry: TimeEntry) {
-  return formatCurrency(entry.earningsAmount)
 }
 
 export function getTimeEntryPrimaryLocation(entry: TimeEntry) {

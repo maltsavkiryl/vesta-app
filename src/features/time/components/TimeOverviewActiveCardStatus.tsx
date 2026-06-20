@@ -1,16 +1,7 @@
-import { useEffect } from "react"
 import { View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated"
 
 import { formatDurationLabel, formatTimeValue } from "@/core/date"
-import { formatCurrency } from "@/core/format"
-import { useAppMotion } from "@/providers/motion-provider"
 import { ProgressBar, Text, useDesignTokens } from "@/ui"
 
 import { formatSeconds } from "../time.utils"
@@ -20,62 +11,6 @@ import type { TimeOverviewCardController } from "./timeOverview.types"
 import { getShiftDurationHours } from "./timeOverview.utils"
 
 type ClockSession = TimeOverviewCardController["state"]["clockSession"]
-
-/**
- * Live, per-second earnings accruing during an active shift. Accrual is driven
- * by `payableSeconds` (worked minus breaks), so it naturally pauses on break.
- * Gives a tasteful count-up pulse each tick unless reduced motion is on.
- */
-export function EarningsTicker({
-  earnings,
-  hourlyRate,
-  isOnBreak,
-}: {
-  earnings: number
-  hourlyRate: number
-  isOnBreak: boolean
-}) {
-  const motion = useAppMotion()
-  const pulse = useSharedValue(1)
-  const formatted = formatCurrency(earnings)
-
-  useEffect(() => {
-    if (motion.shouldReduceMotion || isOnBreak) return
-    pulse.value = withSequence(
-      withTiming(1.035, { duration: 120 }),
-      withTiming(1, { duration: 220 }),
-    )
-  }, [formatted, isOnBreak, motion.shouldReduceMotion, pulse])
-
-  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }))
-  const label = isOnBreak
-    ? `Paused · ${formatted} earned so far`
-    : `Earning ${formatted} · ${formatCurrency(hourlyRate)}/hr`
-
-  return (
-    <Animated.View
-      accessibilityRole="text"
-      accessibilityLabel={
-        isOnBreak
-          ? `Earnings paused. ${formatted} earned so far this shift.`
-          : `Earning ${formatted} so far this shift, at ${formatCurrency(hourlyRate)} per hour.`
-      }
-      style={[styles.earningsTickerRow, animatedStyle]}
-    >
-      <Ionicons
-        color={isOnBreak ? timeHeroColors.secondaryText : timeHeroColors.successText}
-        name="cash-outline"
-        size={14}
-      />
-      <Text
-        text={label}
-        size="xs"
-        weight="semiBold"
-        style={{ color: isOnBreak ? timeHeroColors.secondaryText : timeHeroColors.successText }}
-      />
-    </Animated.View>
-  )
-}
 
 export function ActiveCardMetrics({
   clockSession,

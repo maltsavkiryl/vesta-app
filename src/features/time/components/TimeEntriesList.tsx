@@ -8,11 +8,7 @@ import { useListItemEntrance } from "@/ui/foundations/motion"
 
 import { parseDateValue } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
-import {
-  getTimeEntryEarningsLabel,
-  getTimeEntryTimeRangeLabel,
-  getTimeEntryWorkedLabel,
-} from "@/core/timeEntries"
+import { getTimeEntryTimeRangeLabel, getTimeEntryWorkedLabel } from "@/core/timeEntries"
 import {
   AppScrollScreen,
   DateBadge,
@@ -113,7 +109,6 @@ export function TimeEntriesListScreen({
                     index={index}
                     isLast={index === monthEntries.length - 1}
                     onPress={() => onOpenEntry(entry)}
-                    showEarnings
                   />
                 ))}
               </ListCard>
@@ -130,13 +125,11 @@ function EntryRow({
   index = 0,
   isLast,
   onPress,
-  showEarnings,
 }: {
   entry: TimeEntry
   index?: number
   isLast?: boolean
   onPress: () => void
-  showEarnings?: boolean
 }) {
   const tokens = useDesignTokens()
   const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 0, step: 35 })
@@ -144,12 +137,8 @@ function EntryRow({
   const weekday = date ? format(date, "EEE") : "--"
   const day = date ? format(date, "d") : "--"
   const statusColor = entry.status === "approved" ? tokens.success : tokens.warning
-  const trailingLabel = showEarnings
-    ? getTimeEntryEarningsLabel(entry)
-    : entry.status === "approved"
-      ? "Approved"
-      : "Review"
-  const trailingTone = showEarnings ? tokens.textPrimary : statusColor
+  const trailingLabel = entry.status === "approved" ? "Approved" : "Review"
+  const trailingTone = statusColor
 
   return (
     <Animated.View style={entranceStyle}>

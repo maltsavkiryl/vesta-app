@@ -54,15 +54,6 @@ export function formatDurationHoursLabel(hours: number) {
   return `${wholeHours}h ${minutes}m`
 }
 
-/**
- * Earnings accrued so far this session: only payable (worked-minus-break)
- * seconds count, paid at the employee's average hourly rate. Used by the live
- * ticker on the active clock card and is intentionally pure for testability.
- */
-export function computeAccruedEarnings(payableSeconds: number, hourlyRate: number) {
-  return (Math.max(payableSeconds, 0) / 3600) * Math.max(hourlyRate, 0)
-}
-
 export function getClockInOpenLabel(start: string) {
   const minutes = (timeToMinutes(start) + 24 * 60 - 15) % (24 * 60)
   const hours = String(Math.floor(minutes / 60)).padStart(2, "0")

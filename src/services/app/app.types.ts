@@ -5,7 +5,6 @@ import type {
   ClockSessionContext,
   ClockSession,
   DocumentItem,
-  EarningsSummary,
   Employer,
   HomeHighlight,
   HomeTask,
@@ -95,7 +94,6 @@ export interface ScheduleAggregateDto {
 
 export interface TimeAggregateDto {
   clockSession: ClockSession
-  earnings: EarningsSummary
   timeEntries: TimeEntry[]
   version: 1
 }

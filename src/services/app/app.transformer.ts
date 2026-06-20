@@ -160,35 +160,6 @@ function createDefaultAggregates(): MockAccountAggregatesDto {
   })
 }
 
-function roundTo(value: number, decimals: number) {
-  const factor = 10 ** decimals
-  return Math.round(value * factor) / factor
-}
-
-function buildEarningsFromTimeEntries(
-  timeEntries: TimeEntry[],
-  fallback: TimeAggregateDto["earnings"],
-): TimeAggregateDto["earnings"] {
-  const earnedAmount = roundTo(
-    timeEntries.reduce((sum, entry) => sum + entry.earningsAmount, 0),
-    2,
-  )
-  const hoursWorked = roundTo(
-    timeEntries.reduce((sum, entry) => sum + entry.workedSeconds, 0) / 3600,
-    1,
-  )
-
-  return {
-    averageHourlyRate:
-      hoursWorked > 0 ? roundTo(earnedAmount / hoursWorked, 2) : fallback.averageHourlyRate,
-    earnedAmount,
-    hoursWorked,
-    monthLabel: fallback.monthLabel,
-    shiftsWorked: timeEntries.length,
-    targetAmount: fallback.targetAmount,
-  }
-}
-
 export function createAccountId(email: string) {
   const base = normalizeEmail(email)
     .replace(/[^a-z0-9]+/g, "-")
@@ -244,7 +215,6 @@ export function toPersistedAggregates(state: AppStoreState): MockAccountAggregat
   }
   const time: TimeAggregateDto = {
     clockSession,
-    earnings: cloneValue(snapshot.earnings),
     timeEntries,
     version: 1,
   }
@@ -320,7 +290,6 @@ export function toAppStoreStateFromAggregates(
       ),
       clockSession,
       documents: cloneValue(documents.documents ?? defaults.documents.documents),
-      earnings: cloneValue(time.earnings ?? defaults.time.earnings),
       employerDirectory,
       employers,
       highlights: cloneValue(home.highlights ?? defaults.home.highlights),
@@ -437,10 +406,6 @@ export function migrateMockBackendDb(db: MockBackendDbDto): MockBackendDbDto {
         },
         time: {
           ...currentTime,
-          earnings:
-            filteredTimeEntries.length === 0
-              ? cloneValue(defaults.time.earnings)
-              : buildEarningsFromTimeEntries(filteredTimeEntries, currentTime.earnings),
           timeEntries: cloneValue(filteredTimeEntries),
         },
       },

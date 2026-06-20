@@ -241,7 +241,6 @@ export interface TimeEntry extends ClockSessionContext {
   grossSeconds: number
   workedSeconds: number
   breakSeconds: number
-  earningsAmount: number
   status: TimeEntryStatus
   events: TimeEntryEvent[]
   clockInProofPhoto?: ProofPhoto
@@ -255,15 +254,6 @@ export interface ClockSession extends ClockSessionContext {
   events: TimeEntryEvent[]
   clockInLocation?: LocationSnapshot
   clockInProofPhoto?: ProofPhoto
-}
-
-export interface EarningsSummary {
-  monthLabel: string
-  targetAmount: number
-  earnedAmount: number
-  shiftsWorked: number
-  hoursWorked: number
-  averageHourlyRate: number
 }
 
 export type AppNavigationRoute =
@@ -477,7 +467,6 @@ export interface AppStoreState {
   notifications: NotificationItem[]
   timeEntries: TimeEntry[]
   clockSession: ClockSession
-  earnings: EarningsSummary
   highlights: HomeHighlight[]
   tasks: HomeTask[]
   signedContractIds: string[]
