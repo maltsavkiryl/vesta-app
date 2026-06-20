@@ -90,7 +90,7 @@ export function useHomeScreen() {
     refetch,
     homeSummary: policy.homeSummary,
     nextShift: policy.nextShift,
-    openNotifications: () => navigate("/notifications"),
+    openNotifications: () => navigate("/(app)/(tabs)/inbox"),
     openLatestPayslip: () => {
       if (!latestPayslip) return
       router.push(`/(app)/document-payslip/${latestPayslip.id}` as never)

@@ -273,6 +273,7 @@ export type AppNavigationRoute =
   | "/(app)/(tabs)/profile"
   | "/(app)/(tabs)/schedule"
   | "/(app)/(tabs)/time"
+  | "/(app)/(tabs)/inbox"
   | "/notifications"
   | "/(app)/tasks"
   | "/(app)/request"
