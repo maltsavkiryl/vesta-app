@@ -20,6 +20,8 @@ import {
   Text,
   useDesignTokens,
 } from "@/ui"
+import { MotionView } from "@/ui/composites/app-motion"
+import { translate } from "@/i18n/translate"
 
 const availabilityStatusIcons: Record<AvailabilityStatus, keyof typeof Ionicons.glyphMap> = {
   available: "checkmark-circle-outline",
@@ -33,6 +35,12 @@ function getStatusColor(status: AvailabilityStatus, tokens: ReturnType<typeof us
   if (tone === "success") return tokens.success
   if (tone === "accent") return tokens.accent
   return tokens.textSecondary
+}
+
+function getStatusActiveBg(status: AvailabilityStatus, tokens: ReturnType<typeof useDesignTokens>) {
+  if (status === "available") return tokens.successSoft
+  if (status === "preferred") return tokens.accentMuted
+  return tokens.backgroundMuted
 }
 
 function AvailabilityTimeValue({ value }: { value: string }) {
@@ -52,18 +60,20 @@ export function AvailabilityIntro({ date, weekdayLabel }: { date: string; weekda
   const tokens = useDesignTokens()
 
   return (
-    <View style={styles.intro}>
-      <Text
-        style={[styles.introTitle, { color: tokens.textPrimary }]}
-        text={formatFullDate(date)}
-        weight="bold"
-      />
-      <Text
-        size="xs"
-        style={{ color: tokens.textSecondary }}
-        text={`Use different availability than your usual ${weekdayLabel} hours for this date.`}
-      />
-    </View>
+    <MotionView delay={0}>
+      <View style={styles.intro}>
+        <Text
+          style={[styles.introTitle, { color: tokens.textPrimary }]}
+          text={formatFullDate(date)}
+          weight="bold"
+        />
+        <Text
+          size="xs"
+          style={{ color: tokens.textSecondary }}
+          text={`Use different availability than your usual ${weekdayLabel} hours for this date.`}
+        />
+      </View>
+    </MotionView>
   )
 }
 
@@ -78,7 +88,7 @@ export function AvailabilityTemplateSection({
   const summary = `${availabilityStatusOptions[templateDay.status].label} · ${formatTimeLabel(templateDay.startTime)} to ${formatTimeLabel(templateDay.endTime)}`
 
   return (
-    <GroupedSection title="Weekly default">
+    <GroupedSection title={translate("planning:availability.weeklyDefaultTitle")}>
       <ListRow
         isLast
         leading={
@@ -107,17 +117,18 @@ export function AvailabilityStatusSection({
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection title="Availability for this date">
+    <GroupedSection title={translate("planning:availability.forThisDate")}>
       {(Object.keys(availabilityStatusOptions) as AvailabilityStatus[]).map(
         (candidate, index, items) => {
           const option = availabilityStatusOptions[candidate]
           const active = candidate === status
           const activeColor = getStatusColor(candidate, tokens)
+          const activeBg = active ? getStatusActiveBg(candidate, tokens) : tokens.transparent
 
           return (
             <SelectionRow
               key={candidate}
-              backgroundColor={tokens.transparent}
+              backgroundColor={activeBg}
               dividerInset={58}
               grouped
               isLast={index === items.length - 1}
@@ -160,7 +171,7 @@ export function AvailabilityHoursSection({
   startTime: string
 }) {
   return (
-    <GroupedSection title="Available hours">
+    <GroupedSection title={translate("planning:availability.availableHours")}>
       <ListRow
         subtitle="Start time"
         title="Start"

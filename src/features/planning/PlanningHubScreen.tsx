@@ -19,6 +19,7 @@ import {
   Text,
   useDesignTokens,
 } from "@/ui"
+import { MotionView } from "@/ui/composites"
 import { translate } from "@/i18n/translate"
 
 import { PlanningShiftsScreen } from "./PlanningShiftsScreen"
@@ -51,8 +52,16 @@ export function PlanningHubScreen() {
   return (
     <View style={[styles.container, { backgroundColor: tokens.groupedBackground }]}>
       {/* Sticky header row with segmented control */}
-      <View style={[styles.header, { backgroundColor: tokens.groupedBackground, borderBottomColor: tokens.separator }]}>
-        <View style={styles.headerTop}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: tokens.groupedBackground,
+            borderBottomColor: tokens.separator,
+          },
+        ]}
+      >
+        <MotionView delay={0} style={styles.headerTop}>
           <Text
             preset="heading"
             style={[styles.headerTitle, { color: tokens.textPrimary }]}
@@ -65,30 +74,41 @@ export function PlanningHubScreen() {
             onPress={handleOpenAvailabilityTemplate}
             style={({ pressed }) => [
               styles.availabilityButton,
-              { backgroundColor: tokens.backgroundMuted, opacity: pressed ? 0.7 : 1 },
+              {
+                backgroundColor: pressed ? tokens.backgroundMuted : tokens.accentMuted,
+                opacity: pressed ? 0.75 : 1,
+              },
             ]}
           >
-            <Ionicons color={tokens.textSecondary} name="calendar-outline" size={17} />
+            <Ionicons color={tokens.accent} name="calendar-outline" size={17} />
           </Pressable>
-        </View>
+        </MotionView>
 
-        {/* Five-segment control — use a horizontal scroll if needed on small screens */}
-        <View style={styles.segmentWrapper}>
+        {/* Five-segment control */}
+        <MotionView delay={60} style={styles.segmentWrapper}>
           <AppSegmentedControl
             onChange={setActiveTab}
             options={getTabOptions()}
             value={activeTab}
           />
-        </View>
+        </MotionView>
       </View>
 
-      {/* Tab content */}
-      <View style={styles.content}>
-        {activeTab === "shifts" && <PlanningShiftsScreen />}
-        {activeTab === "todos" && <PlanningTodosScreen />}
-        {activeTab === "calls" && <PlanningCallsScreen />}
-        {activeTab === "requests" && <PlanningRequestsScreen />}
-        {activeTab === "leave" && <PlanningLeaveScreen />}
+      {/* Tab content — keep all mounted for instant tab switch */}
+      <View style={[styles.tabPane, { display: activeTab === "shifts" ? "flex" : "none" }]}>
+        <PlanningShiftsScreen />
+      </View>
+      <View style={[styles.tabPane, { display: activeTab === "todos" ? "flex" : "none" }]}>
+        <PlanningTodosScreen />
+      </View>
+      <View style={[styles.tabPane, { display: activeTab === "calls" ? "flex" : "none" }]}>
+        <PlanningCallsScreen />
+      </View>
+      <View style={[styles.tabPane, { display: activeTab === "requests" ? "flex" : "none" }]}>
+        <PlanningRequestsScreen />
+      </View>
+      <View style={[styles.tabPane, { display: activeTab === "leave" ? "flex" : "none" }]}>
+        <PlanningLeaveScreen />
       </View>
     </View>
   )
@@ -104,9 +124,6 @@ const styles = StyleSheet.create({
     width: 36,
   },
   container: {
-    flex: 1,
-  },
-  content: {
     flex: 1,
   },
   header: {
@@ -127,6 +144,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   segmentWrapper: {
-    // Full-width segmented control
+    // full-width
+  },
+  tabPane: {
+    flex: 1,
   },
 })

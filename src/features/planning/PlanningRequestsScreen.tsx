@@ -1,11 +1,13 @@
 import { StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
+import { useToast } from "@/ui/feedback"
 import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
 import {
   PlanningRequestShortcuts,
   PlanningRequestsListSection,
+  PlanningRequestsSkeleton,
 } from "./PlanningRequestsSections"
 import { usePlanningRequestsScreen } from "./usePlanningRequestsScreen"
 
@@ -13,6 +15,30 @@ export function PlanningRequestsScreen() {
   const tokens = useDesignTokens()
   const screen = usePlanningRequestsScreen()
   const { onRefresh, refreshing } = useRefreshHandler(screen.refetch)
+  const { showSuccess } = useToast()
+
+  const handleDecideSwap = async (swapCode: string, accept: boolean) => {
+    try {
+      await screen.handleDecideSwap(swapCode, accept)
+      showSuccess(translate("planning:requests.swapDecided"))
+    } catch {
+      // Mutation errors are surfaced inline; swallow here to prevent unhandled rejection
+    }
+  }
+
+  const handleCancelSwap = async (swapCode: string) => {
+    try {
+      await screen.handleCancelSwap(swapCode)
+      showSuccess(translate("planning:requests.swapCancelled"))
+    } catch {
+      // Mutation errors are surfaced inline; swallow here to prevent unhandled rejection
+    }
+  }
+
+  const isFirstLoad =
+    screen.isLoading &&
+    screen.requests.swapRequests.length === 0 &&
+    screen.requests.changeRequests.length === 0
 
   if (screen.isError) {
     return (
@@ -48,12 +74,16 @@ export function PlanningRequestsScreen() {
         onNewShiftSwap={screen.handleNewShiftSwap}
       />
 
-      <PlanningRequestsListSection
-        myEmployeeId={screen.myEmployeeId}
-        onCancel={screen.handleCancelSwap}
-        onDecide={screen.handleDecideSwap}
-        requests={screen.requests}
-      />
+      {isFirstLoad ? (
+        <PlanningRequestsSkeleton />
+      ) : (
+        <PlanningRequestsListSection
+          myEmployeeId={screen.myEmployeeId}
+          onCancel={handleCancelSwap}
+          onDecide={handleDecideSwap}
+          requests={screen.requests}
+        />
+      )}
     </AppScrollScreen>
   )
 }

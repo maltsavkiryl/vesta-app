@@ -1,66 +1,86 @@
-/* eslint-disable react-native/no-inline-styles */
-
+import { useEffect } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 import type { Shift } from "@/core/models"
-import { AppScrollScreen, GroupedSection, SurfaceCard, TextField, useDesignTokens } from "@/ui"
+import { AppButton, AppScrollScreen, GroupedSection, SurfaceCard, SuccessState, TextField, useDesignTokens } from "@/ui"
+import { useToast } from "@/ui/feedback"
 import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
 import { getShiftTimeRange, formatShortDate } from "@/core/date"
+import { useListItemEntrance, useCelebratePulse } from "@/ui/foundations/motion"
 import { usePlanningSwapNewScreen } from "./usePlanningSwapNewScreen"
-import { AppButton } from "@/ui"
+import { fireHaptic } from "@/utils/haptics"
 
 function ShiftPickerRow({
+  index,
   isSelected,
   onSelect,
   shift,
 }: {
+  index: number
   isSelected: boolean
   onSelect: () => void
   shift: Shift
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 20, step: 36 })
+  const { animatedStyle: pulseStyle, triggerPulse } = useCelebratePulse()
+
+  useEffect(() => {
+    if (isSelected) {
+      triggerPulse()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSelected])
+
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ checked: isSelected }}
-      onPress={onSelect}
-      style={({ pressed }) => [
-        styles.shiftRow,
-        {
-          borderColor: isSelected ? tokens.accent : tokens.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
-      <View style={styles.shiftRowContent}>
-        <Text size="xs" style={{ color: tokens.textPrimary }} text={formatShortDate(shift.date)} weight="medium" />
-        <Text size="xxs" style={{ color: tokens.textSecondary }} text={getShiftTimeRange(shift)} />
-      </View>
-      {isSelected ? (
-        <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
-      ) : null}
-    </Pressable>
+    <Animated.View style={entranceStyle}>
+      <Animated.View style={pulseStyle}>
+        <Pressable
+          accessibilityRole="radio"
+          accessibilityState={{ checked: isSelected }}
+          onPress={onSelect}
+          style={[
+            styles.shiftRow,
+            {
+              borderColor: isSelected ? tokens.accent : tokens.border,
+              backgroundColor: isSelected ? tokens.accentMuted : tokens.surface,
+            },
+          ]}
+        >
+          <View style={styles.shiftRowContent}>
+            <Text size="xs" style={{ color: tokens.textPrimary }} text={formatShortDate(shift.date)} weight="medium" />
+            <Text size="xxs" style={{ color: tokens.textSecondary }} text={getShiftTimeRange(shift)} />
+          </View>
+          {isSelected ? (
+            <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
+          ) : null}
+        </Pressable>
+      </Animated.View>
+    </Animated.View>
   )
 }
 
 export function PlanningSwapNewScreen() {
   const tokens = useDesignTokens()
   const screen = usePlanningSwapNewScreen()
+  const { showSuccess } = useToast()
+
+  useEffect(() => {
+    if (screen.success) {
+      fireHaptic("success")
+      showSuccess(translate("planning:requests.submitSuccess"))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen.success])
 
   if (screen.success) {
     return (
       <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-        <SurfaceCard style={styles.successCard}>
-          <Ionicons color={tokens.success} name="checkmark-circle" size={32} />
-          <Text
-            size="sm"
-            style={{ color: tokens.success }}
-            text={translate("planning:requests.submitSuccess")}
-            weight="semiBold"
-          />
+        <SuccessState title={translate("planning:requests.submitSuccess")}>
           <AppButton label={translate("common:actions.close")} onPress={screen.handleDismiss} variant="secondary" />
-        </SurfaceCard>
+        </SuccessState>
       </AppScrollScreen>
     )
   }
@@ -72,9 +92,10 @@ export function PlanningSwapNewScreen() {
           <Text size="xs" style={{ color: tokens.textMuted, padding: 16 }} text={translate("planning:schedule.noShifts")} />
         ) : (
           <View style={styles.shiftList}>
-            {screen.myShifts.map((shift) => (
+            {screen.myShifts.map((shift, index) => (
               <ShiftPickerRow
                 key={shift.id}
+                index={index}
                 isSelected={screen.selectedShiftId === shift.id}
                 onSelect={() => screen.setSelectedShiftId(shift.id)}
                 shift={shift}
@@ -84,7 +105,7 @@ export function PlanningSwapNewScreen() {
         )}
       </GroupedSection>
 
-      <View style={styles.fieldBody}>
+      <SurfaceCard style={styles.fieldCard}>
         <TextField
           autoCapitalize="none"
           autoCorrect={false}
@@ -92,7 +113,7 @@ export function PlanningSwapNewScreen() {
           onChangeText={screen.setTargetShiftCode}
           value={screen.targetShiftCode}
         />
-      </View>
+      </SurfaceCard>
 
       <View style={styles.fieldBody}>
         <TextField
@@ -107,7 +128,7 @@ export function PlanningSwapNewScreen() {
       </View>
 
       {screen.error ? (
-        <View style={[styles.errorRow, { backgroundColor: `${tokens.danger}10` }]}>
+        <View style={[styles.errorRow, { backgroundColor: tokens.dangerSoft }]}>
           <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
           <Text size="xxs" style={{ color: tokens.danger }} text={screen.error} />
         </View>
@@ -116,10 +137,9 @@ export function PlanningSwapNewScreen() {
       <AppButton
         disabled={!screen.canSubmit || screen.isSubmitting}
         fullWidth
-        label={screen.isSubmitting ? translate("planning:requests.submitting") : translate("planning:requests.shiftSwap")}
-        onPress={() => {
-          void screen.handleSubmit()
-        }}
+        isLoading={screen.isSubmitting}
+        label={translate("planning:requests.shiftSwap")}
+        onPress={() => { void screen.handleSubmit() }}
         pressHaptic="none"
       />
     </AppScrollScreen>
@@ -138,6 +158,10 @@ const styles = StyleSheet.create({
   },
   fieldBody: {
     gap: 12,
+  },
+  fieldCard: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   screen: {
     gap: 22,
@@ -162,12 +186,6 @@ const styles = StyleSheet.create({
   shiftRowContent: {
     flex: 1,
     gap: 2,
-  },
-  successCard: {
-    alignItems: "center",
-    gap: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 24,
   },
   textAreaInput: {
     minHeight: 64,

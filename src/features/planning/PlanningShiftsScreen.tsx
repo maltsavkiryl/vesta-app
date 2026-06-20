@@ -3,7 +3,11 @@ import { Ionicons } from "@expo/vector-icons"
 import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
 import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
-import { PlanningAgendaSection, PlanningShiftsEmpty } from "./PlanningShiftsSections"
+import {
+  PlanningAgendaSection,
+  PlanningAgendaSectionSkeleton,
+  PlanningShiftsEmpty,
+} from "./PlanningShiftsSections"
 import { usePlanningShiftsScreen } from "./usePlanningShiftsScreen"
 
 export function PlanningShiftsScreen() {
@@ -39,7 +43,9 @@ export function PlanningShiftsScreen() {
       refreshing={refreshing}
     >
       <PageHeader delay={0} title={translate("planning:sections.mySchedule")} />
-      {screen.agendaSections.length === 0 && !screen.isLoading ? (
+      {screen.isLoading && screen.shifts.length === 0 ? (
+        <PlanningAgendaSectionSkeleton />
+      ) : screen.agendaSections.length === 0 ? (
         <PlanningShiftsEmpty />
       ) : (
         <PlanningAgendaSection

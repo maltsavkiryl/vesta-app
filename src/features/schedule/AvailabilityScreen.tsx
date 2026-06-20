@@ -1,6 +1,9 @@
+import { useEffect, useRef } from "react"
 import { StyleSheet, View } from "react-native"
 
 import { AppButton, AppScrollScreen, TextField, useDesignTokens } from "@/ui"
+import { useToast } from "@/ui/feedback"
+import { translate } from "@/i18n/translate"
 
 import {
   AvailabilityHoursSection,
@@ -13,6 +16,18 @@ import { useAvailabilityScreen } from "./useAvailabilityScreen"
 export function AvailabilityScreen() {
   const screen = useAvailabilityScreen()
   const tokens = useDesignTokens()
+  const { showSuccess } = useToast()
+
+  // Track isSaving transitions to fire toast on successful save
+  const wasSavingRef = useRef(false)
+  useEffect(() => {
+    if (wasSavingRef.current && !screen.isSaving) {
+      // isSaving went from true→false; the hook calls router.back() on success
+      // so showing a toast here gives the user feedback before navigation
+      showSuccess(translate("planning:availability.saveSuccess"))
+    }
+    wasSavingRef.current = screen.isSaving
+  }, [screen.isSaving, showSuccess])
 
   return (
     <AppScrollScreen contentContainerStyle={styles.screen} topInset="none" variant="grouped">
@@ -37,11 +52,11 @@ export function AvailabilityScreen() {
         <TextField
           containerStyle={[styles.noteShell, { backgroundColor: tokens.surface }]}
           inputStyle={styles.noteInput}
-          label="Note"
+          label={translate("planning:availability.noteLabel")}
           multiline
           numberOfLines={3}
           onChangeText={screen.setNote}
-          placeholder="Optional context for your manager"
+          placeholder={translate("planning:availability.notePlaceholder")}
           textAlignVertical="top"
           value={screen.note}
           variant="muted"
@@ -50,7 +65,7 @@ export function AvailabilityScreen() {
         {screen.canResetToTemplate ? (
           <View style={styles.buttonStack}>
             <AppButton
-              label="Reset to weekly default"
+              label={translate("planning:availability.resetToDefault")}
               onPress={() => {
                 void screen.handleResetToTemplate()
               }}

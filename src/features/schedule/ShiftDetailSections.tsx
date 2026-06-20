@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatFullDate, getShiftTimeRange } from "@/core/date"
+import { translate } from "@/i18n/translate"
 import type { Shift } from "@/core/models"
 import {
   ActionRow,
@@ -16,6 +17,8 @@ import {
   Text,
   useDesignTokens,
 } from "@/ui"
+
+// ─── Empty ────────────────────────────────────────────────────────────────────
 
 export function ShiftDetailEmptyState() {
   const router = useRouter()
@@ -32,11 +35,14 @@ export function ShiftDetailEmptyState() {
   )
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
 export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void; shift: Shift }) {
   const tokens = useDesignTokens()
 
   return (
-    <SurfaceCard style={styles.heroCard}>
+    <SurfaceCard elevationLevel={1} style={styles.heroCard}>
+      {/* Status + role */}
       <View style={styles.heroHeader}>
         <StatusBadge
           label={
@@ -63,6 +69,8 @@ export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void;
           weight="medium"
         />
       </View>
+
+      {/* Time — prominent */}
       <Text
         adjustsFontSizeToFit
         minimumFontScale={0.82}
@@ -71,21 +79,33 @@ export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void;
         text={getShiftTimeRange(shift)}
         weight="bold"
       />
+
+      {/* Full date */}
       <Text size="xs" style={{ color: tokens.textSecondary }} text={formatFullDate(shift.date)} />
+
+      {/* Venue + maps */}
       <View style={styles.infoRow}>
         <MetaPill
           label={shift.venueName}
           leading={<Ionicons color={tokens.textSecondary} name="business-outline" size={13} />}
         />
         <Pressable
+          accessibilityLabel={translate("planning:schedule.openInMapsA11y")}
+          accessibilityRole="button"
           onPress={onOpenMaps}
-          style={[styles.mapActionChip, { backgroundColor: tokens.backgroundMuted }]}
+          style={({ pressed }) => [
+            styles.mapActionChip,
+            {
+              backgroundColor: pressed ? tokens.backgroundMuted : tokens.accentMuted,
+              opacity: pressed ? 0.75 : 1,
+            },
+          ]}
         >
-          <Ionicons color={tokens.textSecondary} name="location-outline" size={13} />
+          <Ionicons color={tokens.accent} name="location-outline" size={13} />
           <Text
             size="xxs"
-            style={{ color: tokens.textSecondary }}
-            text="Open in Maps"
+            style={{ color: tokens.accent }}
+            text={translate("planning:schedule.openInMaps")}
             weight="medium"
           />
         </Pressable>
@@ -94,6 +114,8 @@ export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void;
   )
 }
 
+// ─── Change summary callout ───────────────────────────────────────────────────
+
 export function ShiftChangeSummaryCallout({ summary }: { summary: string }) {
   const tokens = useDesignTokens()
 
@@ -101,7 +123,7 @@ export function ShiftChangeSummaryCallout({ summary }: { summary: string }) {
     <View
       style={[
         styles.callout,
-        { backgroundColor: `${tokens.warning}10`, borderColor: `${tokens.warning}25` },
+        { backgroundColor: tokens.warningSoft, borderColor: `${tokens.warning}25` },
       ]}
     >
       <Ionicons color={tokens.warning} name="sparkles-outline" size={16} />
@@ -112,6 +134,8 @@ export function ShiftChangeSummaryCallout({ summary }: { summary: string }) {
     </View>
   )
 }
+
+// ─── Action needed ────────────────────────────────────────────────────────────
 
 export function ShiftActionNeededSection({
   callout,
@@ -158,6 +182,8 @@ export function ShiftActionNeededSection({
   )
 }
 
+// ─── Declined state ───────────────────────────────────────────────────────────
+
 export function ShiftDeclinedSection() {
   const tokens = useDesignTokens()
 
@@ -186,6 +212,8 @@ export function ShiftDeclinedSection() {
   )
 }
 
+// ─── Plan section ─────────────────────────────────────────────────────────────
+
 export function ShiftPlanSection({ shift }: { shift: Shift }) {
   return (
     <GroupedSection title="Plan for this shift">
@@ -197,17 +225,22 @@ export function ShiftPlanSection({ shift }: { shift: Shift }) {
   )
 }
 
+// ─── Manager note ─────────────────────────────────────────────────────────────
+
 export function ShiftManagerNoteSection({ note }: { note: string }) {
   const tokens = useDesignTokens()
 
   return (
     <GroupedSection title="Manager note">
-      <View style={styles.groupBody}>
-        <Text size="xs" style={{ color: tokens.textPrimary }} text={note} />
+      <View style={[styles.groupBody, styles.noteBody]}>
+        <Ionicons color={tokens.textMuted} name="chatbubble-ellipses-outline" size={14} />
+        <Text size="xs" style={[styles.flex, { color: tokens.textPrimary }]} text={note} />
       </View>
     </GroupedSection>
   )
 }
+
+// ─── Request actions ──────────────────────────────────────────────────────────
 
 export function ShiftRequestActions({ shift }: { shift: Shift }) {
   const router = useRouter()
@@ -241,11 +274,15 @@ export function ShiftRequestActions({ shift }: { shift: Shift }) {
   )
 }
 
+// ─── Open time ────────────────────────────────────────────────────────────────
+
 export function ShiftOpenTimeAction() {
   const router = useRouter()
 
   return <AppButton label="Open Time" onPress={() => router.push("/(app)/(tabs)/time" as never)} />
 }
+
+// ─── Plan row ─────────────────────────────────────────────────────────────────
 
 function ShiftPlanRow({
   isLast = false,
@@ -260,12 +297,12 @@ function ShiftPlanRow({
 
   return (
     <View style={styles.planRow}>
-      <Text size="xs" style={[styles.planLabel, { color: tokens.textSecondary }]} text={label} />
+      <Text size="xs" style={[styles.planLabel, { color: tokens.textMuted }]} text={label} />
       <Text
         size="xs"
         style={[styles.planValue, { color: tokens.textPrimary }]}
         text={value}
-        weight="semiBold"
+        weight="medium"
       />
       {!isLast ? (
         <View style={[styles.planDivider, { backgroundColor: tokens.separator }]} />
@@ -331,6 +368,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
+  noteBody: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 10,
+  },
   planDivider: {
     bottom: 0,
     height: StyleSheet.hairlineWidth,
@@ -345,9 +387,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
-    minHeight: 68,
+    minHeight: 60,
     paddingHorizontal: 18,
-    paddingVertical: 18,
+    paddingVertical: 14,
     position: "relative",
   },
   planValue: {
