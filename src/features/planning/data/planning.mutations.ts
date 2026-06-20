@@ -2,37 +2,43 @@
  * TanStack Query mutation hooks for the employee planning feature.
  *
  * Mutations invalidate the relevant planning query keys on success.
- * Todo completion uses an optimistic update: the todo is flipped locally
- * immediately and rolled back on failure.
+ * Todo completion uses an optimistic update: the todo isCompletedByMe flag is
+ * flipped locally immediately and rolled back on failure.
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
-import type { PlanningTodo } from "@/core/models"
+import type { PlanningTodo, PlanningTodosResult } from "@/core/models"
 import { useAppSession } from "@/providers/app-provider"
 
-import type { ClaimCallInput, CompleteTodoInput, CreateLeaveRequestParams, GetTodosParams } from "./planning.repository"
+import type {
+  ClaimCallInput,
+  CompleteTodoInput,
+  CreateShiftChangeParams,
+  CreateShiftSwapParams,
+  DecideShiftSwapParams,
+  GetOpenCallsParams,
+} from "./planning.repository"
 import { planningQueryKeys } from "./planning.queries"
 
 // ---------------------------------------------------------------------------
 // Claim a planning call
 // ---------------------------------------------------------------------------
 
-export function useClaimCallMutation() {
+export function useClaimCallMutation(callsParams: GetOpenCallsParams = {}) {
   const queryClient = useQueryClient()
   const { accountId } = useAppSession()
 
   return useMutation({
     mutationFn: (input: ClaimCallInput) => {
       if (!appRepositories.planning) throw new Error("Planning repository not available.")
-      return appRepositories.planning.claimCall(accountId!, input)
+      return appRepositories.planning.claimCall(input)
     },
-    onSuccess: (result, input) => {
+    onSuccess: (result) => {
       if (!accountId || !result.ok) return
-      // Invalidate calls for the establishment we just claimed from.
       void queryClient.invalidateQueries({
-        queryKey: planningQueryKeys.calls(accountId, { establishmentCode: input.establishmentCode }),
+        queryKey: planningQueryKeys.calls(accountId, callsParams),
       })
     },
   })
@@ -42,77 +48,197 @@ export function useClaimCallMutation() {
 // Complete a todo (optimistic)
 // ---------------------------------------------------------------------------
 
-export function useCompleteTodoMutation(todosParams: GetTodosParams) {
+export function useCompleteTodoMutation() {
   const queryClient = useQueryClient()
   const { accountId } = useAppSession()
+  const queryKey = planningQueryKeys.todos(accountId)
 
   return useMutation({
     mutationFn: (input: CompleteTodoInput) => {
       if (!appRepositories.planning) throw new Error("Planning repository not available.")
-      return appRepositories.planning.completeTodo(accountId!, input)
+      return appRepositories.planning.completeTodo(input)
     },
-    // Optimistic update: immediately flip isComplete on the cached todo list.
     onMutate: async (input) => {
-      if (!accountId) return
-      const queryKey = planningQueryKeys.todos(accountId, todosParams)
       await queryClient.cancelQueries({ queryKey })
-      const previous = queryClient.getQueryData<PlanningTodo[]>(queryKey)
+      const previous = queryClient.getQueryData<PlanningTodosResult>(queryKey)
 
-      queryClient.setQueryData<PlanningTodo[]>(queryKey, (old) =>
-        old?.map((todo) =>
-          todo.id === input.todoCode
-            ? { ...todo, isComplete: true, completedCount: todo.completedCount + 1 }
-            : todo,
-        ),
-      )
+      queryClient.setQueryData<PlanningTodosResult>(queryKey, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          todos: old.todos.map((todo): PlanningTodo =>
+            todo.id === input.todoCode ? { ...todo, isCompletedByMe: true } : todo,
+          ),
+        }
+      })
 
-      return { previous, queryKey }
+      return { previous }
     },
     onError: (_error, _input, context) => {
-      // Roll back the optimistic update on failure.
-      if (context?.queryKey && context.previous !== undefined) {
-        queryClient.setQueryData(context.queryKey, context.previous)
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(queryKey, context.previous)
       }
     },
     onSuccess: (result, _input, context) => {
-      if (!accountId || !result.ok) return
-      // Replace the optimistic update with the server response.
-      if (context?.queryKey) {
-        queryClient.setQueryData<PlanningTodo[]>(context.queryKey, (old) =>
-          old?.map((todo) => (todo.id === result.data.id ? result.data : todo)),
-        )
+      if (!result.ok && context?.previous !== undefined) {
+        // Roll back on domain error too
+        queryClient.setQueryData(queryKey, context.previous)
+        return
       }
+      // Refetch to get authoritative server state
+      void queryClient.invalidateQueries({ queryKey })
     },
   })
 }
 
 // ---------------------------------------------------------------------------
-// Create leave request
+// Uncomplete a todo (optimistic)
 // ---------------------------------------------------------------------------
 
-export function useCreateLeaveRequestMutation() {
+export function useUncompleteTodoMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+  const queryKey = planningQueryKeys.todos(accountId)
+
+  return useMutation({
+    mutationFn: (input: CompleteTodoInput) => {
+      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      return appRepositories.planning.uncompleteTodo(input)
+    },
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey })
+      const previous = queryClient.getQueryData<PlanningTodosResult>(queryKey)
+
+      queryClient.setQueryData<PlanningTodosResult>(queryKey, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          todos: old.todos.map((todo): PlanningTodo =>
+            todo.id === input.todoCode ? { ...todo, isCompletedByMe: false } : todo,
+          ),
+        }
+      })
+
+      return { previous }
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(queryKey, context.previous)
+      }
+    },
+    onSuccess: (result, _input, context) => {
+      if (!result.ok && context?.previous !== undefined) {
+        queryClient.setQueryData(queryKey, context.previous)
+        return
+      }
+      void queryClient.invalidateQueries({ queryKey })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Create shift swap request
+// ---------------------------------------------------------------------------
+
+export function useCreateShiftSwapMutation() {
   const queryClient = useQueryClient()
   const { accountId } = useAppSession()
 
   return useMutation({
-    mutationFn: (params: CreateLeaveRequestParams) => {
+    mutationFn: (params: CreateShiftSwapParams) => {
       if (!appRepositories.planning) throw new Error("Planning repository not available.")
-      return appRepositories.planning.createLeaveRequest(accountId!, params)
+      return appRepositories.planning.createShiftSwap(params)
     },
-    onSuccess: (result, params) => {
+    onSuccess: (result) => {
       if (!accountId || !result.ok) return
-      void queryClient.invalidateQueries({
-        queryKey: planningQueryKeys.leaveRequests(accountId, {
-          employerCode: params.employerCode,
-          employeeCode: params.employeeCode,
-        }),
-      })
-      void queryClient.invalidateQueries({
-        queryKey: planningQueryKeys.leaveBalances(accountId, {
-          employerCode: params.employerCode,
-          employeeCode: params.employeeCode,
-        }),
-      })
+      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.requests(accountId) })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Decide (accept/reject) a shift swap
+// ---------------------------------------------------------------------------
+
+export function useDecideShiftSwapMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (params: DecideShiftSwapParams) => {
+      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      return appRepositories.planning.decideShiftSwap(params)
+    },
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.requests(accountId) })
+      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.schedule(accountId, { from: "", to: "" }) })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Cancel a shift swap
+// ---------------------------------------------------------------------------
+
+export function useCancelShiftSwapMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (swapCode: string) => {
+      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      return appRepositories.planning.cancelShiftSwap(swapCode)
+    },
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.requests(accountId) })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Create shift change request
+// ---------------------------------------------------------------------------
+
+export function useCreateShiftChangeMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: (params: CreateShiftChangeParams) => {
+      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      return appRepositories.planning.createShiftChange(params)
+    },
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.requests(accountId) })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Save availability (PUT /employee/planning/availability)
+// ---------------------------------------------------------------------------
+
+export function useSaveAvailabilityMutation() {
+  const queryClient = useQueryClient()
+  const { accountId } = useAppSession()
+
+  return useMutation({
+    mutationFn: ({
+      template,
+      overrides,
+    }: {
+      template: import("@/core/models").AvailabilityTemplate
+      overrides: import("@/core/models").AvailabilityOverride[]
+    }) => {
+      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      return appRepositories.planning.saveMyAvailability(template, overrides)
+    },
+    onSuccess: (result) => {
+      if (!accountId || !result.ok) return
+      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.availability(accountId) })
     },
   })
 }

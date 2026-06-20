@@ -1,11 +1,14 @@
 /**
  * TanStack Query hooks for the employee planning feature.
  *
- * Key structure: ["planning", accountId, scope, ...params]
+ * All endpoints are self-scoped (GET /employee/planning/*) — no employer or
+ * establishment code in the URL. The employee is identified by their JWT.
+ *
+ * Key structure: ["planning", accountId, scope]
  * All read hooks surface { state, isLoading, isError, refetch }.
  *
- * These hooks access appRepositories.planning (wired in composition/repositories.ts).
- * If the repo is not yet wired, queries return empty arrays with no error.
+ * accountId is used only as a query-key seed to scope cache entries to the
+ * active session — it does not appear in the request URL.
  */
 
 import { useMemo } from "react"
@@ -14,13 +17,7 @@ import { useQuery } from "@tanstack/react-query"
 import { appRepositories } from "@/composition/repositories"
 import { useAppSession } from "@/providers/app-provider"
 
-import type {
-  GetCallsParams,
-  GetLeaveBalancesParams,
-  GetLeaveRequestsParams,
-  GetTodosParams,
-  GetShiftsParams,
-} from "./planning.repository"
+import type { GetOpenCallsParams, GetScheduleParams } from "./planning.repository"
 
 // ---------------------------------------------------------------------------
 // Query key factory
@@ -28,28 +25,30 @@ import type {
 
 export const planningQueryKeys = {
   all: (accountId: string | null) => ["planning", accountId] as const,
-  shifts: (accountId: string | null, params: GetShiftsParams) =>
-    ["planning", accountId, "shifts", params] as const,
-  calls: (accountId: string | null, params: GetCallsParams) =>
+  schedule: (accountId: string | null, params: GetScheduleParams) =>
+    ["planning", accountId, "schedule", params] as const,
+  availability: (accountId: string | null) =>
+    ["planning", accountId, "availability"] as const,
+  todos: (accountId: string | null) =>
+    ["planning", accountId, "todos"] as const,
+  calls: (accountId: string | null, params: GetOpenCallsParams) =>
     ["planning", accountId, "calls", params] as const,
-  todos: (accountId: string | null, params: GetTodosParams) =>
-    ["planning", accountId, "todos", params] as const,
-  leaveBalances: (accountId: string | null, params: GetLeaveBalancesParams) =>
-    ["planning", accountId, "leave-balances", params] as const,
-  leaveRequests: (accountId: string | null, params: GetLeaveRequestsParams) =>
-    ["planning", accountId, "leave-requests", params] as const,
+  requests: (accountId: string | null) =>
+    ["planning", accountId, "requests"] as const,
+  leave: (accountId: string | null) =>
+    ["planning", accountId, "leave"] as const,
 }
 
 // ---------------------------------------------------------------------------
-// Shifts
+// Schedule  (GET /employee/planning/schedule?from=&to=)
 // ---------------------------------------------------------------------------
 
-export function usePlanningShiftsQuery(params: GetShiftsParams) {
+export function usePlanningScheduleQuery(params: GetScheduleParams) {
   const { accountId } = useAppSession()
   const query = useQuery({
     enabled: Boolean(accountId) && Boolean(appRepositories.planning),
-    queryFn: () => appRepositories.planning!.getShifts(accountId!, params),
-    queryKey: planningQueryKeys.shifts(accountId, params),
+    queryFn: () => appRepositories.planning!.getMySchedule(params),
+    queryKey: planningQueryKeys.schedule(accountId, params),
   })
 
   return useMemo(
@@ -64,14 +63,60 @@ export function usePlanningShiftsQuery(params: GetShiftsParams) {
 }
 
 // ---------------------------------------------------------------------------
-// Open Calls
+// Availability  (GET /employee/planning/availability)
 // ---------------------------------------------------------------------------
 
-export function usePlanningCallsQuery(params: GetCallsParams) {
+export function usePlanningAvailabilityQuery() {
   const { accountId } = useAppSession()
   const query = useQuery({
     enabled: Boolean(accountId) && Boolean(appRepositories.planning),
-    queryFn: () => appRepositories.planning!.getOpenCalls(accountId!, params),
+    queryFn: () => appRepositories.planning!.getMyAvailability(),
+    queryKey: planningQueryKeys.availability(accountId),
+  })
+
+  return useMemo(
+    () => ({
+      state: query.data,
+      isError: query.isError,
+      isLoading: query.isLoading,
+      refetch: query.refetch,
+    }),
+    [query.data, query.isError, query.isLoading, query.refetch],
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Todos  (GET /employee/planning/todos)
+// ---------------------------------------------------------------------------
+
+export function usePlanningTodosQuery() {
+  const { accountId } = useAppSession()
+  const query = useQuery({
+    enabled: Boolean(accountId) && Boolean(appRepositories.planning),
+    queryFn: () => appRepositories.planning!.getMyTodos(),
+    queryKey: planningQueryKeys.todos(accountId),
+  })
+
+  return useMemo(
+    () => ({
+      state: query.data,
+      isError: query.isError,
+      isLoading: query.isLoading,
+      refetch: query.refetch,
+    }),
+    [query.data, query.isError, query.isLoading, query.refetch],
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Open Calls  (GET /employee/planning/calls/open?from=&to=)
+// ---------------------------------------------------------------------------
+
+export function usePlanningCallsQuery(params: GetOpenCallsParams = {}) {
+  const { accountId } = useAppSession()
+  const query = useQuery({
+    enabled: Boolean(accountId) && Boolean(appRepositories.planning),
+    queryFn: () => appRepositories.planning!.getOpenCalls(params),
     queryKey: planningQueryKeys.calls(accountId, params),
   })
 
@@ -87,15 +132,15 @@ export function usePlanningCallsQuery(params: GetCallsParams) {
 }
 
 // ---------------------------------------------------------------------------
-// Todos
+// My Requests  (GET /employee/planning/requests)
 // ---------------------------------------------------------------------------
 
-export function usePlanningTodosQuery(params: GetTodosParams) {
+export function useMyRequestsQuery() {
   const { accountId } = useAppSession()
   const query = useQuery({
     enabled: Boolean(accountId) && Boolean(appRepositories.planning),
-    queryFn: () => appRepositories.planning!.getTodos(accountId!, params),
-    queryKey: planningQueryKeys.todos(accountId, params),
+    queryFn: () => appRepositories.planning!.getMyRequests(),
+    queryKey: planningQueryKeys.requests(accountId),
   })
 
   return useMemo(
@@ -110,38 +155,15 @@ export function usePlanningTodosQuery(params: GetTodosParams) {
 }
 
 // ---------------------------------------------------------------------------
-// Leave Balances
+// Leave Entitlement  (GET /employee/planning/leave)
 // ---------------------------------------------------------------------------
 
-export function useLeaveBalancesQuery(params: GetLeaveBalancesParams) {
+export function useLeaveEntitlementQuery() {
   const { accountId } = useAppSession()
   const query = useQuery({
     enabled: Boolean(accountId) && Boolean(appRepositories.planning),
-    queryFn: () => appRepositories.planning!.getLeaveBalances(accountId!, params),
-    queryKey: planningQueryKeys.leaveBalances(accountId, params),
-  })
-
-  return useMemo(
-    () => ({
-      state: query.data,
-      isError: query.isError,
-      isLoading: query.isLoading,
-      refetch: query.refetch,
-    }),
-    [query.data, query.isError, query.isLoading, query.refetch],
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Leave Requests
-// ---------------------------------------------------------------------------
-
-export function useLeaveRequestsQuery(params: GetLeaveRequestsParams) {
-  const { accountId } = useAppSession()
-  const query = useQuery({
-    enabled: Boolean(accountId) && Boolean(appRepositories.planning),
-    queryFn: () => appRepositories.planning!.getLeaveRequests(accountId!, params),
-    queryKey: planningQueryKeys.leaveRequests(accountId, params),
+    queryFn: () => appRepositories.planning!.getLeaveEntitlement(),
+    queryKey: planningQueryKeys.leave(accountId),
   })
 
   return useMemo(

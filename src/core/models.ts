@@ -309,10 +309,8 @@ export interface HomeHighlight {
 }
 
 // ---------------------------------------------------------------------------
-// Planning domain models (slice 5b)
+// Planning domain models (slice 5b — corrected for /employee/planning/* API)
 // ---------------------------------------------------------------------------
-
-export type LeaveRequestStatus = "submitted" | "approved" | "rejected" | "cancelled"
 
 export interface PlanningCallClaim {
   id: string
@@ -323,12 +321,26 @@ export interface PlanningCallClaim {
   availabilityIntent: string
 }
 
+/**
+ * Open planning call returned by GET /employee/planning/calls/open.
+ * employerCode + establishmentCode are NOT in the self-scoped response — they
+ * are stored on the shift itself. We include them here so the claim mutation
+ * can build the correct URL: POST /employers/{emp}/establishments/{est}/calls/{code}/claim.
+ * The HTTP repo extracts them from the associated ShiftDto or passes through
+ * from a context that knows the establishment.
+ */
 export interface PlanningCall {
   id: string
   shiftId: string
-  /** Employer unique code — needed to build the claim URL. */
+  /**
+   * Employer unique code — required by the claim endpoint.
+   * Derived from the employee's active employer context (accountId).
+   */
   employerCode: string
-  /** Establishment unique code — needed to build the claim URL. */
+  /**
+   * Establishment unique code — required by the claim endpoint.
+   * Derived from the associated ShiftDto.establishmentUniqueCode when available.
+   */
   establishmentCode: string
   mode: string
   status: string
@@ -337,53 +349,102 @@ export interface PlanningCall {
   claims: PlanningCallClaim[]
 }
 
-export interface PlanningTodoCompletion {
-  employeeId: string
-  employeeName: string
-  completedAt: string // ISO date-time
-  channel: string
-}
-
+/**
+ * Employee-facing todo from GET /employee/planning/todos.
+ * The employee API exposes only isCompletedByMe (no requiredCount/completedCount/
+ * completions — those are admin-only fields).
+ */
 export interface PlanningTodo {
   id: string
-  establishmentCode: string
   scope: string
   date?: string // yyyy-MM-dd
   shiftId?: string
   label: string
   completionMode: string
   sortOrder: number
-  requiredCount: number
-  completedCount: number
-  isComplete: boolean
-  completions: PlanningTodoCompletion[]
+  isCompletedByMe: boolean
 }
 
-export interface LeaveBalance {
+/**
+ * Wrapper returned by GET /employee/planning/todos — includes optional
+ * dressNote and note fields alongside the todo list.
+ */
+export interface PlanningTodosResult {
+  todos: PlanningTodo[]
+  dressNote?: string
+  note?: string
+}
+
+// ---------------------------------------------------------------------------
+// Shift Swap / Change request models
+// ---------------------------------------------------------------------------
+
+export interface ShiftSwapRequest {
+  id: string
+  requesterShiftId: string
+  targetShiftId: string
+  requesterEmployeeId: string
+  targetEmployeeId: string
+  status: string
+  note?: string
+  createdAt: string // ISO date-time
+}
+
+export interface CreateShiftSwapInput {
+  requesterShiftId: string
+  targetShiftId: string
+  note?: string
+}
+
+export interface DecideShiftSwapInput {
+  swapCode: string
+  accept: boolean
+  note?: string
+}
+
+export interface ShiftChangeRequest {
+  id: string
+  shiftId: string
+  employeeId: string
+  status: string
+  requestedDate?: string // yyyy-MM-dd
+  requestedStartTime?: string // HH:mm
+  requestedEndTime?: string // HH:mm
+  note?: string
+  createdAt: string // ISO date-time
+}
+
+export interface CreateShiftChangeInput {
+  shiftId: string
+  requestedDate?: string // yyyy-MM-dd
+  requestedStartTime?: string // HH:mm
+  requestedEndTime?: string // HH:mm
+  note?: string
+}
+
+export interface MyRequests {
+  swapRequests: ShiftSwapRequest[]
+  changeRequests: ShiftChangeRequest[]
+}
+
+// ---------------------------------------------------------------------------
+// Leave entitlement model
+// ---------------------------------------------------------------------------
+
+/**
+ * The employee's annual leave entitlement for the current calendar year.
+ * Returned by GET /employee/planning/leave.
+ * This is NOT a list of leave requests.
+ */
+export interface LeaveEntitlement {
   calendarYear: number
   statutoryDays: number
   employerPolicyDays: number
   totalDays: number
-}
-
-export interface LeaveRequest {
-  id: string
-  employeeId: string
-  employerCode: string
-  leaveTypeId: number
-  leaveTypeName?: string
-  startDate: string // yyyy-MM-dd
-  endDate: string // yyyy-MM-dd
-  status: LeaveRequestStatus
-  requestNotes?: string
-  decisionNotes?: string
-}
-
-export interface CreateLeaveRequestInput {
-  leaveTypeId: number
-  startDate: string // yyyy-MM-dd
-  endDate: string // yyyy-MM-dd
-  requestNotes?: string
+  /** Annual leave entitlement in hours. */
+  entitlementHours: number
+  /** 0 = Local, 1 = Prisma */
+  source: number
 }
 
 export interface AppStoreState {

@@ -1,5 +1,6 @@
 /**
  * Hand-written DTO interfaces matching the Vesta Workforce API OpenAPI spec.
+ * Source: GET /api/v1/employee/planning/* paths in Vesta.Workforce.Api.correct.json.
  * These types MUST NOT leak into screens or UI components — transform them
  * via planning.transformer.ts before use.
  */
@@ -18,7 +19,6 @@ export type TransportMethodDto =
   | "OnFoot"
   | "None"
 export type ShiftStatusDto = "Concept" | "Published"
-export type LeaveRequestStatusDto = "Submitted" | "Approved" | "Rejected" | "Cancelled"
 
 // ---------------------------------------------------------------------------
 // Availability DTOs
@@ -97,7 +97,7 @@ export interface ShiftDto {
 }
 
 // ---------------------------------------------------------------------------
-// Planning Call DTOs
+// Planning Call DTOs  (GET /employee/planning/calls/open)
 // ---------------------------------------------------------------------------
 
 export interface PlanningCallClaimDto {
@@ -129,67 +129,108 @@ export interface PlanningCallDto {
 }
 
 // ---------------------------------------------------------------------------
-// Todo DTOs
+// Todo DTOs  (GET /employee/planning/todos → KioskTodosResultDto)
 // ---------------------------------------------------------------------------
 
-export interface PlanningTodoCompletionDto {
-  employeeUniqueCode: string
-  employeeName: string
-  completedAtUtc: string // ISO date-time
-  channel: string
-}
-
-export interface PlanningTodoDto {
+/**
+ * Employee-facing todo item (KioskTodoDto in the spec).
+ * Note: the employee endpoint only exposes isCompletedByMe (not requiredCount/
+ * completedCount/completions which are admin-side fields).
+ */
+export interface KioskTodoDto {
   uniqueCode: string
-  establishmentUniqueCode: string
   scope: string
   date?: string | null // yyyy-MM-dd
   shiftUniqueCode?: string | null
   label: string
   completionMode: string
   sortOrder: number
-  requiredCount: number
-  completedCount: number
-  isComplete: boolean
-  completions: PlanningTodoCompletionDto[]
+  isCompletedByMe: boolean
+}
+
+/** Wrapper returned by GET /employee/planning/todos */
+export interface KioskTodosResultDto {
+  todos: KioskTodoDto[]
+  dressNote?: string | null
+  note?: string | null
 }
 
 // ---------------------------------------------------------------------------
-// Leave DTOs
+// Shift Swap DTOs  (GET /employee/planning/requests + POST /employee/planning/shift-swaps)
 // ---------------------------------------------------------------------------
 
-export interface LeaveBalanceDto {
+export interface ShiftSwapRequestDto {
+  uniqueCode: string
+  requesterShiftUniqueCode: string
+  targetShiftUniqueCode: string
+  requesterEmployeeUniqueCode: string
+  targetEmployeeUniqueCode: string
+  status: string
+  note?: string | null
+  createTime: string // ISO date-time
+}
+
+export interface CreateShiftSwapRequestDto {
+  requesterShiftUniqueCode: string
+  targetShiftUniqueCode: string
+  note?: string | null
+}
+
+export interface DecideShiftSwapDto {
+  /** true = accept/approve, false = reject */
+  accept: boolean
+  note?: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Shift Change DTOs  (GET /employee/planning/requests + POST /employee/planning/shift-changes)
+// ---------------------------------------------------------------------------
+
+export interface ShiftChangeRequestDto {
+  uniqueCode: string
+  shiftUniqueCode: string
+  employeeUniqueCode: string
+  status: string
+  requestedDate?: string | null // yyyy-MM-dd
+  requestedStartTime?: string | null // HH:mm
+  requestedEndTime?: string | null // HH:mm
+  note?: string | null
+  createTime: string // ISO date-time
+}
+
+export interface CreateShiftChangeRequestDto {
+  shiftUniqueCode: string
+  requestedDate?: string | null // yyyy-MM-dd
+  requestedStartTime?: string | null // HH:mm
+  requestedEndTime?: string | null // HH:mm
+  note?: string | null
+}
+
+// ---------------------------------------------------------------------------
+// My Requests DTO  (GET /employee/planning/requests)
+// ---------------------------------------------------------------------------
+
+export interface MyRequestsDto {
+  swapRequests: ShiftSwapRequestDto[]
+  changeRequests: ShiftChangeRequestDto[]
+}
+
+// ---------------------------------------------------------------------------
+// Leave Entitlement DTO  (GET /employee/planning/leave)
+// ---------------------------------------------------------------------------
+
+/**
+ * The employee's own annual leave entitlement for the current calendar year.
+ * This is NOT a leave-request list — it is the statutory + employer-policy
+ * entitlement totals.
+ */
+export interface MyLeaveEntitlementDto {
   calendarYear: number
   statutoryDays: number
   employerPolicyDays: number
   totalDays: number
-}
-
-export interface PagedResultDto<T> {
-  items: T[]
-  offset: number
-  limit: number
-  totalCount: number
-}
-
-export interface LeaveRequestDto {
-  id: number
-  employeeUniqueCode: string
-  employeeDisplayName?: string | null
-  employerUniqueCode: string
-  leaveTypeId: number
-  leaveTypeName?: string | null
-  startDate: string // yyyy-MM-dd
-  endDate: string // yyyy-MM-dd
-  status: LeaveRequestStatusDto
-  requestNotes?: string | null
-  decisionNotes?: string | null
-  approverIdentityId?: string | null
-}
-
-export interface CreateLeaveRequestDto {
-  leaveTypeId: number
-  startDate: string // yyyy-MM-dd
-  endDate: string // yyyy-MM-dd
-  requestNotes?: string | null
+  /** Annual leave entitlement in hours. */
+  entitlementHours: number
+  /** 0 = Local, 1 = Prisma */
+  source: number
 }

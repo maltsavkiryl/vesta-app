@@ -3,3 +3,4 @@ export type PlanningError =
   | { type: "forbidden"; message: string }
   | { type: "validation"; message: string }
   | { type: "already-claimed"; message: string }
+  | { type: "conflict"; message: string }

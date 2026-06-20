@@ -9,30 +9,32 @@ import type {
   AvailabilityStatus,
   AvailabilityTemplate,
   AvailabilityWeekday,
-  LeaveBalance,
-  LeaveRequest,
-  LeaveRequestStatus,
+  LeaveEntitlement,
+  MyRequests,
   PlanningCall,
   PlanningCallClaim,
   PlanningTodo,
-  PlanningTodoCompletion,
+  PlanningTodosResult,
   Shift,
+  ShiftChangeRequest,
   ShiftStatus,
+  ShiftSwapRequest,
 } from "@/core/models"
 
 import type {
   AvailabilityIntentDto,
   AvailabilityOverrideDto,
   AvailabilityWindowDto,
-  LeaveBalanceDto,
-  LeaveRequestDto,
-  LeaveRequestStatusDto,
+  KioskTodoDto,
+  KioskTodosResultDto,
+  MyLeaveEntitlementDto,
+  MyRequestsDto,
   PlanningCallClaimDto,
   PlanningCallDto,
-  PlanningTodoCompletionDto,
-  PlanningTodoDto,
+  ShiftChangeRequestDto,
   ShiftDto,
   ShiftStatusDto,
+  ShiftSwapRequestDto,
 } from "./planning.dto"
 
 // ---------------------------------------------------------------------------
@@ -64,20 +66,6 @@ function toAvailabilityStatus(intent: AvailabilityIntentDto): AvailabilityStatus
 function toShiftStatus(status: ShiftStatusDto): ShiftStatus {
   // Concept → pending, Published → confirmed
   return status === "Published" ? "confirmed" : "pending"
-}
-
-function toLeaveRequestStatus(status: LeaveRequestStatusDto): LeaveRequestStatus {
-  switch (status) {
-    case "Approved":
-      return "approved"
-    case "Rejected":
-      return "rejected"
-    case "Cancelled":
-      return "cancelled"
-    case "Submitted":
-    default:
-      return "submitted"
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -156,8 +144,36 @@ export function toAvailabilityOverrides(
   return Object.fromEntries(dtos.map((dto) => [dto.date, toAvailabilityOverride(dto)]))
 }
 
+/** Convert availability domain model back to window DTO (for PUT request body). */
+export function fromAvailabilityTemplate(template: AvailabilityTemplate): AvailabilityWindowDto[] {
+  return WEEKDAY_NAMES.flatMap((weekday, index) => {
+    const day = template[weekday]
+    if (!day) return []
+    const intent: AvailabilityIntentDto =
+      day.status === "available" ? "Want" : day.status === "preferred" ? "Standby" : "Unavailable"
+    return [{ weekday: index, startTime: day.startTime, endTime: day.endTime, intent }]
+  })
+}
+
+export function fromAvailabilityOverride(override: AvailabilityOverride): AvailabilityOverrideDto {
+  const intent: AvailabilityIntentDto =
+    override.status === "available"
+      ? "Want"
+      : override.status === "preferred"
+        ? "Standby"
+        : "Unavailable"
+  return {
+    date: override.date,
+    startTime: override.startTime,
+    endTime: override.endTime,
+    intent,
+    note: override.note ?? null,
+    confirmed: false,
+  }
+}
+
 // ---------------------------------------------------------------------------
-// Planning Calls
+// Planning Calls  (GET /employee/planning/calls/open)
 // ---------------------------------------------------------------------------
 
 function toPlanningCallClaim(dto: PlanningCallClaimDto): PlanningCallClaim {
@@ -173,7 +189,8 @@ function toPlanningCallClaim(dto: PlanningCallClaimDto): PlanningCallClaim {
 
 /**
  * @param employerCode - The employer unique code (= accountId in the session).
- * @param establishmentCode - The establishment unique code from the surrounding list context.
+ * @param establishmentCode - Derived from the associated shift's establishmentUniqueCode
+ *   or from surrounding context. Required to build the claim URL.
  */
 export function toPlanningCall(
   dto: PlanningCallDto,
@@ -194,67 +211,87 @@ export function toPlanningCall(
 }
 
 // ---------------------------------------------------------------------------
-// Todos
+// Todos  (GET /employee/planning/todos → KioskTodosResultDto)
 // ---------------------------------------------------------------------------
 
-function toPlanningTodoCompletion(dto: PlanningTodoCompletionDto): PlanningTodoCompletion {
-  return {
-    employeeId: dto.employeeUniqueCode,
-    employeeName: dto.employeeName,
-    completedAt: dto.completedAtUtc,
-    channel: dto.channel,
-  }
-}
-
-export function toPlanningTodo(dto: PlanningTodoDto): PlanningTodo {
+export function toPlanningTodo(dto: KioskTodoDto): PlanningTodo {
   return {
     id: dto.uniqueCode,
-    establishmentCode: dto.establishmentUniqueCode,
     scope: dto.scope,
     date: dto.date ?? undefined,
     shiftId: dto.shiftUniqueCode ?? undefined,
     label: dto.label,
     completionMode: dto.completionMode,
     sortOrder: dto.sortOrder,
-    requiredCount: dto.requiredCount,
-    completedCount: dto.completedCount,
-    isComplete: dto.isComplete,
-    completions: dto.completions.map(toPlanningTodoCompletion),
+    isCompletedByMe: dto.isCompletedByMe,
   }
 }
 
-export function toPlanningTodos(dtos: PlanningTodoDto[]): PlanningTodo[] {
-  return dtos.map(toPlanningTodo)
+export function toPlanningTodosResult(dto: KioskTodosResultDto): PlanningTodosResult {
+  return {
+    todos: dto.todos.map(toPlanningTodo),
+    dressNote: dto.dressNote ?? undefined,
+    note: dto.note ?? undefined,
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Leave
+// Shift Swap Requests
 // ---------------------------------------------------------------------------
 
-export function toLeaveBalance(dto: LeaveBalanceDto): LeaveBalance {
+export function toShiftSwapRequest(dto: ShiftSwapRequestDto): ShiftSwapRequest {
+  return {
+    id: dto.uniqueCode,
+    requesterShiftId: dto.requesterShiftUniqueCode,
+    targetShiftId: dto.targetShiftUniqueCode,
+    requesterEmployeeId: dto.requesterEmployeeUniqueCode,
+    targetEmployeeId: dto.targetEmployeeUniqueCode,
+    status: dto.status,
+    note: dto.note ?? undefined,
+    createdAt: dto.createTime,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shift Change Requests
+// ---------------------------------------------------------------------------
+
+export function toShiftChangeRequest(dto: ShiftChangeRequestDto): ShiftChangeRequest {
+  return {
+    id: dto.uniqueCode,
+    shiftId: dto.shiftUniqueCode,
+    employeeId: dto.employeeUniqueCode,
+    status: dto.status,
+    requestedDate: dto.requestedDate ?? undefined,
+    requestedStartTime: dto.requestedStartTime ?? undefined,
+    requestedEndTime: dto.requestedEndTime ?? undefined,
+    note: dto.note ?? undefined,
+    createdAt: dto.createTime,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// My Requests  (GET /employee/planning/requests)
+// ---------------------------------------------------------------------------
+
+export function toMyRequests(dto: MyRequestsDto): MyRequests {
+  return {
+    swapRequests: dto.swapRequests.map(toShiftSwapRequest),
+    changeRequests: dto.changeRequests.map(toShiftChangeRequest),
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Leave Entitlement  (GET /employee/planning/leave)
+// ---------------------------------------------------------------------------
+
+export function toLeaveEntitlement(dto: MyLeaveEntitlementDto): LeaveEntitlement {
   return {
     calendarYear: dto.calendarYear,
     statutoryDays: dto.statutoryDays,
     employerPolicyDays: dto.employerPolicyDays,
     totalDays: dto.totalDays,
+    entitlementHours: dto.entitlementHours,
+    source: dto.source,
   }
-}
-
-export function toLeaveRequest(dto: LeaveRequestDto): LeaveRequest {
-  return {
-    id: String(dto.id),
-    employeeId: dto.employeeUniqueCode,
-    employerCode: dto.employerUniqueCode,
-    leaveTypeId: dto.leaveTypeId,
-    leaveTypeName: dto.leaveTypeName ?? undefined,
-    startDate: dto.startDate,
-    endDate: dto.endDate,
-    status: toLeaveRequestStatus(dto.status),
-    requestNotes: dto.requestNotes ?? undefined,
-    decisionNotes: dto.decisionNotes ?? undefined,
-  }
-}
-
-export function toLeaveRequests(dtos: LeaveRequestDto[]): LeaveRequest[] {
-  return dtos.map(toLeaveRequest)
 }

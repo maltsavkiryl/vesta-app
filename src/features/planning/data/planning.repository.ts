@@ -1,132 +1,160 @@
 /**
- * PlanningRepository — extends ScheduleRepository with the employee planning
- * capabilities added in slice 5b:
- *   - open planning calls + claim
- *   - daily todos + complete/uncomplete
- *   - leave balances + leave requests + create leave request
- *   - shifts for a date range (employer/establishment-scoped)
- *   - employee availability (GET + PUT)
+ * PlanningRepository — employee self-scoped planning capabilities.
+ * All GET /employee/planning/* endpoints are self-scoped (no employer/establishment
+ * in the URL path — the JWT token identifies the employee).
+ *
+ * Exception: POST .../calls/{code}/claim still targets the employer+establishment
+ * scoped URL because it's an action on an establishment resource.
  */
 
-import type { AvailabilityTemplate, LeaveBalance, LeaveRequest, PlanningCall, PlanningTodo, Shift } from "@/core/models"
+import type {
+  AvailabilityTemplate,
+  CreateShiftChangeInput,
+  CreateShiftSwapInput,
+  DecideShiftSwapInput,
+  LeaveEntitlement,
+  MyRequests,
+  PlanningCall,
+  PlanningTodosResult,
+  Shift,
+} from "@/core/models"
 import type { Result } from "@/shared/result"
 import type { ScheduleRepository } from "@/features/schedule/data/schedule.repository"
 
 import type { PlanningError } from "./planning.errors"
-import type { CreateLeaveRequestInput } from "@/core/models"
 
-export interface GetShiftsParams {
+// ---------------------------------------------------------------------------
+// Parameter types for self-scoped queries
+// ---------------------------------------------------------------------------
+
+export interface GetScheduleParams {
   from: string // yyyy-MM-dd
   to: string // yyyy-MM-dd
-  establishmentCode?: string
-  employeeCode?: string
 }
 
-export interface GetCallsParams {
-  establishmentCode: string
-  from?: string
-  to?: string
-}
-
-export interface GetTodosParams {
-  establishmentCode: string
+export interface GetOpenCallsParams {
   from?: string // yyyy-MM-dd
   to?: string // yyyy-MM-dd
 }
 
 export interface ClaimCallInput {
+  /** Employer unique code — required by the claim endpoint path. */
   employerCode: string
+  /** Establishment unique code — required by the claim endpoint path. */
   establishmentCode: string
   callCode: string
 }
 
 export interface CompleteTodoInput {
-  employerCode: string
-  establishmentCode: string
   todoCode: string
 }
 
-export interface GetLeaveBalancesParams {
-  employerCode: string
-  employeeCode: string
+export interface CreateShiftSwapParams {
+  input: CreateShiftSwapInput
 }
 
-export interface GetLeaveRequestsParams {
-  employerCode: string
-  employeeCode: string
+export interface DecideShiftSwapParams {
+  swapCode: string
+  accept: boolean
+  note?: string
 }
 
-export interface CreateLeaveRequestParams {
-  employerCode: string
-  employeeCode: string
-  input: CreateLeaveRequestInput
+export interface CreateShiftChangeParams {
+  input: CreateShiftChangeInput
 }
+
+// ---------------------------------------------------------------------------
+// Repository interface
+// ---------------------------------------------------------------------------
 
 export interface PlanningRepository extends ScheduleRepository {
   /**
-   * Fetch the employee's own shifts for a date range.
-   * Uses: GET /employers/{emp}/establishments/{est}/shifts?from&to&employeeCode
+   * Fetch the employee's own shifts for a date range (self-scoped).
+   * Uses: GET /employee/planning/schedule?from&to
    */
-  getShifts(accountId: string, params: GetShiftsParams): Promise<Shift[]>
+  getMySchedule(params: GetScheduleParams): Promise<Shift[]>
 
   /**
-   * Fetch open planning calls for an establishment.
-   * Uses: GET /employers/{emp}/establishments/{est}/calls
+   * Fetch the employee's full availability (recurring windows + date overrides).
+   * Uses: GET /employee/planning/availability
    */
-  getOpenCalls(accountId: string, params: GetCallsParams): Promise<PlanningCall[]>
+  getMyAvailability(): Promise<{ template: AvailabilityTemplate; overrides: Record<string, import("@/core/models").AvailabilityOverride> }>
+
+  /**
+   * Replace-set the employee's availability (windows + overrides).
+   * Uses: PUT /employee/planning/availability
+   */
+  saveMyAvailability(
+    template: AvailabilityTemplate,
+    overrides: import("@/core/models").AvailabilityOverride[],
+  ): Promise<Result<void, PlanningError>>
+
+  /**
+   * Fetch today's todos for the employee (self-scoped).
+   * Uses: GET /employee/planning/todos
+   */
+  getMyTodos(): Promise<PlanningTodosResult>
+
+  /**
+   * Mark a todo as completed by the calling employee.
+   * Uses: POST /employee/planning/todos/{todoCode}/complete
+   */
+  completeTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>>
+
+  /**
+   * Unmark a todo as completed.
+   * Uses: POST /employee/planning/todos/{todoCode}/uncomplete
+   */
+  uncompleteTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>>
+
+  /**
+   * Fetch open planning calls the employee can claim.
+   * Uses: GET /employee/planning/calls/open?from&to
+   */
+  getOpenCalls(params: GetOpenCallsParams): Promise<PlanningCall[]>
 
   /**
    * Claim a planning call (employee self-assigns).
    * Uses: POST /employers/{emp}/establishments/{est}/calls/{code}/claim
+   * (This is the only endpoint that still uses the employer+establishment path.)
    */
-  claimCall(
-    accountId: string,
-    input: ClaimCallInput,
-  ): Promise<Result<void, PlanningError>>
+  claimCall(input: ClaimCallInput): Promise<Result<void, PlanningError>>
 
   /**
-   * Fetch todos for an establishment in a date range.
-   * Uses: GET /employers/{emp}/establishments/{est}/todos?from&to
+   * Fetch the employee's own swap + change requests.
+   * Uses: GET /employee/planning/requests
    */
-  getTodos(accountId: string, params: GetTodosParams): Promise<PlanningTodo[]>
+  getMyRequests(): Promise<MyRequests>
 
   /**
-   * Mark a todo as completed by the calling employee.
-   * Uses: POST /employers/{emp}/establishments/{est}/todos/{code}/complete  (virtual — see impl notes)
+   * Create a shift swap request.
+   * Uses: POST /employee/planning/shift-swaps
    */
-  completeTodo(
-    accountId: string,
-    input: CompleteTodoInput,
-  ): Promise<Result<PlanningTodo, PlanningError>>
+  createShiftSwap(params: CreateShiftSwapParams): Promise<Result<void, PlanningError>>
 
   /**
-   * Fetch leave balances for an employee.
-   * Uses: GET /employers/{emp}/employees/{emp_code}/leave-balances
+   * Accept or reject a swap request targeting this employee.
+   * Uses: POST /employee/planning/shift-swaps/{swapCode}/decide
    */
-  getLeaveBalances(accountId: string, params: GetLeaveBalancesParams): Promise<LeaveBalance[]>
+  decideShiftSwap(params: DecideShiftSwapParams): Promise<Result<void, PlanningError>>
 
   /**
-   * Fetch leave requests for an employee.
-   * Uses: GET /employers/{emp}/employees/{emp_code}/leave-requests
+   * Cancel a swap request created by this employee.
+   * Uses: POST /employee/planning/shift-swaps/{swapCode}/cancel
    */
-  getLeaveRequests(accountId: string, params: GetLeaveRequestsParams): Promise<LeaveRequest[]>
+  cancelShiftSwap(swapCode: string): Promise<Result<void, PlanningError>>
 
   /**
-   * Create a leave request on behalf of the employee.
-   * Uses: POST /employers/{emp}/employees/{emp_code}/leave-requests
+   * Create a shift change request.
+   * Uses: POST /employee/planning/shift-changes
    */
-  createLeaveRequest(
-    accountId: string,
-    params: CreateLeaveRequestParams,
-  ): Promise<Result<LeaveRequest, PlanningError>>
+  createShiftChange(params: CreateShiftChangeParams): Promise<Result<void, PlanningError>>
 
   /**
-   * Fetch the employee's full availability template + overrides.
-   * Uses: GET /employers/{emp}/employees/{emp_code}/availability
+   * Fetch the employee's leave entitlement for the current year.
+   * Uses: GET /employee/planning/leave
+   * Returns entitlement totals (statutory + policy days + hours) — NOT a list
+   * of leave requests.
    */
-  getAvailability(
-    accountId: string,
-    employerCode: string,
-    employeeCode: string,
-  ): Promise<AvailabilityTemplate>
+  getLeaveEntitlement(): Promise<LeaveEntitlement>
 }

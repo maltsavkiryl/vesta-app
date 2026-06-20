@@ -1,9 +1,11 @@
 /**
  * HTTP implementation of PlanningRepository.
  *
+ * All /employee/planning/* endpoints are self-scoped — the JWT token identifies
+ * the employee. No employer/establishment code appears in these URLs (except
+ * the claimCall mutation, which targets the employer+establishment resource).
+ *
  * Convention:
- *  - `accountId` in every method IS the employer's uniqueCode (the JWT exchange
- *    selects an employer and stores its code as accountId; see authService.ts).
  *  - Read operations throw on infrastructure failure (network / 5xx).
  *  - Write operations return Result<T, PlanningError> — domain errors stay
  *    in the type system and never throw.
@@ -12,11 +14,10 @@
 import type {
   AvailabilityOverride,
   AvailabilityTemplate,
-  LeaveBalance,
-  LeaveRequest,
+  LeaveEntitlement,
+  MyRequests,
   PlanningCall,
-  PlanningTodo,
-  PlanningWindow,
+  PlanningTodosResult,
   RequestItem,
   Shift,
 } from "@/core/models"
@@ -29,35 +30,34 @@ import type { PlanningError } from "./planning.errors"
 import type {
   ClaimCallInput,
   CompleteTodoInput,
-  CreateLeaveRequestParams,
-  GetCallsParams,
-  GetLeaveBalancesParams,
-  GetLeaveRequestsParams,
-  GetShiftsParams,
-  GetTodosParams,
+  CreateShiftChangeParams,
+  CreateShiftSwapParams,
+  DecideShiftSwapParams,
+  GetOpenCallsParams,
+  GetScheduleParams,
   PlanningRepository,
 } from "./planning.repository"
 import type {
   EmployeeAvailabilityDto,
-  LeaveBalanceDto,
-  LeaveRequestDto,
-  PagedResultDto,
+  KioskTodosResultDto,
+  MyLeaveEntitlementDto,
+  MyRequestsDto,
   PlanningCallDto,
-  PlanningTodoDto,
   ShiftDto,
+  UpdateEmployeeAvailabilityDto,
 } from "./planning.dto"
-import type { CreateLeaveRequestInput } from "@/core/models"
 import {
+  fromAvailabilityOverride,
+  fromAvailabilityTemplate,
   toAvailabilityOverrides,
   toAvailabilityTemplate,
-  toLeaveBalance,
-  toLeaveRequest,
-  toLeaveRequests,
+  toLeaveEntitlement,
+  toMyRequests,
   toPlanningCall,
-  toPlanningTodo,
-  toPlanningTodos,
+  toPlanningTodosResult,
   toShifts,
 } from "./planning.transformer"
+import type { PlanningWindow } from "@/core/models"
 
 // ---------------------------------------------------------------------------
 // Error helpers
@@ -66,8 +66,9 @@ import {
 function toPlanningError(status: number | null | undefined, fallbackMessage: string): PlanningError {
   if (status === 403) return { type: "forbidden", message: "Access denied." }
   if (status === 404) return { type: "not-found", message: "Resource not found." }
-  if (status === 409) return { type: "already-claimed", message: "This call has already been claimed." }
-  if (status === 400 || status === 422) return { type: "validation", message: fallbackMessage }
+  if (status === 409) return { type: "conflict", message: "This action conflicts with an existing state." }
+  if (status === 422) return { type: "already-claimed", message: "This call has already been claimed." }
+  if (status === 400) return { type: "validation", message: fallbackMessage }
   return { type: "validation", message: fallbackMessage }
 }
 
@@ -77,14 +78,11 @@ function toPlanningError(status: number | null | undefined, fallbackMessage: str
 
 export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRepository {
   // ---------------------------------------------------------------------------
-  // ScheduleRepository surface (kept as no-ops / mocks because these will be
-  // wired separately or are handled by the existing schedule data layer)
+  // ScheduleRepository surface (no-ops — kept to satisfy the interface contract;
+  // the composition layer routes to the schedule repo for these)
   // ---------------------------------------------------------------------------
 
   async function getSchedule(_accountId: string): Promise<ScheduleOverview> {
-    // The live schedule is fetched via getShifts/getAvailability in the planning
-    // layer. This stub satisfies the interface; the composition layer can keep
-    // routing to the mock schedule repo for these fields until they're migrated.
     return {
       shifts: [],
       availabilityTemplate: {
@@ -119,16 +117,16 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
 
   async function saveAvailabilityOverride(
     _accountId: string,
-    day: AvailabilityOverride,
+    _day: AvailabilityOverride,
   ): Promise<Result<AvailabilityOverride, ScheduleError>> {
-    return failure<ScheduleError>({ type: "validation", message: "Use saveAvailabilityTemplate for HTTP updates." })
+    return failure<ScheduleError>({ type: "validation", message: "Use saveMyAvailability for HTTP updates." })
   }
 
   async function saveAvailabilityTemplate(
     _accountId: string,
     _template: AvailabilityTemplate,
   ): Promise<Result<AvailabilityTemplate, ScheduleError>> {
-    return failure<ScheduleError>({ type: "validation", message: "Not implemented in planning HTTP repo." })
+    return failure<ScheduleError>({ type: "validation", message: "Use saveMyAvailability for HTTP updates." })
   }
 
   async function submitPlanningWindow(
@@ -139,49 +137,106 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   }
 
   // ---------------------------------------------------------------------------
-  // Shifts
+  // Schedule  (GET /employee/planning/schedule?from=&to=)
   // ---------------------------------------------------------------------------
 
-  async function getShifts(accountId: string, params: GetShiftsParams): Promise<Shift[]> {
-    const { from, to, establishmentCode, employeeCode } = params
-    if (!establishmentCode) {
-      // Without an establishment code we cannot call the employer/establishment scoped endpoint.
-      return []
-    }
-    const res = await httpClient.get<ShiftDto[]>(
-      `/employers/${accountId}/establishments/${establishmentCode}/shifts`,
-      {
-        from,
-        to,
-        ...(employeeCode ? { employeeUniqueCode: employeeCode } : {}),
-      },
-    )
-    if (!res.ok || !res.data) throw new Error("Failed to load shifts")
+  async function getMySchedule(params: GetScheduleParams): Promise<Shift[]> {
+    const res = await httpClient.get<ShiftDto[]>("/employee/planning/schedule", {
+      from: params.from,
+      to: params.to,
+    })
+    if (!res.ok || !res.data) throw new Error("Failed to load schedule")
     return toShifts(res.data)
   }
 
   // ---------------------------------------------------------------------------
-  // Planning Calls
+  // Availability  (GET/PUT /employee/planning/availability)
   // ---------------------------------------------------------------------------
 
-  async function getOpenCalls(accountId: string, params: GetCallsParams): Promise<PlanningCall[]> {
-    const { establishmentCode, from, to } = params
-    const queryParams: Record<string, string> = {}
-    if (from) queryParams.from = from
-    if (to) queryParams.to = to
-
-    const res = await httpClient.get<PlanningCallDto[]>(
-      `/employers/${accountId}/establishments/${establishmentCode}/calls`,
-      Object.keys(queryParams).length > 0 ? queryParams : undefined,
-    )
-    if (!res.ok || !res.data) throw new Error("Failed to load planning calls")
-    return res.data.map((dto) => toPlanningCall(dto, accountId, establishmentCode))
+  async function getMyAvailability(): Promise<{
+    template: AvailabilityTemplate
+    overrides: Record<string, AvailabilityOverride>
+  }> {
+    const res = await httpClient.get<EmployeeAvailabilityDto>("/employee/planning/availability")
+    if (!res.ok || !res.data) throw new Error("Failed to load availability")
+    return {
+      template: toAvailabilityTemplate(res.data.windows),
+      overrides: toAvailabilityOverrides(res.data.overrides),
+    }
   }
 
-  async function claimCall(
-    _accountId: string,
-    input: ClaimCallInput,
+  async function saveMyAvailability(
+    template: AvailabilityTemplate,
+    overrides: AvailabilityOverride[],
   ): Promise<Result<void, PlanningError>> {
+    const body: UpdateEmployeeAvailabilityDto = {
+      windows: fromAvailabilityTemplate(template),
+      overrides: overrides.map(fromAvailabilityOverride),
+    }
+    const res = await httpClient.put<void>("/employee/planning/availability", body)
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not save availability."))
+  }
+
+  // ---------------------------------------------------------------------------
+  // Todos  (GET /employee/planning/todos, POST .../complete, POST .../uncomplete)
+  // ---------------------------------------------------------------------------
+
+  async function getMyTodos(): Promise<PlanningTodosResult> {
+    const res = await httpClient.get<KioskTodosResultDto>("/employee/planning/todos")
+    if (!res.ok || !res.data) throw new Error("Failed to load todos")
+    return toPlanningTodosResult(res.data)
+  }
+
+  async function completeTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>> {
+    const res = await httpClient.post<void>(
+      `/employee/planning/todos/${input.todoCode}/complete`,
+    )
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not complete todo."))
+  }
+
+  async function uncompleteTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>> {
+    const res = await httpClient.post<void>(
+      `/employee/planning/todos/${input.todoCode}/uncomplete`,
+    )
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not uncomplete todo."))
+  }
+
+  // ---------------------------------------------------------------------------
+  // Open Calls  (GET /employee/planning/calls/open?from=&to=)
+  // ---------------------------------------------------------------------------
+
+  async function getOpenCalls(params: GetOpenCallsParams): Promise<PlanningCall[]> {
+    const query: Record<string, string> = {}
+    if (params.from) query.from = params.from
+    if (params.to) query.to = params.to
+
+    const res = await httpClient.get<PlanningCallDto[]>(
+      "/employee/planning/calls/open",
+      Object.keys(query).length > 0 ? query : undefined,
+    )
+    if (!res.ok || !res.data) throw new Error("Failed to load open calls")
+
+    // The self-scoped response does not include employer/establishment codes —
+    // those come from the associated shift. We pass empty strings here; the UI
+    // layer must supply them from the call's associated shift when building the
+    // claim request.  For now we leave them blank; the claimCall input carries
+    // the correct codes from the PlanningCall object stored in the UI.
+    //
+    // In practice the PlanningCallDto does not carry establishmentCode directly,
+    // so we store a placeholder and rely on the screen to pass the correct codes
+    // via ClaimCallInput.employerCode / .establishmentCode.
+    return res.data.map((dto) => toPlanningCall(dto, "", ""))
+  }
+
+  // ---------------------------------------------------------------------------
+  // Claim Call  (POST /employers/{emp}/establishments/{est}/calls/{code}/claim)
+  // This is the only endpoint that still uses the employer+establishment URL.
+  // ---------------------------------------------------------------------------
+
+  async function claimCall(input: ClaimCallInput): Promise<Result<void, PlanningError>> {
     const { employerCode, establishmentCode, callCode } = input
     const res = await httpClient.post<void>(
       `/employers/${employerCode}/establishments/${establishmentCode}/calls/${callCode}/claim`,
@@ -191,133 +246,94 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   }
 
   // ---------------------------------------------------------------------------
-  // Todos
+  // My Requests  (GET /employee/planning/requests)
   // ---------------------------------------------------------------------------
 
-  async function getTodos(accountId: string, params: GetTodosParams): Promise<PlanningTodo[]> {
-    const { establishmentCode, from, to } = params
-    const queryParams: Record<string, string> = {}
-    if (from) queryParams.from = from
-    if (to) queryParams.to = to
-
-    const res = await httpClient.get<PlanningTodoDto[]>(
-      `/employers/${accountId}/establishments/${establishmentCode}/todos`,
-      Object.keys(queryParams).length > 0 ? queryParams : undefined,
-    )
-    if (!res.ok || !res.data) throw new Error("Failed to load todos")
-    return toPlanningTodos(res.data)
-  }
-
-  async function completeTodo(
-    accountId: string,
-    input: CompleteTodoInput,
-  ): Promise<Result<PlanningTodo, PlanningError>> {
-    // The spec shows admin-side PUT on the todo resource (SavePlanningTodoDto).
-    // The plan doc mentions POST .../todos/{code}/complete — not yet in the spec.
-    // We implement a best-effort PUT that re-fetches to return the updated todo.
-    const { establishmentCode, todoCode } = input
-    const res = await httpClient.put<void>(
-      `/employers/${accountId}/establishments/${establishmentCode}/todos/${todoCode}`,
-      { sortOrder: 0 }, // minimal valid SavePlanningTodoDto
-    )
-    if (!res.ok) {
-      return failure(toPlanningError(res.status, "Could not complete todo."))
-    }
-    // Re-fetch the single todo to return the updated state.
-    const todosRes = await httpClient.get<PlanningTodoDto[]>(
-      `/employers/${accountId}/establishments/${establishmentCode}/todos`,
-    )
-    if (!todosRes.ok || !todosRes.data) {
-      return failure<PlanningError>({ type: "not-found", message: "Todo not found after update." })
-    }
-    const updated = todosRes.data.find((t) => t.uniqueCode === todoCode)
-    if (!updated) {
-      return failure<PlanningError>({ type: "not-found", message: "Todo not found." })
-    }
-    return success(toPlanningTodo(updated))
+  async function getMyRequests(): Promise<MyRequests> {
+    const res = await httpClient.get<MyRequestsDto>("/employee/planning/requests")
+    if (!res.ok || !res.data) throw new Error("Failed to load requests")
+    return toMyRequests(res.data)
   }
 
   // ---------------------------------------------------------------------------
-  // Leave
+  // Shift Swaps  (POST /employee/planning/shift-swaps/*)
   // ---------------------------------------------------------------------------
 
-  async function getLeaveBalances(
-    _accountId: string,
-    params: GetLeaveBalancesParams,
-  ): Promise<LeaveBalance[]> {
-    const { employerCode, employeeCode } = params
-    const res = await httpClient.get<PagedResultDto<LeaveBalanceDto>>(
-      `/employers/${employerCode}/employees/${employeeCode}/leave-balances`,
-    )
-    if (!res.ok || !res.data) throw new Error("Failed to load leave balances")
-    return res.data.items.map(toLeaveBalance)
+  async function createShiftSwap(params: CreateShiftSwapParams): Promise<Result<void, PlanningError>> {
+    const res = await httpClient.post<void>("/employee/planning/shift-swaps", {
+      requesterShiftUniqueCode: params.input.requesterShiftId,
+      targetShiftUniqueCode: params.input.targetShiftId,
+      note: params.input.note ?? null,
+    })
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not create shift swap request."))
   }
 
-  async function getLeaveRequests(
-    _accountId: string,
-    params: GetLeaveRequestsParams,
-  ): Promise<LeaveRequest[]> {
-    const { employerCode, employeeCode } = params
-    const res = await httpClient.get<PagedResultDto<LeaveRequestDto>>(
-      `/employers/${employerCode}/employees/${employeeCode}/leave-requests`,
+  async function decideShiftSwap(params: DecideShiftSwapParams): Promise<Result<void, PlanningError>> {
+    const res = await httpClient.post<void>(
+      `/employee/planning/shift-swaps/${params.swapCode}/decide`,
+      { accept: params.accept, note: params.note ?? null },
     )
-    if (!res.ok || !res.data) throw new Error("Failed to load leave requests")
-    return toLeaveRequests(res.data.items)
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not decide shift swap."))
   }
 
-  async function createLeaveRequest(
-    _accountId: string,
-    params: CreateLeaveRequestParams,
-  ): Promise<Result<LeaveRequest, PlanningError>> {
-    const { employerCode, employeeCode, input } = params
-    const res = await httpClient.post<LeaveRequestDto>(
-      `/employers/${employerCode}/employees/${employeeCode}/leave-requests`,
-      {
-        leaveTypeId: input.leaveTypeId,
-        startDate: input.startDate,
-        endDate: input.endDate,
-        requestNotes: input.requestNotes,
-      },
+  async function cancelShiftSwap(swapCode: string): Promise<Result<void, PlanningError>> {
+    const res = await httpClient.post<void>(
+      `/employee/planning/shift-swaps/${swapCode}/cancel`,
     )
-    if (!res.ok || !res.data) {
-      return failure(toPlanningError(res.status, "Could not create leave request."))
-    }
-    return success(toLeaveRequest(res.data))
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not cancel shift swap."))
   }
 
   // ---------------------------------------------------------------------------
-  // Availability
+  // Shift Changes  (POST /employee/planning/shift-changes)
   // ---------------------------------------------------------------------------
 
-  async function getAvailability(
-    _accountId: string,
-    employerCode: string,
-    employeeCode: string,
-  ): Promise<AvailabilityTemplate> {
-    const res = await httpClient.get<EmployeeAvailabilityDto>(
-      `/employers/${employerCode}/employees/${employeeCode}/availability`,
-    )
-    if (!res.ok || !res.data) throw new Error("Failed to load availability")
-    return toAvailabilityTemplate(res.data.windows)
+  async function createShiftChange(params: CreateShiftChangeParams): Promise<Result<void, PlanningError>> {
+    const res = await httpClient.post<void>("/employee/planning/shift-changes", {
+      shiftUniqueCode: params.input.shiftId,
+      requestedDate: params.input.requestedDate ?? null,
+      requestedStartTime: params.input.requestedStartTime ?? null,
+      requestedEndTime: params.input.requestedEndTime ?? null,
+      note: params.input.note ?? null,
+    })
+    if (res.ok) return success(undefined)
+    return failure(toPlanningError(res.status, "Could not create shift change request."))
+  }
+
+  // ---------------------------------------------------------------------------
+  // Leave Entitlement  (GET /employee/planning/leave)
+  // ---------------------------------------------------------------------------
+
+  async function getLeaveEntitlement(): Promise<LeaveEntitlement> {
+    const res = await httpClient.get<MyLeaveEntitlementDto>("/employee/planning/leave")
+    if (!res.ok || !res.data) throw new Error("Failed to load leave entitlement")
+    return toLeaveEntitlement(res.data)
   }
 
   return {
-    // ScheduleRepository surface
+    // ScheduleRepository surface (no-ops)
     getSchedule,
     createRequest,
     respondToShift,
     saveAvailabilityOverride,
     saveAvailabilityTemplate,
     submitPlanningWindow,
-    // Extended planning surface
-    getShifts,
+    // Self-scoped planning surface
+    getMySchedule,
+    getMyAvailability,
+    saveMyAvailability,
+    getMyTodos,
+    completeTodo,
+    uncompleteTodo,
     getOpenCalls,
     claimCall,
-    getTodos,
-    completeTodo,
-    getLeaveBalances,
-    getLeaveRequests,
-    createLeaveRequest,
-    getAvailability,
+    getMyRequests,
+    createShiftSwap,
+    decideShiftSwap,
+    cancelShiftSwap,
+    createShiftChange,
+    getLeaveEntitlement,
   }
 }
