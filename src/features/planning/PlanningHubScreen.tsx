@@ -17,6 +17,7 @@ import { translate } from "@/i18n/translate"
 import { AppSegmentedControl, Text, useDesignTokens } from "@/ui"
 import { MotionView } from "@/ui/composites"
 
+import { usePlanningCallsQuery } from "./data/planning.queries"
 import { PlanningCallsScreen } from "./PlanningCallsScreen"
 import { PlanningLeaveScreen } from "./PlanningLeaveScreen"
 import { PlanningRequestsScreen } from "./PlanningRequestsScreen"
@@ -25,11 +26,17 @@ import { PlanningTodosScreen } from "./PlanningTodosScreen"
 
 type PlanningTab = "shifts" | "todos" | "calls" | "requests" | "leave"
 
-function getTabOptions(): Array<{ label: string; value: PlanningTab }> {
+// Surfaces the number of open shifts the employee can pick up directly on the
+// Calls segment, so the earning opportunity is visible without opening the tab.
+function getTabOptions(openShiftCount: number): Array<{ label: string; value: PlanningTab }> {
+  const callsLabel = translate("planning:sections.tabs.calls")
   return [
     { label: translate("planning:sections.tabs.shifts"), value: "shifts" },
     { label: translate("planning:sections.tabs.todos"), value: "todos" },
-    { label: translate("planning:sections.tabs.calls"), value: "calls" },
+    {
+      label: openShiftCount > 0 ? `${callsLabel} (${openShiftCount})` : callsLabel,
+      value: "calls",
+    },
     { label: translate("planning:sections.tabs.requests"), value: "requests" },
     { label: translate("planning:sections.tabs.leave"), value: "leave" },
   ]
@@ -39,6 +46,8 @@ export function PlanningHubScreen() {
   const tokens = useDesignTokens()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<PlanningTab>("shifts")
+  const { state: openCalls } = usePlanningCallsQuery()
+  const openShiftCount = openCalls?.length ?? 0
 
   const handleOpenAvailabilityTemplate = () => {
     router.push("/(app)/availability-template" as never)
@@ -83,7 +92,7 @@ export function PlanningHubScreen() {
         <MotionView delay={60} style={styles.segmentWrapper}>
           <AppSegmentedControl
             onChange={setActiveTab}
-            options={getTabOptions()}
+            options={getTabOptions(openShiftCount)}
             value={activeTab}
           />
         </MotionView>

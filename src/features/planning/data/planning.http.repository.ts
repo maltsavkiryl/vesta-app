@@ -11,6 +11,7 @@
  *    in the type system and never throw.
  */
 
+import { addLocalDays, getLocalToday } from "@/core/date"
 import type {
   AvailabilityOverride,
   AvailabilityTemplate,
@@ -89,36 +90,73 @@ function toPlanningError(
 
 export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRepository {
   // ---------------------------------------------------------------------------
-  // ScheduleRepository surface (no-ops — kept to satisfy the interface contract;
-  // the composition layer routes to the schedule repo for these)
+  // ScheduleRepository surface — the planning repo is the single source for the
+  // schedule tab and the shift/availability screens. Reads compose the real
+  // planning endpoints; availability writes go through PUT availability.
   // ---------------------------------------------------------------------------
 
+  // The schedule view spans roughly a month back (for recent history) to a
+  // quarter ahead (the planning horizon).
+  const SCHEDULE_PAST_DAYS = 31
+  const SCHEDULE_FUTURE_DAYS = 92
+
   async function getSchedule(_accountId: string): Promise<ScheduleOverview> {
+    const today = getLocalToday()
+    const [shifts, availability] = await Promise.all([
+      getMySchedule({
+        from: addLocalDays(today, -SCHEDULE_PAST_DAYS),
+        to: addLocalDays(today, SCHEDULE_FUTURE_DAYS),
+      }),
+      getMyAvailability(),
+    ])
     return {
-      shifts: [],
-      availabilityTemplate: {
-        monday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-        tuesday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-        wednesday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-        thursday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-        friday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-        saturday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-        sunday: { status: "unavailable", startTime: "00:00", endTime: "00:00" },
-      },
-      availabilityOverrides: {},
+      shifts,
+      availabilityTemplate: availability.template,
+      availabilityOverrides: availability.overrides,
+      // Employers, planning windows and the generic request list are mock-era
+      // concepts with no employee endpoint. Real requests live in the planning
+      // hub (getMyRequests); swaps/changes use the dedicated planning flows.
       employers: [],
       planningWindows: [],
       requests: [],
     }
   }
 
+  async function saveAvailabilityOverride(
+    _accountId: string,
+    day: AvailabilityOverride,
+  ): Promise<Result<AvailabilityOverride, ScheduleError>> {
+    // PUT availability replaces the whole set, so merge onto the current state.
+    const current = await getMyAvailability()
+    const overrides = { ...current.overrides, [day.date]: day }
+    const result = await saveMyAvailability(current.template, Object.values(overrides))
+    if (!result.ok) {
+      return failure<ScheduleError>({ type: "validation", message: "Could not save availability." })
+    }
+    return success(day)
+  }
+
+  async function saveAvailabilityTemplate(
+    _accountId: string,
+    template: AvailabilityTemplate,
+  ): Promise<Result<AvailabilityTemplate, ScheduleError>> {
+    const current = await getMyAvailability()
+    const result = await saveMyAvailability(template, Object.values(current.overrides))
+    if (!result.ok) {
+      return failure<ScheduleError>({ type: "validation", message: "Could not save availability." })
+    }
+    return success(template)
+  }
+
   async function createRequest(
     _accountId: string,
     _input: CreateRequestInput,
   ): Promise<Result<RequestItem, ScheduleError>> {
+    // The generic request form has no single employee endpoint; swaps and changes
+    // use the dedicated planning flows, time-off is expressed via availability.
     return failure<ScheduleError>({
       type: "validation",
-      message: "Not implemented in planning HTTP repo.",
+      message: "Use the planning tools to request a swap, change or time off.",
     })
   }
 
@@ -126,29 +164,11 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     _accountId: string,
     _shiftId: string,
   ): Promise<Result<Shift, ScheduleError>> {
+    // Real shifts never require an in-app acknowledgement (the field is unset by
+    // the transformer), so this path is unreachable for server-backed shifts.
     return failure<ScheduleError>({
       type: "not-found",
-      message: "Not implemented in planning HTTP repo.",
-    })
-  }
-
-  async function saveAvailabilityOverride(
-    _accountId: string,
-    _day: AvailabilityOverride,
-  ): Promise<Result<AvailabilityOverride, ScheduleError>> {
-    return failure<ScheduleError>({
-      type: "validation",
-      message: "Use saveMyAvailability for HTTP updates.",
-    })
-  }
-
-  async function saveAvailabilityTemplate(
-    _accountId: string,
-    _template: AvailabilityTemplate,
-  ): Promise<Result<AvailabilityTemplate, ScheduleError>> {
-    return failure<ScheduleError>({
-      type: "validation",
-      message: "Use saveMyAvailability for HTTP updates.",
+      message: "This shift doesn't need a response.",
     })
   }
 
@@ -158,7 +178,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   ): Promise<Result<PlanningWindow, ScheduleError>> {
     return failure<ScheduleError>({
       type: "not-found",
-      message: "Not implemented in planning HTTP repo.",
+      message: "Planning windows are managed from the availability screen.",
     })
   }
 
