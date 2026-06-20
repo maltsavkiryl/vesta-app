@@ -54,7 +54,7 @@ export function PlanningTodosScreen() {
             onUncomplete={(id) => {
               void screen.handleUncomplete(id)
             }}
-            title="Te doen"
+            title={translate("planning:todos.sectionTodo")}
             todos={screen.pendingTodos}
           />
           <PlanningTodosSection
@@ -65,7 +65,7 @@ export function PlanningTodosScreen() {
             onUncomplete={(id) => {
               void screen.handleUncomplete(id)
             }}
-            title="Klaar"
+            title={translate("planning:todos.sectionDone")}
             todos={screen.completedTodos}
           />
         </>

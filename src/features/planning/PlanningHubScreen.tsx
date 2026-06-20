@@ -2,7 +2,7 @@
  * PlanningHubScreen — the "Planning" tab root.
  *
  * Provides a segmented control to switch between:
- *   Shifts | Taken | Oproepen | Aanvragen | Verlof
+ *   Shifts | Todos | Calls | Requests | Leave
  *
  * Each segment lazily renders its sub-screen. Availability editing is
  * accessible via the quick-actions button (gear icon) and routes to the
@@ -15,12 +15,11 @@ import { Ionicons } from "@expo/vector-icons"
 import { Pressable } from "react-native"
 
 import {
-  AppScrollScreen,
   AppSegmentedControl,
-  PageHeader,
   Text,
   useDesignTokens,
 } from "@/ui"
+import { translate } from "@/i18n/translate"
 
 import { PlanningShiftsScreen } from "./PlanningShiftsScreen"
 import { PlanningTodosScreen } from "./PlanningTodosScreen"
@@ -30,13 +29,15 @@ import { PlanningLeaveScreen } from "./PlanningLeaveScreen"
 
 type PlanningTab = "shifts" | "todos" | "calls" | "requests" | "leave"
 
-const TAB_OPTIONS: Array<{ label: string; value: PlanningTab }> = [
-  { label: "Planning", value: "shifts" },
-  { label: "Taken", value: "todos" },
-  { label: "Oproepen", value: "calls" },
-  { label: "Aanvragen", value: "requests" },
-  { label: "Verlof", value: "leave" },
-]
+function getTabOptions(): Array<{ label: string; value: PlanningTab }> {
+  return [
+    { label: translate("planning:sections.tabs.shifts"), value: "shifts" },
+    { label: translate("planning:sections.tabs.todos"), value: "todos" },
+    { label: translate("planning:sections.tabs.calls"), value: "calls" },
+    { label: translate("planning:sections.tabs.requests"), value: "requests" },
+    { label: translate("planning:sections.tabs.leave"), value: "leave" },
+  ]
+}
 
 export function PlanningHubScreen() {
   const tokens = useDesignTokens()
@@ -55,11 +56,11 @@ export function PlanningHubScreen() {
           <Text
             preset="heading"
             style={[styles.headerTitle, { color: tokens.textPrimary }]}
-            text="Mijn planning"
+            text={translate("planning:title")}
             weight="bold"
           />
           <Pressable
-            accessibilityLabel="Beschikbaarheid bewerken"
+            accessibilityLabel={translate("planning:availability.editAccessibilityLabel")}
             accessibilityRole="button"
             onPress={handleOpenAvailabilityTemplate}
             style={({ pressed }) => [
@@ -75,7 +76,7 @@ export function PlanningHubScreen() {
         <View style={styles.segmentWrapper}>
           <AppSegmentedControl
             onChange={setActiveTab}
-            options={TAB_OPTIONS}
+            options={getTabOptions()}
             value={activeTab}
           />
         </View>

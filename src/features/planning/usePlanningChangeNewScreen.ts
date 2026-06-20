@@ -1,19 +1,14 @@
 import { useState, useMemo } from "react"
 import { useRouter } from "expo-router"
-import { getLocalToday } from "@/core/date"
+import { getLocalToday, addLocalDays } from "@/core/date"
+import { translate } from "@/i18n/translate"
 import { usePlanningScheduleQuery } from "@/features/planning/data/planning.queries"
 import { useCreateShiftChangeMutation } from "@/features/planning/data/planning.mutations"
-
-function addDays(d: string, days: number): string {
-  const date = new Date(`${d}T12:00:00`)
-  date.setDate(date.getDate() + days)
-  return date.toISOString().slice(0, 10)
-}
 
 export function usePlanningChangeNewScreen() {
   const router = useRouter()
   const today = getLocalToday()
-  const to = addDays(today, 14)
+  const to = addLocalDays(today, 14)
   const { state: shifts, isLoading } = usePlanningScheduleQuery({ from: today, to })
   const mutation = useCreateShiftChangeMutation()
 
@@ -41,7 +36,7 @@ export function usePlanningChangeNewScreen() {
       },
     })
     if (!result.ok) {
-      setError("Kon aanvraag niet indienen.")
+      setError(translate("planning:requests.submitError"))
       return
     }
     setSuccess(true)

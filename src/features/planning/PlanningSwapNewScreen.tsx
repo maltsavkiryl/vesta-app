@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import type { Shift } from "@/core/models"
-import { AppScrollScreen, GroupedSection, SurfaceCard, useDesignTokens } from "@/ui"
+import { AppScrollScreen, GroupedSection, SurfaceCard, TextField, useDesignTokens } from "@/ui"
 import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
 import { getShiftTimeRange, formatShortDate } from "@/core/date"
@@ -84,33 +84,27 @@ export function PlanningSwapNewScreen() {
         )}
       </GroupedSection>
 
-      <GroupedSection title="Shift code collega">
-        <View style={styles.fieldBody}>
-          <TextInput
-            autoCapitalize="none"
-            autoCorrect={false}
-            onChangeText={screen.setTargetShiftCode}
-            placeholder="bijv. shift-abc-123"
-            placeholderTextColor={tokens.textMuted}
-            style={[styles.textInput, { color: tokens.textPrimary, borderColor: tokens.border }]}
-            value={screen.targetShiftCode}
-          />
-        </View>
-      </GroupedSection>
+      <View style={styles.fieldBody}>
+        <TextField
+          autoCapitalize="none"
+          autoCorrect={false}
+          label={translate("planning:requests.targetShiftId")}
+          onChangeText={screen.setTargetShiftCode}
+          value={screen.targetShiftCode}
+        />
+      </View>
 
-      <GroupedSection title="Notitie (optioneel)">
-        <View style={styles.fieldBody}>
-          <TextInput
-            multiline
-            numberOfLines={3}
-            onChangeText={screen.setNote}
-            placeholder="Toelichting…"
-            placeholderTextColor={tokens.textMuted}
-            style={[styles.textArea, { color: tokens.textPrimary, borderColor: tokens.border }]}
-            value={screen.note}
-          />
-        </View>
-      </GroupedSection>
+      <View style={styles.fieldBody}>
+        <TextField
+          label={translate("planning:requests.noteOptional")}
+          multiline
+          numberOfLines={3}
+          onChangeText={screen.setNote}
+          placeholder={translate("planning:requests.notePlaceholder")}
+          value={screen.note}
+          inputStyle={styles.textAreaInput}
+        />
+      </View>
 
       {screen.error ? (
         <View style={[styles.errorRow, { backgroundColor: `${tokens.danger}10` }]}>
@@ -122,7 +116,7 @@ export function PlanningSwapNewScreen() {
       <AppButton
         disabled={!screen.canSubmit || screen.isSubmitting}
         fullWidth
-        label={screen.isSubmitting ? "Indienen…" : translate("planning:requests.shiftSwap")}
+        label={screen.isSubmitting ? translate("planning:requests.submitting") : translate("planning:requests.shiftSwap")}
         onPress={() => {
           void screen.handleSubmit()
         }}
@@ -144,8 +138,6 @@ const styles = StyleSheet.create({
   },
   fieldBody: {
     gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   screen: {
     gap: 22,
@@ -177,20 +169,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 24,
   },
-  textArea: {
-    borderCurve: "continuous",
-    borderRadius: 8,
-    borderWidth: 1,
-    minHeight: 80,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  textAreaInput: {
+    minHeight: 64,
     textAlignVertical: "top",
-  },
-  textInput: {
-    borderCurve: "continuous",
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 42,
-    paddingHorizontal: 12,
   },
 })
