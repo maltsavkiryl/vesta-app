@@ -1,5 +1,12 @@
-import { useEffect } from "react"
-import { type DimensionValue, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+import { useEffect, useState } from "react"
+import {
+  type DimensionValue,
+  type LayoutChangeEvent,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native"
 import Animated, {
   Easing,
   cancelAnimation,
@@ -8,9 +15,12 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated"
+import { LinearGradient } from "expo-linear-gradient"
 
 import { useAppMotion } from "@/providers/motion-provider"
 import { useDesignTokens } from "@/ui/foundations/tokens"
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
 export interface SkeletonProps {
   width?: DimensionValue
@@ -20,14 +30,23 @@ export interface SkeletonProps {
 }
 
 /**
- * Accessible, theme-tokened shimmer placeholder. Animates a gentle opacity
- * pulse while data loads, and collapses to a static block when the user has
+ * Accessible, theme-tokened shimmer placeholder. Animates a shimmer sweep
+ * while data loads. Falls back to a static opacity block when the user has
  * reduced motion enabled.
+ *
+ * Shimmer approach: a LinearGradient overlay is translated from -width to
+ * +width on repeat. Width is measured via onLayout. The gradient colors
+ * differ by theme to ensure visibility on both light and dark surfaces.
  */
 export function Skeleton({ width = "100%", height = 16, radius = 8, style }: SkeletonProps) {
   const tokens = useDesignTokens()
   const motion = useAppMotion()
   const progress = useSharedValue(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width)
+  }
 
   useEffect(() => {
     if (motion.shouldReduceMotion) {
@@ -39,28 +58,65 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: Ske
     progress.value = withRepeat(
       withTiming(1, { duration: 1100, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      false,
     )
 
     return () => cancelAnimation(progress)
   }, [motion.shouldReduceMotion, progress])
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.45 + progress.value * 0.4,
-  }))
+  const shimmerStyle = useAnimatedStyle(() => {
+    if (containerWidth === 0) return { transform: [{ translateX: 0 }] }
+    // Translate from -containerWidth to +containerWidth
+    const translateX = -containerWidth + progress.value * containerWidth * 2
+    return { transform: [{ translateX }] }
+  })
+
+  const shimmerColors: [string, string, string] = tokens.isDark
+    ? ["transparent", "rgba(255,255,255,0.06)", "transparent"]
+    : ["transparent", "rgba(255,255,255,0.65)", "transparent"]
+
+  if (motion.shouldReduceMotion) {
+    return (
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel="Loading"
+        accessibilityState={{ busy: true }}
+        style={[
+          { backgroundColor: tokens.surfaceSecondary, borderRadius: radius, height, width },
+          styles.staticBlock,
+          style,
+        ]}
+      />
+    )
+  }
 
   return (
-    <Animated.View
+    <View
       accessible
       accessibilityRole="image"
       accessibilityLabel="Loading"
       accessibilityState={{ busy: true }}
+      onLayout={handleLayout}
       style={[
         { backgroundColor: tokens.surfaceSecondary, borderRadius: radius, height, width },
-        motion.shouldReduceMotion ? styles.staticBlock : animatedStyle,
+        styles.overflow,
         style,
       ]}
-    />
+    >
+      {containerWidth > 0 ? (
+        <AnimatedLinearGradient
+          colors={shimmerColors}
+          end={{ x: 1, y: 0 }}
+          start={{ x: 0, y: 0 }}
+          style={[
+            StyleSheet.absoluteFill,
+            { width: containerWidth },
+            shimmerStyle,
+          ]}
+        />
+      ) : null}
+    </View>
   )
 }
 
@@ -96,6 +152,9 @@ export function SkeletonText({
 }
 
 const styles = StyleSheet.create({
+  overflow: {
+    overflow: "hidden",
+  },
   staticBlock: {
     opacity: 0.55,
   },
