@@ -5,7 +5,7 @@
  * interactions. Hooks are mocked at their module boundaries so we exercise
  * the real screen component logic without network calls.
  */
-import { fireEvent, render, screen } from "@testing-library/react-native"
+import { act, fireEvent, render, screen } from "@testing-library/react-native"
 
 // ── Additional mocks (global mocks already in test/setup.ts) ─────────────────
 
@@ -354,6 +354,26 @@ describe("PlanningSwapNewScreen", () => {
       },
     })
   })
+
+  it("shows error row when mutation returns ok: false", async () => {
+    mockCreateShiftSwapMutation.mockResolvedValue({ ok: false, error: { type: "validation", message: "fail" } })
+    const { PlanningSwapNewScreen } = require("./PlanningSwapNewScreen")
+    render(<PlanningSwapNewScreen />)
+
+    const shiftRow = screen.getByRole("radio", { name: /./i })
+    fireEvent.press(shiftRow)
+
+    const inputs = screen.getAllByDisplayValue("")
+    fireEvent.changeText(inputs[0], "shift-fail-999")
+
+    const submitBtn = screen.getByRole("button", { name: /planning:requests\.shiftSwap/ })
+    await act(async () => {
+      fireEvent.press(submitBtn)
+    })
+
+    // Error row appears (i18n key for submitError)
+    expect(screen.getByText(/planning:requests\.submitError/)).toBeTruthy()
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -408,6 +428,22 @@ describe("PlanningChangeNewScreen", () => {
     expect(screen.getByText(/planning:requests\.requestedDate/i)).toBeTruthy()
     expect(screen.getByText(/planning:requests\.requestedStartTime/i)).toBeTruthy()
     expect(screen.getByText(/planning:requests\.requestedEndTime/i)).toBeTruthy()
+  })
+
+  it("shows error row when mutation returns ok: false", async () => {
+    mockCreateShiftChangeMutation.mockResolvedValue({ ok: false, error: { type: "validation", message: "fail" } })
+    const { PlanningChangeNewScreen } = require("./PlanningChangeNewScreen")
+    render(<PlanningChangeNewScreen />)
+
+    const shiftRow = screen.getByRole("radio", { name: /./i })
+    fireEvent.press(shiftRow)
+
+    const submitBtn = screen.getByRole("button", { name: /planning:requests\.changeRequest/ })
+    await act(async () => {
+      fireEvent.press(submitBtn)
+    })
+
+    expect(screen.getByText(/planning:requests\.submitError/)).toBeTruthy()
   })
 })
 

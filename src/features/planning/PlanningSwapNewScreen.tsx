@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import type { Shift } from "@/core/models"
 import { AppScrollScreen, GroupedSection, SurfaceCard, TextField, useDesignTokens } from "@/ui"

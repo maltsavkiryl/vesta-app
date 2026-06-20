@@ -30,6 +30,25 @@ export function getLocalToday(): string {
   return format(new Date(), "yyyy-MM-dd")
 }
 
+/**
+ * Advance a local `yyyy-MM-dd` string by `days` days and return the result
+ * as a local `yyyy-MM-dd` string. Parses at local noon so the intermediate
+ * Date never drifts across the UTC boundary.
+ */
+export function addLocalDays(dateString: string, days: number): string {
+  const date = resolveLocalDate(dateString) ?? new Date()
+  date.setDate(date.getDate() + days)
+  return format(date, "yyyy-MM-dd")
+}
+
+/**
+ * Format a Date as a local `yyyy-MM-dd` string. Prefer this over
+ * `date.toISOString().slice(0, 10)`, which returns the UTC date.
+ */
+export function formatLocalDate(date: Date): string {
+  return format(date, "yyyy-MM-dd")
+}
+
 /** True when the given date (local `yyyy-MM-dd` or ISO) is the local today. */
 export function isToday(value: string): boolean {
   const date = resolveLocalDate(value)

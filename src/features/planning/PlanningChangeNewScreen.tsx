@@ -8,18 +8,10 @@ import type { Shift } from "@/core/models"
 import { AppButton, AppScrollScreen, GroupedSection, SurfaceCard, TextField, useDesignTokens } from "@/ui"
 import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
-import { getShiftTimeRange, formatShortDate } from "@/core/date"
+import { getShiftTimeRange, formatShortDate, formatLocalDate, formatTimeLabel } from "@/core/date"
 import { usePlanningChangeNewScreen } from "./usePlanningChangeNewScreen"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-function toTimeString(d: Date): string {
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
-}
 
 function parseDateString(s: string): Date {
   // Parse "yyyy-MM-dd" as local date at noon to avoid timezone shifts
@@ -175,7 +167,7 @@ export function PlanningChangeNewScreen() {
               mode="date"
               onChange={(_, selected) => {
                 if (!selected) return
-                screen.setRequestedDate(toDateString(selected))
+                screen.setRequestedDate(formatLocalDate(selected))
               }}
               value={dateValue}
             />
@@ -197,7 +189,7 @@ export function PlanningChangeNewScreen() {
               mode="time"
               onChange={(_, selected) => {
                 if (!selected) return
-                screen.setRequestedStartTime(toTimeString(selected))
+                screen.setRequestedStartTime(formatTimeLabel(selected))
               }}
               value={startValue}
             />
@@ -219,7 +211,7 @@ export function PlanningChangeNewScreen() {
               mode="time"
               onChange={(_, selected) => {
                 if (!selected) return
-                screen.setRequestedEndTime(toTimeString(selected))
+                screen.setRequestedEndTime(formatTimeLabel(selected))
               }}
               value={endValue}
             />
