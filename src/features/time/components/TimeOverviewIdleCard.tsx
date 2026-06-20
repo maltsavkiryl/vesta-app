@@ -8,6 +8,8 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated"
 
+import { translate } from "@/i18n/translate"
+import { useCelebratePulse } from "@/ui/foundations/motion"
 import { InCardActionButton, Text, appTypography, useDesignTokens } from "@/ui"
 
 import { timeHeroColors } from "./TimeHeroCard"
@@ -33,8 +35,13 @@ export function IdleCardContent({
   showCollapseToggle?: boolean
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle: pulseStyle, triggerPulse } = useCelebratePulse()
   const detailHeight = useSharedValue(96)
   const isCollapsible = Boolean(onToggleCollapsed)
+  const handleClockIn = () => {
+    triggerPulse()
+    onClockIn()
+  }
   const idleDetailsAnimatedStyle = useAnimatedStyle(() => ({
     height: detailHeight.value * collapseProgress.value,
     marginBottom: interpolate(collapseProgress.value, [0, 1], [0, 12], Extrapolation.CLAMP),
@@ -54,17 +61,17 @@ export function IdleCardContent({
   }))
   const eyebrowLabel =
     idleState.kind === "shift"
-      ? "TODAY'S SHIFT"
+      ? translate("time:clock.todayShift")
       : idleState.kind === "unavailable"
-        ? "CLOCK-IN UNAVAILABLE"
-        : "READY TO TRACK"
+        ? translate("time:clock.unavailable")
+        : translate("time:clock.readyToTrack")
   const statusPill =
     idleState.kind === "shift" ? (
-      <HeroStatusPill icon="checkmark-circle-outline" text="Confirmed" tone="success" />
+      <HeroStatusPill icon="checkmark-circle-outline" text={translate("time:clock.confirmed")} tone="success" />
     ) : idleState.kind === "unavailable" ? (
-      <HeroStatusPill icon="alert-circle-outline" text="Setup needed" tone="warning" />
+      <HeroStatusPill icon="alert-circle-outline" text={translate("time:clock.setupNeeded")} tone="warning" />
     ) : (
-      <HeroStatusPill icon="time-outline" text="No shift needed" tone="neutral" />
+      <HeroStatusPill icon="time-outline" text={translate("time:clock.noShiftNeeded")} tone="neutral" />
     )
 
   return (
@@ -151,12 +158,14 @@ export function IdleCardContent({
           </View>
         )}
 
-        <InCardActionButton
-          disabled={idleState.disabled || pending}
-          label={pending ? "Getting location…" : idleState.actionLabel}
-          onPress={onClockIn}
-          stopPropagation
-        />
+        <Animated.View style={pulseStyle}>
+          <InCardActionButton
+            disabled={idleState.disabled || pending}
+            label={pending ? translate("time:clock.gettingLocation") : idleState.actionLabel}
+            onPress={handleClockIn}
+            stopPropagation
+          />
+        </Animated.View>
       </View>
     </HeroCard>
   )
