@@ -7,7 +7,9 @@
  */
 export default {
   API_URL: "https://api.vesta.services/api/v1",
-  DEMO_AUTH_ENABLED: true,
+  // Production authenticates through the identity provider (Entra) over HTTP.
+  // The demo/mock sign-in path must never be reachable in production builds.
+  DEMO_AUTH_ENABLED: false,
   SUPPORT_EMAIL: "support@vesta.services",
 
   AUTH: {
