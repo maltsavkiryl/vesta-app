@@ -5,9 +5,12 @@ import {
   TextInput,
   View,
 } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 
 import { Text, useDesignTokens } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
+import { translate } from "@/i18n/translate"
 
 import { normalizeEmployerInviteCode } from "./employerInviteCode"
 
@@ -24,6 +27,7 @@ export function EmployerInviteCodeEntry({
 }) {
   const inputRef = useRef<TextInput>(null)
   const tokens = useDesignTokens()
+  const { animatedStyle, pressHandlers } = usePressScale({})
 
   return (
     <View style={styles.stack}>
@@ -44,6 +48,7 @@ export function EmployerInviteCodeEntry({
                   {
                     backgroundColor: filled ? tokens.accentSoft : tokens.background,
                     borderColor: filled ? tokens.textPrimary : tokens.border,
+                    ...(filled ? tokens.elevation1 : {}),
                   },
                 ]}
               >
@@ -77,22 +82,29 @@ export function EmployerInviteCodeEntry({
         style={[styles.helperText, { color: tokens.textMuted }]}
       />
 
-      <Pressable
-        accessibilityLabel="Scan QR code"
-        accessibilityRole="button"
-        onPress={onOpenQrScanner}
-        style={({ pressed }) => [
-          styles.qrAction,
-          {
-            backgroundColor: tokens.accent,
-            borderColor: tokens.accent,
-            opacity: pressed ? 0.82 : 1,
-          },
-        ]}
-      >
-        <Ionicons color="#FFFFFF" name="qr-code-outline" size={18} />
-        <Text text="Scan QR code" size="xs" weight="semiBold" style={{ color: "#FFFFFF" }} />
-      </Pressable>
+      <Animated.View style={animatedStyle}>
+        <Pressable
+          accessibilityLabel="Scan QR code"
+          accessibilityRole="button"
+          onPress={onOpenQrScanner}
+          style={[
+            styles.qrAction,
+            {
+              backgroundColor: tokens.accent,
+              borderColor: tokens.accent,
+            },
+          ]}
+          {...pressHandlers}
+        >
+          <Ionicons color={tokens.accentForeground} name="qr-code-outline" size={18} />
+          <Text
+            tx="employers:scanQrCode"
+            size="xs"
+            weight="semiBold"
+            style={{ color: tokens.accentForeground }}
+          />
+        </Pressable>
+      </Animated.View>
     </View>
   )
 }
@@ -100,6 +112,7 @@ export function EmployerInviteCodeEntry({
 const styles = StyleSheet.create({
   codeBox: {
     alignItems: "center",
+    borderCurve: "continuous",
     borderRadius: 12,
     borderWidth: 1.5,
     height: 56,
