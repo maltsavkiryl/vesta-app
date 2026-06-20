@@ -65,14 +65,14 @@ export function PlanningRequestShortcuts({
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />}
           onPress={onNewShiftSwap}
-          subtitle="Vraag een collega om je shift over te nemen"
+          subtitle={translate("planning:requests.swapSubtitle")}
           title={translate("planning:requests.shiftSwap")}
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />}
           onPress={onNewChangeRequest}
-          subtitle="Meld een conflict of vraag een wijziging aan"
+          subtitle={translate("planning:requests.changeSubtitle")}
           title={translate("planning:requests.changeRequest")}
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />

@@ -21,11 +21,11 @@ export function PlanningLeaveBalanceCard({ entitlement }: { entitlement: LeaveEn
   const isSynced = entitlement.source === 1
 
   const metricItems = [
-    { label: "Wettelijk", value: `${entitlement.statutoryDays}d` },
-    { label: "Werkgever", value: `${entitlement.employerPolicyDays}d` },
-    { label: "Totaal", value: `${entitlement.totalDays}d` },
+    { label: translate("planning:leave.statutory"), value: `${entitlement.statutoryDays}d` },
+    { label: translate("planning:leave.employer"), value: `${entitlement.employerPolicyDays}d` },
+    { label: translate("planning:leave.total"), value: `${entitlement.totalDays}d` },
     ...(hasHours
-      ? [{ label: "Uren", value: `${entitlement.entitlementHours}u` }]
+      ? [{ label: translate("planning:leave.hoursLabel"), value: `${entitlement.entitlementHours}u` }]
       : []),
   ]
 
