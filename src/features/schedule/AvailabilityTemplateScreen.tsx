@@ -7,14 +7,16 @@ import {
   AvailabilityTemplateIntro,
   AvailabilityTemplateWeekdaySection,
 } from "@/features/schedule/AvailabilityTemplateSections"
-import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { usePlanningAvailabilityQuery } from "@/features/planning/data/planning.queries"
 import { AppScrollScreen, useDesignTokens } from "@/ui"
 
 export function AvailabilityTemplateScreen() {
   const router = useRouter()
   const tokens = useDesignTokens()
-  const { state } = useScheduleStateQuery()
-  const template = state?.availabilityTemplate ?? getFallbackAvailabilityTemplate()
+  const { state, isError } = usePlanningAvailabilityQuery()
+  const template = state?.template ?? getFallbackAvailabilityTemplate()
+
+  void isError
 
   const handlePressDay = (weekday: AvailabilityWeekday) => {
     router.push({
