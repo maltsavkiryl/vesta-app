@@ -38,3 +38,6 @@ export {
   StatusBadge as Badge,
   SurfaceCard as Card,
 } from "./AppPrimitives"
+
+export { Sheet } from "./Sheet"
+export type { SheetProps } from "./Sheet"

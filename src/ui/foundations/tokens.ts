@@ -2,6 +2,14 @@ import { useMemo } from "react"
 
 import { useAppTheme } from "@/theme/context"
 
+export interface ElevationStyle {
+  shadowColor: string
+  shadowOffset: { width: number; height: number }
+  shadowOpacity: number
+  shadowRadius: number
+  elevation: number
+}
+
 export interface DesignTokens {
   isDark: boolean
   background: string
@@ -38,6 +46,20 @@ export interface DesignTokens {
   successSoft: string
   warningSoft: string
   dangerSoft: string
+  // Elevation scale (platform-correct shadows)
+  elevation0: ElevationStyle
+  elevation1: ElevationStyle
+  elevation2: ElevationStyle
+  elevation3: ElevationStyle
+  // Radius scale
+  radiusSm: number
+  radiusMd: number
+  radiusLg: number
+  radiusXl: number
+  radiusFull: number
+  // Semantic additions
+  accentMuted: string
+  surfaceSheet: string
 }
 
 // Exported for design-system tests (e.g. WCAG contrast checks). These are the
@@ -83,6 +105,41 @@ export const DARK_DESIGN_TOKENS: DesignTokens = {
   successSoft: "rgba(48, 209, 88, 0.14)",
   warningSoft: "rgba(255, 214, 10, 0.14)",
   dangerSoft: "rgba(255, 69, 58, 0.14)",
+  elevation0: {
+    shadowColor: "rgba(0,0,0,0)",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  elevation1: {
+    shadowColor: "rgba(0,0,0,0.5)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  elevation2: {
+    shadowColor: "rgba(0,0,0,0.5)",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.26,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  elevation3: {
+    shadowColor: "rgba(0,0,0,0.5)",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.34,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 20,
+  radiusFull: 999,
+  accentMuted: "rgba(10, 132, 255, 0.08)",
+  surfaceSheet: "#1C1C1E",
 }
 
 export const LIGHT_DESIGN_TOKENS: DesignTokens = {
@@ -122,6 +179,41 @@ export const LIGHT_DESIGN_TOKENS: DesignTokens = {
   successSoft: "rgba(52, 199, 89, 0.12)",
   warningSoft: "rgba(255, 159, 10, 0.12)",
   dangerSoft: "rgba(255, 59, 48, 0.12)",
+  elevation0: {
+    shadowColor: "rgba(0,0,0,0)",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  elevation1: {
+    shadowColor: "rgba(60,60,67,0.14)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  elevation2: {
+    shadowColor: "rgba(60,60,67,0.14)",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  elevation3: {
+    shadowColor: "rgba(60,60,67,0.14)",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 20,
+  radiusFull: 999,
+  accentMuted: "rgba(0, 122, 255, 0.07)",
+  surfaceSheet: "#FFFFFF",
 }
 
 export function useDesignTokens() {

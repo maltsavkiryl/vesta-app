@@ -183,9 +183,16 @@ export function HeaderAvatar({ initials }: { initials: string }) {
 export function SurfaceCard({
   children,
   elevated,
+  elevationLevel = 0,
   style,
-}: PropsWithChildren<{ elevated?: boolean; style?: StyleProp<ViewStyle> }>) {
+}: PropsWithChildren<{
+  elevated?: boolean
+  elevationLevel?: 0 | 1 | 2 | 3
+  style?: StyleProp<ViewStyle>
+}>) {
   const tokens = useDesignTokens()
+  const elevationMap = { 0: null, 1: tokens.elevation1, 2: tokens.elevation2, 3: tokens.elevation3 } as const
+  const elevationStyle = elevationMap[elevationLevel]
 
   return (
     <View
@@ -196,6 +203,7 @@ export function SurfaceCard({
           borderColor: tokens.border,
           shadowColor: tokens.shadow,
         },
+        elevationStyle,
         style,
       ]}
     >

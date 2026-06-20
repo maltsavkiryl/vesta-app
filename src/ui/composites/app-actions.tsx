@@ -1,5 +1,13 @@
 import { PropsWithChildren, ReactNode } from "react"
-import { Platform, Pressable, type StyleProp, StyleSheet, View, type ViewStyle } from "react-native"
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from "react-native"
 import { isLiquidGlassAvailable } from "expo-glass-effect"
 import Animated from "react-native-reanimated"
 
@@ -88,6 +96,7 @@ export function AppButton({
   accessibilityLabel,
   disabled,
   fullWidth = false,
+  isLoading,
   label,
   onPress,
   pressHaptic = "selection",
@@ -96,6 +105,7 @@ export function AppButton({
   accessibilityLabel?: string
   disabled?: boolean
   fullWidth?: boolean
+  isLoading?: boolean
   label: string
   onPress: () => void
   pressHaptic?: PressHapticIntent | "none"
@@ -104,7 +114,8 @@ export function AppButton({
   const tokens = useDesignTokens()
   const isPrimary = variant === "primary"
   const isDanger = variant === "danger"
-  const { animatedStyle, pressHandlers } = usePressScale({ disabled })
+  const isDisabled = disabled || isLoading
+  const { animatedStyle, pressHandlers } = usePressScale({ disabled: isDisabled })
 
   if (Platform.OS === "ios" && !fullWidth) {
     const { Button: NativeButton, Host } =
@@ -128,7 +139,7 @@ export function AppButton({
     const modifiers = [
       buttonStyle(nativeStyle),
       controlSize("large"),
-      nativeDisabled(Boolean(disabled)),
+      nativeDisabled(Boolean(isDisabled)),
     ]
 
     if (variant === "primary") modifiers.push(tint(tokens.accent))
@@ -156,8 +167,8 @@ export function AppButton({
       <Pressable
         accessibilityLabel={accessibilityLabel ?? label}
         accessibilityRole="button"
-        accessibilityState={{ disabled: Boolean(disabled) }}
-        disabled={disabled}
+        accessibilityState={{ disabled: Boolean(isDisabled) }}
+        disabled={isDisabled}
         onPress={() => {
           firePressHaptic(pressHaptic)
           onPress()
@@ -171,17 +182,24 @@ export function AppButton({
                 ? tokens.danger
                 : tokens.surfaceSecondary,
             borderColor: isPrimary ? tokens.accent : isDanger ? tokens.danger : tokens.border,
-            opacity: disabled ? 0.55 : pressed ? 0.88 : 1,
+            opacity: isDisabled ? (isLoading ? 0.8 : 0.55) : pressed ? 0.88 : 1,
           },
         ]}
         {...pressHandlers}
       >
-        <Text
-          size="xs"
-          style={{ color: isPrimary || isDanger ? tokens.accentForeground : tokens.textPrimary }}
-          text={label}
-          weight="semiBold"
-        />
+        {isLoading ? (
+          <ActivityIndicator
+            color={isPrimary || isDanger ? tokens.accentForeground : tokens.textPrimary}
+            size="small"
+          />
+        ) : (
+          <Text
+            size="xs"
+            style={{ color: isPrimary || isDanger ? tokens.accentForeground : tokens.textPrimary }}
+            text={label}
+            weight="semiBold"
+          />
+        )}
       </Pressable>
     </Animated.View>
   )
