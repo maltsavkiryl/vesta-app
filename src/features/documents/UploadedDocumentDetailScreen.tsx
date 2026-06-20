@@ -11,6 +11,7 @@ import {
   appLayout,
   useDesignTokens,
 } from "@/ui"
+import { translate } from "@/i18n/translate"
 
 import { useDocumentsStateQuery } from "./data/documents.queries"
 import { shareUploadedDocument } from "./documentShare"
@@ -23,11 +24,11 @@ export function UploadedDocumentDetailScreen() {
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-      <Stack.Screen options={{ title: document?.title ?? "Uploaded file" }} />
+      <Stack.Screen options={{ title: document?.title ?? translate("documents:title") }} />
       {document ? (
         <>
-          <SurfaceCard style={styles.hero}>
-            <View style={[styles.icon, { backgroundColor: `${tokens.warning}14` }]}>
+          <SurfaceCard elevationLevel={1} style={styles.hero}>
+            <View style={[styles.icon, { backgroundColor: tokens.warningSoft }]}>
               <Ionicons color={tokens.warning} name="document-text-outline" size={22} />
             </View>
             <View style={styles.copy}>
@@ -41,29 +42,47 @@ export function UploadedDocumentDetailScreen() {
             </View>
           </SurfaceCard>
 
-          <GroupedSection title="Upload details">
+          <GroupedSection title={translate("documents:uploadDetails")}>
             <DetailItem
-              label="Status"
-              value={document.status === "processing" ? "Under review" : "Uploaded"}
+              label={translate("documents:status")}
+              value={
+                document.status === "processing"
+                  ? translate("documents:underReview")
+                  : translate("documents:uploaded")
+              }
             />
-            <DetailItem label="File name" value={document.uploadedFileName ?? "Unknown"} />
-            <DetailItem label="Uploaded" value={document.uploadedAt ?? "Unknown"} />
-            <DetailItem isLast label="Format" value={document.uploadedMimeType ?? "Unknown"} />
+            <DetailItem
+              label={translate("documents:fileName")}
+              value={document.uploadedFileName ?? "Unknown"}
+            />
+            <DetailItem
+              label={translate("documents:uploaded")}
+              value={document.uploadedAt ?? "Unknown"}
+            />
+            <DetailItem
+              isLast
+              label={translate("documents:format")}
+              value={document.uploadedMimeType ?? "Unknown"}
+            />
           </GroupedSection>
 
           <AppButton
             fullWidth
-            label="Share file"
+            label={translate("documents:shareFile")}
             onPress={() => {
               void shareUploadedDocument(document)
             }}
           />
         </>
       ) : (
-        <SurfaceCard style={styles.emptyCard}>
-          <Text text="Document not found" weight="semiBold" style={{ color: tokens.textPrimary }} />
+        <SurfaceCard elevationLevel={1} style={styles.emptyCard}>
           <Text
-            text="This uploaded file is no longer available in local storage."
+            tx="documents:documentNotFound"
+            weight="semiBold"
+            style={{ color: tokens.textPrimary }}
+          />
+          <Text
+            tx="documents:documentNotFoundSubtitle"
             size="xs"
             style={{ color: tokens.textSecondary }}
           />

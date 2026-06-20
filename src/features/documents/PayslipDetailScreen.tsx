@@ -12,6 +12,7 @@ import {
   useAppTheme,
   useDesignTokens,
 } from "@/ui"
+import { translate } from "@/i18n/translate"
 
 import { payslips } from "./documents.data"
 import { sharePayslipPdf } from "./documentShare"
@@ -46,7 +47,7 @@ export function PayslipDetailScreen() {
       <Stack.Screen
         options={{
           ...headerActions,
-          title: "Payslip",
+          title: translate("documents:title"),
         }}
       />
       {payslip ? (
@@ -62,11 +63,14 @@ export function PayslipDetailScreen() {
           <View
             style={[
               styles.netPayHero,
-              { backgroundColor: `${tokens.success}10`, borderColor: `${tokens.success}22` },
+              {
+                backgroundColor: tokens.successSoft,
+                borderColor: tokens.success,
+              },
             ]}
           >
             <Text
-              text="NET PAY"
+              tx="documents:netPay"
               size="xxs"
               weight="semiBold"
               style={[styles.caps, { color: tokens.success }]}
@@ -77,18 +81,18 @@ export function PayslipDetailScreen() {
               style={[appTypography.heroValue, { color: tokens.textPrimary }]}
             />
             <Text
-              text={`Paid ${payslip.date}`}
+              text={translate("documents:paidOn", { date: payslip.date })}
               size="xxs"
               style={{ color: tokens.textSecondary }}
             />
           </View>
           <Text
-            text="BREAKDOWN"
+            tx="documents:breakdown"
             size="xxs"
             weight="semiBold"
             style={[styles.caps, { color: tokens.textMuted }]}
           />
-          <View style={[styles.breakdown, { backgroundColor: tokens.surface }]}>
+          <View style={[styles.breakdown, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
             {payslip.rows.map((row) => (
               <View
                 key={row.label}
@@ -111,11 +115,11 @@ export function PayslipDetailScreen() {
         </>
       ) : (
         <EmptyState
-          actionLabel="Back"
+          actionLabel={translate("common:actions.back")}
           icon={<Ionicons color={tokens.textMuted} name="cash-outline" size={18} />}
           onAction={() => router.back()}
-          subtitle="This payslip is no longer available in the current local list."
-          title="Payslip not found"
+          subtitle={translate("documents:payslipNotFoundSubtitle")}
+          title={translate("documents:payslipNotFound")}
         />
       )}
     </AppScrollScreen>
