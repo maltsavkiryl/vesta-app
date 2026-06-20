@@ -32,14 +32,17 @@ describe("Skeleton", () => {
     expect(node.props.accessibilityState).toEqual({ busy: true })
   })
 
-  it("pulses (animated opacity) when motion is allowed", () => {
+  it("renders a shimmer container (not a static opacity block) when motion is allowed", () => {
     mockMotion.shouldReduceMotion = false
 
     const screen = renderSkeleton()
-    const style = StyleSheet.flatten(screen.getByLabelText("Loading").props.style)
+    const node = screen.getByLabelText("Loading")
+    const style = StyleSheet.flatten(node.props.style)
 
-    // 0.45 + progress(0) * 0.4 from the animated style factory
-    expect(style.opacity).toBeCloseTo(0.45)
+    // Shimmer path renders a View with overflow:hidden (no fixed opacity) — the
+    // translateX gradient overlay handles the animation.
+    expect(style.overflow).toBe("hidden")
+    expect(style.opacity).toBeUndefined()
   })
 
   it("collapses to a static block when reduced motion is enabled", () => {
