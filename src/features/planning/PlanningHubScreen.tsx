@@ -13,6 +13,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
+import { useCalendarSync } from "@/features/calendar/useCalendarSync"
 import { translate } from "@/i18n/translate"
 import { AppSegmentedControl, Text, useDesignTokens } from "@/ui"
 import { MotionView } from "@/ui/composites"
@@ -48,6 +49,7 @@ export function PlanningHubScreen() {
   const [activeTab, setActiveTab] = useState<PlanningTab>("shifts")
   const { state: openCalls } = usePlanningCallsQuery()
   const openShiftCount = openCalls?.length ?? 0
+  const { isSyncing, syncToCalendar } = useCalendarSync()
 
   const handleOpenAvailabilityTemplate = () => {
     router.push("/(app)/availability-template" as never)
@@ -72,20 +74,39 @@ export function PlanningHubScreen() {
             text={translate("planning:title")}
             weight="bold"
           />
-          <Pressable
-            accessibilityLabel={translate("planning:availability.editAccessibilityLabel")}
-            accessibilityRole="button"
-            onPress={handleOpenAvailabilityTemplate}
-            style={({ pressed }) => [
-              styles.availabilityButton,
-              {
-                backgroundColor: pressed ? tokens.backgroundMuted : tokens.accentMuted,
-                opacity: pressed ? 0.75 : 1,
-              },
-            ]}
-          >
-            <Ionicons color={tokens.accent} name="calendar-outline" size={17} />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityLabel="Add my shifts to my phone calendar"
+              accessibilityRole="button"
+              disabled={isSyncing}
+              onPress={() => {
+                void syncToCalendar()
+              }}
+              style={({ pressed }) => [
+                styles.availabilityButton,
+                {
+                  backgroundColor: pressed ? tokens.backgroundMuted : tokens.accentMuted,
+                  opacity: pressed || isSyncing ? 0.75 : 1,
+                },
+              ]}
+            >
+              <Ionicons color={tokens.accent} name="download-outline" size={17} />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={translate("planning:availability.editAccessibilityLabel")}
+              accessibilityRole="button"
+              onPress={handleOpenAvailabilityTemplate}
+              style={({ pressed }) => [
+                styles.availabilityButton,
+                {
+                  backgroundColor: pressed ? tokens.backgroundMuted : tokens.accentMuted,
+                  opacity: pressed ? 0.75 : 1,
+                },
+              ]}
+            >
+              <Ionicons color={tokens.accent} name="calendar-outline" size={17} />
+            </Pressable>
+          </View>
         </MotionView>
 
         {/* Five-segment control */}
@@ -138,6 +159,10 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingHorizontal: 24,
     paddingTop: 18,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
   },
   headerTitle: {
     fontSize: 28,
