@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import Animated from "react-native-reanimated"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -25,17 +25,15 @@ function SignInButton({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Animated.View
-        accessible
+      <Pressable
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
-        {...pressHandlers}
-        onStartShouldSetResponder={() => true}
-        onResponderRelease={onPress}
+        onPress={onPress}
         style={Array.isArray(style) ? StyleSheet.flatten(style) : style}
+        {...pressHandlers}
       >
         {children}
-      </Animated.View>
+      </Pressable>
     </Animated.View>
   )
 }

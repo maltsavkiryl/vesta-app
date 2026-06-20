@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -45,13 +45,12 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
           style={{ color: tokens.textSecondary }}
         />
         <Animated.View style={startAnim}>
-          <Animated.View
-            accessible
+          <Pressable
+            accessibilityLabel="Get started"
             accessibilityRole="button"
-            {...startHandlers}
-            onStartShouldSetResponder={() => true}
-            onResponderRelease={onStart}
+            onPress={onStart}
             style={[styles.darkButton, { backgroundColor: tokens.textPrimary }]}
+            {...startHandlers}
           >
             <Text
               text="Get started"
@@ -60,19 +59,18 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
               style={{ color: tokens.background }}
             />
             <Ionicons color={tokens.background} name="arrow-forward-outline" size={18} />
-          </Animated.View>
+          </Pressable>
         </Animated.View>
         <Animated.View style={skipAnim}>
-          <Animated.View
-            accessible
+          <Pressable
+            accessibilityLabel="Skip for now"
             accessibilityRole="button"
-            {...skipHandlers}
-            onStartShouldSetResponder={() => true}
-            onResponderRelease={onSkip}
+            onPress={onSkip}
             style={styles.skipButton}
+            {...skipHandlers}
           >
             <Text text="Skip for now" size="xxs" style={{ color: tokens.textMuted }} />
-          </Animated.View>
+          </Pressable>
         </Animated.View>
       </MotionView>
     </AppScrollScreen>

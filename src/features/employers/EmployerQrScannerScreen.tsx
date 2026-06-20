@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-color-literals */
 import { useRef } from "react"
-import { Alert, StyleSheet, View } from "react-native"
+import { Alert, Pressable, StyleSheet, View } from "react-native"
 import Animated from "react-native-reanimated"
 import { Stack, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -72,13 +72,10 @@ export function EmployerQrScannerScreen() {
           >
             <View style={styles.topBar}>
               <Animated.View style={closeAnimStyle}>
-                <Animated.View
-                  accessible
+                <Pressable
                   accessibilityLabel={translate("employers:closeScanner")}
                   accessibilityRole="button"
-                  {...closeHandlers}
-                  onStartShouldSetResponder={() => true}
-                  onResponderRelease={closeScanner}
+                  onPress={closeScanner}
                   style={[
                     styles.closeButton,
                     {
@@ -86,9 +83,10 @@ export function EmployerQrScannerScreen() {
                       borderColor: "rgba(255, 255, 255, 0.2)",
                     },
                   ]}
+                  {...closeHandlers}
                 >
                   <Ionicons color="#FFFFFF" name="close" size={20} />
-                </Animated.View>
+                </Pressable>
               </Animated.View>
             </View>
 
@@ -118,21 +116,19 @@ export function EmployerQrScannerScreen() {
           ]}
         >
           <Animated.View style={closeAnimStyle}>
-            <Animated.View
-              accessible
+            <Pressable
               accessibilityLabel={translate("employers:closeScanner")}
               accessibilityRole="button"
-              {...closeHandlers}
-              onStartShouldSetResponder={() => true}
-              onResponderRelease={closeScanner}
+              onPress={closeScanner}
               style={[
                 styles.closeButton,
                 styles.permissionCloseButton,
                 { backgroundColor: tokens.surfaceSecondary, borderColor: tokens.border },
               ]}
+              {...closeHandlers}
             >
               <Ionicons color={tokens.textPrimary} name="close" size={20} />
-            </Animated.View>
+            </Pressable>
           </Animated.View>
           <View style={styles.permissionCopy}>
             <Text

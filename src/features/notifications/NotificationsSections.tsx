@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -133,16 +133,14 @@ export function NotificationsClearAll({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Animated.View
-        accessible
+      <Pressable
         accessibilityRole="button"
-        {...pressHandlers}
-        onStartShouldSetResponder={() => true}
-        onResponderRelease={onClearAll}
+        onPress={onClearAll}
         style={[
           styles.clearAllButton,
           { backgroundColor: tokens.dangerSoft, borderColor: tokens.danger },
         ]}
+        {...pressHandlers}
       >
         <Ionicons color={tokens.danger} name="trash-outline" size={15} />
         <Text
@@ -151,18 +149,16 @@ export function NotificationsClearAll({
           weight="medium"
           style={{ color: tokens.danger }}
         />
-      </Animated.View>
+      </Pressable>
     </Animated.View>
   )
 }
 
 function NotificationRowItem({
-  index,
   item,
   onDismiss,
   onPress,
 }: {
-  index: number
   item: NotificationItem
   onDismiss: () => void
   onPress: () => void
@@ -184,13 +180,11 @@ function NotificationRowItem({
       ]}
     >
       <Animated.View style={[styles.notificationPressWrapper, animatedStyle]}>
-        <Animated.View
-          accessible
+        <Pressable
           accessibilityRole="button"
-          {...pressHandlers}
-          onStartShouldSetResponder={() => true}
-          onResponderRelease={onPress}
+          onPress={onPress}
           style={styles.notificationMain}
+          {...pressHandlers}
         >
           <View style={[styles.notificationIcon, { backgroundColor: iconBg }]}>
             <Ionicons color={color} name={iconByKind[item.kind]} size={18} />
@@ -231,7 +225,7 @@ function NotificationRowItem({
               </View>
             ) : null}
           </View>
-        </Animated.View>
+        </Pressable>
       </Animated.View>
       <Animated.View
         accessible
@@ -276,10 +270,9 @@ function NotificationGroup({
           { backgroundColor: tokens.surface, ...tokens.elevation1 },
         ]}
       >
-        {items.map((item, index) => (
+        {items.map((item) => (
           <NotificationRowItem
             key={item.id}
-            index={index}
             item={item}
             onDismiss={() => onDismiss(item.id)}
             onPress={() => onPress(item)}

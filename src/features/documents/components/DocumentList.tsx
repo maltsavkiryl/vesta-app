@@ -1,10 +1,12 @@
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { DocumentItem } from "@/core/models"
 import { Banner, Text, appLayout, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
+
+import { translate } from "@/i18n/translate"
 
 import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.status"
 import type { Contract, Payslip } from "../documents.types"
@@ -56,13 +58,11 @@ export function RequiredDocumentRow({
     <Animated.View
       style={[styles.documentRowElevation, { ...tokens.elevation1 }, animatedStyle]}
     >
-      <Animated.View
-        accessible
+      <Pressable
         accessibilityRole="button"
-        {...pressHandlers}
-        onStartShouldSetResponder={() => true}
-        onResponderRelease={onPress}
+        onPress={onPress}
         style={[styles.documentRow, { backgroundColor: tokens.surface }]}
+        {...pressHandlers}
       >
         <DocumentStatusIcon
           backgroundColor={status.backgroundColor}
@@ -89,7 +89,7 @@ export function RequiredDocumentRow({
           statusLabel={status.label}
           textSecondary={tokens.textSecondary}
         />
-      </Animated.View>
+      </Pressable>
     </Animated.View>
   )
 }
@@ -110,13 +110,11 @@ export function PayslipRow({
     <Animated.View
       style={[styles.documentRowElevation, { ...tokens.elevation1 }, animatedStyle]}
     >
-      <Animated.View
-        accessible
+      <Pressable
         accessibilityRole="button"
-        {...pressHandlers}
-        onStartShouldSetResponder={() => true}
-        onResponderRelease={onPress}
+        onPress={onPress}
         style={[styles.documentRow, { backgroundColor: tokens.surface }]}
+        {...pressHandlers}
       >
         <DocumentStatusIcon
           backgroundColor={tokens.successSoft}
@@ -131,14 +129,14 @@ export function PayslipRow({
             style={{ color: tokens.textPrimary }}
           />
           <Text
-            text={`Paid ${payslip.date}`}
+            text={translate("documents:paidOn", { date: payslip.date })}
             size="xxs"
             style={{ color: tokens.textSecondary }}
           />
         </View>
         <PayslipSummary amount={payslip.net} muted={tokens.textMuted} primary={tokens.textPrimary} />
         <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
-      </Animated.View>
+      </Pressable>
     </Animated.View>
   )
 }
