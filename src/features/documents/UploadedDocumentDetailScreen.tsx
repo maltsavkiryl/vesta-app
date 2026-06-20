@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import {
   AppButton,
   AppScrollScreen,
@@ -11,16 +12,16 @@ import {
   appLayout,
   useDesignTokens,
 } from "@/ui"
-import { translate } from "@/i18n/translate"
 
 import { useDocumentsStateQuery } from "./data/documents.queries"
-import { shareUploadedDocument } from "./documentShare"
+import { useOpenDocument } from "./useOpenDocument"
 
 export function UploadedDocumentDetailScreen() {
   const tokens = useDesignTokens()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { documents } = useDocumentsStateQuery()
   const document = documents.find((candidate) => candidate.id === id)
+  const openDocument = useOpenDocument()
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
@@ -70,7 +71,7 @@ export function UploadedDocumentDetailScreen() {
             fullWidth
             label={translate("documents:shareFile")}
             onPress={() => {
-              void shareUploadedDocument(document)
+              void openDocument(document)
             }}
           />
         </>

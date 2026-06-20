@@ -4,6 +4,7 @@ import * as Sharing from "expo-sharing"
 import * as FileSystem from "expo-file-system/legacy"
 
 import type { DocumentItem } from "@/core/models"
+import type { DocumentsRepository } from "@/features/documents/data/documents.repository"
 
 import type { Contract, Payslip } from "./documents.types"
 
@@ -203,4 +204,26 @@ export async function shareUploadedDocument(document: DocumentItem) {
     title: document.title,
     uri: document.uploadedUri,
   })
+}
+
+/**
+ * Opens a document for the employee. A locally-stored file is shared directly;
+ * a server-side document is resolved to a short-lived URL and opened in the
+ * system viewer/browser.
+ */
+export async function openDocumentFile(
+  repo: Pick<DocumentsRepository, "getDocumentDownloadUrl">,
+  accountId: string,
+  document: DocumentItem,
+) {
+  if (document.uploadedUri) return shareUploadedDocument(document)
+
+  const url = await repo.getDocumentDownloadUrl(accountId, document.id)
+  if (url && (await Linking.canOpenURL(url))) {
+    await Linking.openURL(url)
+    return true
+  }
+
+  Alert.alert("File unavailable", "Vesta couldn't open this document right now.")
+  return false
 }

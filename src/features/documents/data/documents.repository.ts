@@ -24,6 +24,8 @@ export interface DocumentContract {
 export interface DocumentsRepository {
   getContracts(accountId: string): Promise<DocumentContract[]>
   getDocuments(accountId: string): Promise<DocumentItem[]>
+  /** Resolves a directly-openable URL for a document, or null when unavailable. */
+  getDocumentDownloadUrl(accountId: string, documentId: string): Promise<string | null>
   signContract(
     accountId: string,
     contractId: string,
