@@ -1,8 +1,10 @@
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { AppScrollScreen, Text, appTypography, useDesignTokens } from "@/ui"
+import { AppScrollScreen, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
 
 export interface OnboardingWelcomeProps {
   firstName: string
@@ -13,12 +15,14 @@ export interface OnboardingWelcomeProps {
 export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelcomeProps) {
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
+  const { animatedStyle: startAnim, pressHandlers: startHandlers } = usePressScale({ pressedScale: 0.97 })
+  const { animatedStyle: skipAnim, pressHandlers: skipHandlers } = usePressScale({})
 
   return (
     <AppScrollScreen
       contentContainerStyle={[styles.welcomeScreen, { paddingBottom: insets.bottom + 40 }]}
     >
-      <View style={styles.welcomeArt}>
+      <MotionView style={styles.welcomeArt}>
         <View style={[styles.welcomeHaloOuter, { backgroundColor: tokens.accentSoft }]} />
         <View style={[styles.welcomeHaloInner, { backgroundColor: tokens.accentSoft }]} />
         <View style={[styles.welcomeMark, { backgroundColor: tokens.textPrimary }]}>
@@ -28,8 +32,8 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
             style={[styles.welcomeLetter, { color: tokens.background }]}
           />
         </View>
-      </View>
-      <View style={styles.welcomeCopy}>
+      </MotionView>
+      <MotionView delay={60} style={styles.welcomeCopy}>
         <Text
           text={`Welcome to Vesta,\n${firstName}.`}
           weight="bold"
@@ -40,22 +44,37 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
           size="sm"
           style={{ color: tokens.textSecondary }}
         />
-        <Pressable
-          onPress={onStart}
-          style={[styles.darkButton, { backgroundColor: tokens.textPrimary }]}
-        >
-          <Text
-            text="Get started"
-            size="sm"
-            weight="semiBold"
-            style={{ color: tokens.background }}
-          />
-          <Ionicons color={tokens.background} name="arrow-forward-outline" size={18} />
-        </Pressable>
-        <Pressable onPress={onSkip} style={styles.skipButton}>
-          <Text text="Skip for now" size="xxs" style={{ color: tokens.textMuted }} />
-        </Pressable>
-      </View>
+        <Animated.View style={startAnim}>
+          <Animated.View
+            accessible
+            accessibilityRole="button"
+            {...startHandlers}
+            onStartShouldSetResponder={() => true}
+            onResponderRelease={onStart}
+            style={[styles.darkButton, { backgroundColor: tokens.textPrimary }]}
+          >
+            <Text
+              text="Get started"
+              size="sm"
+              weight="semiBold"
+              style={{ color: tokens.background }}
+            />
+            <Ionicons color={tokens.background} name="arrow-forward-outline" size={18} />
+          </Animated.View>
+        </Animated.View>
+        <Animated.View style={skipAnim}>
+          <Animated.View
+            accessible
+            accessibilityRole="button"
+            {...skipHandlers}
+            onStartShouldSetResponder={() => true}
+            onResponderRelease={onSkip}
+            style={styles.skipButton}
+          >
+            <Text text="Skip for now" size="xxs" style={{ color: tokens.textMuted }} />
+          </Animated.View>
+        </Animated.View>
+      </MotionView>
     </AppScrollScreen>
   )
 }
@@ -63,6 +82,7 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
 const styles = StyleSheet.create({
   darkButton: {
     alignItems: "center",
+    borderCurve: "continuous",
     borderRadius: 16,
     flexDirection: "row",
     gap: 8,
@@ -102,6 +122,7 @@ const styles = StyleSheet.create({
   },
   welcomeMark: {
     alignItems: "center",
+    borderCurve: "continuous",
     borderRadius: 90,
     height: 180,
     justifyContent: "center",
