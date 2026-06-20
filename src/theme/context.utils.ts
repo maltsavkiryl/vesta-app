@@ -17,7 +17,12 @@ export const setSystemUIBackgroundColor = (color: string) => {
 }
 
 export const setNativeColorScheme = (themeOverride: ThemeContextModeT) => {
-  Appearance.setColorScheme(themeOverride ?? "unspecified")
+  // `Appearance.setColorScheme` is a native-only API (iOS/Android). On react-native-web it is
+  // undefined, so calling it unconditionally crashes the web build at boot (blank screen).
+  // Guard it so theming degrades gracefully on web while native behaviour is unchanged.
+  if (typeof Appearance.setColorScheme === "function") {
+    Appearance.setColorScheme(themeOverride ?? "unspecified")
+  }
 }
 
 /**
