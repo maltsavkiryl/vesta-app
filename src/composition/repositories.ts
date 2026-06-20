@@ -671,14 +671,18 @@ export function createAppRepositories(): AppRepositories {
   }
 
   const httpRepos = createApiRepositories()
+  // One planning repo instance is the single source for both the planning hub
+  // and the schedule tab / shift / availability screens (PlanningRepository
+  // extends ScheduleRepository).
+  const planning = createPlanningHttpRepository(httpClient)
   return {
     auth: httpRepos.auth,
     profile: httpRepos.profile,
     documents: createDocumentsHttpRepository(httpClient, createMockDocumentsRepository()),
     home: createMockHomeRepository(),
     notifications: createNotificationsHttpRepository(httpClient),
-    planning: createPlanningHttpRepository(httpClient),
-    schedule: createMockScheduleRepository(),
+    planning,
+    schedule: planning,
     time: createMockTimeRepository(),
   }
 }
