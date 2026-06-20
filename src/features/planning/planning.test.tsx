@@ -65,6 +65,17 @@ jest.mock("@/providers/app-provider", () => ({
   useAppSession: () => ({ accountId: "test-account-id" }),
 }))
 
+jest.mock("@/ui/feedback", () => ({
+  ...jest.requireActual("@/ui/feedback"),
+  useToast: () => ({
+    showToast: jest.fn(),
+    showSuccess: jest.fn(),
+    showError: jest.fn(),
+    showInfo: jest.fn(),
+    showWarning: jest.fn(),
+  }),
+}))
+
 // ── Screen hook mocks (set up per test suite) ─────────────────────────────────
 
 const mockScheduleQuery = jest.fn()
@@ -283,6 +294,43 @@ describe("PlanningCallsScreen", () => {
   })
 
   it("calls claimCall mutation when claim button pressed", async () => {
+    mockCallsQuery.mockReturnValue(idleQuery([SAMPLE_CALL]))
+    const { PlanningCallsScreen } = require("./PlanningCallsScreen")
+    render(<PlanningCallsScreen />)
+    const claimButton = screen.getByRole("button", { name: /planning:calls\.claim/ })
+    fireEvent.press(claimButton)
+    await Promise.resolve()
+    expect(mockClaimCallMutation).toHaveBeenCalledWith({
+      callCode: "call-001",
+      employerCode: "employer-1",
+      establishmentCode: "est-1",
+    })
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Signature moments
+
+describe("Signature moments", () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it("calls completeTodo mutation on checkbox press (check-off signature moment)", async () => {
+    mockTodosQuery.mockReturnValue(
+      idleQuery({ todos: [SAMPLE_TODO], dressNote: null, note: null }),
+    )
+    const { PlanningTodosScreen } = require("./PlanningTodosScreen")
+    render(<PlanningTodosScreen />)
+    const checkbox = screen.getByRole("checkbox", { name: "Check stock levels" })
+    fireEvent.press(checkbox)
+    await Promise.resolve()
+    // Core behaviour: mutation called with the right todo code
+    expect(mockCompleteTodoMutation).toHaveBeenCalledWith({ todoCode: "todo-001" })
+  })
+
+  it("calls claimCall mutation on claim press (claim signature moment)", async () => {
+    mockClaimCallMutation.mockResolvedValue({ ok: true })
     mockCallsQuery.mockReturnValue(idleQuery([SAMPLE_CALL]))
     const { PlanningCallsScreen } = require("./PlanningCallsScreen")
     render(<PlanningCallsScreen />)
