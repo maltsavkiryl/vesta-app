@@ -114,9 +114,12 @@ export function usePlanningTodosQuery() {
 
 export function usePlanningCallsQuery(params: GetOpenCallsParams = {}) {
   const { accountId } = useAppSession()
+  const paramsWithEmployer: GetOpenCallsParams = accountId
+    ? { ...params, employerCode: accountId }
+    : params
   const query = useQuery({
     enabled: Boolean(accountId) && Boolean(appRepositories.planning),
-    queryFn: () => appRepositories.planning!.getOpenCalls(params),
+    queryFn: () => appRepositories.planning!.getOpenCalls(paramsWithEmployer),
     queryKey: planningQueryKeys.calls(accountId, params),
   })
 

@@ -118,6 +118,8 @@ export interface PlanningCallCandidateDto {
 export interface PlanningCallDto {
   uniqueCode: string
   shiftUniqueCode: string
+  /** Establishment that owns this call — required to build the claim URL. */
+  establishmentUniqueCode: string
   target: string
   mode: string
   status: string

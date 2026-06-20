@@ -35,6 +35,12 @@ export interface GetScheduleParams {
 export interface GetOpenCallsParams {
   from?: string // yyyy-MM-dd
   to?: string // yyyy-MM-dd
+  /**
+   * The session employer's unique code (accountId).
+   * Passed through to toPlanningCall so the domain model carries the correct
+   * employer code for the claim URL without an extra context lookup in the repo.
+   */
+  employerCode?: string
 }
 
 export interface ClaimCallInput {

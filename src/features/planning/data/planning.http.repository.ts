@@ -219,16 +219,12 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     )
     if (!res.ok || !res.data) throw new Error("Failed to load open calls")
 
-    // The self-scoped response does not include employer/establishment codes —
-    // those come from the associated shift. We pass empty strings here; the UI
-    // layer must supply them from the call's associated shift when building the
-    // claim request.  For now we leave them blank; the claimCall input carries
-    // the correct codes from the PlanningCall object stored in the UI.
-    //
-    // In practice the PlanningCallDto does not carry establishmentCode directly,
-    // so we store a placeholder and rely on the screen to pass the correct codes
-    // via ClaimCallInput.employerCode / .establishmentCode.
-    return res.data.map((dto) => toPlanningCall(dto, "", ""))
+    // The employer code comes from the session (passed via params.employerCode).
+    // The establishment code is now carried directly on PlanningCallDto
+    // (dto.establishmentUniqueCode) — the backend exposes it so the mobile app
+    // can build the correct claim URL without a separate lookup.
+    const employerCode = params.employerCode ?? ""
+    return res.data.map((dto) => toPlanningCall(dto, employerCode, dto.establishmentUniqueCode))
   }
 
   // ---------------------------------------------------------------------------
