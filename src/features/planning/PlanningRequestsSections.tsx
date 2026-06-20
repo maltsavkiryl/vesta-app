@@ -1,17 +1,19 @@
+/* eslint-disable react-native/no-inline-styles */
+
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import type { MyRequests, ShiftChangeRequest, ShiftSwapRequest } from "@/core/models"
+import { Pressable } from "react-native"
 import {
   ActionRow,
-  AppButton as _AppButton,
   EmptyState,
   GroupedSection,
   StatusBadge,
-  SurfaceCard as _SurfaceCard,
   Text,
   useDesignTokens,
 } from "@/ui"
 import type { AppTone } from "@/ui/composites/appTone"
+import { translate } from "@/i18n/translate"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -32,14 +34,14 @@ function getRequestStatusLabel(status: string): string {
   switch (status.toLowerCase()) {
     case "approved":
     case "accepted":
-      return "Goedgekeurd"
+      return translate("planning:requests.statusApproved")
     case "rejected":
     case "declined":
-      return "Afgewezen"
+      return translate("planning:requests.statusRejected")
     case "cancelled":
-      return "Geannuleerd"
+      return translate("planning:requests.statusCancelled")
     default:
-      return "In behandeling"
+      return translate("planning:requests.statusPending")
   }
 }
 
@@ -57,21 +59,21 @@ export function PlanningRequestShortcuts({
   return (
     <GroupedSection
       bodyStyle={styles.noCardBody}
-      title="Nieuwe aanvraag"
+      title={translate("planning:requests.newRequest")}
     >
       <View style={styles.shortcutsStack}>
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />}
           onPress={onNewShiftSwap}
           subtitle="Vraag een collega om je shift over te nemen"
-          title="Shift ruilen"
+          title={translate("planning:requests.shiftSwap")}
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />}
           onPress={onNewChangeRequest}
           subtitle="Meld een conflict of vraag een wijziging aan"
-          title="Wijziging aanvragen"
+          title={translate("planning:requests.changeRequest")}
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
       </View>
@@ -81,8 +83,21 @@ export function PlanningRequestShortcuts({
 
 // ── Shift swap request row ────────────────────────────────────────────────────
 
-export function PlanningSwapRequestRow({ request }: { request: ShiftSwapRequest }) {
+export function PlanningSwapRequestRow({
+  myEmployeeId,
+  onCancel,
+  onDecide,
+  request,
+}: {
+  myEmployeeId?: string
+  onCancel?: (swapCode: string) => void
+  onDecide?: (swapCode: string, accept: boolean) => void
+  request: ShiftSwapRequest
+}) {
   const tokens = useDesignTokens()
+  const isPending = request.status.toLowerCase() === "pending"
+  const isRequester = myEmployeeId !== undefined && request.requesterEmployeeId === myEmployeeId
+  const isTarget = myEmployeeId !== undefined && request.targetEmployeeId === myEmployeeId
 
   return (
     <View style={styles.requestRow}>
@@ -90,14 +105,41 @@ export function PlanningSwapRequestRow({ request }: { request: ShiftSwapRequest 
         <Text
           size="xs"
           style={{ color: tokens.textPrimary }}
-          text="Shift ruilen"
+          text={translate("planning:requests.shiftSwap")}
           weight="medium"
         />
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={`Aangevraagd op ${request.createdAt.slice(0, 10)}`}
+          text={request.createdAt.slice(0, 10)}
         />
+        {isPending && isTarget && onDecide ? (
+          <View style={styles.decideRow}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => onDecide(request.id, true)}
+              style={({ pressed }) => [styles.actionBtn, styles.actionBtnAccept, { opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Text size="xxs" style={{ color: tokens.success }} text={translate("planning:requests.statusApproved")} weight="semiBold" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => onDecide(request.id, false)}
+              style={({ pressed }) => [styles.actionBtn, styles.actionBtnReject, { opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Text size="xxs" style={{ color: tokens.danger }} text={translate("planning:requests.statusRejected")} weight="semiBold" />
+            </Pressable>
+          </View>
+        ) : null}
+        {isPending && isRequester && onCancel ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onCancel(request.id)}
+            style={({ pressed }) => [styles.actionBtn, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Text size="xxs" style={{ color: tokens.textSecondary }} text={translate("planning:requests.statusCancelled")} weight="semiBold" />
+          </Pressable>
+        ) : null}
       </View>
       <StatusBadge
         label={getRequestStatusLabel(request.status)}
@@ -118,7 +160,7 @@ export function PlanningChangeRequestRow({ request }: { request: ShiftChangeRequ
         <Text
           size="xs"
           style={{ color: tokens.textPrimary }}
-          text="Shift wijziging"
+          text={translate("planning:requests.changeRequest")}
           weight="medium"
         />
         {request.requestedDate ? (
@@ -147,18 +189,28 @@ export function PlanningChangeRequestRow({ request }: { request: ShiftChangeRequ
 
 // ── Combined requests section ─────────────────────────────────────────────────
 
-export function PlanningRequestsListSection({ requests }: { requests: MyRequests }) {
+export function PlanningRequestsListSection({
+  myEmployeeId,
+  onCancel,
+  onDecide,
+  requests,
+}: {
+  myEmployeeId?: string
+  onCancel?: (swapCode: string) => void
+  onDecide?: (swapCode: string, accept: boolean) => void
+  requests: MyRequests
+}) {
   const tokens = useDesignTokens()
   const hasAny = requests.swapRequests.length > 0 || requests.changeRequests.length > 0
 
   if (!hasAny) {
     return (
-      <GroupedSection title="Mijn aanvragen">
+      <GroupedSection title={translate("planning:requests.title")}>
         <View style={styles.emptyBody}>
           <Text
             size="xs"
             style={{ color: tokens.textMuted, textAlign: "center" }}
-            text="Nog geen ingediende aanvragen."
+            text={translate("planning:requests.noRequestsSubtitle")}
           />
         </View>
       </GroupedSection>
@@ -166,10 +218,16 @@ export function PlanningRequestsListSection({ requests }: { requests: MyRequests
   }
 
   return (
-    <GroupedSection title="Mijn aanvragen">
+    <GroupedSection title={translate("planning:requests.title")}>
       <View style={styles.requestsList}>
         {requests.swapRequests.map((req) => (
-          <PlanningSwapRequestRow key={req.id} request={req} />
+          <PlanningSwapRequestRow
+            key={req.id}
+            myEmployeeId={myEmployeeId}
+            onCancel={onCancel}
+            onDecide={onDecide}
+            request={req}
+          />
         ))}
         {requests.changeRequests.map((req) => (
           <PlanningChangeRequestRow key={req.id} request={req} />
@@ -187,13 +245,36 @@ export function PlanningRequestsEmpty() {
     <EmptyState
       cardless
       icon={<Ionicons color={tokens.textMuted} name="document-text-outline" size={18} />}
-      subtitle="Ingediende aanvragen verschijnen hier."
-      title="Nog geen aanvragen"
+      subtitle={translate("planning:requests.noRequestsSubtitle")}
+      title={translate("planning:requests.noRequestsTitle")}
     />
   )
 }
 
 const styles = StyleSheet.create({
+  actionBtn: {
+    borderCurve: "continuous",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "transparent",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginTop: 6,
+    alignSelf: "flex-start",
+  },
+  actionBtnAccept: {
+    backgroundColor: "transparent",
+    borderColor: "#34C75920",
+  },
+  actionBtnReject: {
+    backgroundColor: "transparent",
+    borderColor: "#FF3B3020",
+  },
+  decideRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 2,
+  },
   emptyBody: {
     paddingHorizontal: 16,
     paddingVertical: 20,

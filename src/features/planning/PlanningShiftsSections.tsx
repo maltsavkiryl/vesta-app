@@ -5,6 +5,7 @@ import type { Shift } from "@/core/models"
 import type { AgendaSection } from "@/features/schedule/schedule.utils"
 import { EmptyState, SectionTitle, useDesignTokens } from "@/ui"
 import { SurfaceCard, Text } from "@/ui"
+import { translate } from "@/i18n/translate"
 
 export function PlanningShiftCard({
   onPress,
@@ -75,8 +76,8 @@ export function PlanningShiftsEmpty() {
   return (
     <EmptyState
       icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
-      subtitle="Je planning is leeg. Nieuwe shifts verschijnen hier zodra ze ingepland zijn."
-      title="Geen aankomende shifts"
+      subtitle={translate("planning:schedule.noShiftsSubtitle")}
+      title={translate("planning:schedule.noShifts")}
     />
   )
 }

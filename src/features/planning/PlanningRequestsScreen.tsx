@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
+import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
 import {
   PlanningRequestShortcuts,
@@ -21,13 +22,13 @@ export function PlanningRequestsScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title="Mijn aanvragen" />
+        <PageHeader delay={0} title={translate("planning:requests.title")} />
         <EmptyState
-          actionLabel="Opnieuw proberen"
+          actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
           onAction={onRefresh}
-          subtitle="Kon je aanvragen niet laden. Controleer je verbinding en probeer opnieuw."
-          title="Er is iets misgegaan"
+          subtitle={translate("planning:schedule.loadErrorSubtitle")}
+          title={translate("planning:schedule.loadError")}
         />
       </AppScrollScreen>
     )
@@ -40,7 +41,7 @@ export function PlanningRequestsScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title="Mijn aanvragen" />
+      <PageHeader delay={0} title={translate("planning:requests.title")} />
 
       <PlanningRequestShortcuts
         onNewChangeRequest={screen.handleNewChangeRequest}
@@ -48,6 +49,9 @@ export function PlanningRequestsScreen() {
       />
 
       <PlanningRequestsListSection
+        myEmployeeId={screen.myEmployeeId}
+        onCancel={screen.handleCancelSwap}
+        onDecide={screen.handleDecideSwap}
         requests={screen.requests}
       />
     </AppScrollScreen>
