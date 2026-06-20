@@ -15,7 +15,10 @@ import type {
 } from "@/features/documents/data/documents.repository"
 import { getContracts } from "@/features/documents/documents.utils"
 import type { HomeRepository } from "@/features/home/data/home.repository"
+import { createNotificationsHttpRepository } from "@/features/notifications/data/notifications.http.repository"
 import type { NotificationsRepository } from "@/features/notifications/data/notifications.repository"
+import { createPlanningHttpRepository } from "@/features/planning/data/planning.http.repository"
+import type { PlanningRepository } from "@/features/planning/data/planning.repository"
 import type { ProfileError } from "@/features/profile/data/profile.errors"
 import type { ProfileRepository } from "@/features/profile/data/profile.repository"
 import {
@@ -27,8 +30,6 @@ import type {
   CreateRequestInput,
   ScheduleRepository,
 } from "@/features/schedule/data/schedule.repository"
-import { createPlanningHttpRepository } from "@/features/planning/data/planning.http.repository"
-import type { PlanningRepository } from "@/features/planning/data/planning.repository"
 import type { ClockError } from "@/features/time/data/time.errors"
 import type { TimeRepository } from "@/features/time/data/time.repository"
 import { authService, httpClient } from "@/services/api"
@@ -670,7 +671,7 @@ export function createAppRepositories(): AppRepositories {
     profile: httpRepos.profile,
     documents: createMockDocumentsRepository(),
     home: createMockHomeRepository(),
-    notifications: createMockNotificationsRepository(),
+    notifications: createNotificationsHttpRepository(httpClient),
     planning: createPlanningHttpRepository(httpClient),
     schedule: createMockScheduleRepository(),
     time: createMockTimeRepository(),

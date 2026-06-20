@@ -8,12 +8,19 @@ export const notificationsQueryKeys = {
   list: (accountId: string | null) => ["notifications", accountId, "list"] as const,
 }
 
+// Keeps the inbox feeling live without a persistent SSE socket (which drains
+// battery and dies on backgrounding). Background-delivered changes arrive via
+// push; the foreground poll catches everything else while the app is open.
+const NOTIFICATIONS_POLL_INTERVAL_MS = 60_000
+
 export function useNotificationsQuery() {
   const { accountId } = useAppSession()
   return useQuery({
     enabled: Boolean(accountId),
     queryFn: () => appRepositories.notifications.getNotifications(accountId!),
     queryKey: notificationsQueryKeys.list(accountId),
+    refetchInterval: NOTIFICATIONS_POLL_INTERVAL_MS,
+    refetchOnWindowFocus: true,
   })
 }
 
