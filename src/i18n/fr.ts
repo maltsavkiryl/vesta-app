@@ -167,6 +167,72 @@ const fr: Translations = {
       hoursLabel: "Heures",
     },
   },
+  home: {
+    greeting: {
+      night: "Bonne nuit",
+      morning: "Bonjour",
+      afternoon: "Bon après-midi",
+      evening: "Bonsoir",
+    },
+    errorTitle: "Une erreur est survenue",
+    errorSubtitle: "Impossible de charger votre page d'accueil. Vérifiez votre connexion et réessayez.",
+    payrollNudge: {
+      title: "Finish setting up payroll",
+      cta: "Compléter le profil",
+      dismiss: "Ignorer",
+    },
+    upcoming: {
+      title: "À venir",
+      viewAll: "Voir tout",
+      empty: "Aucun service à venir",
+      emptySubtitle: "Vos prochains services planifiés apparaîtront ici dès que le planning sera publié.",
+    },
+    tasks: {
+      title: "Tâches",
+      viewAll: "Voir tout",
+    },
+    updates: {
+      title: "Mises à jour",
+      viewAll: "Voir tout",
+    },
+    earnings: {
+      title: "Revenus {{month}}",
+      hoursWorked: "Heures travaillées",
+      shiftsWorked: "Services travaillés",
+      viewPayslip: "Voir la dernière fiche de paie",
+      targetReached: "Objectif mensuel atteint — bravo",
+      remaining: "{{remaining}} avant votre objectif de {{target}}",
+      averageRate: "{{rate}}/h en moyenne",
+    },
+  },
+  time: {
+    title: "Temps",
+    recentEntries: "Entrées récentes",
+    viewAll: "Voir tout",
+    noEntriesTitle: "Aucune entrée",
+    noEntriesSubtitle: "Pointez via l'onglet Temps pour commencer à construire votre historique de travail.",
+    historyEmptyTitle: "Aucun historique pour le moment",
+    historyEmptySubtitle: "Les services terminés apparaissent ici après votre première sortie.",
+    entriesTotal: "{{count}} entrées au total",
+    monthEntries: "{{count}} entrées",
+    clock: {
+      todayShift: "SERVICE DU JOUR",
+      unavailable: "POINTAGE INDISPONIBLE",
+      readyToTrack: "PRÊT À SUIVRE",
+      confirmed: "Confirmé",
+      setupNeeded: "Configuration requise",
+      noShiftNeeded: "Aucun service requis",
+      gettingLocation: "Localisation en cours…",
+      clockInSuccess: "Pointé — bonne journée !",
+    },
+  },
+  profile: {
+    completeness: {
+      complete: "Complet",
+      stepsLeft: "{{count}} étape restante",
+      stepsLeftPlural: "{{count}} étapes restantes",
+    },
+  },
 }
 
 export default fr

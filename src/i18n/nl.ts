@@ -167,6 +167,72 @@ const nl: Translations = {
       hoursLabel: "Uren",
     },
   },
+  home: {
+    greeting: {
+      night: "Goedenacht",
+      morning: "Goedemorgen",
+      afternoon: "Goedemiddag",
+      evening: "Goedenavond",
+    },
+    errorTitle: "Er is iets misgegaan",
+    errorSubtitle: "We konden je startpagina niet laden. Controleer je verbinding en probeer opnieuw.",
+    payrollNudge: {
+      title: "Finish setting up payroll",
+      cta: "Profiel voltooien",
+      dismiss: "Sluiten",
+    },
+    upcoming: {
+      title: "Aankomend",
+      viewAll: "Alles bekijken",
+      empty: "Geen aankomende shifts",
+      emptySubtitle: "Je volgende ingeplande shifts verschijnen hier zodra de planning gepubliceerd is.",
+    },
+    tasks: {
+      title: "Taken",
+      viewAll: "Alles bekijken",
+    },
+    updates: {
+      title: "Updates",
+      viewAll: "Alles bekijken",
+    },
+    earnings: {
+      title: "{{month}} inkomsten",
+      hoursWorked: "Gewerkte uren",
+      shiftsWorked: "Gewerkte shifts",
+      viewPayslip: "Laatste loonbrief bekijken",
+      targetReached: "Maanddoel bereikt — goed gedaan",
+      remaining: "{{remaining}} tot je doel van {{target}}",
+      averageRate: "{{rate}}/uur gemiddeld",
+    },
+  },
+  time: {
+    title: "Tijd",
+    recentEntries: "Recente registraties",
+    viewAll: "Alles bekijken",
+    noEntriesTitle: "Nog geen registraties",
+    noEntriesSubtitle: "In- en uitklokken via het tabblad Tijd om je werkgeschiedenis op te bouwen.",
+    historyEmptyTitle: "Nog niets in je geschiedenis",
+    historyEmptySubtitle: "Voltooide shifts verschijnen hier nadat je voor het eerst uitklokt.",
+    entriesTotal: "{{count}} registraties totaal",
+    monthEntries: "{{count}} registraties",
+    clock: {
+      todayShift: "SHIFT VAN VANDAAG",
+      unavailable: "INKLOKKEN NIET BESCHIKBAAR",
+      readyToTrack: "KLAAR OM TE REGISTREREN",
+      confirmed: "Bevestigd",
+      setupNeeded: "Instelling vereist",
+      noShiftNeeded: "Geen shift nodig",
+      gettingLocation: "Locatie ophalen…",
+      clockInSuccess: "Ingeklokt — veel succes!",
+    },
+  },
+  profile: {
+    completeness: {
+      complete: "Volledig",
+      stepsLeft: "{{count}} stap over",
+      stepsLeftPlural: "{{count}} stappen over",
+    },
+  },
 }
 
 export default nl

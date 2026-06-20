@@ -165,6 +165,72 @@ const en = {
       hoursLabel: "Hours",
     },
   },
+  home: {
+    greeting: {
+      night: "Good night",
+      morning: "Good morning",
+      afternoon: "Good afternoon",
+      evening: "Good evening",
+    },
+    errorTitle: "Something went wrong",
+    errorSubtitle: "We couldn't load your home overview. Check your connection and try again.",
+    payrollNudge: {
+      title: "Finish setting up payroll",
+      cta: "Complete profile",
+      dismiss: "Dismiss",
+    },
+    upcoming: {
+      title: "Upcoming",
+      viewAll: "View all",
+      empty: "No upcoming shifts",
+      emptySubtitle: "Your next assigned shifts will appear here as soon as planning is published.",
+    },
+    tasks: {
+      title: "Tasks",
+      viewAll: "View all",
+    },
+    updates: {
+      title: "Updates",
+      viewAll: "View all",
+    },
+    earnings: {
+      title: "{{month}} earnings",
+      hoursWorked: "Hours worked",
+      shiftsWorked: "Shifts worked",
+      viewPayslip: "View latest payslip",
+      targetReached: "Monthly target reached — nice work",
+      remaining: "{{remaining}} to your {{target}} target",
+      averageRate: "{{rate}}/hr average",
+    },
+  },
+  time: {
+    title: "Time",
+    recentEntries: "Recent entries",
+    viewAll: "View all",
+    noEntriesTitle: "No entries yet",
+    noEntriesSubtitle: "Clock in and out from the Time tab to start building your work history.",
+    historyEmptyTitle: "Nothing in your history yet",
+    historyEmptySubtitle: "Completed shifts appear here after you clock out for the first time.",
+    entriesTotal: "{{count}} entries total",
+    monthEntries: "{{count}} entries",
+    clock: {
+      todayShift: "TODAY'S SHIFT",
+      unavailable: "CLOCK-IN UNAVAILABLE",
+      readyToTrack: "READY TO TRACK",
+      confirmed: "Confirmed",
+      setupNeeded: "Setup needed",
+      noShiftNeeded: "No shift needed",
+      gettingLocation: "Getting location…",
+      clockInSuccess: "Clocked in — have a great shift!",
+    },
+  },
+  profile: {
+    completeness: {
+      complete: "Complete",
+      stepsLeft: "{{count}} step left",
+      stepsLeftPlural: "{{count}} steps left",
+    },
+  },
 }
 
 export default en
