@@ -1,14 +1,16 @@
-import Animated from "react-native-reanimated"
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import type { PlanningCall } from "@/core/models"
-import { AppButton, EmptyState, Skeleton, SurfaceCard, useDesignTokens } from "@/ui"
-import { Text } from "@/ui/primitives/Text"
-import { translate } from "@/i18n/translate"
-import type { ClaimState } from "./usePlanningCallsScreen"
+import Animated from "react-native-reanimated"
+
 import { formatShortDate } from "@/core/date"
+import type { PlanningCall } from "@/core/models"
+import { translate } from "@/i18n/translate"
+import { AppButton, EmptyState, Skeleton, SurfaceCard, useDesignTokens } from "@/ui"
 import { useListItemEntrance, useCelebratePulse } from "@/ui/foundations/motion"
+import { Text } from "@/ui/primitives/Text"
 import { fireHaptic } from "@/utils/haptics"
+
+import type { ClaimState } from "./usePlanningCallsScreen"
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -161,7 +163,12 @@ export function PlanningCallCard({
 
           {/* Error callout */}
           {hasError && errorMessage ? (
-            <View style={[styles.errorRow, { backgroundColor: tokens.dangerSoft, borderColor: `${tokens.danger}25` }]}>
+            <View
+              style={[
+                styles.errorRow,
+                { backgroundColor: tokens.dangerSoft, borderColor: `${tokens.danger}25` },
+              ]}
+            >
               <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
               <Text size="xxs" style={{ color: tokens.danger }} text={errorMessage} />
             </View>

@@ -4,8 +4,8 @@ import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
 
-import { SurfaceCard } from "./AppPrimitives"
 import { MotionView } from "./app-motion"
+import { SurfaceCard } from "./AppPrimitives"
 import { SectionTitle } from "./SectionTitle"
 
 export function SectionBlock({

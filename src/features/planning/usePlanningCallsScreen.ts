@@ -10,14 +10,20 @@
  * HTTP repo populates from the employee's active employer context).
  */
 import { useState } from "react"
-import { useAppSession } from "@/providers/app-provider"
-import { usePlanningCallsQuery } from "@/features/planning/data/planning.queries"
-import { useClaimCallMutation } from "@/features/planning/data/planning.mutations"
 
-export type ClaimState = "idle" | "claiming" | "claimed" | "error" | "already-claimed" | "forbidden" | "conflict"
+import { useClaimCallMutation } from "@/features/planning/data/planning.mutations"
+import { usePlanningCallsQuery } from "@/features/planning/data/planning.queries"
+
+export type ClaimState =
+  | "idle"
+  | "claiming"
+  | "claimed"
+  | "error"
+  | "already-claimed"
+  | "forbidden"
+  | "conflict"
 
 export function usePlanningCallsScreen() {
-  const { accountId } = useAppSession()
   const [claimStates, setClaimStates] = useState<Record<string, ClaimState>>({})
 
   // Self-scoped: no establishment code required

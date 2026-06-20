@@ -1,17 +1,26 @@
 import { useEffect, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
+import Animated from "react-native-reanimated"
+
+import { formatShortDate, formatLocalDate, formatTimeLabel, getShiftTimeRange } from "@/core/date"
 import type { Shift } from "@/core/models"
-import { AppButton, AppScrollScreen, GroupedSection, SuccessState, TextField, useDesignTokens } from "@/ui"
-import { useToast } from "@/ui/feedback"
-import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
-import { getShiftTimeRange, formatShortDate, formatLocalDate, formatTimeLabel } from "@/core/date"
+import {
+  AppButton,
+  AppScrollScreen,
+  GroupedSection,
+  SuccessState,
+  TextField,
+  useDesignTokens,
+} from "@/ui"
+import { useToast } from "@/ui/feedback"
 import { useListItemEntrance, useCelebratePulse } from "@/ui/foundations/motion"
-import { usePlanningChangeNewScreen } from "./usePlanningChangeNewScreen"
+import { Text } from "@/ui/primitives/Text"
 import { fireHaptic } from "@/utils/haptics"
+
+import { usePlanningChangeNewScreen } from "./usePlanningChangeNewScreen"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -68,12 +77,19 @@ function ShiftPickerRow({
           ]}
         >
           <View style={styles.shiftRowContent}>
-            <Text size="xs" style={{ color: tokens.textPrimary }} text={formatShortDate(shift.date)} weight="medium" />
-            <Text size="xxs" style={{ color: tokens.textSecondary }} text={getShiftTimeRange(shift)} />
+            <Text
+              size="xs"
+              style={{ color: tokens.textPrimary }}
+              text={formatShortDate(shift.date)}
+              weight="medium"
+            />
+            <Text
+              size="xxs"
+              style={{ color: tokens.textSecondary }}
+              text={getShiftTimeRange(shift)}
+            />
           </View>
-          {isSelected ? (
-            <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
-          ) : null}
+          {isSelected ? <Ionicons color={tokens.accent} name="checkmark-circle" size={18} /> : null}
         </Pressable>
       </Animated.View>
     </Animated.View>
@@ -94,21 +110,25 @@ function PickerRow({
   value: string
 }) {
   const tokens = useDesignTokens()
+  const pickerActiveStyle = isActive
+    ? {
+        backgroundColor: tokens.accentMuted,
+        borderLeftColor: tokens.accent,
+        borderLeftWidth: 3,
+      }
+    : null
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={[
-        styles.pickerRow,
-        {
-          borderColor: tokens.border,
-          backgroundColor: isActive ? tokens.accentMuted : "transparent",
-          borderLeftColor: isActive ? tokens.accent : "transparent",
-          borderLeftWidth: isActive ? 3 : 0,
-        },
-      ]}
+      style={[styles.pickerRow, { borderColor: tokens.border }, pickerActiveStyle]}
     >
-      <Text size="xxs" style={{ color: tokens.textMuted }} text={label.toUpperCase()} weight="medium" />
+      <Text
+        size="xxs"
+        style={{ color: tokens.textMuted }}
+        text={label.toUpperCase()}
+        weight="medium"
+      />
       <Text
         size="sm"
         style={{ color: value ? tokens.textPrimary : tokens.textMuted }}
@@ -138,9 +158,7 @@ export function PlanningChangeNewScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen.success])
 
-  const dateValue = screen.requestedDate
-    ? parseDateString(screen.requestedDate)
-    : new Date()
+  const dateValue = screen.requestedDate ? parseDateString(screen.requestedDate) : new Date()
   const startValue = screen.requestedStartTime
     ? parseTimeString(screen.requestedStartTime)
     : new Date(new Date().setHours(9, 0, 0, 0))
@@ -152,7 +170,11 @@ export function PlanningChangeNewScreen() {
     return (
       <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
         <SuccessState title={translate("planning:requests.submitSuccess")}>
-          <AppButton label={translate("common:actions.close")} onPress={screen.handleDismiss} variant="secondary" />
+          <AppButton
+            label={translate("common:actions.close")}
+            onPress={screen.handleDismiss}
+            variant="secondary"
+          />
         </SuccessState>
       </AppScrollScreen>
     )
@@ -162,7 +184,11 @@ export function PlanningChangeNewScreen() {
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
       <GroupedSection title={translate("planning:requests.changeRequest")}>
         {screen.myShifts.length === 0 && !screen.isLoading ? (
-          <Text size="xs" style={{ color: tokens.textMuted, padding: 16 }} text={translate("planning:schedule.noShifts")} />
+          <Text
+            size="xs"
+            style={[styles.emptyText, { color: tokens.textMuted }]}
+            text={translate("planning:schedule.noShifts")}
+          />
         ) : (
           <View style={styles.shiftList}>
             {screen.myShifts.map((shift, index) => (
@@ -284,6 +310,9 @@ export function PlanningChangeNewScreen() {
 }
 
 const styles = StyleSheet.create({
+  emptyText: {
+    padding: 16,
+  },
   errorRow: {
     alignItems: "center",
     borderCurve: "continuous",

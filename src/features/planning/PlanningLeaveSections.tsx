@@ -1,15 +1,10 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+
 import type { LeaveEntitlement } from "@/core/models"
-import {
-  EmptyState,
-  MetricGrid,
-  Pill,
-  SurfaceCard,
-  useDesignTokens,
-} from "@/ui"
-import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
+import { EmptyState, MetricGrid, Pill, SurfaceCard, useDesignTokens } from "@/ui"
+import { Text } from "@/ui/primitives/Text"
 
 // ── Leave entitlement card ────────────────────────────────────────────────────
 
@@ -24,7 +19,12 @@ export function PlanningLeaveBalanceCard({ entitlement }: { entitlement: LeaveEn
     { label: translate("planning:leave.employer"), value: `${entitlement.employerPolicyDays}d` },
     { label: translate("planning:leave.total"), value: `${entitlement.totalDays}d` },
     ...(hasHours
-      ? [{ label: translate("planning:leave.hoursLabel"), value: `${entitlement.entitlementHours}u` }]
+      ? [
+          {
+            label: translate("planning:leave.hoursLabel"),
+            value: `${entitlement.entitlementHours}u`,
+          },
+        ]
       : []),
   ]
 

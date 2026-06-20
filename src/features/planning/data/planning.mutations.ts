@@ -12,6 +12,7 @@ import { appRepositories } from "@/composition/repositories"
 import type { PlanningTodo, PlanningTodosResult } from "@/core/models"
 import { useAppSession } from "@/providers/app-provider"
 
+import { planningQueryKeys } from "./planning.queries"
 import type {
   ClaimCallInput,
   CompleteTodoInput,
@@ -20,7 +21,6 @@ import type {
   DecideShiftSwapParams,
   GetOpenCallsParams,
 } from "./planning.repository"
-import { planningQueryKeys } from "./planning.queries"
 
 // ---------------------------------------------------------------------------
 // Claim a planning call
@@ -66,8 +66,9 @@ export function useCompleteTodoMutation() {
         if (!old) return old
         return {
           ...old,
-          todos: old.todos.map((todo): PlanningTodo =>
-            todo.id === input.todoCode ? { ...todo, isCompletedByMe: true } : todo,
+          todos: old.todos.map(
+            (todo): PlanningTodo =>
+              todo.id === input.todoCode ? { ...todo, isCompletedByMe: true } : todo,
           ),
         }
       })
@@ -113,8 +114,9 @@ export function useUncompleteTodoMutation() {
         if (!old) return old
         return {
           ...old,
-          todos: old.todos.map((todo): PlanningTodo =>
-            todo.id === input.todoCode ? { ...todo, isCompletedByMe: false } : todo,
+          todos: old.todos.map(
+            (todo): PlanningTodo =>
+              todo.id === input.todoCode ? { ...todo, isCompletedByMe: false } : todo,
           ),
         }
       })

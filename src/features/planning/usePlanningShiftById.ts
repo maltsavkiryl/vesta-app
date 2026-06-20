@@ -1,7 +1,8 @@
 import { useMemo } from "react"
+
 import { getLocalToday, addLocalDays } from "@/core/date"
-import { usePlanningScheduleQuery } from "@/features/planning/data/planning.queries"
 import type { Shift } from "@/core/models"
+import { usePlanningScheduleQuery } from "@/features/planning/data/planning.queries"
 
 /**
  * Finds a shift by ID in the cached planning schedule (today → +14 days).
@@ -11,8 +12,5 @@ export function usePlanningShiftById(id: string | undefined): Shift | undefined 
   const today = getLocalToday()
   const to = addLocalDays(today, 14)
   const { state } = usePlanningScheduleQuery({ from: today, to })
-  return useMemo(
-    () => (id ? (state ?? []).find((s) => s.id === id) : undefined),
-    [id, state],
-  )
+  return useMemo(() => (id ? (state ?? []).find((s) => s.id === id) : undefined), [id, state])
 }

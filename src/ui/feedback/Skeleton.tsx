@@ -7,6 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native"
+import { LinearGradient } from "expo-linear-gradient"
 import Animated, {
   Easing,
   cancelAnimation,
@@ -15,7 +16,6 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated"
-import { LinearGradient } from "expo-linear-gradient"
 
 import { useAppMotion } from "@/providers/motion-provider"
 import { useDesignTokens } from "@/ui/foundations/tokens"

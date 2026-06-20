@@ -11,7 +11,6 @@ import type {
   AvailabilityTemplate,
   CreateShiftChangeInput,
   CreateShiftSwapInput,
-  DecideShiftSwapInput,
   LeaveEntitlement,
   MyRequests,
   PlanningCall,
@@ -19,8 +18,8 @@ import type {
   PlanningTodosResult,
   Shift,
 } from "@/core/models"
-import type { Result } from "@/shared/result"
 import type { ScheduleRepository } from "@/features/schedule/data/schedule.repository"
+import type { Result } from "@/shared/result"
 
 import type { PlanningError } from "./planning.errors"
 
@@ -85,7 +84,10 @@ export interface PlanningRepository extends ScheduleRepository {
    * Fetch the employee's full availability (recurring windows + date overrides).
    * Uses: GET /employee/planning/availability
    */
-  getMyAvailability(): Promise<{ template: AvailabilityTemplate; overrides: Record<string, import("@/core/models").AvailabilityOverride> }>
+  getMyAvailability(): Promise<{
+    template: AvailabilityTemplate
+    overrides: Record<string, import("@/core/models").AvailabilityOverride>
+  }>
 
   /**
    * Replace-set the employee's availability (windows + overrides).

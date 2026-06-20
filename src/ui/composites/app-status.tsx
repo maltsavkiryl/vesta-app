@@ -131,7 +131,11 @@ export function EmptyState({
 
   const content = (
     <View style={styles.emptyState}>
-      {icon ? <View style={[styles.emptyStateIcon, { backgroundColor: tokens.backgroundMuted }]}>{icon}</View> : null}
+      {icon ? (
+        <View style={[styles.emptyStateIcon, { backgroundColor: tokens.backgroundMuted }]}>
+          {icon}
+        </View>
+      ) : null}
       <Text size="sm" style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
       <Text
         size="xs"

@@ -56,7 +56,6 @@ describe("useCelebratePulse", () => {
     }))
 
     // Re-import after mock
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useCelebratePulse: useCelebratePulseReduced } = require("./motion")
     const { result } = renderHook(() => useCelebratePulseReduced())
 
