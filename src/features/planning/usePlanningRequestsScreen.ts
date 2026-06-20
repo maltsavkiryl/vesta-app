@@ -9,19 +9,34 @@
  */
 import { useRouter } from "expo-router"
 import { useMyRequestsQuery } from "@/features/planning/data/planning.queries"
+import { useDecideShiftSwapMutation, useCancelShiftSwapMutation } from "@/features/planning/data/planning.mutations"
+import { useProfileQuery } from "@/features/profile/data/profile.queries"
 
 const EMPTY_REQUESTS = { swapRequests: [], changeRequests: [] }
 
 export function usePlanningRequestsScreen() {
   const router = useRouter()
   const requestsQuery = useMyRequestsQuery()
+  const decideMutation = useDecideShiftSwapMutation()
+  const cancelMutation = useCancelShiftSwapMutation()
+  const { data: profile } = useProfileQuery()
+
+  const myEmployeeId = profile?.id
 
   const handleNewShiftSwap = () => {
-    router.push("/(app)/request?category=shift_change" as never)
+    router.push("/(app)/planning-swap-new" as never)
   }
 
   const handleNewChangeRequest = () => {
-    router.push("/(app)/request?category=time_off" as never)
+    router.push("/(app)/planning-change-new" as never)
+  }
+
+  const handleDecideSwap = async (swapCode: string, accept: boolean) => {
+    await decideMutation.mutateAsync({ swapCode, accept })
+  }
+
+  const handleCancelSwap = async (swapCode: string) => {
+    await cancelMutation.mutateAsync(swapCode)
   }
 
   const refetch = () => {
@@ -29,10 +44,13 @@ export function usePlanningRequestsScreen() {
   }
 
   return {
+    handleCancelSwap,
+    handleDecideSwap,
     handleNewChangeRequest,
     handleNewShiftSwap,
     isError: requestsQuery.isError,
     isLoading: requestsQuery.isLoading,
+    myEmployeeId,
     requests: requestsQuery.state ?? EMPTY_REQUESTS,
     refetch,
   }
