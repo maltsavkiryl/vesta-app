@@ -308,6 +308,84 @@ export interface HomeHighlight {
   subtitle: string
 }
 
+// ---------------------------------------------------------------------------
+// Planning domain models (slice 5b)
+// ---------------------------------------------------------------------------
+
+export type LeaveRequestStatus = "submitted" | "approved" | "rejected" | "cancelled"
+
+export interface PlanningCallClaim {
+  id: string
+  employeeId: string
+  employeeName: string
+  state: string
+  claimedAt: string // ISO date-time
+  availabilityIntent: string
+}
+
+export interface PlanningCall {
+  id: string
+  shiftId: string
+  /** Employer unique code — needed to build the claim URL. */
+  employerCode: string
+  /** Establishment unique code — needed to build the claim URL. */
+  establishmentCode: string
+  mode: string
+  status: string
+  note?: string
+  createdAt: string // ISO date-time
+  claims: PlanningCallClaim[]
+}
+
+export interface PlanningTodoCompletion {
+  employeeId: string
+  employeeName: string
+  completedAt: string // ISO date-time
+  channel: string
+}
+
+export interface PlanningTodo {
+  id: string
+  establishmentCode: string
+  scope: string
+  date?: string // yyyy-MM-dd
+  shiftId?: string
+  label: string
+  completionMode: string
+  sortOrder: number
+  requiredCount: number
+  completedCount: number
+  isComplete: boolean
+  completions: PlanningTodoCompletion[]
+}
+
+export interface LeaveBalance {
+  calendarYear: number
+  statutoryDays: number
+  employerPolicyDays: number
+  totalDays: number
+}
+
+export interface LeaveRequest {
+  id: string
+  employeeId: string
+  employerCode: string
+  leaveTypeId: number
+  leaveTypeName?: string
+  startDate: string // yyyy-MM-dd
+  endDate: string // yyyy-MM-dd
+  status: LeaveRequestStatus
+  requestNotes?: string
+  decisionNotes?: string
+}
+
+export interface CreateLeaveRequestInput {
+  leaveTypeId: number
+  startDate: string // yyyy-MM-dd
+  endDate: string // yyyy-MM-dd
+  requestNotes?: string
+}
+
 export interface AppStoreState {
   authStatus: AuthStatus
   profile: UserProfile
