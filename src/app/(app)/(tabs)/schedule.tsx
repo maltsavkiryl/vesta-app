@@ -1,3 +1,3 @@
-import { ScheduleScreen } from "@/features/schedule/ScheduleScreen"
+import { PlanningHubScreen } from "@/features/planning/PlanningHubScreen"
 
-export default ScheduleScreen
+export default PlanningHubScreen

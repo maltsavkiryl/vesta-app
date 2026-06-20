@@ -114,6 +114,52 @@ export default function AppLayout() {
         })}
       />
       <Stack.Screen
+        name="planning-todos"
+        options={createPushDetailOptions(theme, "Taken voor vandaag", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+        })}
+      />
+      <Stack.Screen
+        name="planning-calls"
+        options={createPushDetailOptions(theme, "Open oproepen", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+        })}
+      />
+      <Stack.Screen
+        name="planning-requests"
+        options={createPushDetailOptions(theme, "Mijn aanvragen", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+        })}
+      />
+      <Stack.Screen
+        name="planning-leave"
+        options={createPushDetailOptions(theme, "Verlof", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+        })}
+      />
+      <Stack.Screen
+        name="planning-swap-new"
+        options={createSheetOptions(theme, "Shift ruilen", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+          ...closeActions,
+          presentation: "pageSheet",
+        })}
+      />
+      <Stack.Screen
+        name="planning-change-new"
+        options={createSheetOptions(theme, "Wijziging aanvragen", {
+          backgroundColor: groupedSheetBackground,
+          motionEnabled: !shouldReduceMotion,
+          ...closeActions,
+          presentation: "pageSheet",
+        })}
+      />
+      <Stack.Screen
         name="time-entries"
         options={createPushDetailOptions(theme, "Time entries", {
           backgroundColor: groupedSheetBackground,

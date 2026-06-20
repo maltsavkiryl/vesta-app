@@ -1,0 +1,158 @@
+/* eslint-disable react-native/no-inline-styles */
+
+import { Pressable, StyleSheet, View } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import type { PlanningTodo } from "@/core/models"
+import { EmptyState, GroupedSection, useDesignTokens } from "@/ui"
+import { Text } from "@/ui/primitives/Text"
+import { translate } from "@/i18n/translate"
+
+export function PlanningTodosBrief({ dressNote, note }: { dressNote?: string; note?: string }) {
+  const tokens = useDesignTokens()
+  if (!dressNote && !note) return null
+  return (
+    <GroupedSection title={translate("planning:todos.brief")}>
+      <View style={styles.briefBody}>
+        {dressNote ? (
+          <Text size="xs" style={{ color: tokens.textPrimary }} text={dressNote} />
+        ) : null}
+        {note ? (
+          <Text size="xs" style={{ color: tokens.textSecondary }} text={note} />
+        ) : null}
+      </View>
+    </GroupedSection>
+  )
+}
+
+export function PlanningTodoItem({
+  isCompleting,
+  onComplete,
+  onUncomplete,
+  todo,
+}: {
+  isCompleting: boolean
+  onComplete: (id: string) => void
+  onUncomplete: (id: string) => void
+  todo: PlanningTodo
+}) {
+  const tokens = useDesignTokens()
+  const done = todo.isCompletedByMe
+  const checkColor = done ? tokens.success : tokens.backgroundMuted
+  const borderColor = done ? tokens.success : tokens.border
+
+  void checkColor
+
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: done }}
+      accessibilityLabel={todo.label}
+      disabled={isCompleting}
+      onPress={() => (done ? onUncomplete(todo.id) : onComplete(todo.id))}
+      style={({ pressed }) => [styles.todoRow, { opacity: pressed ? 0.7 : 1 }]}
+    >
+      <View
+        style={[
+          styles.checkbox,
+          {
+            backgroundColor: done ? tokens.success : "transparent",
+            borderColor,
+          },
+        ]}
+      >
+        {done ? (
+          <Ionicons color={tokens.surface} name="checkmark" size={12} />
+        ) : null}
+      </View>
+      <View style={styles.todoContent}>
+        <Text
+          size="sm"
+          style={[
+            { color: done ? tokens.textMuted : tokens.textPrimary },
+            done ? styles.strikethrough : undefined,
+          ]}
+          text={todo.label}
+          weight={done ? "normal" : "medium"}
+        />
+      </View>
+    </Pressable>
+  )
+}
+
+export function PlanningTodosSection({
+  isCompleting,
+  onComplete,
+  onUncomplete,
+  title,
+  todos,
+}: {
+  isCompleting: boolean
+  onComplete: (id: string) => void
+  onUncomplete: (id: string) => void
+  title: string
+  todos: PlanningTodo[]
+}) {
+  if (todos.length === 0) return null
+
+  return (
+    <GroupedSection title={title}>
+      <View style={styles.todoList}>
+        {todos.map((todo) => (
+          <PlanningTodoItem
+            key={todo.id}
+            isCompleting={isCompleting}
+            onComplete={onComplete}
+            onUncomplete={onUncomplete}
+            todo={todo}
+          />
+        ))}
+      </View>
+    </GroupedSection>
+  )
+}
+
+export function PlanningTodosEmpty() {
+  const tokens = useDesignTokens()
+  return (
+    <EmptyState
+      icon={<Ionicons color={tokens.textMuted} name="checkmark-done-outline" size={18} />}
+      subtitle={translate("planning:todos.noTasksSubtitle")}
+      title={translate("planning:todos.noTasksTitle")}
+    />
+  )
+}
+
+const styles = StyleSheet.create({
+  briefBody: {
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  checkbox: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: 6,
+    borderWidth: 1.5,
+    height: 22,
+    justifyContent: "center",
+    width: 22,
+  },
+  strikethrough: {
+    textDecorationLine: "line-through",
+  },
+  todoContent: {
+    flex: 1,
+    gap: 2,
+  },
+  todoList: {
+    gap: 0,
+  },
+  todoRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 14,
+    minHeight: 52,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+})

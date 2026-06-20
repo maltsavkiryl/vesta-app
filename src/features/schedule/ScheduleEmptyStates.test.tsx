@@ -67,6 +67,10 @@ jest.mock("@/features/schedule/data/schedule.mutations", () => ({
   }),
 }))
 
+jest.mock("@/features/planning/usePlanningShiftById", () => ({
+  usePlanningShiftById: () => undefined,
+}))
+
 jest.mock("@/features/schedule/data/schedule.queries", () => ({
   useScheduleStateQuery: () => ({
     state: mockScheduleState,
