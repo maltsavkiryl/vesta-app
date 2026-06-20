@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
+import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
 import { PlanningCallCard, PlanningCallsEmpty } from "./PlanningCallsSections"
 import { usePlanningCallsScreen } from "./usePlanningCallsScreen"
@@ -18,13 +19,13 @@ export function PlanningCallsScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title="Open oproepen" />
+        <PageHeader delay={0} title={translate("planning:calls.title")} />
         <EmptyState
-          actionLabel="Opnieuw proberen"
+          actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
           onAction={onRefresh}
-          subtitle="Kon de open oproepen niet laden. Controleer je verbinding en probeer opnieuw."
-          title="Er is iets misgegaan"
+          subtitle={translate("planning:schedule.loadErrorSubtitle")}
+          title={translate("planning:schedule.loadError")}
         />
       </AppScrollScreen>
     )
@@ -37,7 +38,7 @@ export function PlanningCallsScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title="Open oproepen" />
+      <PageHeader delay={0} title={translate("planning:calls.title")} />
       {screen.calls.length === 0 && !screen.isLoading ? (
         <PlanningCallsEmpty />
       ) : (
