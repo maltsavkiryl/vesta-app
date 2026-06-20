@@ -218,6 +218,24 @@ export interface MyRequestsDto {
 }
 
 // ---------------------------------------------------------------------------
+// Shift Swap Candidate DTOs  (GET /employee/planning/shift-swaps/candidates)
+// ---------------------------------------------------------------------------
+
+export interface ShiftSwapCandidateDto {
+  shiftUniqueCode: string
+  employeeUniqueCode: string
+  employeeName: string
+  shiftDate: string // yyyy-MM-dd
+  startTime: string // HH:mm
+  endTime: string // HH:mm
+  teamUniqueCode: string
+  teamName: string
+  planningTaskUniqueCode: string
+  planningTaskName: string
+  establishmentCity: string
+}
+
+// ---------------------------------------------------------------------------
 // Leave Entitlement DTO  (GET /employee/planning/leave)
 // ---------------------------------------------------------------------------
 

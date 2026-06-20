@@ -37,6 +37,8 @@ export const planningQueryKeys = {
     ["planning", accountId, "requests"] as const,
   leave: (accountId: string | null) =>
     ["planning", accountId, "leave"] as const,
+  swapCandidates: (accountId: string | null, shiftUniqueCode: string | null) =>
+    ["planning", accountId, "swap-candidates", shiftUniqueCode] as const,
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +146,29 @@ export function useMyRequestsQuery() {
     enabled: Boolean(accountId) && Boolean(appRepositories.planning),
     queryFn: () => appRepositories.planning!.getMyRequests(),
     queryKey: planningQueryKeys.requests(accountId),
+  })
+
+  return useMemo(
+    () => ({
+      state: query.data,
+      isError: query.isError,
+      isLoading: query.isLoading,
+      refetch: query.refetch,
+    }),
+    [query.data, query.isError, query.isLoading, query.refetch],
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Swap Candidates  (GET /employee/planning/shift-swaps/candidates)
+// ---------------------------------------------------------------------------
+
+export function usePlanningSwapCandidatesQuery(shiftUniqueCode: string | null) {
+  const { accountId } = useAppSession()
+  const query = useQuery({
+    enabled: Boolean(accountId) && Boolean(appRepositories.planning) && Boolean(shiftUniqueCode),
+    queryFn: () => appRepositories.planning!.getSwapCandidates(shiftUniqueCode!),
+    queryKey: planningQueryKeys.swapCandidates(accountId, shiftUniqueCode),
   })
 
   return useMemo(

@@ -17,6 +17,7 @@ import type {
   LeaveEntitlement,
   MyRequests,
   PlanningCall,
+  PlanningSwapCandidate,
   PlanningTodosResult,
   RequestItem,
   Shift,
@@ -44,6 +45,7 @@ import type {
   MyRequestsDto,
   PlanningCallDto,
   ShiftDto,
+  ShiftSwapCandidateDto,
   UpdateEmployeeAvailabilityDto,
 } from "./planning.dto"
 import {
@@ -56,6 +58,7 @@ import {
   toPlanningCall,
   toPlanningTodosResult,
   toShifts,
+  toSwapCandidates,
 } from "./planning.transformer"
 import type { PlanningWindow } from "@/core/models"
 
@@ -308,6 +311,19 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     return toLeaveEntitlement(res.data)
   }
 
+  // ---------------------------------------------------------------------------
+  // Swap Candidates  (GET /employee/planning/shift-swaps/candidates?shiftUniqueCode=)
+  // ---------------------------------------------------------------------------
+
+  async function getSwapCandidates(shiftUniqueCode: string): Promise<PlanningSwapCandidate[]> {
+    const res = await httpClient.get<ShiftSwapCandidateDto[]>(
+      "/employee/planning/shift-swaps/candidates",
+      { shiftUniqueCode },
+    )
+    if (!res.ok || !res.data) throw new Error("Failed to load swap candidates")
+    return toSwapCandidates(res.data)
+  }
+
   return {
     // ScheduleRepository surface (no-ops)
     getSchedule,
@@ -331,5 +347,6 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     cancelShiftSwap,
     createShiftChange,
     getLeaveEntitlement,
+    getSwapCandidates,
   }
 }

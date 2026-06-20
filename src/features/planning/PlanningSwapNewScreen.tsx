@@ -2,8 +2,8 @@ import { useEffect } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
-import type { Shift } from "@/core/models"
-import { AppButton, AppScrollScreen, GroupedSection, SurfaceCard, SuccessState, TextField, useDesignTokens } from "@/ui"
+import type { PlanningSwapCandidate, Shift } from "@/core/models"
+import { AppButton, AppScrollScreen, GroupedSection, Skeleton, SuccessState, TextField, useDesignTokens } from "@/ui"
 import { useToast } from "@/ui/feedback"
 import { Text } from "@/ui/primitives/Text"
 import { translate } from "@/i18n/translate"
@@ -62,6 +62,59 @@ function ShiftPickerRow({
   )
 }
 
+function CandidatePickerRow({
+  candidate,
+  index,
+  isSelected,
+  onSelect,
+}: {
+  candidate: PlanningSwapCandidate
+  index: number
+  isSelected: boolean
+  onSelect: () => void
+}) {
+  const tokens = useDesignTokens()
+  const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 20, step: 36 })
+  const { animatedStyle: pulseStyle, triggerPulse } = useCelebratePulse()
+
+  useEffect(() => {
+    if (isSelected) {
+      triggerPulse()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSelected])
+
+  const timeRange = `${candidate.startTime} - ${candidate.endTime}`
+
+  return (
+    <Animated.View style={entranceStyle}>
+      <Animated.View style={pulseStyle}>
+        <Pressable
+          accessibilityRole="radio"
+          accessibilityState={{ checked: isSelected }}
+          onPress={onSelect}
+          style={[
+            styles.shiftRow,
+            {
+              borderColor: isSelected ? tokens.accent : tokens.border,
+              backgroundColor: isSelected ? tokens.accentMuted : tokens.surface,
+            },
+          ]}
+        >
+          <View style={styles.shiftRowContent}>
+            <Text size="xs" style={{ color: tokens.textPrimary }} text={candidate.employeeName} weight="medium" />
+            <Text size="xxs" style={{ color: tokens.textSecondary }} text={`${formatShortDate(candidate.shiftDate)}  ${timeRange}`} />
+            <Text size="xxs" style={{ color: tokens.textMuted }} text={`${candidate.taskName} · ${candidate.city}`} />
+          </View>
+          {isSelected ? (
+            <Ionicons color={tokens.accent} name="checkmark-circle" size={18} />
+          ) : null}
+        </Pressable>
+      </Animated.View>
+    </Animated.View>
+  )
+}
+
 export function PlanningSwapNewScreen() {
   const tokens = useDesignTokens()
   const screen = usePlanningSwapNewScreen()
@@ -97,7 +150,7 @@ export function PlanningSwapNewScreen() {
                 key={shift.id}
                 index={index}
                 isSelected={screen.selectedShiftId === shift.id}
-                onSelect={() => screen.setSelectedShiftId(shift.id)}
+                onSelect={() => screen.handleSelectShift(shift.id)}
                 shift={shift}
               />
             ))}
@@ -105,15 +158,44 @@ export function PlanningSwapNewScreen() {
         )}
       </GroupedSection>
 
-      <SurfaceCard style={styles.fieldCard}>
-        <TextField
-          autoCapitalize="none"
-          autoCorrect={false}
-          label={translate("planning:requests.targetShiftId")}
-          onChangeText={screen.setTargetShiftCode}
-          value={screen.targetShiftCode}
-        />
-      </SurfaceCard>
+      <GroupedSection title={translate("planning:requests.candidatePickerTitle")}>
+        {!screen.selectedShiftId ? (
+          <Text
+            size="xs"
+            style={{ color: tokens.textMuted, padding: 16 }}
+            text={translate("planning:requests.pickShiftFirst")}
+          />
+        ) : screen.isCandidatesLoading ? (
+          <View style={styles.skeletonList}>
+            <Skeleton height={60} radius={10} />
+            <Skeleton height={60} radius={10} />
+            <Skeleton height={60} radius={10} />
+          </View>
+        ) : screen.isCandidatesError ? (
+          <View style={[styles.errorRow, { backgroundColor: tokens.dangerSoft }]}>
+            <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
+            <Text size="xxs" style={{ color: tokens.danger }} text={translate("planning:requests.submitError")} />
+          </View>
+        ) : screen.candidateList.length === 0 ? (
+          <Text
+            size="xs"
+            style={{ color: tokens.textMuted, padding: 16 }}
+            text={translate("planning:requests.noSwapCandidates")}
+          />
+        ) : (
+          <View style={styles.shiftList}>
+            {screen.candidateList.map((candidate, index) => (
+              <CandidatePickerRow
+                key={candidate.shiftId}
+                candidate={candidate}
+                index={index}
+                isSelected={screen.selectedCandidateShiftId === candidate.shiftId}
+                onSelect={() => screen.setSelectedCandidateShiftId(candidate.shiftId)}
+              />
+            ))}
+          </View>
+        )}
+      </GroupedSection>
 
       <View style={styles.fieldBody}>
         <TextField
@@ -159,10 +241,6 @@ const styles = StyleSheet.create({
   fieldBody: {
     gap: 12,
   },
-  fieldCard: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
   screen: {
     gap: 22,
     paddingBottom: 32,
@@ -186,6 +264,10 @@ const styles = StyleSheet.create({
   shiftRowContent: {
     flex: 1,
     gap: 2,
+  },
+  skeletonList: {
+    gap: 8,
+    padding: 8,
   },
   textAreaInput: {
     minHeight: 64,

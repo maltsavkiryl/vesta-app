@@ -396,6 +396,21 @@ export interface CreateShiftSwapInput {
   note?: string
 }
 
+/** A colleague shift that the requester's shift can be swapped into. */
+export interface PlanningSwapCandidate {
+  shiftId: string
+  employeeId: string
+  employeeName: string
+  shiftDate: string // yyyy-MM-dd
+  startTime: string // HH:mm
+  endTime: string // HH:mm
+  teamId: string
+  teamName: string
+  taskId: string
+  taskName: string
+  city: string
+}
+
 export interface DecideShiftSwapInput {
   swapCode: string
   accept: boolean
