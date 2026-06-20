@@ -32,21 +32,21 @@ export function ProfileCompletenessCard({ setupStatus }: { setupStatus: ProfileS
 
   return (
     <Animated.View style={pulseStyle}>
-    <SurfaceCard style={styles.completenessCard}>
-      <View style={styles.progressHeader}>
-        <View style={styles.headerCopy}>
-          <Text
-            text={setupStatus.title}
-            size="xs"
-            weight="medium"
-            style={{ color: tokens.textPrimary }}
-          />
-          <Text text={setupStatus.detail} size="xxs" style={{ color: tokens.textMuted }} />
+      <SurfaceCard style={styles.completenessCard}>
+        <View style={styles.progressHeader}>
+          <View style={styles.headerCopy}>
+            <Text
+              text={setupStatus.title}
+              size="xs"
+              weight="medium"
+              style={{ color: tokens.textPrimary }}
+            />
+            <Text text={setupStatus.detail} size="xxs" style={{ color: tokens.textMuted }} />
+          </View>
+          <Pill label={badgeLabel} tone={setupStatus.remainingCount === 0 ? "success" : "accent"} />
         </View>
-        <Pill label={badgeLabel} tone={setupStatus.remainingCount === 0 ? "success" : "accent"} />
-      </View>
-      <ProgressBar progress={setupStatus.progress} />
-    </SurfaceCard>
+        <ProgressBar progress={setupStatus.progress} />
+      </SurfaceCard>
     </Animated.View>
   )
 }

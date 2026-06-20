@@ -141,7 +141,7 @@ export function ActiveCardActions({
               },
             ]}
           >
-            <Ionicons color={`${tokens.accentForeground}BF`} name="cafe-outline" size={16} />
+            <Ionicons color={tokens.accentForeground} name="cafe-outline" size={16} />
             <Text
               text="Start break"
               size="xs"
