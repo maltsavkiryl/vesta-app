@@ -42,7 +42,7 @@ export default function AppLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
         name="notifications"
-        options={createPushDetailOptions(theme, "Notifications", {
+        options={createPushDetailOptions(theme, undefined, {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
           ...closeActions,
