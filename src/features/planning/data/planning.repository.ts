@@ -15,6 +15,7 @@ import type {
   LeaveEntitlement,
   MyRequests,
   PlanningCall,
+  PlanningSwapCandidate,
   PlanningTodosResult,
   Shift,
 } from "@/core/models"
@@ -163,4 +164,10 @@ export interface PlanningRepository extends ScheduleRepository {
    * of leave requests.
    */
   getLeaveEntitlement(): Promise<LeaveEntitlement>
+
+  /**
+   * Fetch colleague shifts that the given shift can be swapped into.
+   * Uses: GET /employee/planning/shift-swaps/candidates?shiftUniqueCode={code}
+   */
+  getSwapCandidates(shiftUniqueCode: string): Promise<PlanningSwapCandidate[]>
 }

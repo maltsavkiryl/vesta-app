@@ -13,6 +13,7 @@ import type {
   MyRequests,
   PlanningCall,
   PlanningCallClaim,
+  PlanningSwapCandidate,
   PlanningTodo,
   PlanningTodosResult,
   Shift,
@@ -34,6 +35,7 @@ import type {
   ShiftChangeRequestDto,
   ShiftDto,
   ShiftStatusDto,
+  ShiftSwapCandidateDto,
   ShiftSwapRequestDto,
 } from "./planning.dto"
 
@@ -279,6 +281,30 @@ export function toMyRequests(dto: MyRequestsDto): MyRequests {
     swapRequests: dto.swapRequests.map(toShiftSwapRequest),
     changeRequests: dto.changeRequests.map(toShiftChangeRequest),
   }
+}
+
+// ---------------------------------------------------------------------------
+// Shift Swap Candidates  (GET /employee/planning/shift-swaps/candidates)
+// ---------------------------------------------------------------------------
+
+export function toSwapCandidate(dto: ShiftSwapCandidateDto): PlanningSwapCandidate {
+  return {
+    shiftId: dto.shiftUniqueCode,
+    employeeId: dto.employeeUniqueCode,
+    employeeName: dto.employeeName,
+    shiftDate: dto.shiftDate,
+    startTime: dto.startTime,
+    endTime: dto.endTime,
+    teamId: dto.teamUniqueCode,
+    teamName: dto.teamName,
+    taskId: dto.planningTaskUniqueCode,
+    taskName: dto.planningTaskName,
+    city: dto.establishmentCity,
+  }
+}
+
+export function toSwapCandidates(dtos: ShiftSwapCandidateDto[]): PlanningSwapCandidate[] {
+  return dtos.map(toSwapCandidate)
 }
 
 // ---------------------------------------------------------------------------
