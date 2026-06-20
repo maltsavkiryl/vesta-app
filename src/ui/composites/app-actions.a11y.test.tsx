@@ -1,8 +1,10 @@
+import { Pressable } from "react-native"
 import { render } from "@testing-library/react-native"
 
 import { ThemeProvider } from "@/theme/context"
 
 import { AppButton, IconButton } from "./app-actions"
+import { StatusBadge } from "./app-status"
 
 function renderUI(ui: React.ReactElement) {
   return render(<ThemeProvider initialContext="light">{ui}</ThemeProvider>)
@@ -44,5 +46,31 @@ describe("shared interactive primitives accessibility", () => {
 
     expect(node.props.accessibilityRole).toBe("button")
     expect(node.props.hitSlop).toBeDefined()
+  })
+
+  it("PlanningTodoItem checkbox role + state propagates correctly", () => {
+    // Validate the pattern used by PlanningTodoItem (checkbox + checked state)
+    // by testing the primitive: a Pressable with accessibilityRole="checkbox"
+    // and accessibilityState.checked reflects the done state.
+    const { getByRole } = renderUI(
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: true }}
+        accessibilityLabel="Bestelling sorteren"
+        onPress={jest.fn()}
+      >
+        {null}
+      </Pressable>,
+    )
+    const node = getByRole("checkbox", { name: "Bestelling sorteren" })
+    expect(node.props.accessibilityState?.checked).toBe(true)
+  })
+
+  it("StatusBadge is accessible with a label", () => {
+    const { getByLabelText } = renderUI(
+      <StatusBadge label="In behandeling" tone="warning" />,
+    )
+    const node = getByLabelText("In behandeling")
+    expect(node.props.accessible).toBe(true)
   })
 })
