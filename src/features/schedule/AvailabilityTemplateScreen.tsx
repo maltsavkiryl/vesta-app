@@ -1,11 +1,12 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 
 import type { AvailabilityWeekday } from "@/core/models"
-import { AvailabilityTemplateIntro, AvailabilityTemplateWeekdaySection } from "@/features/schedule/AvailabilityTemplateSections"
 import { getFallbackAvailabilityTemplate } from "@/features/schedule/availability-template.utils"
+import {
+  AvailabilityTemplateIntro,
+  AvailabilityTemplateWeekdaySection,
+} from "@/features/schedule/AvailabilityTemplateSections"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { AppScrollScreen, useDesignTokens } from "@/ui"
 

@@ -32,26 +32,28 @@ export function ShiftDetailEmptyState() {
   )
 }
 
-export function ShiftDetailHero({
-  onOpenMaps,
-  shift,
-}: {
-  onOpenMaps: () => void
-  shift: Shift
-}) {
+export function ShiftDetailHero({ onOpenMaps, shift }: { onOpenMaps: () => void; shift: Shift }) {
   const tokens = useDesignTokens()
 
   return (
     <SurfaceCard style={styles.heroCard}>
       <View style={styles.heroHeader}>
         <StatusBadge
-          label={shift.requiresResponse ? "Needs response" : shift.status}
+          label={
+            shift.responseStatus === "declined"
+              ? "Declined"
+              : shift.requiresResponse
+                ? "Needs response"
+                : shift.status
+          }
           tone={
-            shift.requiresResponse
-              ? "warning"
-              : shift.status === "confirmed"
-                ? "success"
-                : "neutral"
+            shift.responseStatus === "declined"
+              ? "danger"
+              : shift.requiresResponse
+                ? "warning"
+                : shift.status === "confirmed"
+                  ? "success"
+                  : "neutral"
           }
         />
         <Text
@@ -114,9 +116,11 @@ export function ShiftChangeSummaryCallout({ summary }: { summary: string }) {
 export function ShiftActionNeededSection({
   callout,
   onAcknowledge,
+  onDecline,
 }: {
   callout?: ReactNode
   onAcknowledge: () => void | Promise<void>
+  onDecline: () => void | Promise<void>
 }) {
   const tokens = useDesignTokens()
 
@@ -126,18 +130,59 @@ export function ShiftActionNeededSection({
         <Text
           size="xs"
           style={{ color: tokens.textSecondary }}
-          text="Your manager is waiting for a response on this update before the rota is locked."
+          text="Your manager is waiting for a response before the rota is locked. Let them know if you're in."
         />
-        <AppButton
-          fullWidth
-          label="Acknowledge update"
-          onPress={() => {
-            void onAcknowledge()
-          }}
-          pressHaptic="none"
-        />
+        <View style={styles.responseActions}>
+          <AppButton
+            accessibilityLabel="Accept this shift"
+            fullWidth
+            label="I'll be there"
+            onPress={() => {
+              void onAcknowledge()
+            }}
+            pressHaptic="none"
+          />
+          <AppButton
+            accessibilityLabel="Decline this shift, I can't make it"
+            fullWidth
+            label="Can't make it"
+            onPress={() => {
+              void onDecline()
+            }}
+            pressHaptic="none"
+            variant="secondary"
+          />
+        </View>
       </View>
     </GroupedSection>
+  )
+}
+
+export function ShiftDeclinedSection() {
+  const tokens = useDesignTokens()
+
+  return (
+    <View
+      style={[
+        styles.callout,
+        { backgroundColor: tokens.dangerSoft, borderColor: `${tokens.danger}25` },
+      ]}
+    >
+      <Ionicons color={tokens.danger} name="close-circle-outline" size={16} />
+      <View style={styles.flex}>
+        <Text
+          size="xxs"
+          style={{ color: tokens.danger }}
+          text="You declined this shift"
+          weight="semiBold"
+        />
+        <Text
+          size="xxs"
+          style={{ color: tokens.textPrimary }}
+          text="We've let your manager know you can't make it. They may reach out about cover."
+        />
+      </View>
+    </View>
   )
 }
 
@@ -147,11 +192,7 @@ export function ShiftPlanSection({ shift }: { shift: Shift }) {
       <ShiftPlanRow label="Venue" value={shift.venueName} />
       <ShiftPlanRow label="Address" value={shift.venueAddress} />
       <ShiftPlanRow label="Time" value={getShiftTimeRange(shift)} />
-      <ShiftPlanRow
-        isLast
-        label="Team"
-        value={shift.coworkers?.join(", ") ?? "To be confirmed"}
-      />
+      <ShiftPlanRow isLast label="Team" value={shift.coworkers?.join(", ") ?? "To be confirmed"} />
     </GroupedSection>
   )
 }
@@ -180,7 +221,9 @@ export function ShiftRequestActions({ shift }: { shift: Shift }) {
       <View style={styles.actionStack}>
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />}
-          onPress={() => router.push(`/(app)/request?category=shift_change&shiftId=${shift.id}` as never)}
+          onPress={() =>
+            router.push(`/(app)/request?category=shift_change&shiftId=${shift.id}` as never)
+          }
           subtitle="Start a shift change request from this shift"
           title="Request a replacement"
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
@@ -224,7 +267,9 @@ function ShiftPlanRow({
         text={value}
         weight="semiBold"
       />
-      {!isLast ? <View style={[styles.planDivider, { backgroundColor: tokens.separator }]} /> : null}
+      {!isLast ? (
+        <View style={[styles.planDivider, { backgroundColor: tokens.separator }]} />
+      ) : null}
     </View>
   )
 }
@@ -308,5 +353,8 @@ const styles = StyleSheet.create({
   planValue: {
     flex: 1,
     minWidth: 0,
+  },
+  responseActions: {
+    gap: 10,
   },
 })

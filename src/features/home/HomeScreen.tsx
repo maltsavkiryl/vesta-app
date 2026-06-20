@@ -2,15 +2,18 @@ import { StyleSheet, View } from "react-native"
 
 import { EarningsSummaryCard } from "@/features/home/components/EarningsSummaryCard"
 import { HomeHeader } from "@/features/home/components/HomeHeader"
+import { HomeScreenSkeleton } from "@/features/home/components/HomeScreenSkeleton"
 import {
   HomeTasksDrawerGroups,
   HomeTasksSection,
   HomeUpdatesSection,
 } from "@/features/home/components/HomeTaskSections"
 import { HomeTimeCard } from "@/features/home/components/HomeTimeCard"
+import { PayrollProfileNudge } from "@/features/home/components/PayrollProfileNudge"
 import { UpcomingShiftsSection } from "@/features/home/components/UpcomingShiftsSection"
 import { useHomeScreen } from "@/features/home/useHomeScreen"
-import { AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
+import { AppScrollScreen, EmptyState, MotionView, useDesignTokens } from "@/ui"
+import { useRefreshHandler } from "@/utils/useRefreshHandler"
 
 export function HomeTasksScreen() {
   const tokens = useDesignTokens()
@@ -40,21 +43,62 @@ export function HomeScreen() {
     completeTask,
     greeting,
     home,
+    isError,
+    isLoading,
+    refetch,
     homeSummary,
+    dismissPayrollNudge,
     openLatestPayslip,
     openNotifications,
+    openPayrollProfile,
     openSchedule,
     openShift,
     openTasks,
+    payrollProfileGaps,
     pendingTasks,
     runAction,
+    shouldShowPayrollNudge,
     shouldShowTasksSection,
     shouldShowUpdatesSection,
     upcomingShifts,
   } = useHomeScreen()
+  const { onRefresh, refreshing } = useRefreshHandler(refetch)
+
+  if (isLoading && !home) {
+    return (
+      <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
+        <HomeScreenSkeleton />
+      </AppScrollScreen>
+    )
+  }
+
+  if (isError && !home) {
+    return (
+      <AppScrollScreen
+        variant="grouped"
+        contentContainerStyle={styles.screenContent}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+      >
+        <View style={styles.errorState}>
+          <EmptyState
+            actionLabel="Try again"
+            onAction={onRefresh}
+            subtitle="We couldn't load your home overview. Check your connection and try again."
+            title="Something went wrong"
+          />
+        </View>
+      </AppScrollScreen>
+    )
+  }
 
   return (
-    <AppScrollScreen variant="grouped" contentContainerStyle={styles.screenContent}>
+    <AppScrollScreen
+      variant="grouped"
+      contentContainerStyle={styles.screenContent}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+    >
       <MotionView>
         <HomeHeader
           firstName={home?.profile.firstName ?? ""}
@@ -66,6 +110,14 @@ export function HomeScreen() {
       </MotionView>
 
       <View style={styles.stack}>
+        {shouldShowPayrollNudge ? (
+          <PayrollProfileNudge
+            gaps={payrollProfileGaps}
+            onPress={openPayrollProfile}
+            onDismiss={dismissPayrollNudge}
+          />
+        ) : null}
+
         <MotionView delay={50}>
           <HomeTimeCard />
         </MotionView>
@@ -100,9 +152,13 @@ export function HomeScreen() {
 
         <MotionView delay={250}>
           <EarningsSummaryCard
+            averageHourlyRate={home?.earnings.averageHourlyRate ?? 0}
             earnedAmount={home?.earnings.earnedAmount ?? 0}
+            hoursWorked={home?.earnings.hoursWorked ?? 0}
             monthLabel={home?.earnings.monthLabel ?? ""}
             onPayslipPress={openLatestPayslip}
+            shiftsWorked={home?.earnings.shiftsWorked ?? 0}
+            targetAmount={home?.earnings.targetAmount ?? 0}
           />
         </MotionView>
       </View>
@@ -111,6 +167,9 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorState: {
+    marginTop: 24,
+  },
   nativeSheetContent: {
     gap: 16,
     paddingBottom: 36,

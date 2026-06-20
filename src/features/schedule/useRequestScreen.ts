@@ -4,7 +4,6 @@ import { useLocalSearchParams } from "expo-router"
 import type { RequestCategory } from "@/core/models"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
-import { isRequestCategory, requestCategoryConfig } from "@/features/schedule/requestCategories"
 import {
   getRequestActionCopy,
   getRequestDetailTargetLabel,
@@ -13,6 +12,7 @@ import {
   getTargetSectionCopy,
   getTodayDateString,
 } from "@/features/schedule/request-screen.utils"
+import { isRequestCategory, requestCategoryConfig } from "@/features/schedule/requestCategories"
 import { enumerateDateRange } from "@/features/schedule/schedule.utils"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -39,9 +39,7 @@ export function useRequestScreen() {
     : []
   const upcomingShifts = useMemo(
     () =>
-      (state?.shifts ?? []).filter(
-        (shift) => shift.id === params.shiftId || shift.date >= today,
-      ),
+      (state?.shifts ?? []).filter((shift) => shift.id === params.shiftId || shift.date >= today),
     [params.shiftId, state?.shifts, today],
   )
   const selectedShift = upcomingShifts.find((shift) => shift.id === selectedShiftId)

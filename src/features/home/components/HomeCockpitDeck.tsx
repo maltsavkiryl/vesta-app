@@ -2,9 +2,9 @@ import { StyleSheet, View } from "react-native"
 
 import { useDesignTokens } from "@/ui"
 
-import { HomeCockpitMiniCard, HomeCockpitPrimaryCard } from "./HomeCockpitCards"
 import type { HomeCockpitDeckProps } from "./homeCockpit.types"
 import { getPrimaryCockpitAction } from "./homeCockpit.utils"
+import { HomeCockpitMiniCard, HomeCockpitPrimaryCard } from "./HomeCockpitCards"
 
 export function HomeCockpitDeck({
   nextShift,

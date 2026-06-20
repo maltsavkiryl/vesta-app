@@ -18,13 +18,16 @@ describe("mock backend persistence", () => {
     expect(db.session.accountId).toBeNull()
   })
 
-  it("starts with an empty demo time history", () => {
+  it("starts with no in-app clock log but a seeded month-to-date earnings summary", () => {
     const state = createInitialState()
 
+    // No clock sessions have been logged in-app yet…
     expect(state.timeEntries).toEqual([])
-    expect(state.earnings.earnedAmount).toBe(0)
-    expect(state.earnings.hoursWorked).toBe(0)
-    expect(state.earnings.shiftsWorked).toBe(0)
+    // …but the payroll-level monthly summary is seeded so the home + time
+    // earnings surfaces demo with realistic, non-zero progress.
+    expect(state.earnings.earnedAmount).toBeGreaterThan(0)
+    expect(state.earnings.hoursWorked).toBeGreaterThan(0)
+    expect(state.earnings.shiftsWorked).toBeGreaterThan(0)
   })
 
   it("round-trips account snapshots back into app state", () => {
@@ -120,10 +123,20 @@ describe("mock backend persistence", () => {
 
     const migrated = migrateMockBackendDb(db)
 
+    const seededEarnings = createInitialState().earnings
     expect(migrated.version).toBeGreaterThan(db.version)
+    // Seeded demo time entries are dropped…
     expect(migrated.accounts[0].aggregates.time.timeEntries).toEqual([])
-    expect(migrated.accounts[0].aggregates.time.earnings.earnedAmount).toBe(0)
-    expect(migrated.accounts[0].aggregates.time.earnings.hoursWorked).toBe(0)
-    expect(migrated.accounts[0].aggregates.time.earnings.shiftsWorked).toBe(0)
+    // …and the monthly earnings summary is normalised back to the seeded
+    // month-to-date default (no longer derived from the removed entries).
+    expect(migrated.accounts[0].aggregates.time.earnings.earnedAmount).toBe(
+      seededEarnings.earnedAmount,
+    )
+    expect(migrated.accounts[0].aggregates.time.earnings.hoursWorked).toBe(
+      seededEarnings.hoursWorked,
+    )
+    expect(migrated.accounts[0].aggregates.time.earnings.shiftsWorked).toBe(
+      seededEarnings.shiftsWorked,
+    )
   })
 })

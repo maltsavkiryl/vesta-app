@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { type AppLocale, mapToSupportedLocale } from "@/i18n"
 import {
   AppButton,
   Banner,
@@ -65,21 +66,23 @@ export function LanguageSection({
   onSelectLanguage,
   tokens,
 }: {
-  currentLanguage: (typeof LANGUAGE_OPTIONS)[number]
-  onSelectLanguage: (language: (typeof LANGUAGE_OPTIONS)[number]) => void
+  currentLanguage: string
+  onSelectLanguage: (language: AppLocale) => void
   tokens: DesignTokens
 }) {
+  const activeLocale = mapToSupportedLocale(currentLanguage)
+
   return (
     <GroupedSection title="Language">
       {LANGUAGE_OPTIONS.map((language, index) => {
-        const selected = currentLanguage === language
+        const selected = activeLocale === language.value
 
         return (
           <ListRow
-            key={language}
+            key={language.value}
             isLast={index === LANGUAGE_OPTIONS.length - 1}
-            title={language}
-            onPress={() => onSelectLanguage(language)}
+            title={language.label}
+            onPress={() => onSelectLanguage(language.value)}
             leading={
               <Ionicons
                 color={selected ? tokens.accent : tokens.textSecondary}

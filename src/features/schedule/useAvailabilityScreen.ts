@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useMemo, useState } from "react"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useNavigation } from "@react-navigation/native"
 
+import { getLocalToday } from "@/core/date"
 import type { AvailabilityStatus } from "@/core/models"
 import { type AvailabilityTimeField } from "@/features/schedule/availability.utils"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
@@ -23,7 +24,7 @@ export function useAvailabilityScreen() {
   const navigation = useNavigation()
   const { theme } = useAppTheme()
   const {
-    date = new Date().toISOString().slice(0, 10),
+    date = getLocalToday(),
     timeField,
     timeNonce,
     timeValue,

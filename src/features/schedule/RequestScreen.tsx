@@ -1,5 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
-
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
 import { Stack } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -11,11 +9,7 @@ import {
   RequestTargetSection,
 } from "@/features/schedule/RequestScreenSections"
 import { useRequestScreen } from "@/features/schedule/useRequestScreen"
-import {
-  AppButton,
-  AppScrollScreen,
-  useDesignTokens,
-} from "@/ui"
+import { AppButton, AppScrollScreen, useDesignTokens } from "@/ui"
 
 export function RequestScreen() {
   const insets = useSafeAreaInsets()

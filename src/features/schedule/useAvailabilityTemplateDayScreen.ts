@@ -6,22 +6,25 @@ import { useNavigation } from "@react-navigation/native"
 
 import type { AvailabilityTemplate, AvailabilityWeekday } from "@/core/models"
 import {
+  getAvailabilityTemplateDay,
+  getFallbackAvailabilityTemplate,
+} from "@/features/schedule/availability-template.utils"
+import {
   formatTime,
   isAvailabilityTimeField,
   nearestMinute,
   type AvailabilityTimeField,
 } from "@/features/schedule/availability.utils"
-import {
-  getAvailabilityTemplateDay,
-  getFallbackAvailabilityTemplate,
-} from "@/features/schedule/availability-template.utils"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { createHeaderActionOptions, useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
 type AvailabilityTemplateDayRouteParams = {
-  day?: string; timeField?: string; timeNonce?: string; timeValue?: string
+  day?: string
+  timeField?: string
+  timeNonce?: string
+  timeValue?: string
 }
 
 export function useAvailabilityTemplateDayScreen() {
@@ -48,9 +51,16 @@ export function useAvailabilityTemplateDayScreen() {
     setEditedRule(template[day])
   }, [day, template])
 
-  const updateRule = useCallback((updater: (current: AvailabilityTemplate[AvailabilityWeekday]) => AvailabilityTemplate[AvailabilityWeekday]) => {
-    setEditedRule((current) => updater(current))
-  }, [])
+  const updateRule = useCallback(
+    (
+      updater: (
+        current: AvailabilityTemplate[AvailabilityWeekday],
+      ) => AvailabilityTemplate[AvailabilityWeekday],
+    ) => {
+      setEditedRule((current) => updater(current))
+    },
+    [],
+  )
 
   const updateTimeValue = useCallback(
     (field: AvailabilityTimeField, nextValue: string) => {

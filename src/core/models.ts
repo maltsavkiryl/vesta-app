@@ -36,6 +36,9 @@ export interface Employer {
   rating: number
   clockConfig: {
     requiresScheduledShift: boolean
+    // When false (default), clock-in does not force a proof selfie; only employers
+    // that explicitly require photo proof prompt for it.
+    proofRequired?: boolean
   }
   worksite?: {
     latitude: number
@@ -120,7 +123,7 @@ export interface Shift {
   coworkers?: string[]
   changeSummary?: string
   requiresResponse?: boolean
-  responseStatus?: "pending" | "acknowledged"
+  responseStatus?: "pending" | "acknowledged" | "declined"
 }
 
 export interface AvailabilityDay {

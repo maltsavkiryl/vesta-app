@@ -1,4 +1,3 @@
-import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
@@ -16,5 +15,10 @@ export function useHomeQuery() {
     queryKey: homeQueryKeys.overview(accountId),
   })
 
-  return useMemo(() => query.data, [query.data])
+  return {
+    data: query.data,
+    isError: query.isError,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+  }
 }

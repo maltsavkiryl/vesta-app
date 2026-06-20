@@ -31,7 +31,10 @@ export function buildAddressLabel(components: {
   return parts
     .filter((part, index, values) => {
       const normalizedPart = normalizeAddressPart(part)
-      return values.findIndex((candidate) => normalizeAddressPart(candidate) === normalizedPart) === index
+      return (
+        values.findIndex((candidate) => normalizeAddressPart(candidate) === normalizedPart) ===
+        index
+      )
     })
     .join(", ")
 }
@@ -79,25 +82,19 @@ export async function captureLocationSnapshot(): Promise<LocationSnapshot | unde
   }
 }
 
-function promptForClockInPhoto() {
-  return new Promise<"photo" | "skip" | "cancel">((resolve) => {
-    Alert.alert("Clock-in proof photo", "Add an optional selfie for your check-in proof?", [
-      { text: "Cancel", style: "cancel", onPress: () => resolve("cancel") },
-      { text: "Skip", onPress: () => resolve("skip") },
-      { text: "Take selfie", onPress: () => resolve("photo") },
-    ])
-  })
-}
-
-export async function captureOptionalClockInPhoto(): Promise<ProofPhoto | undefined | null> {
-  const nextAction = await promptForClockInPhoto()
-  if (nextAction === "cancel") return null
-  if (nextAction === "skip") return undefined
-
+/**
+ * Captures the proof selfie for employers that require it. Goes straight to the
+ * camera — there is no "add a selfie?" interstitial, because proof is only
+ * requested when the employer's `clockConfig.proofRequired` is true.
+ *
+ * Returns `null` when the user backs out (camera declined or shot cancelled) so
+ * the caller can abort the clock-in instead of saving an unproven entry.
+ */
+export async function captureClockInProofPhoto(): Promise<ProofPhoto | null> {
   const permission = await requestCameraPermissionsAsync()
   if (!permission.granted) {
-    Alert.alert("Camera access needed", "Allow camera access to capture a clock-in selfie.")
-    return undefined
+    Alert.alert("Camera access needed", "This workplace requires a photo to clock in.")
+    return null
   }
 
   const result = await launchCameraAsync({
@@ -108,9 +105,9 @@ export async function captureOptionalClockInPhoto(): Promise<ProofPhoto | undefi
     quality: 0.75,
   })
 
-  if (result.canceled) return undefined
+  if (result.canceled) return null
   const asset = result.assets[0]
-  if (!asset) return undefined
+  if (!asset) return null
 
   return {
     uri: asset.uri,

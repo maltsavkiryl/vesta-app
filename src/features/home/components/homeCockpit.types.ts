@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons"
+
 import type { Shift } from "@/core/models"
 
 import type { TaskItem } from "./HomeTaskSectionRows"

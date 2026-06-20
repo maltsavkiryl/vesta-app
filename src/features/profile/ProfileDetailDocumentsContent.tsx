@@ -9,10 +9,10 @@ import {
   RequiredDocumentRow,
 } from "@/features/documents/components/DocumentList"
 import { DocumentsHeader } from "@/features/documents/components/DocumentsHeader"
-import { shareContractPdf } from "@/features/documents/documentShare"
 import { payslips } from "@/features/documents/documents.data"
+import { shareContractPdf } from "@/features/documents/documentShare"
 import { useDocumentsScreen } from "@/features/documents/useDocumentsScreen"
-import { EmptyState, appLayout, useDesignTokens } from "@/ui"
+import { EmptyState, Skeleton, SurfaceCard, appLayout, useDesignTokens } from "@/ui"
 
 import type { SectionKey } from "./profileSections"
 import type { ProfileDetailScreenState } from "./useProfileDetailScreen"
@@ -43,14 +43,48 @@ function DocumentsEmptyState({
   )
 }
 
+function DocumentsListSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <View
+      accessibilityLabel="Loading documents"
+      accessibilityState={{ busy: true }}
+      style={styles.list}
+    >
+      {Array.from({ length: rows }).map((_, index) => (
+        <SurfaceCard key={index} style={styles.skeletonRow}>
+          <Skeleton height={36} radius={11} width={36} />
+          <View style={styles.skeletonRowCopy}>
+            <Skeleton height={12} width="70%" />
+            <Skeleton height={10} width="45%" />
+          </View>
+        </SurfaceCard>
+      ))}
+    </View>
+  )
+}
+
+function DocumentsErrorState({ onRetry, subtitle }: { onRetry: () => void; subtitle: string }) {
+  return (
+    <EmptyState
+      actionLabel="Try again"
+      onAction={onRetry}
+      subtitle={subtitle}
+      title="Couldn't load documents"
+    />
+  )
+}
+
 function LegalDocumentsContent() {
   const router = useRouter()
   const {
     cancelSearch,
     filteredDocuments,
+    isError,
+    isLoading,
     isSearching,
     openUploadOptions,
     query,
+    refetch,
     setQuery,
   } = useDocumentsScreen()
   const hasSearchQuery = query.trim().length > 0
@@ -68,7 +102,14 @@ function LegalDocumentsContent() {
         onQueryChange={setQuery}
       />
       <View style={styles.list}>
-        {filteredDocuments.length > 0 ? (
+        {isLoading ? (
+          <DocumentsListSkeleton />
+        ) : isError ? (
+          <DocumentsErrorState
+            onRetry={refetch}
+            subtitle="We couldn't load your required documents. Check your connection and try again."
+          />
+        ) : filteredDocuments.length > 0 ? (
           filteredDocuments.map((document) => (
             <RequiredDocumentRow
               key={document.id}
@@ -108,7 +149,16 @@ function LegalDocumentsContent() {
 
 function ContractsContent() {
   const router = useRouter()
-  const { cancelSearch, filteredContracts, isSearching, query, setQuery } = useDocumentsScreen()
+  const {
+    cancelSearch,
+    filteredContracts,
+    isError,
+    isLoading,
+    isSearching,
+    query,
+    refetch,
+    setQuery,
+  } = useDocumentsScreen()
   const hasSearchQuery = query.trim().length > 0
 
   return (
@@ -124,7 +174,14 @@ function ContractsContent() {
         onQueryChange={setQuery}
       />
       <View style={styles.contractList}>
-        {filteredContracts.length > 0 ? (
+        {isLoading ? (
+          <DocumentsListSkeleton rows={2} />
+        ) : isError ? (
+          <DocumentsErrorState
+            onRetry={refetch}
+            subtitle="We couldn't load your contracts. Check your connection and try again."
+          />
+        ) : filteredContracts.length > 0 ? (
           filteredContracts.map((contract) => (
             <ContractCard
               key={contract.id}
@@ -205,7 +262,13 @@ function PayslipsContent() {
                 ? "Try a different month or clear the search."
                 : "Payslips will show up here after payroll is published."
             }
-            title={hasSearchQuery ? "No matching payslips" : payslips.length === 0 ? "No payslips yet" : "No matching payslips"}
+            title={
+              hasSearchQuery
+                ? "No matching payslips"
+                : payslips.length === 0
+                  ? "No payslips yet"
+                  : "No matching payslips"
+            }
           />
         )}
       </View>
@@ -246,5 +309,14 @@ const styles = StyleSheet.create({
   list: {
     gap: 10,
     paddingHorizontal: 0,
+  },
+  skeletonRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  skeletonRowCopy: {
+    flex: 1,
+    gap: 8,
   },
 })

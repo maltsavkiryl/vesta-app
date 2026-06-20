@@ -68,6 +68,9 @@ module.exports = (_: ConfigContext): ExpoConfig => {
     plugins: [
       "expo-localization",
       "expo-font",
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-notifications",
       [
         "expo-splash-screen",
         {

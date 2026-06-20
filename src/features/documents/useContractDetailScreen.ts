@@ -11,10 +11,10 @@ export function useContractDetailScreen() {
   const router = useRouter()
   const { id, mode = "view" } = useLocalSearchParams<{ id: string; mode?: "view" | "sign" }>()
   const { signContract } = useDocumentActions()
-  const contracts = useContractsQuery()
+  const { data: contracts } = useContractsQuery()
   const [signature, setSignature] = useState("")
 
-  const contract = findContract(contracts, id)
+  const contract = findContract(contracts ?? [], id)
   const canSign = Boolean(signature.trim())
 
   const signCurrentContract = async () => {

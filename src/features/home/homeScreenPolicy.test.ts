@@ -34,7 +34,7 @@ const sampleNotification: NotificationItem = {
 }
 
 describe("deriveHomeScreenPolicy", () => {
-  it("hides duplicated task and update sections when the cockpit already covers the only item", () => {
+  it("surfaces a single urgent task and update on home", () => {
     const policy = deriveHomeScreenPolicy({
       notifications: [sampleNotification],
       pendingTasks: [sampleTask],
@@ -44,8 +44,28 @@ describe("deriveHomeScreenPolicy", () => {
 
     expect(policy.homeSummary).toBe("")
     expect(policy.priorityTask?.id).toBe(sampleTask.id)
-    expect(policy.shouldShowTasksSection).toBe(false)
-    expect(policy.shouldShowUpdatesSection).toBe(false)
+    expect(policy.shouldShowTasksSection).toBe(true)
+    expect(policy.shouldShowUpdatesSection).toBe(true)
+  })
+
+  it("orders tasks by urgency so the highest-priority item leads", () => {
+    const lowTask: TaskItem = { ...sampleTask, id: "task-low", urgency: "low" }
+    const highTask: TaskItem = { ...sampleTask, id: "task-high", urgency: "high" }
+    const mediumTask: TaskItem = { ...sampleTask, id: "task-medium", urgency: "medium" }
+
+    const policy = deriveHomeScreenPolicy({
+      notifications: [],
+      pendingTasks: [lowTask, highTask, mediumTask],
+      unreadCount: 0,
+      upcomingShifts: [],
+    })
+
+    expect(policy.priorityTask?.id).toBe("task-high")
+    expect(policy.sortedTasks.map((task) => task.id)).toEqual([
+      "task-high",
+      "task-medium",
+      "task-low",
+    ])
   })
 
   it("shows the lower sections when there are multiple tasks and updates to scan", () => {

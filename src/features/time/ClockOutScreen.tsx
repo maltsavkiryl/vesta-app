@@ -1,17 +1,14 @@
-import { StyleSheet, View } from "react-native"
+import { StyleSheet } from "react-native"
 import { useRouter } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import {
-  AppScrollScreen,
-  useDesignTokens,
-} from "@/ui"
-import {
+  ClockOutCelebration,
   ClockOutContent,
   ClockOutEmptyState,
-  ClockOutSuccessState,
 } from "@/features/time/ClockOutSections"
 import { useClockOutScreen } from "@/features/time/useClockOutScreen"
+import { AppScrollScreen, useDesignTokens } from "@/ui"
 
 export function ClockOutScreen() {
   const router = useRouter()
@@ -23,7 +20,11 @@ export function ClockOutScreen() {
     return (
       <AppScrollScreen
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={[styles.screen, styles.emptyScreen, { paddingBottom: insets.bottom + 30 }]}
+        contentContainerStyle={[
+          styles.screen,
+          styles.emptyScreen,
+          { paddingBottom: insets.bottom + 30 },
+        ]}
         style={{ backgroundColor: tokens.groupedBackground }}
         topInset="none"
       >
@@ -39,10 +40,14 @@ export function ClockOutScreen() {
       style={{ backgroundColor: tokens.groupedBackground }}
       topInset="none"
     >
-      {screen.confirmed ? (
-        <ClockOutSuccessState earnings={screen.summary.earnings} workedLabel={screen.summary.workedLabel} />
+      {screen.confirmed && screen.celebration ? (
+        <ClockOutCelebration data={screen.celebration} onDone={screen.handleDismiss} />
       ) : (
-        <ClockOutContent onFinish={screen.handleFinish} onKeepWorking={router.back} summary={screen.summary} />
+        <ClockOutContent
+          onFinish={screen.handleFinish}
+          onKeepWorking={router.back}
+          summary={screen.summary}
+        />
       )}
     </AppScrollScreen>
   )

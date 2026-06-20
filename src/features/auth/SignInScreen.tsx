@@ -12,6 +12,12 @@ export function SignInScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
 
+  // All sign-in entry points (email + social) start the same real auth flow.
+  // Entra federates Apple/Google, so a provider hint can pre-select the IdP
+  // once that flow lands. TODO: pass an OIDC login_hint per provider so the
+  // social buttons skip straight to the matching federated identity provider.
+  const startSignIn = () => router.push("/(auth)/sign-in-email")
+
   return (
     <View style={[styles.screen, { backgroundColor: AUTH_SCREEN_PALETTE.canvas }]}>
       <AuthBackgroundLayers />
@@ -42,7 +48,9 @@ export function SignInScreen() {
 
           <View style={styles.buttonGroup}>
             <Pressable
-              onPress={() => router.push("/(auth)/sign-in-email")}
+              accessibilityLabel="Log in with email"
+              accessibilityRole="button"
+              onPress={startSignIn}
               style={({ pressed }) => [
                 styles.emailButton,
                 {
@@ -74,6 +82,9 @@ export function SignInScreen() {
             </View>
 
             <Pressable
+              accessibilityLabel="Continue with Apple"
+              accessibilityRole="button"
+              onPress={startSignIn}
               style={({ pressed }) => [
                 styles.socialButton,
                 {
@@ -93,6 +104,9 @@ export function SignInScreen() {
             </Pressable>
 
             <Pressable
+              accessibilityLabel="Continue with Google"
+              accessibilityRole="button"
+              onPress={startSignIn}
               style={({ pressed }) => [
                 styles.socialButton,
                 {
@@ -118,8 +132,12 @@ export function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
+  bottomContent: {
+    gap: 24,
+    paddingHorizontal: 24,
+  },
+  buttonGroup: {
+    gap: 12,
   },
   dividerLine: {
     flex: 1,
@@ -130,46 +148,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
-
-  // Landing view
-  landingMain: {
-    flex: 1,
-  },
-  heroSection: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-  },
-  logo: {
-    height: 96,
-    width: 96,
-  },
-
-  // Bottom content
-  bottomContent: {
-    gap: 24,
-    paddingHorizontal: 24,
-  },
-  textBlock: {
-    alignItems: "center",
-    gap: 12,
-  },
-  headline: {
-    textAlign: "center",
-  },
-  subtitle: {
-    maxWidth: 300,
-    textAlign: "center",
-  },
-  buttonGroup: {
-    gap: 12,
-  },
   emailButton: {
     alignItems: "center",
     borderCurve: "continuous",
     borderRadius: 999,
     height: 56,
     justifyContent: "center",
+  },
+  headline: {
+    textAlign: "center",
+  },
+  heroSection: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+  },
+  landingMain: {
+    flex: 1,
+  },
+  logo: {
+    height: 96,
+    width: 96,
+  },
+  screen: {
+    flex: 1,
   },
   socialButton: {
     alignItems: "center",
@@ -180,5 +182,13 @@ const styles = StyleSheet.create({
     gap: 10,
     height: 52,
     justifyContent: "center",
+  },
+  subtitle: {
+    maxWidth: 300,
+    textAlign: "center",
+  },
+  textBlock: {
+    alignItems: "center",
+    gap: 12,
   },
 })

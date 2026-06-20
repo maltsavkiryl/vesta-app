@@ -1,5 +1,4 @@
 import type { AvailabilityStatus, AvailabilityTemplate, AvailabilityWeekday } from "@/core/models"
-
 import { formatTimeLabel } from "@/features/schedule/availability.utils"
 import { availabilityWeekdays } from "@/features/schedule/schedule.utils"
 

@@ -1,3 +1,4 @@
+import { getLocalToday } from "@/core/date"
 import type {
   AppStoreState,
   AvailabilityOverride,
@@ -69,14 +70,15 @@ export function enumerateDateRange(startDate: string, endDate: string) {
 
 export function getPlanningWindowCoverage(
   planningWindow: PlanningWindow,
-  template: AvailabilityTemplate,
+  _template: AvailabilityTemplate,
   overrides: Record<string, AvailabilityOverride>,
 ) {
   const dates = enumerateDateRange(planningWindow.startDate, planningWindow.endDate)
-  const completedDates = dates.filter((date) => {
-    const availability = getEffectiveAvailability(template, overrides, date)
-    return Boolean(availability.status && availability.startTime && availability.endTime)
-  })
+  // A day only counts as "covered" when the employee has set an EXPLICIT
+  // override for it. The weekly template is a sensible default, not an answer
+  // to "what are you doing this specific week" — counting template-filled days
+  // made coverage read 100% the moment a template existed.
+  const completedDates = dates.filter((date) => Boolean(overrides[date]))
 
   return {
     completedDates,
@@ -100,7 +102,7 @@ export function getNextIncompleteAvailabilityDate(
 }
 
 export function getUpcomingShifts(shifts: Shift[], fromDate?: string) {
-  const baseline = fromDate ?? new Date().toISOString().slice(0, 10)
+  const baseline = fromDate ?? getLocalToday()
   return shifts.filter((shift) => shift.date >= baseline)
 }
 
@@ -117,7 +119,9 @@ export function buildMonthGrid(anchorDate: Date) {
   const year = anchorDate.getFullYear()
   const month = anchorDate.getMonth()
   const firstDay = new Date(year, month, 1)
-  const firstOffset = firstDay.getDay()
+  // Monday-first (EU): shift Sunday (0) to the last column, Monday (1) to the
+  // first. Matches the Monday-first availability model (`getWeekdayKey`).
+  const firstOffset = (firstDay.getDay() + 6) % 7
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const cells: Array<string | null> = []
 
@@ -134,6 +138,130 @@ export function buildMonthGrid(anchorDate: Date) {
   }
 
   return cells
+}
+
+/** A `Date` for a shift's start, anchored at local time from `date` + `startTime`. */
+export function getShiftStartDate(shift: Shift): Date {
+  const [year, month, day] = shift.date.split("-").map(Number)
+  const [hour, minute] = shift.startTime.split(":").map(Number)
+  return new Date(year, month - 1, day, hour, minute, 0)
+}
+
+/**
+ * A `Date` for a shift's end. When the end time is at or before the start time
+ * (e.g. a shift that runs to "00:00"), it rolls over to the next day.
+ */
+export function getShiftEndDate(shift: Shift): Date {
+  const start = getShiftStartDate(shift)
+  const [hour, minute] = shift.endTime.split(":").map(Number)
+  const end = new Date(start)
+  end.setHours(hour, minute, 0, 0)
+  if (end <= start) {
+    end.setDate(end.getDate() + 1)
+  }
+  return end
+}
+
+/**
+ * The single most relevant upcoming shift: the one that is currently running or
+ * starts soonest. Shifts that have already ended are ignored.
+ */
+export function getNextShift(shifts: Shift[], now: Date = new Date()): Shift | undefined {
+  return shifts
+    .filter((shift) => getShiftEndDate(shift).getTime() >= now.getTime())
+    .sort(
+      (left, right) => getShiftStartDate(left).getTime() - getShiftStartDate(right).getTime(),
+    )[0]
+}
+
+/**
+ * A short, human countdown to a future moment: "Starting now", "in 25 min",
+ * "in 4h", "in 3 days". Returns `null` once the moment has passed.
+ */
+export function formatCountdown(target: Date, now: Date = new Date()): string | null {
+  const diffMs = target.getTime() - now.getTime()
+  if (diffMs <= 0) return null
+
+  const minutes = Math.round(diffMs / 60000)
+  if (minutes < 1) return "Starting now"
+  if (minutes < 60) return `in ${minutes} min`
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) {
+    const remainderMinutes = minutes % 60
+    return remainderMinutes > 0 ? `in ${hours}h ${remainderMinutes}m` : `in ${hours}h`
+  }
+
+  const days = Math.round(hours / 24)
+  return days === 1 ? "in 1 day" : `in ${days} days`
+}
+
+/** Monday (local noon) of the week containing `dateString`. */
+export function getWeekStart(dateString: string): Date {
+  const date = new Date(`${dateString}T12:00:00`)
+  const offset = (date.getDay() + 6) % 7
+  date.setDate(date.getDate() - offset)
+  date.setHours(12, 0, 0, 0)
+  return date
+}
+
+export type AgendaSectionKey = "this-week" | "next-week" | "later"
+
+export interface AgendaSection {
+  key: AgendaSectionKey
+  label: string
+  shifts: Shift[]
+}
+
+/**
+ * Groups upcoming shifts into "This week" / "Next week" / "Later" buckets,
+ * Monday-first, relative to `today`. Empty sections are omitted.
+ */
+export function groupUpcomingShiftsByWeek(
+  shifts: Shift[],
+  today: string = getLocalToday(),
+): AgendaSection[] {
+  const upcoming = getUpcomingShifts(shifts, today).sort((left, right) => {
+    if (left.date !== right.date) return left.date.localeCompare(right.date)
+    return left.startTime.localeCompare(right.startTime)
+  })
+
+  const weekStart = getWeekStart(today)
+  const thisWeekEnd = toIsoDate(
+    new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6, 12),
+  )
+  const nextWeekStart = toIsoDate(
+    new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 7, 12),
+  )
+  const nextWeekEnd = toIsoDate(
+    new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 13, 12),
+  )
+
+  const buckets: Record<AgendaSectionKey, Shift[]> = {
+    "this-week": [],
+    "next-week": [],
+    "later": [],
+  }
+
+  for (const shift of upcoming) {
+    if (shift.date <= thisWeekEnd) {
+      buckets["this-week"].push(shift)
+    } else if (shift.date >= nextWeekStart && shift.date <= nextWeekEnd) {
+      buckets["next-week"].push(shift)
+    } else {
+      buckets.later.push(shift)
+    }
+  }
+
+  const labels: Record<AgendaSectionKey, string> = {
+    "this-week": "This week",
+    "next-week": "Next week",
+    "later": "Later",
+  }
+
+  return (["this-week", "next-week", "later"] as const)
+    .filter((key) => buckets[key].length > 0)
+    .map((key) => ({ key, label: labels[key], shifts: buckets[key] }))
 }
 
 export function getShiftsForDate(shifts: Shift[], dateString: string) {

@@ -14,6 +14,9 @@ export const timeHeroColors = {
   secondaryText: "rgba(231, 238, 255, 0.78)",
   tertiaryText: "rgba(214, 225, 255, 0.66)",
   divider: "rgba(255, 255, 255, 0.10)",
+  // Mint that reads as "success" on the dark hero gradient (the app's green
+  // tokens are tuned for light/grouped surfaces, not this near-black card).
+  successText: "#74E6AC",
 } as const
 
 type TimeHeroCardVariant = "default" | "compact"

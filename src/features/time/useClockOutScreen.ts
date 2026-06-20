@@ -2,26 +2,34 @@ import { useState } from "react"
 import { useRouter } from "expo-router"
 
 import { formatDurationLabel, formatTimeLabel } from "@/core/date"
+import { formatCurrency } from "@/core/format"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useClockSummary, useTimeDataQuery } from "@/features/time/data/time.queries"
 import { fireHaptic } from "@/utils/haptics"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
-const HOURLY_RATE = 12.02
-
 export function useClockOutScreen() {
   const router = useRouter()
   const { confirmClockOut } = useTimeActions()
   const query = useTimeDataQuery()
   const clockSession = query.data?.clockSession
+  // Real, per-employee pay rate sourced from the time overview earnings summary.
+  const hourlyRate = query.data?.earnings.averageHourlyRate ?? 0
+  const shiftsWorked = query.data?.earnings.shiftsWorked ?? 0
   const summary = useClockSummary()
   const [confirmed, setConfirmed] = useState(false)
 
+  const handleDismiss = () => {
+    router.replace("/(app)/(tabs)/time")
+  }
+
   if (!clockSession) {
     return {
+      celebration: null,
       clockSession,
       confirmed,
+      handleDismiss,
       handleFinish: async () => {},
       summary: null,
     }
@@ -29,7 +37,7 @@ export function useClockOutScreen() {
 
   const netSeconds = Math.max(summary.payableSeconds, 0)
   const workedLabel = formatDurationLabel(netSeconds)
-  const earnings = ((netSeconds / 3600) * HOURLY_RATE).toFixed(2)
+  const earnings = formatCurrency((netSeconds / 3600) * hourlyRate)
   const overtime = netSeconds > 6 * 3600 ? netSeconds - 6 * 3600 : 0
 
   const handleFinish = async () => {
@@ -42,20 +50,28 @@ export function useClockOutScreen() {
     }
 
     fireHaptic("success")
+    // No auto-redirect — the celebration is a moment the employee dismisses.
     setConfirmed(true)
-    setTimeout(() => router.replace("/(app)/(tabs)/time"), 900)
   }
 
   return {
+    // The just-finished shift counts toward the running monthly total.
+    celebration: {
+      breakLabel: formatDurationLabel(summary.breakSeconds),
+      earnedToday: earnings,
+      shiftsWorked: shiftsWorked + 1,
+      workedLabel,
+    },
     clockSession,
     confirmed,
+    handleDismiss,
     handleFinish,
     summary: {
       breakLabel: formatDurationLabel(summary.breakSeconds),
       clockOutTime: formatTimeLabel(new Date()),
       earnings,
       overtime,
-      rateLabel: `€${HOURLY_RATE.toFixed(2)}/hr`,
+      rateLabel: `${formatCurrency(hourlyRate)}/hr`,
       startedAtLabel: summary.startedAtLabel ?? "--:--",
       workedLabel,
     },

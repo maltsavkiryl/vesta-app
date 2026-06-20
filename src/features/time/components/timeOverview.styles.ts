@@ -53,6 +53,11 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 14,
   },
+  earningsTickerRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
   flex: {
     flex: 1,
     minWidth: 0,

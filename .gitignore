@@ -92,3 +92,6 @@ web-build/
 # Dependency Graph Visualizations
 app-dependency-graph.svg
 app-dependency-graph.png
+
+# Local env (secrets, not committed)
+.env*.local

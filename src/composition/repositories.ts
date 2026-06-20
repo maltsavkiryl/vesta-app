@@ -18,17 +18,24 @@ import type { HomeRepository } from "@/features/home/data/home.repository"
 import type { NotificationsRepository } from "@/features/notifications/data/notifications.repository"
 import type { ProfileError } from "@/features/profile/data/profile.errors"
 import type { ProfileRepository } from "@/features/profile/data/profile.repository"
+import {
+  toUpdateMyEmployeeDto,
+  toUserProfile,
+  type EmployeeDto,
+} from "@/features/profile/data/profile.transformer"
 import type {
   CreateRequestInput,
   ScheduleRepository,
 } from "@/features/schedule/data/schedule.repository"
 import type { ClockError } from "@/features/time/data/time.errors"
 import type { TimeRepository } from "@/features/time/data/time.repository"
+import { authService, httpClient } from "@/services/api"
 import { applyAppAction, normalizeEmail } from "@/services/app/app-state.reducer"
 import {
   commitAccountPasswordChange,
   commitAccountAction,
   ensureDb,
+  ensureSeededAccount,
   findAccountByEmail,
   findAccountOrThrow,
   getAccountState,
@@ -555,116 +562,76 @@ function createMockHomeRepository(): HomeRepository {
   }
 }
 
-function createApiNotReadyError() {
-  return new Error("HTTP adapters are not implemented yet.")
-}
-
 function createApiRepositories() {
   return {
     auth: {
-      changePassword: async () => {
-        throw createApiNotReadyError()
+      async signIn() {
+        const result = await authService.signIn()
+        if (!result.ok) return result
+        ensureSeededAccount(result.data.accountId)
+        setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
+        // First-run onboarding is local app state, not the backend payroll-profile
+        // completeness (which the lightweight wizard cannot satisfy).
+        return success(buildSessionForAccount(result.data.accountId))
       },
-      completeOnboarding: async () => {
-        throw createApiNotReadyError()
+      async signOut() {
+        await authService.signOut()
+        setSession({ accountId: null })
+        return toAppSession({ accountId: null })
       },
-      getSession: async () => toAppSession({ accountId: null }),
-      register: async () => {
-        throw createApiNotReadyError()
+      async getSession() {
+        const restored = await authService.loadSession()
+        if (!restored) return toAppSession({ accountId: null })
+        ensureSeededAccount(restored.accountId)
+        setSession({ accountId: restored.accountId, signedInAt: new Date().toISOString() })
+        return buildSessionForAccount(restored.accountId)
       },
-      requestPasswordReset: async () => {
-        throw createApiNotReadyError()
+      register: async () =>
+        failure<AuthError>({ type: "validation", message: "Use Continue with email." }),
+      requestPasswordReset: async () =>
+        failure<AuthError>({
+          type: "reset-unavailable",
+          message: "Password reset is handled by the identity provider.",
+        }),
+      resetPassword: async () =>
+        failure<AuthError>({
+          type: "reset-unavailable",
+          message: "Password reset is handled by the identity provider.",
+        }),
+      changePassword: async () =>
+        failure<AuthError>({
+          type: "validation",
+          message: "Password change is handled by the identity provider.",
+        }),
+      async completeOnboarding(accountId: string, input: CompleteOnboardingInput) {
+        const nextState = commitAccountAction(
+          accountId,
+          { type: "completeOnboarding", payload: input },
+          applyAppAction,
+        )
+        return success(
+          buildSessionForAccount(nextState.authStatus === "signedIn" ? accountId : null),
+        )
       },
-      resetPassword: async () => {
-        throw createApiNotReadyError()
-      },
-      signIn: async () => {
-        throw createApiNotReadyError()
-      },
-      signOut: async () => toAppSession({ accountId: null }),
     } satisfies AuthRepository,
-    documents: {
-      getContracts: async () => [],
-      getDocuments: async () => [],
-      signContract: async () => {
-        throw createApiNotReadyError()
-      },
-      uploadDocument: async () => {
-        throw createApiNotReadyError()
-      },
-    } satisfies DocumentsRepository,
-    home: {
-      getHomeOverview: async () => {
-        throw createApiNotReadyError()
-      },
-    } satisfies HomeRepository,
-    notifications: {
-      archive: async () => [],
-      archiveAll: async () => [],
-      getNotifications: async () => [],
-      markAllRead: async () => [],
-      markRead: async () => [],
-    } satisfies NotificationsRepository,
     profile: {
-      getEmployers: async () => {
-        throw createApiNotReadyError()
+      async getProfile() {
+        const res = await httpClient.get<EmployeeDto>("/employee")
+        if (!res.ok || !res.data) throw new Error("Failed to load profile")
+        return toUserProfile(res.data)
       },
-      getProfile: async () => {
-        throw createApiNotReadyError()
+      async updateProfile(_accountId, profile) {
+        const res = await httpClient.put<unknown>("/employee", toUpdateMyEmployeeDto(profile))
+        if (!res.ok) return failure(toProfileError("validation", "Could not save profile."))
+        const reloaded = await httpClient.get<EmployeeDto>("/employee")
+        if (!reloaded.ok || !reloaded.data) {
+          return failure(toProfileError("not-found", "Profile not found."))
+        }
+        return success(toUserProfile(reloaded.data))
       },
-      joinEmployer: async () => {
-        throw createApiNotReadyError()
-      },
-      updateProfile: async () => {
-        throw createApiNotReadyError()
-      },
+      getEmployers: createMockProfileRepository().getEmployers,
+      joinEmployer: createMockProfileRepository().joinEmployer,
     } satisfies ProfileRepository,
-    schedule: {
-      createRequest: async () => {
-        throw createApiNotReadyError()
-      },
-      getSchedule: async () => {
-        throw createApiNotReadyError()
-      },
-      respondToShift: async () => {
-        throw createApiNotReadyError()
-      },
-      saveAvailabilityOverride: async () => {
-        throw createApiNotReadyError()
-      },
-      saveAvailabilityTemplate: async () => {
-        throw createApiNotReadyError()
-      },
-      submitPlanningWindow: async () => {
-        throw createApiNotReadyError()
-      },
-    } satisfies ScheduleRepository,
-    time: {
-      clockIn: async () => {
-        throw createApiNotReadyError()
-      },
-      clockOut: async () => {
-        throw createApiNotReadyError()
-      },
-      endBreak: async () => {
-        throw createApiNotReadyError()
-      },
-      getClockSession: async () => {
-        throw createApiNotReadyError()
-      },
-      getTimeEntries: async () => {
-        throw createApiNotReadyError()
-      },
-      getTimeEntry: async () => {
-        throw createApiNotReadyError()
-      },
-      getTimeOverview: async () => {
-        throw createApiNotReadyError()
-      },
-      startBreak: async () => {
-        throw createApiNotReadyError()
-      },
-    } satisfies TimeRepository,
   }
 }
 
@@ -679,8 +646,8 @@ export interface AppRepositories {
 }
 
 export function createAppRepositories(): AppRepositories {
-  const adapter = Config.API_URL ? "mock" : "mock"
-  if (adapter === "mock") {
+  const useHttp = Boolean(Config.API_URL)
+  if (!useHttp) {
     return {
       auth: createMockAuthRepository(),
       documents: createMockDocumentsRepository(),
@@ -692,7 +659,16 @@ export function createAppRepositories(): AppRepositories {
     }
   }
 
-  return createApiRepositories()
+  const httpRepos = createApiRepositories()
+  return {
+    auth: httpRepos.auth,
+    profile: httpRepos.profile,
+    documents: createMockDocumentsRepository(),
+    home: createMockHomeRepository(),
+    notifications: createMockNotificationsRepository(),
+    schedule: createMockScheduleRepository(),
+    time: createMockTimeRepository(),
+  }
 }
 
 export const appRepositories = createAppRepositories()

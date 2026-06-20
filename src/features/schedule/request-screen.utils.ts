@@ -1,4 +1,4 @@
-import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
+import { formatFullDate, formatShortDate, getLocalToday, getShiftTimeRange } from "@/core/date"
 import type { RequestCategory, Shift } from "@/core/models"
 
 export function formatRequestDateListLabel(dates: string[]) {
@@ -9,7 +9,7 @@ export function formatRequestDateListLabel(dates: string[]) {
 }
 
 export function getTodayDateString() {
-  return new Date().toISOString().slice(0, 10)
+  return getLocalToday()
 }
 
 export function getTargetSectionCopy(category: RequestCategory) {
@@ -63,7 +63,11 @@ export function getRequestActionCopy(category: RequestCategory) {
   }
 }
 
-export function getRequestSummaryTarget(category: RequestCategory, selectedDates: string[], selectedShift?: Shift) {
+export function getRequestSummaryTarget(
+  category: RequestCategory,
+  selectedDates: string[],
+  selectedShift?: Shift,
+) {
   return category === "shift_change"
     ? selectedShift
       ? `${selectedShift.dayLabel} · ${getShiftTimeRange(selectedShift)}`
@@ -71,7 +75,11 @@ export function getRequestSummaryTarget(category: RequestCategory, selectedDates
     : formatRequestDateListLabel(selectedDates)
 }
 
-export function getRequestDetailTargetLabel(category: RequestCategory, selectedDates: string[], selectedShift?: Shift) {
+export function getRequestDetailTargetLabel(
+  category: RequestCategory,
+  selectedDates: string[],
+  selectedShift?: Shift,
+) {
   if (category === "shift_change") {
     return selectedShift ? `${selectedShift.role} · ${selectedShift.venueName}` : ""
   }

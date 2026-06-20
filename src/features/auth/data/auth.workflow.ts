@@ -9,12 +9,15 @@ export function completeOnboardingWorkflow(
   accountId: string,
   input: CompleteOnboardingInput,
 ): Promise<Result<AppSession, AuthError>> {
-  if (!input.role.trim() || !input.employerId.trim()) {
+  // Employer is optional here — joining an employer is invite/QR-driven and can be
+  // done later, so "Skip for now" must be able to complete onboarding. Role always
+  // has a sensible default from the screen.
+  if (!input.role.trim()) {
     return Promise.resolve({
       ok: false,
       error: {
         type: "onboarding-invalid",
-        message: "Choose a role and employer before completing onboarding.",
+        message: "Choose a role before completing onboarding.",
       },
     })
   }

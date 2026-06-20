@@ -2,11 +2,31 @@ import { useRef } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { formatMonthLabel } from "@/core/date"
+import { formatFullDate, formatMonthLabel, getLocalToday } from "@/core/date"
 import type { CalendarDayState } from "@/features/schedule/schedule.utils"
 import { Text, useDesignTokens } from "@/ui"
 
-const dayLabels = ["S", "M", "T", "W", "T", "F", "S"] as const
+const availabilityA11yLabel: Record<CalendarDayState["availabilityStatus"], string> = {
+  available: "available",
+  preferred: "preferred to work",
+  unavailable: "unavailable",
+}
+
+function buildDayAccessibilityLabel(dateString: string, dayState: CalendarDayState): string {
+  const parts = [formatFullDate(dateString)]
+  if (dayState.shiftCount > 0) {
+    parts.push(`${dayState.shiftCount} ${dayState.shiftCount === 1 ? "shift" : "shifts"}`)
+  } else {
+    parts.push(availabilityA11yLabel[dayState.availabilityStatus])
+  }
+  if (dayState.needsResponse) {
+    parts.push("needs response")
+  }
+  return parts.join(", ")
+}
+
+// Monday-first (EU): Mon, Tue, Wed, Thu, Fri, Sat, Sun.
+const dayLabels = ["M", "T", "W", "T", "F", "S", "S"] as const
 
 function getAvailabilityColor(
   availabilityStatus: CalendarDayState["availabilityStatus"],
@@ -37,7 +57,7 @@ export function PlanningMonthCalendar({
   selectedDate: string
 }) {
   const tokens = useDesignTokens()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalToday()
   const currentMonth = anchorDate.getMonth()
   const ignoreNextPressRef = useRef(false)
 
@@ -151,6 +171,8 @@ export function PlanningMonthCalendar({
             <Pressable
               key={dateString}
               accessibilityRole="button"
+              accessibilityLabel={buildDayAccessibilityLabel(dateString, dayState)}
+              accessibilityState={{ selected: isSelected }}
               onLongPress={() => {
                 ignoreNextPressRef.current = true
                 onLongPressDate(dateString)

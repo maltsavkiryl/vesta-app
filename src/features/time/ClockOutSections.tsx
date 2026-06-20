@@ -1,8 +1,18 @@
+import { useEffect } from "react"
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated"
 
 import { formatDurationLabel } from "@/core/date"
+import { useAppMotion } from "@/providers/motion-provider"
 import {
   AppButton,
   DetailRow,
@@ -39,41 +49,120 @@ export function ClockOutEmptyState() {
   )
 }
 
-export function ClockOutSuccessState({
-  earnings,
-  workedLabel,
-}: {
-  earnings: string
+type ClockOutCelebrationData = {
+  breakLabel: string
+  earnedToday: string
+  shiftsWorked: number
   workedLabel: string
+}
+
+/**
+ * Rewarding end-of-shift moment. Replaces the old 900ms auto-redirect: the
+ * employee lingers on their earnings and dismisses when ready. Honours reduced
+ * motion by rendering everything static (no pop-in, no shimmer).
+ */
+export function ClockOutCelebration({
+  data,
+  onDone,
+}: {
+  data: ClockOutCelebrationData
+  onDone: () => void
 }) {
   const tokens = useDesignTokens()
+  const motion = useAppMotion()
+  const amountScale = useSharedValue(motion.shouldReduceMotion ? 1 : 0.82)
+  const amountOpacity = useSharedValue(motion.shouldReduceMotion ? 1 : 0)
+  const glowOpacity = useSharedValue(motion.shouldReduceMotion ? 0.5 : 0)
+
+  useEffect(() => {
+    if (motion.shouldReduceMotion) return
+    amountOpacity.value = withDelay(120, withTiming(1, { duration: 320 }))
+    amountScale.value = withDelay(120, withSpring(1, { damping: 11, stiffness: 180 }))
+    glowOpacity.value = withSequence(
+      withDelay(120, withTiming(0.7, { duration: 360 })),
+      withTiming(0.5, { duration: 420 }),
+    )
+  }, [amountOpacity, amountScale, glowOpacity, motion.shouldReduceMotion])
+
+  const amountAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: amountOpacity.value,
+    transform: [{ scale: amountScale.value }],
+  }))
+  const glowAnimatedStyle = useAnimatedStyle(() => ({ opacity: glowOpacity.value }))
 
   return (
-    <SuccessState subtitle="Your time has been saved." title="Clocked out">
-      <View style={styles.successStats}>
-        <View style={styles.statBlock}>
-          <Text
-            style={[appTypography.successTitle, { color: tokens.textPrimary }]}
-            text={workedLabel}
-            weight="bold"
-          />
-          <Text size="xxs" style={[styles.statLabel, { color: tokens.textSecondary }]} text="Worked" />
+    <View style={styles.celebration}>
+      <SuccessState
+        icon="sparkles"
+        subtitle="Your time is saved. Here's what you earned."
+        title="Shift complete!"
+        tone="success"
+      >
+        <View
+          accessible
+          accessibilityRole="summary"
+          accessibilityLabel={`You earned ${data.earnedToday} for ${data.workedLabel} of payable time. ${data.shiftsWorked} shifts worked this month.`}
+          style={styles.celebrationBody}
+        >
+          <View style={styles.earnedTodayBlock}>
+            <Text
+              size="xxs"
+              style={[styles.statLabel, { color: tokens.textSecondary }]}
+              text="Earned this shift"
+            />
+            <View>
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  styles.earnedGlow,
+                  { backgroundColor: tokens.successSoft },
+                  glowAnimatedStyle,
+                ]}
+              />
+              <Animated.View style={amountAnimatedStyle}>
+                <Text
+                  style={[styles.earnedAmount, { color: tokens.success }]}
+                  text={data.earnedToday}
+                  weight="bold"
+                />
+              </Animated.View>
+            </View>
+          </View>
+
+          <View style={styles.successStats}>
+            <View style={styles.statBlock}>
+              <Text
+                style={[appTypography.successTitle, { color: tokens.textPrimary }]}
+                text={data.workedLabel}
+                weight="bold"
+              />
+              <Text
+                size="xxs"
+                style={[styles.statLabel, { color: tokens.textSecondary }]}
+                text="Worked"
+              />
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
+            <View style={styles.statBlock}>
+              <Text
+                style={[appTypography.successTitle, { color: tokens.textPrimary }]}
+                text={`${data.shiftsWorked}`}
+                weight="bold"
+              />
+              <Text
+                size="xxs"
+                style={[styles.statLabel, { color: tokens.textSecondary }]}
+                text="Shifts this month"
+              />
+            </View>
+          </View>
         </View>
-        <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
-        <View style={styles.statBlock}>
-          <Text
-            style={[appTypography.successTitle, { color: tokens.success }]}
-            text={`€${earnings}`}
-            weight="bold"
-          />
-          <Text
-            size="xxs"
-            style={[styles.statLabel, { color: tokens.textSecondary }]}
-            text="Est. pay"
-          />
-        </View>
+      </SuccessState>
+
+      <View style={styles.celebrationFooter}>
+        <AppButton label="Done" onPress={onDone} />
       </View>
-    </SuccessState>
+    </View>
   )
 }
 
@@ -115,7 +204,11 @@ export function ClockOutContent({
       </GroupedSection>
 
       <GroupedSection title="Pay estimate">
-        <ClockOutPaySummary earnings={summary.earnings} workedLabel={summary.workedLabel} />
+        <ClockOutPaySummary
+          earnings={summary.earnings}
+          rateLabel={summary.rateLabel}
+          workedLabel={summary.workedLabel}
+        />
       </GroupedSection>
 
       <View style={styles.footerBlock}>
@@ -135,7 +228,15 @@ export function ClockOutContent({
   )
 }
 
-function ClockOutPaySummary({ earnings, workedLabel }: { earnings: string; workedLabel: string }) {
+function ClockOutPaySummary({
+  earnings,
+  rateLabel,
+  workedLabel,
+}: {
+  earnings: string
+  rateLabel: string
+  workedLabel: string
+}) {
   const tokens = useDesignTokens()
 
   return (
@@ -150,22 +251,48 @@ function ClockOutPaySummary({ earnings, workedLabel }: { earnings: string; worke
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={`€12.02/hr x ${workedLabel}`}
+          text={`${rateLabel} x ${workedLabel}`}
         />
       </View>
-      <Text
-        style={[styles.payValue, { color: tokens.success }]}
-        text={`€${earnings}`}
-        weight="bold"
-      />
+      <Text style={[styles.payValue, { color: tokens.success }]} text={earnings} weight="bold" />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  celebration: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  celebrationBody: {
+    alignItems: "center",
+    gap: 22,
+  },
+  celebrationFooter: {
+    paddingHorizontal: 4,
+    paddingTop: 12,
+  },
   content: {
     gap: 20,
     padding: 20,
+  },
+  earnedAmount: {
+    fontSize: 48,
+    lineHeight: 54,
+    textAlign: "center",
+  },
+  earnedGlow: {
+    borderRadius: 999,
+    bottom: 6,
+    left: -12,
+    position: "absolute",
+    right: -12,
+    top: 6,
+  },
+  earnedTodayBlock: {
+    alignItems: "center",
+    gap: 6,
   },
   footerActions: {
     alignSelf: "stretch",

@@ -1,7 +1,7 @@
 import type { Shift } from "@/core/models"
 
-import type { TaskItem } from "./HomeTaskSectionRows"
 import { getPrimaryCockpitAction } from "./homeCockpit.utils"
+import type { TaskItem } from "./HomeTaskSectionRows"
 
 const sampleShift: Shift = {
   id: "shift-1",

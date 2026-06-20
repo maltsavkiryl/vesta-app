@@ -2,11 +2,11 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { AvailabilityTemplate, AvailabilityWeekday } from "@/core/models"
-import { durationLabel } from "@/features/schedule/availability.utils"
 import {
   getAvailabilityTemplateStatusTone,
   getAvailabilityTemplateSummary,
 } from "@/features/schedule/availability-template.utils"
+import { durationLabel } from "@/features/schedule/availability.utils"
 import { availabilityWeekdayLabels, availabilityWeekdays } from "@/features/schedule/schedule.utils"
 import { GroupedSection, SelectionRow, Text, useDesignTokens } from "@/ui"
 
@@ -65,7 +65,9 @@ export function AvailabilityTemplateWeekdaySection({
             style={styles.weekdayRow}
             subtitle={statusSummary}
             title={availabilityWeekdayLabels[weekday]}
-            trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
+            trailing={
+              <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
+            }
           />
         )
       })}

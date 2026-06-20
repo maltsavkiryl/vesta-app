@@ -9,13 +9,24 @@ export function useSignInScreen() {
   const router = useRouter()
   const { signIn } = useAuthActions()
 
-  const [email, setEmail] = useState<string>(DEMO_AUTH_CREDENTIALS.email)
-  const [password, setPassword] = useState<string>(DEMO_AUTH_CREDENTIALS.password)
+  // Production sign-in must open with empty credentials — no demo prefill.
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
   const [error, setError] = useState<string>()
 
   const clearError = () => {
     if (error) setError(undefined)
   }
+
+  // Dev-only convenience: lets engineers populate the demo account with one tap.
+  // Never exposed (or returned) in production builds.
+  const fillDemoCredentials = __DEV__
+    ? () => {
+        setEmail(DEMO_AUTH_CREDENTIALS.email)
+        setPassword(DEMO_AUTH_CREDENTIALS.password)
+        clearError()
+      }
+    : undefined
 
   const handleEmailChange = (value: string) => {
     setEmail(value)
@@ -51,6 +62,7 @@ export function useSignInScreen() {
     clearPassword: () => setPassword(""),
     email,
     error,
+    fillDemoCredentials,
     handleContinue,
     handleEmailChange,
     handlePasswordChange,

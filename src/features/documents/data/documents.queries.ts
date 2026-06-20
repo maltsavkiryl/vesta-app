@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
@@ -11,11 +11,18 @@ export const documentsQueryKeys = {
 
 export function useDocumentsQuery() {
   const { accountId } = useAppSession()
-  return useQuery({
+  const query = useQuery({
     enabled: Boolean(accountId),
     queryFn: () => appRepositories.documents.getDocuments(accountId!),
     queryKey: documentsQueryKeys.documents(accountId),
   })
+
+  return {
+    data: query.data,
+    isError: query.isError,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+  }
 }
 
 export function useContractsQuery() {
@@ -25,18 +32,40 @@ export function useContractsQuery() {
     queryFn: () => appRepositories.documents.getContracts(accountId!),
     queryKey: documentsQueryKeys.contracts(accountId),
   })
-  return query.data ?? []
+
+  return {
+    data: query.data,
+    isError: query.isError,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+  }
 }
 
 export function useDocumentsStateQuery() {
   const documentsQuery = useDocumentsQuery()
-  const contracts = useContractsQuery()
+  const contractsQuery = useContractsQuery()
+
+  const refetch = useCallback(() => {
+    void documentsQuery.refetch()
+    void contractsQuery.refetch()
+  }, [contractsQuery, documentsQuery])
 
   return useMemo(
     () => ({
-      contracts,
+      contracts: contractsQuery.data ?? [],
       documents: documentsQuery.data ?? [],
+      isError: documentsQuery.isError || contractsQuery.isError,
+      isLoading: documentsQuery.isLoading || contractsQuery.isLoading,
+      refetch,
     }),
-    [contracts, documentsQuery.data],
+    [
+      contractsQuery.data,
+      contractsQuery.isError,
+      contractsQuery.isLoading,
+      documentsQuery.data,
+      documentsQuery.isError,
+      documentsQuery.isLoading,
+      refetch,
+    ],
   )
 }

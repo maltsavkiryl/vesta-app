@@ -1,18 +1,14 @@
+import {
+  formatCompactCurrency as formatCompactCurrencyLocalized,
+  formatCurrency as formatCurrencyLocalized,
+} from "@/core/format"
+
 export function formatCurrency(value: number, currency = "EUR") {
-  return new Intl.NumberFormat("en-BE", {
-    currency,
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-    style: "currency",
-  }).format(value)
+  return formatCurrencyLocalized(value, { currency })
 }
 
 export function formatCompactCurrency(value: number, currency = "EUR") {
-  return new Intl.NumberFormat("en-BE", {
-    currency,
-    maximumFractionDigits: 0,
-    style: "currency",
-  }).format(value)
+  return formatCompactCurrencyLocalized(value, { currency })
 }
 
 export function maskIban(iban?: string) {

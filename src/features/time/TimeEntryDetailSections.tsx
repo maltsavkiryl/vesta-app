@@ -29,7 +29,11 @@ export function TimeEntryDetailEmptyState() {
 
   return (
     <SurfaceCard style={styles.emptyCard}>
-      <Text style={{ color: tokens.textPrimary }} text="Entry no longer available" weight="semiBold" />
+      <Text
+        style={{ color: tokens.textPrimary }}
+        text="Entry no longer available"
+        weight="semiBold"
+      />
       <Text
         size="xs"
         style={{ color: tokens.textSecondary }}
@@ -131,13 +135,7 @@ export function TimeEntryMapSection({
   )
 }
 
-export function TimeEntryPhotoSection({
-  capturedAt,
-  uri,
-}: {
-  capturedAt: string
-  uri: string
-}) {
+export function TimeEntryPhotoSection({ capturedAt, uri }: { capturedAt: string; uri: string }) {
   const tokens = useDesignTokens()
 
   return (

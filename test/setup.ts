@@ -212,12 +212,16 @@ jest.mock("react-native-reanimated", () => {
     Easing: {
       bezier: () => (value: number) => value,
       cubic: (value: number) => value,
+      ease: (value: number) => value,
+      inOut: (easing: unknown) => easing,
+      linear: (value: number) => value,
       out: (easing: unknown) => easing,
       quad: (value: number) => value,
     },
     Extrapolation: {
       CLAMP: "clamp",
     },
+    cancelAnimation: jest.fn(),
     LinearTransition: {
       springify: () => ({
         damping: () => ({
@@ -231,9 +235,25 @@ jest.mock("react-native-reanimated", () => {
     useAnimatedStyle: (factory: () => Record<string, unknown>) => factory(),
     useSharedValue: (value: unknown) => ({ value }),
     withDelay: (_delay: number, value: unknown) => value,
+    withRepeat: (value: unknown) => value,
     withSequence: (...values: unknown[]) => values[values.length - 1],
     withSpring: (value: unknown) => value,
     withTiming: (value: unknown) => value,
+  }
+})
+
+jest.mock("react-native-keyboard-controller", () => {
+  const React = require("react")
+  const { ScrollView } = require("react-native")
+
+  const KeyboardAwareScrollView = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement(ScrollView, { ...props, ref }, children),
+  )
+  KeyboardAwareScrollView.displayName = "KeyboardAwareScrollView"
+
+  return {
+    KeyboardAwareScrollView,
+    KeyboardProvider: ({ children }: { children: ReactNode }) => children,
   }
 })
 

@@ -2,29 +2,60 @@ import { Translations } from "./en"
 
 const fr: Translations = {
   common: {
-    ok: "OK !",
-    cancel: "Annuler",
-    back: "Retour",
-  },
-  welcomeScreen: {
-    postscript:
-      "psst  — Ce n'est probablement pas à quoi ressemble votre application. (À moins que votre designer ne vous ait donné ces écrans, dans ce cas, mettez la en prod !)",
-    readyForLaunch: "Votre application, presque prête pour le lancement !",
-    exciting: "(ohh, c'est excitant !)",
+    actions: {
+      back: "Retour",
+      cancel: "Annuler",
+      close: "Fermer",
+      done: "Terminé",
+      ok: "OK",
+      retry: "Réessayer",
+      save: "Enregistrer",
+    },
+    states: {
+      empty: "Rien pour le moment",
+      error: "Une erreur est survenue",
+      loading: "Chargement…",
+      retry: "Réessayer",
+    },
   },
   errorScreen: {
-    title: "Quelque chose s'est mal passé !",
     friendlySubtitle:
-      "C'est l'écran que vos utilisateurs verront en production lorsqu'une erreur sera lancée. Vous voudrez personnaliser ce message (situé dans `app/i18n/fr.ts`) et probablement aussi la mise en page (`app/screens/ErrorScreen`). Si vous voulez le supprimer complètement, vérifiez `app/app.tsx` pour le composant <ErrorBoundary>.",
-    reset: "RÉINITIALISER L'APPLICATION",
+      "L'application a rencontré un problème inattendu. Vous pouvez réessayer — si cela persiste, veuillez contacter le support Vesta.",
+    reset: "Redémarrer l'application",
+    title: "Une erreur est survenue",
   },
-  emptyStateComponent: {
-    generic: {
-      heading: "Si vide... si triste",
-      content:
-        "Aucune donnée trouvée pour le moment. Essayez de cliquer sur le bouton pour rafraîchir ou recharger l'application.",
-      button: "Essayons à nouveau",
+  notifications: {
+    actions: {
+      editTemplate: "Modifier le modèle",
+      open: "Ouvrir",
+      reviewContract: "Consulter le contrat",
+      reviewContracts: "Consulter les contrats",
+      reviewDocuments: "Consulter les documents",
+      reviewPayslip: "Consulter la fiche de paie",
+      reviewPayslips: "Consulter les fiches de paie",
+      reviewPlanning: "Consulter le planning",
+      reviewProfile: "Consulter le profil",
+      reviewRequest: "Consulter la demande",
+      reviewShift: "Consulter le service",
+      reviewTime: "Consulter les heures",
+      setHours: "Définir les heures",
+      uploadNow: "Téléverser",
+      viewShift: "Voir le service",
+      viewTasks: "Voir les tâches",
+      viewUpdate: "Voir la mise à jour",
     },
+    clearAll: "Effacer toutes les notifications",
+    emptyBody:
+      "Aucune notification pour l'instant. Nous vous préviendrons dès que quelque chose nécessite votre attention.",
+    emptyTitle: "Tout est à jour",
+    groups: {
+      earlier: "Plus tôt cette semaine",
+      today: "Aujourd'hui",
+      yesterday: "Hier",
+    },
+    markAllRead: "Tout marquer comme lu",
+    title: "Notifications",
+    unread: "{{count}} non lues",
   },
 }
 

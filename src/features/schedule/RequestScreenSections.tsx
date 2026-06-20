@@ -49,7 +49,12 @@ export function RequestSuccessContent({
 
   return (
     <AppScrollScreen
-      contentContainerStyle={{ justifyContent: "center", minHeight: "100%", paddingBottom: insets.bottom + 30, paddingHorizontal: 20 }}
+      contentContainerStyle={{
+        justifyContent: "center",
+        minHeight: "100%",
+        paddingBottom: insets.bottom + 30,
+        paddingHorizontal: 20,
+      }}
       variant="grouped"
     >
       <SuccessState subtitle={successCopy} title="Request submitted" />
@@ -61,7 +66,12 @@ export function RequestSuccessContent({
             text={actionCopy.screenTitle}
             weight="semiBold"
           />
-          <Text size="sm" style={{ color: tokens.textPrimary }} text={summaryTarget} weight="semiBold" />
+          <Text
+            size="sm"
+            style={{ color: tokens.textPrimary }}
+            text={summaryTarget}
+            weight="semiBold"
+          />
           {detailTargetLabel ? (
             <Text size="xxs" style={{ color: tokens.textSecondary }} text={detailTargetLabel} />
           ) : null}

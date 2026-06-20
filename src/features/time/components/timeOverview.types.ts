@@ -11,14 +11,20 @@ export interface IdleClockCardState {
 }
 
 export type TimeOverviewCardController = {
+  averageHourlyRate: number
+  clockInPending: boolean
   elapsedSeconds: number
   handleClockIn: () => void
   handleEndBreak: () => void
   handleStartBreak: () => void
   idleState: IdleClockCardState
+  liveEarnings: number
   openClockOut: () => void
+  payableSeconds: number
   snapshot: {
     breakSeconds: number
+    payableSeconds: number
+    workedSeconds: number
   }
   state: {
     clockSession: ClockSession

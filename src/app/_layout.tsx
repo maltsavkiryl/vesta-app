@@ -8,9 +8,11 @@ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-c
 
 import Config from "@/config"
 import { initI18n } from "@/i18n"
+import { AppLockProvider } from "@/providers/app-lock-provider"
 import { AppProvider } from "@/providers/app-provider"
 import { MotionProvider } from "@/providers/motion-provider"
 import { createAppQueryClient } from "@/services/app/app.queries"
+import { usePushRegistration } from "@/services/notifications/usePushRegistration"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { initCrashReporting } from "@/utils/crashReporting"
 import { loadDateFnsLocale } from "@/utils/formatDate"
@@ -27,6 +29,16 @@ if (__DEV__) {
 
 const queryClient = createAppQueryClient()
 
+/**
+ * Headless component that wires up push-notification registration + deep-link
+ * routing for the signed-in user. Rendered inside AppProvider so it can read
+ * the session; renders nothing.
+ */
+function PushRegistration() {
+  usePushRegistration()
+  return null
+}
+
 function AppShell() {
   const { navigationTheme, theme } = useAppTheme()
 
@@ -35,13 +47,16 @@ function AppShell() {
       <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
         <QueryClientProvider client={queryClient}>
           <AppProvider>
-            <MotionProvider>
-              <KeyboardProvider>
-                <ErrorBoundary catchErrors={Config.catchErrors}>
-                  <Slot />
-                </ErrorBoundary>
-              </KeyboardProvider>
-            </MotionProvider>
+            <PushRegistration />
+            <AppLockProvider>
+              <MotionProvider>
+                <KeyboardProvider>
+                  <ErrorBoundary catchErrors={Config.catchErrors}>
+                    <Slot />
+                  </ErrorBoundary>
+                </KeyboardProvider>
+              </MotionProvider>
+            </AppLockProvider>
           </AppProvider>
         </QueryClientProvider>
       </View>
