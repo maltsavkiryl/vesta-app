@@ -2,6 +2,7 @@
 // (`import { format } from "date-fns"`) pulls the ENTIRE library into the
 // production bundle because react-native does not tree-shake.
 import { format } from "date-fns/format"
+import { formatDistanceToNowStrict } from "date-fns/formatDistanceToNowStrict"
 import type { Locale } from "date-fns/locale"
 import { enGB } from "date-fns/locale/en-GB"
 import { fr as frLocale } from "date-fns/locale/fr"
@@ -52,6 +53,14 @@ export function formatLocalizedDate(
 ): string {
   const date = toDate(value)
   return date ? format(date, dateFormats[style], { locale: getDateFnsLocale(locale) }) : ""
+}
+
+/** A localized relative label for a timestamp, e.g. "3 hours ago" / "il y a 3 heures". */
+export function toRelativeTime(value: string | number | Date, locale?: string): string {
+  const date = toDate(value)
+  return date
+    ? formatDistanceToNowStrict(date, { addSuffix: true, locale: getDateFnsLocale(locale) })
+    : ""
 }
 
 export function formatCurrency(

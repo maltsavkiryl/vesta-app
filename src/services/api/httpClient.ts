@@ -8,10 +8,11 @@ export interface HttpClient {
   get<T>(url: string, params?: object): Promise<ApiResponse<T>>
   post<T>(url: string, body?: object): Promise<ApiResponse<T>>
   put<T>(url: string, body?: object): Promise<ApiResponse<T>>
+  delete<T>(url: string, params?: object): Promise<ApiResponse<T>>
 }
 
 export function createHttpClient(
-  api: Pick<ApisauceInstance, "get" | "post" | "put">,
+  api: Pick<ApisauceInstance, "get" | "post" | "put" | "delete">,
   reauthenticate: Reauthenticate,
 ): HttpClient {
   function authHeaders(): Record<string, string> {
@@ -29,5 +30,6 @@ export function createHttpClient(
     get: (url, params) => withRetry(() => api.get(url, params, { headers: authHeaders() })),
     post: (url, body) => withRetry(() => api.post(url, body, { headers: authHeaders() })),
     put: (url, body) => withRetry(() => api.put(url, body, { headers: authHeaders() })),
+    delete: (url, params) => withRetry(() => api.delete(url, params, { headers: authHeaders() })),
   }
 }
