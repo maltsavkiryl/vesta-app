@@ -6,7 +6,6 @@ import { createInitialState } from "@/core/mockState"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import type { IdleClockCardState } from "@/features/time/components/timeOverview.types"
-import { computeAccruedEarnings } from "@/features/time/components/timeOverview.utils"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import { formatClockStartDistance, resolveClockStart } from "@/features/time/data/time.workflow"
@@ -106,7 +105,6 @@ export function useTimeCardController() {
   const fallbackState = useMemo(() => createInitialState(), [])
   const state = query.data ?? {
     clockSession: fallbackState.clockSession,
-    earnings: fallbackState.earnings,
     timeEntries: fallbackState.timeEntries,
   }
   const employers = profileQuery.state?.employers ?? fallbackState.employers
@@ -131,9 +129,7 @@ export function useTimeCardController() {
       )
     : 0
   const totalBreakSeconds = snapshot.breakSeconds
-  const averageHourlyRate = state.earnings.averageHourlyRate
   const payableSeconds = snapshot.payableSeconds
-  const liveEarnings = computeAccruedEarnings(payableSeconds, averageHourlyRate)
   const idleState = useMemo(
     () => buildIdleClockCardState(resolveClockStart({ employers, profileRole, shifts })),
     [employers, profileRole, shifts],
@@ -148,14 +144,12 @@ export function useTimeCardController() {
   })
 
   return {
-    averageHourlyRate,
     clockInPending,
     elapsedSeconds,
     handleClockIn,
     handleEndBreak,
     handleStartBreak,
     idleState,
-    liveEarnings,
     openClockOut: () => {
       fireHaptic("selection")
       router.push("/(app)/clock-out" as never)

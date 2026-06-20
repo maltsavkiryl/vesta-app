@@ -32,6 +32,7 @@ import type {
   ScheduleRepository,
 } from "@/features/schedule/data/schedule.repository"
 import type { ClockError } from "@/features/time/data/time.errors"
+import { createTimeHttpRepository } from "@/features/time/data/time.http.repository"
 import type { TimeRepository } from "@/features/time/data/time.repository"
 import { authService, httpClient } from "@/services/api"
 import { applyAppAction, normalizeEmail } from "@/services/app/app-state.reducer"
@@ -432,7 +433,6 @@ function createMockTimeRepository(): TimeRepository {
       const state = getSignedInState(accountId)
       return {
         clockSession: state.clockSession,
-        earnings: state.earnings,
         timeEntries: state.timeEntries,
       }
     },
@@ -559,7 +559,6 @@ function createMockHomeRepository(): HomeRepository {
       const state = getSignedInState(accountId)
       const notifications = getVisibleNotifications(state)
       return {
-        earnings: state.earnings,
         notifications,
         profile: state.profile,
         shifts: state.shifts,
@@ -683,7 +682,7 @@ export function createAppRepositories(): AppRepositories {
     notifications: createNotificationsHttpRepository(httpClient),
     planning,
     schedule: planning,
-    time: createMockTimeRepository(),
+    time: createTimeHttpRepository(httpClient),
   }
 }
 

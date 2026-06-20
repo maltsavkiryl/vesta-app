@@ -8,32 +8,27 @@ import { formatHours, formatSeconds } from "../time.utils"
 import { timeHeroColors } from "./TimeHeroCard"
 import { styles } from "./timeOverview.styles"
 import type { TimeOverviewCardController } from "./timeOverview.types"
-import { EarningsTicker } from "./TimeOverviewActiveCardStatus"
 import { CollapseToggle, HeroStatusPill } from "./TimeOverviewShared"
 
 type ClockSession = TimeOverviewCardController["state"]["clockSession"]
 
 export function ActiveCardHeader({
-  averageHourlyRate,
   breakSeconds,
   clockSession,
   collapsed,
   collapseProgress,
   elapsedSeconds,
   isOnBreak,
-  liveEarnings,
   onToggleCollapsed,
   payableSeconds,
   showCollapseToggle,
 }: {
-  averageHourlyRate: number
   breakSeconds: number
   clockSession: ClockSession
   collapsed: boolean
   collapseProgress: SharedValue<number>
   elapsedSeconds: number
   isOnBreak: boolean
-  liveEarnings: number
   onToggleCollapsed?: () => void
   payableSeconds: number
   showCollapseToggle: boolean
@@ -43,9 +38,8 @@ export function ActiveCardHeader({
     clockSession.source === "shift" && clockSession.scheduledStart && clockSession.scheduledEnd
       ? `${clockSession.scheduledStart} - ${clockSession.scheduledEnd} · ${clockSession.venueName}`
       : clockSession.venueName
-  // The big timer is the honest payable (worked-minus-break) figure — the same
-  // value that drives the live earnings ticker and clock-out pay. Total time on
-  // shift is shown beneath so nothing is hidden.
+  // The big timer is the honest payable (worked-minus-break) figure. Total time
+  // on shift is shown beneath so nothing is hidden.
   const heroSeconds = isOnBreak ? breakSeconds : payableSeconds
   const onShiftLabel = `On shift ${formatHours(elapsedSeconds)} · ${venueLabel}`
 
@@ -66,11 +60,6 @@ export function ActiveCardHeader({
             styles.activeHeroValue,
             { color: isOnBreak ? tokens.warning : timeHeroColors.primaryText },
           ]}
-        />
-        <EarningsTicker
-          earnings={liveEarnings}
-          hourlyRate={averageHourlyRate}
-          isOnBreak={isOnBreak}
         />
         <Text
           text={isOnBreak ? venueLabel : onShiftLabel}

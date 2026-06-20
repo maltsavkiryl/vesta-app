@@ -100,13 +100,11 @@ export function TimeOverviewCard({
       />
     ) : (
       <ActiveCardContent
-        averageHourlyRate={controller.averageHourlyRate}
         breakSeconds={clockSession.state === "onBreak" ? controller.snapshot.breakSeconds : 0}
         collapsed={isCollapsed}
         collapseProgress={collapseProgress}
         elapsedSeconds={controller.elapsedSeconds}
         clockSession={clockSession}
-        liveEarnings={controller.liveEarnings}
         onClockOut={controller.openClockOut}
         onEndBreak={controller.handleEndBreak}
         onStartBreak={controller.handleStartBreak}
@@ -166,10 +164,8 @@ export function IdleClockCard({
 }
 
 export function ActiveClockCard({
-  averageHourlyRate,
   breakSeconds,
   elapsedSeconds,
-  liveEarnings,
   onClockOut,
   onEndBreak,
   onStartBreak,
@@ -178,11 +174,9 @@ export function ActiveClockCard({
   totalBreakSeconds,
   clockSession,
 }: {
-  averageHourlyRate: number
   breakSeconds: number
   clockSession: TimeOverviewCardController["state"]["clockSession"]
   elapsedSeconds: number
-  liveEarnings: number
   onClockOut: () => void
   onEndBreak: () => void
   onStartBreak: () => void
@@ -194,13 +188,11 @@ export function ActiveClockCard({
 
   return (
     <ActiveCardContent
-      averageHourlyRate={averageHourlyRate}
       breakSeconds={breakSeconds}
       collapsed={false}
       collapseProgress={collapseProgress}
       elapsedSeconds={elapsedSeconds}
       clockSession={clockSession}
-      liveEarnings={liveEarnings}
       onClockOut={onClockOut}
       onEndBreak={onEndBreak}
       onStartBreak={onStartBreak}

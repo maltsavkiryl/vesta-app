@@ -75,7 +75,6 @@ const sampleTimeEntry: TimeEntry = {
   clockOutAt: "2099-05-20T23:30:00.000Z",
   date: "2099-05-20",
   employerId: "bistro-noir",
-  earningsAmount: 82.5,
   events: [],
   grossSeconds: 19800,
   id: "entry-1",

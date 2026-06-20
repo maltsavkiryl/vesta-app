@@ -56,7 +56,6 @@ function createController(): TimeOverviewCardController {
   const initialState = createInitialState()
 
   return {
-    averageHourlyRate: 12.04,
     clockInPending: false,
     elapsedSeconds: 0,
     handleClockIn: jest.fn(),
@@ -70,7 +69,6 @@ function createController(): TimeOverviewCardController {
       subtitle: "Waiter · 5h planned",
       title: "18:00 - 23:00",
     },
-    liveEarnings: 0,
     openClockOut: jest.fn(),
     payableSeconds: 0,
     snapshot: {
@@ -126,8 +124,6 @@ describe("TimeOverviewCard", () => {
     controller.payableSeconds = 3000
     controller.snapshot = { breakSeconds: 900, payableSeconds: 3000, workedSeconds: 3900 }
     controller.totalBreakSeconds = 900
-    controller.averageHourlyRate = 12
-    controller.liveEarnings = 10
 
     const view = render(
       <ThemeProvider initialContext="light">
@@ -140,7 +136,7 @@ describe("TimeOverviewCard", () => {
     expect(view.queryByText("01:05:00")).toBeNull()
     // Total presence is still surfaced honestly beneath.
     expect(view.getByText(/On shift 1h 5m/)).toBeTruthy()
-    // Live earnings ticker is wired from rate + payable seconds.
-    expect(view.getByText(/Earning/)).toBeTruthy()
+    // Earnings are intentionally not shown.
+    expect(view.queryByText(/Earning/)).toBeNull()
   })
 })

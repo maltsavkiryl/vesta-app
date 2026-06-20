@@ -21,13 +21,8 @@ describe("mock backend persistence", () => {
   it("starts with no in-app clock log but a seeded month-to-date earnings summary", () => {
     const state = createInitialState()
 
-    // No clock sessions have been logged in-app yet…
+    // No clock sessions have been logged in-app yet.
     expect(state.timeEntries).toEqual([])
-    // …but the payroll-level monthly summary is seeded so the home + time
-    // earnings surfaces demo with realistic, non-zero progress.
-    expect(state.earnings.earnedAmount).toBeGreaterThan(0)
-    expect(state.earnings.hoursWorked).toBeGreaterThan(0)
-    expect(state.earnings.shiftsWorked).toBeGreaterThan(0)
   })
 
   it("round-trips account snapshots back into app state", () => {
@@ -106,7 +101,6 @@ describe("mock backend persistence", () => {
         grossSeconds: 21660,
         workedSeconds: 19860,
         breakSeconds: 1800,
-        earningsAmount: 66.24,
         status: "approved",
         events: [],
         clockInProofPhoto: {
@@ -117,26 +111,11 @@ describe("mock backend persistence", () => {
         },
       },
     ]
-    db.accounts[0].aggregates.time.earnings.earnedAmount = 847.2
-    db.accounts[0].aggregates.time.earnings.hoursWorked = 41.5
-    db.accounts[0].aggregates.time.earnings.shiftsWorked = 7
 
     const migrated = migrateMockBackendDb(db)
 
-    const seededEarnings = createInitialState().earnings
     expect(migrated.version).toBeGreaterThan(db.version)
-    // Seeded demo time entries are dropped…
+    // Seeded demo time entries are dropped on migration.
     expect(migrated.accounts[0].aggregates.time.timeEntries).toEqual([])
-    // …and the monthly earnings summary is normalised back to the seeded
-    // month-to-date default (no longer derived from the removed entries).
-    expect(migrated.accounts[0].aggregates.time.earnings.earnedAmount).toBe(
-      seededEarnings.earnedAmount,
-    )
-    expect(migrated.accounts[0].aggregates.time.earnings.hoursWorked).toBe(
-      seededEarnings.hoursWorked,
-    )
-    expect(migrated.accounts[0].aggregates.time.earnings.shiftsWorked).toBe(
-      seededEarnings.shiftsWorked,
-    )
   })
 })
