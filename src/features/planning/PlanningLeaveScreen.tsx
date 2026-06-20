@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { AppScrollScreen, EmptyState, PageHeader, useDesignTokens } from "@/ui"
+import { AppScrollScreen, EmptyState, MotionView, PageHeader, Skeleton, SurfaceCard, useDesignTokens } from "@/ui"
 import { translate } from "@/i18n/translate"
 import { useRefreshHandler } from "@/utils/useRefreshHandler"
 import {
@@ -8,6 +8,21 @@ import {
   PlanningLeaveBalanceEmpty,
 } from "./PlanningLeaveSections"
 import { usePlanningLeaveScreen } from "./usePlanningLeaveScreen"
+
+function LeaveBalanceSkeleton() {
+  const tokens = useDesignTokens()
+  return (
+    <SurfaceCard style={styles.skeletonCard}>
+      <Skeleton height={12} width={120} radius={6} />
+      <Skeleton height={52} width={80} radius={tokens.radiusMd} />
+      <View style={styles.skeletonGrid}>
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton key={i} height={32} width="48%" radius={tokens.radiusSm} />
+        ))}
+      </View>
+    </SurfaceCard>
+  )
+}
 
 export function PlanningLeaveScreen() {
   const tokens = useDesignTokens()
@@ -34,6 +49,8 @@ export function PlanningLeaveScreen() {
     )
   }
 
+  const isFirstLoad = screen.isLoading && !screen.entitlement
+
   return (
     <AppScrollScreen
       variant="grouped"
@@ -43,8 +60,12 @@ export function PlanningLeaveScreen() {
     >
       <PageHeader delay={0} title={translate("planning:leave.title")} />
 
-      {screen.entitlement ? (
-        <PlanningLeaveBalanceCard entitlement={screen.entitlement} />
+      {isFirstLoad ? (
+        <LeaveBalanceSkeleton />
+      ) : screen.entitlement ? (
+        <MotionView delay={60}>
+          <PlanningLeaveBalanceCard entitlement={screen.entitlement} />
+        </MotionView>
       ) : !screen.isLoading ? (
         <PlanningLeaveBalanceEmpty />
       ) : null}
@@ -56,5 +77,15 @@ const styles = StyleSheet.create({
   screen: {
     gap: 22,
     paddingBottom: 32,
+  },
+  skeletonCard: {
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  skeletonGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
   },
 })
