@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { Slot, SplashScreen } from "expo-router"
 import { ThemeProvider as NavigationThemeProvider } from "@react-navigation/native"
-import { QueryClientProvider } from "@tanstack/react-query"
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
 
@@ -11,7 +11,8 @@ import { initI18n } from "@/i18n"
 import { AppLockProvider } from "@/providers/app-lock-provider"
 import { AppProvider } from "@/providers/app-provider"
 import { MotionProvider } from "@/providers/motion-provider"
-import { createAppQueryClient } from "@/services/app/app.queries"
+import { appQueryKeys, createAppQueryClient } from "@/services/app/app.queries"
+import { queryPersister } from "@/services/app/query.persister"
 import { usePushRegistration } from "@/services/notifications/usePushRegistration"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { ToastProvider } from "@/ui/feedback"
@@ -46,7 +47,25 @@ function AppShell() {
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister: queryPersister,
+            maxAge: 1000 * 60 * 60 * 24, // 24 h
+            // Bump "v1" → "v2" etc. whenever a query's response shape changes
+            // incompatibly, so stale caches are discarded on upgrade.
+            buster: "v1",
+            dehydrateOptions: {
+              shouldDehydrateMutation: () => false, // never persist mutations
+              // Never persist the auth session — it is authoritative from the
+              // in-memory store (via initialData) and must not hydrate stale
+              // session data for a different user on the next cold start.
+              shouldDehydrateQuery: (query) =>
+                query.queryKey[0] !== appQueryKeys.session[0] ||
+                query.queryKey[1] !== appQueryKeys.session[1],
+            },
+          }}
+        >
           <AppProvider>
             <PushRegistration />
             <AppLockProvider>
@@ -61,7 +80,7 @@ function AppShell() {
               </MotionProvider>
             </AppLockProvider>
           </AppProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </View>
     </NavigationThemeProvider>
   )

@@ -44,7 +44,12 @@ export function PlanningCallsListSkeleton() {
 function CallModeBadge({ mode }: { mode: string }) {
   const tokens = useDesignTokens()
   return (
-    <View style={[styles.modeBadge, { backgroundColor: tokens.accentMuted }]}>
+    <View
+      accessible
+      accessibilityLabel={mode.toUpperCase()}
+      accessibilityRole="text"
+      style={[styles.modeBadge, { backgroundColor: tokens.accentMuted }]}
+    >
       <Text
         size="xxs"
         style={{ color: tokens.accent }}
@@ -124,8 +129,16 @@ export function PlanningCallCard({
               <CallModeBadge mode={call.mode} />
             </View>
             {isClaimed ? (
-              <View style={[styles.claimedBadge, { backgroundColor: tokens.successSoft }]}>
-                <Ionicons color={tokens.success} name="checkmark-circle" size={13} />
+              <View
+                accessible
+                accessibilityLabel={translate("planning:calls.claimed")}
+                accessibilityRole="text"
+                style={[styles.claimedBadge, { backgroundColor: tokens.successSoft }]}
+              >
+                {/* Decorative checkmark — hidden from screen readers */}
+                <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  <Ionicons color={tokens.success} name="checkmark-circle" size={13} />
+                </View>
                 <Text
                   size="xxs"
                   style={{ color: tokens.success }}
