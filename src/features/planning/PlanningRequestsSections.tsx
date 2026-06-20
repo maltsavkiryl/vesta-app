@@ -1,17 +1,19 @@
-/* eslint-disable react-native/no-inline-styles */
-
+import Animated from "react-native-reanimated"
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import type { MyRequests, ShiftChangeRequest, ShiftSwapRequest } from "@/core/models"
 import { Pressable } from "react-native"
+import type { MyRequests, ShiftChangeRequest, ShiftSwapRequest } from "@/core/models"
 import {
   ActionRow,
   EmptyState,
   GroupedSection,
   StatusBadge,
+  SurfaceCard,
   Text,
   useDesignTokens,
 } from "@/ui"
+import { MotionView, usePressScale } from "@/ui/composites/app-motion"
+import { useListItemEntrance } from "@/ui/foundations/motion"
 import type { AppTone } from "@/ui/composites/appTone"
 import { translate } from "@/i18n/translate"
 
@@ -55,6 +57,8 @@ export function PlanningRequestShortcuts({
   onNewShiftSwap: () => void
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle: entrance0 } = useListItemEntrance(0, { baseDelay: 0, step: 50 })
+  const { animatedStyle: entrance1 } = useListItemEntrance(1, { baseDelay: 0, step: 50 })
 
   return (
     <GroupedSection
@@ -62,52 +66,133 @@ export function PlanningRequestShortcuts({
       title={translate("planning:requests.newRequest")}
     >
       <View style={styles.shortcutsStack}>
-        <ActionRow
-          leading={<Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />}
-          onPress={onNewShiftSwap}
-          subtitle={translate("planning:requests.swapSubtitle")}
-          title={translate("planning:requests.shiftSwap")}
-          trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
-        />
-        <ActionRow
-          leading={<Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />}
-          onPress={onNewChangeRequest}
-          subtitle={translate("planning:requests.changeSubtitle")}
-          title={translate("planning:requests.changeRequest")}
-          trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
-        />
+        <Animated.View style={entrance0}>
+          <ActionRow
+            leading={
+              <View style={[styles.shortcutIcon, { backgroundColor: tokens.accentMuted }]}>
+                <Ionicons color={tokens.accent} name="swap-horizontal-outline" size={18} />
+              </View>
+            }
+            onPress={onNewShiftSwap}
+            subtitle={translate("planning:requests.swapSubtitle")}
+            title={translate("planning:requests.shiftSwap")}
+            trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
+          />
+        </Animated.View>
+        <Animated.View style={entrance1}>
+          <ActionRow
+            leading={
+              <View style={[styles.shortcutIcon, { backgroundColor: tokens.accentMuted }]}>
+                <Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />
+              </View>
+            }
+            onPress={onNewChangeRequest}
+            subtitle={translate("planning:requests.changeSubtitle")}
+            title={translate("planning:requests.changeRequest")}
+            trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
+          />
+        </Animated.View>
       </View>
     </GroupedSection>
+  )
+}
+
+// ── Decide action button ──────────────────────────────────────────────────────
+
+function DecideButton({
+  label,
+  onPress,
+  tone,
+}: {
+  label: string
+  onPress: () => void
+  tone: "accept" | "reject" | "cancel"
+}) {
+  const tokens = useDesignTokens()
+  const { animatedStyle, pressHandlers } = usePressScale({ pressedScale: 0.975 })
+
+  const bgColor =
+    tone === "accept"
+      ? tokens.successSoft
+      : tone === "reject"
+        ? tokens.dangerSoft
+        : tokens.backgroundMuted
+  const textColor =
+    tone === "accept"
+      ? tokens.success
+      : tone === "reject"
+        ? tokens.danger
+        : tokens.textSecondary
+  const borderColor =
+    tone === "accept"
+      ? tokens.success
+      : tone === "reject"
+        ? tokens.danger
+        : tokens.border
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      {...pressHandlers}
+    >
+      <Animated.View
+        style={[
+          styles.decideBtn,
+          {
+            backgroundColor: bgColor,
+            borderColor,
+          },
+          animatedStyle,
+        ]}
+      >
+        <Text
+          size="xxs"
+          style={{ color: textColor }}
+          text={label}
+          weight="semiBold"
+        />
+      </Animated.View>
+    </Pressable>
   )
 }
 
 // ── Shift swap request row ────────────────────────────────────────────────────
 
 export function PlanningSwapRequestRow({
+  index = 0,
   myEmployeeId,
   onCancel,
   onDecide,
   request,
 }: {
+  index?: number
   myEmployeeId?: string
   onCancel?: (swapCode: string) => void
   onDecide?: (swapCode: string, accept: boolean) => void
   request: ShiftSwapRequest
 }) {
   const tokens = useDesignTokens()
+  const { animatedStyle } = useListItemEntrance(index, { baseDelay: 30, step: 50 })
   const isPending = request.status.toLowerCase() === "pending"
   const isRequester = myEmployeeId !== undefined && request.requesterEmployeeId === myEmployeeId
   const isTarget = myEmployeeId !== undefined && request.targetEmployeeId === myEmployeeId
 
   return (
-    <View style={styles.requestRow}>
-      <View style={styles.requestInfo}>
-        <Text
-          size="xs"
-          style={{ color: tokens.textPrimary }}
-          text={translate("planning:requests.shiftSwap")}
-          weight="medium"
-        />
+    <Animated.View style={animatedStyle}>
+      <SurfaceCard elevationLevel={1} style={styles.requestCard}>
+        <View style={styles.requestCardHeader}>
+          <Text
+            size="xs"
+            style={{ color: tokens.textPrimary }}
+            text={translate("planning:requests.shiftSwap")}
+            weight="semiBold"
+          />
+          <StatusBadge
+            label={getRequestStatusLabel(request.status)}
+            tone={getRequestStatusTone(request.status)}
+          />
+        </View>
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
@@ -115,54 +200,59 @@ export function PlanningSwapRequestRow({
         />
         {isPending && isTarget && onDecide ? (
           <View style={styles.decideRow}>
-            <Pressable
-              accessibilityRole="button"
+            <DecideButton
+              label={translate("planning:requests.statusApproved")}
               onPress={() => onDecide(request.id, true)}
-              style={({ pressed }) => [styles.actionBtn, styles.actionBtnAccept, { opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Text size="xxs" style={{ color: tokens.success }} text={translate("planning:requests.statusApproved")} weight="semiBold" />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
+              tone="accept"
+            />
+            <DecideButton
+              label={translate("planning:requests.statusRejected")}
               onPress={() => onDecide(request.id, false)}
-              style={({ pressed }) => [styles.actionBtn, styles.actionBtnReject, { opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Text size="xxs" style={{ color: tokens.danger }} text={translate("planning:requests.statusRejected")} weight="semiBold" />
-            </Pressable>
+              tone="reject"
+            />
           </View>
         ) : null}
         {isPending && isRequester && onCancel ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => onCancel(request.id)}
-            style={({ pressed }) => [styles.actionBtn, { opacity: pressed ? 0.7 : 1 }]}
-          >
-            <Text size="xxs" style={{ color: tokens.textSecondary }} text={translate("planning:requests.statusCancelled")} weight="semiBold" />
-          </Pressable>
+          <View style={styles.cancelRow}>
+            <DecideButton
+              label={translate("planning:requests.statusCancelled")}
+              onPress={() => onCancel(request.id)}
+              tone="cancel"
+            />
+          </View>
         ) : null}
-      </View>
-      <StatusBadge
-        label={getRequestStatusLabel(request.status)}
-        tone={getRequestStatusTone(request.status)}
-      />
-    </View>
+      </SurfaceCard>
+    </Animated.View>
   )
 }
 
 // ── Shift change request row ──────────────────────────────────────────────────
 
-export function PlanningChangeRequestRow({ request }: { request: ShiftChangeRequest }) {
+export function PlanningChangeRequestRow({
+  index = 0,
+  request,
+}: {
+  index?: number
+  request: ShiftChangeRequest
+}) {
   const tokens = useDesignTokens()
+  const { animatedStyle } = useListItemEntrance(index, { baseDelay: 30, step: 50 })
 
   return (
-    <View style={styles.requestRow}>
-      <View style={styles.requestInfo}>
-        <Text
-          size="xs"
-          style={{ color: tokens.textPrimary }}
-          text={translate("planning:requests.changeRequest")}
-          weight="medium"
-        />
+    <Animated.View style={animatedStyle}>
+      <SurfaceCard elevationLevel={1} style={styles.requestCard}>
+        <View style={styles.requestCardHeader}>
+          <Text
+            size="xs"
+            style={{ color: tokens.textPrimary }}
+            text={translate("planning:requests.changeRequest")}
+            weight="semiBold"
+          />
+          <StatusBadge
+            label={getRequestStatusLabel(request.status)}
+            tone={getRequestStatusTone(request.status)}
+          />
+        </View>
         {request.requestedDate ? (
           <Text
             size="xxs"
@@ -178,12 +268,8 @@ export function PlanningChangeRequestRow({ request }: { request: ShiftChangeRequ
             text={request.note}
           />
         ) : null}
-      </View>
-      <StatusBadge
-        label={getRequestStatusLabel(request.status)}
-        tone={getRequestStatusTone(request.status)}
-      />
-    </View>
+      </SurfaceCard>
+    </Animated.View>
   )
 }
 
@@ -217,23 +303,56 @@ export function PlanningRequestsListSection({
     )
   }
 
+  // Compute a global index across both lists for consistent stagger
+  let globalIndex = 0
+
   return (
-    <GroupedSection title={translate("planning:requests.title")}>
+    <GroupedSection
+      bodyStyle={styles.noCardBody}
+      title={translate("planning:requests.title")}
+    >
       <View style={styles.requestsList}>
-        {requests.swapRequests.map((req) => (
-          <PlanningSwapRequestRow
-            key={req.id}
-            myEmployeeId={myEmployeeId}
-            onCancel={onCancel}
-            onDecide={onDecide}
-            request={req}
-          />
-        ))}
-        {requests.changeRequests.map((req) => (
-          <PlanningChangeRequestRow key={req.id} request={req} />
-        ))}
+        {requests.swapRequests.map((req) => {
+          const idx = globalIndex++
+          return (
+            <PlanningSwapRequestRow
+              key={req.id}
+              index={idx}
+              myEmployeeId={myEmployeeId}
+              onCancel={onCancel}
+              onDecide={onDecide}
+              request={req}
+            />
+          )
+        })}
+        {requests.changeRequests.map((req) => {
+          const idx = globalIndex++
+          return (
+            <PlanningChangeRequestRow key={req.id} index={idx} request={req} />
+          )
+        })}
       </View>
     </GroupedSection>
+  )
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+export function PlanningRequestsSkeleton() {
+  const tokens = useDesignTokens()
+  return (
+    <SurfaceCard style={styles.skeletonCard}>
+      {[0, 1, 2].map((i) => (
+        <MotionView key={i} delay={i * 40}>
+          <View
+            style={[
+              styles.skeletonRow,
+              { backgroundColor: tokens.backgroundMuted, borderRadius: tokens.radiusMd },
+            ]}
+          />
+        </MotionView>
+      ))}
+    </SurfaceCard>
   )
 }
 
@@ -252,28 +371,22 @@ export function PlanningRequestsEmpty() {
 }
 
 const styles = StyleSheet.create({
-  actionBtn: {
-    borderCurve: "continuous",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "transparent",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginTop: 6,
+  cancelRow: {
+    alignItems: "flex-start",
+    marginTop: 4,
+  },
+  decideBtn: {
     alignSelf: "flex-start",
-  },
-  actionBtnAccept: {
-    backgroundColor: "transparent",
-    borderColor: "#34C75920",
-  },
-  actionBtnReject: {
-    backgroundColor: "transparent",
-    borderColor: "#FF3B3020",
+    borderCurve: "continuous",
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
   },
   decideRow: {
     flexDirection: "row",
     gap: 8,
-    marginTop: 2,
+    marginTop: 6,
   },
   emptyBody: {
     paddingHorizontal: 16,
@@ -287,23 +400,36 @@ const styles = StyleSheet.create({
     padding: 0,
     shadowOpacity: 0,
   },
-  requestInfo: {
-    flex: 1,
-    gap: 2,
+  requestCard: {
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  requestRow: {
+  requestCardHeader: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12,
     justifyContent: "space-between",
-    minHeight: 56,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   requestsList: {
-    gap: 0,
+    gap: 10,
+  },
+  shortcutIcon: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
   },
   shortcutsStack: {
     gap: 10,
+  },
+  skeletonCard: {
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  skeletonRow: {
+    height: 56,
+    width: "100%",
   },
 })
