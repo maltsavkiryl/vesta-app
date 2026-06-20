@@ -14,6 +14,7 @@ import { MotionProvider } from "@/providers/motion-provider"
 import { createAppQueryClient } from "@/services/app/app.queries"
 import { usePushRegistration } from "@/services/notifications/usePushRegistration"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
+import { ToastProvider } from "@/ui/feedback"
 import { initCrashReporting } from "@/utils/crashReporting"
 import { loadDateFnsLocale } from "@/utils/formatDate"
 
@@ -50,11 +51,13 @@ function AppShell() {
             <PushRegistration />
             <AppLockProvider>
               <MotionProvider>
-                <KeyboardProvider>
-                  <ErrorBoundary catchErrors={Config.catchErrors}>
-                    <Slot />
-                  </ErrorBoundary>
-                </KeyboardProvider>
+                <ToastProvider>
+                  <KeyboardProvider>
+                    <ErrorBoundary catchErrors={Config.catchErrors}>
+                      <Slot />
+                    </ErrorBoundary>
+                  </KeyboardProvider>
+                </ToastProvider>
               </MotionProvider>
             </AppLockProvider>
           </AppProvider>

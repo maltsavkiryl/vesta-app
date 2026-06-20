@@ -85,6 +85,7 @@ const en = {
       claim: "Claim",
       claiming: "Claiming…",
       claimed: "Claimed",
+      claimSuccess: "Shift claimed! You're all set.",
       claimError: "Couldn't claim this shift",
       alreadyClaimed: "This shift was already claimed",
       forbidden: "You're not eligible for this shift",

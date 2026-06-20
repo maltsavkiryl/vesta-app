@@ -87,6 +87,7 @@ const nl: Translations = {
       claim: "Claimen",
       claiming: "Claimen…",
       claimed: "Geclaimd",
+      claimSuccess: "Shift geclaimd! Je bent klaar.",
       claimError: "Kon deze shift niet claimen",
       alreadyClaimed: "Deze shift is al geclaimed",
       forbidden: "Je komt niet in aanmerking voor deze shift",

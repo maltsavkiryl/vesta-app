@@ -87,6 +87,7 @@ const fr: Translations = {
       claim: "Prendre",
       claiming: "En cours…",
       claimed: "Pris",
+      claimSuccess: "Service pris ! Vous êtes prêt.",
       claimError: "Impossible de prendre ce service",
       alreadyClaimed: "Ce service a déjà été pris",
       forbidden: "Vous n'êtes pas éligible pour ce service",
