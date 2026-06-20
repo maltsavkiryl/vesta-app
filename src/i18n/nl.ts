@@ -83,6 +83,7 @@ const nl: Translations = {
       claimError: "Kon deze shift niet claimen",
       alreadyClaimed: "Deze shift is al geclaimed",
       forbidden: "Je komt niet in aanmerking voor deze shift",
+      conflict: "Dit oproep conflicteert met je huidige planning.",
     },
     todos: {
       title: "Taken voor vandaag",

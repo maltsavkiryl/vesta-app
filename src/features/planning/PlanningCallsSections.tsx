@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 import type { PlanningCall } from "@/core/models"
 import { AppButton, EmptyState, SurfaceCard, useDesignTokens } from "@/ui"
 import { Text } from "@/ui/primitives/Text"
+import { translate } from "@/i18n/translate"
 import type { ClaimState } from "./usePlanningCallsScreen"
 import { formatShortDate } from "@/core/date"
 
@@ -21,16 +22,21 @@ export function PlanningCallCard({
   const isClaiming = claimState === "claiming"
   const isClaimed = claimState === "claimed" || call.status === "claimed"
   const hasError =
-    claimState === "error" || claimState === "already-claimed" || claimState === "forbidden"
+    claimState === "error" ||
+    claimState === "already-claimed" ||
+    claimState === "forbidden" ||
+    claimState === "conflict"
 
   const errorMessage =
     claimState === "already-claimed"
-      ? "Deze shift is al geclaimed"
+      ? translate("planning:calls.alreadyClaimed")
       : claimState === "forbidden"
-        ? "Je komt niet in aanmerking voor deze shift"
-        : claimState === "error"
-          ? "Kon deze shift niet claimen"
-          : null
+        ? translate("planning:calls.forbidden")
+        : claimState === "conflict"
+          ? translate("planning:calls.conflict")
+          : claimState === "error"
+            ? translate("planning:calls.claimError")
+            : null
 
   return (
     <SurfaceCard style={styles.callCard}>
@@ -52,7 +58,7 @@ export function PlanningCallCard({
         {isClaimed ? (
           <View style={[styles.claimedBadge, { backgroundColor: `${tokens.success}18` }]}>
             <Ionicons color={tokens.success} name="checkmark-circle" size={13} />
-            <Text size="xxs" style={{ color: tokens.success }} text="Geclaimd" weight="semiBold" />
+            <Text size="xxs" style={{ color: tokens.success }} text={translate("planning:calls.claimed")} weight="semiBold" />
           </View>
         ) : null}
       </View>
@@ -77,7 +83,7 @@ export function PlanningCallCard({
         <AppButton
           disabled={isClaiming}
           fullWidth
-          label={isClaiming ? "Claimen…" : "Claimen"}
+          label={isClaiming ? translate("planning:calls.claiming") : translate("planning:calls.claim")}
           onPress={onClaim}
           pressHaptic="none"
         />
@@ -91,8 +97,8 @@ export function PlanningCallsEmpty() {
   return (
     <EmptyState
       icon={<Ionicons color={tokens.textMuted} name="radio-outline" size={18} />}
-      subtitle="Er zijn momenteel geen open shifts beschikbaar."
-      title="Geen open oproepen"
+      subtitle={translate("planning:calls.noCallsSubtitle")}
+      title={translate("planning:calls.noCallsTitle")}
     />
   )
 }

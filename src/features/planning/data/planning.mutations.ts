@@ -172,7 +172,7 @@ export function useDecideShiftSwapMutation() {
     onSuccess: (result) => {
       if (!accountId || !result.ok) return
       void queryClient.invalidateQueries({ queryKey: planningQueryKeys.requests(accountId) })
-      void queryClient.invalidateQueries({ queryKey: planningQueryKeys.schedule(accountId, { from: "", to: "" }) })
+      void queryClient.invalidateQueries({ queryKey: ["planning", accountId, "schedule"] })
     },
   })
 }

@@ -83,6 +83,7 @@ const fr: Translations = {
       claimError: "Impossible de prendre ce service",
       alreadyClaimed: "Ce service a déjà été pris",
       forbidden: "Vous n'êtes pas éligible pour ce service",
+      conflict: "Cet appel entre en conflit avec votre planning actuel.",
     },
     todos: {
       title: "Tâches du jour",

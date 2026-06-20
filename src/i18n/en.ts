@@ -81,6 +81,7 @@ const en = {
       claimError: "Couldn't claim this shift",
       alreadyClaimed: "This shift was already claimed",
       forbidden: "You're not eligible for this shift",
+      conflict: "This call conflicts with your current schedule.",
     },
     todos: {
       title: "Today's Tasks",
