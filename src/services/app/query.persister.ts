@@ -3,6 +3,10 @@
  *
  * MMKV is synchronous so we don't need the async-storage variant. We wrap the
  * sync calls in Promise.resolve() to match the Persister interface signature.
+ *
+ * A singleton instance (`queryPersister`) is exported so that auth mutations
+ * can call `removeClient()` on sign-out without recreating the persister or
+ * introducing circular dependencies through the layout.
  */
 
 import type { PersistedClient, Persister } from "@tanstack/react-query-persist-client"
@@ -36,3 +40,11 @@ export function createMmkvPersister(): Persister {
     },
   }
 }
+
+/**
+ * Singleton persister shared across the app.
+ *
+ * Callers that need to wipe the on-disk cache (e.g. on sign-out) import this
+ * directly and call `queryPersister.removeClient()`.
+ */
+export const queryPersister = createMmkvPersister()

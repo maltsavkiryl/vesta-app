@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
 import type { AppSession } from "@/features/auth/data/auth.transformer"
+import { queryPersister } from "@/services/app/query.persister"
 
 import { authQueryKeys, useAuthSession } from "./auth.queries"
 import { completeOnboardingWorkflow } from "./auth.workflow"
@@ -60,6 +61,10 @@ export function useSignOutMutation() {
       for (const root of resourceRoots) {
         void queryClient.removeQueries({ queryKey: [root] })
       }
+      // Wipe the on-disk persisted cache so that PII from this session
+      // (profile, schedule, time entries, etc.) is not visible to the next
+      // user who signs in on this device.
+      void queryPersister.removeClient()
     },
   })
 }

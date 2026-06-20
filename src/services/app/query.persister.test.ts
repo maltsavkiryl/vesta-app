@@ -1,4 +1,4 @@
-import { createMmkvPersister } from "./query.persister"
+import { createMmkvPersister, queryPersister } from "./query.persister"
 
 jest.mock("@/utils/storage")
 
@@ -39,6 +39,23 @@ describe("createMmkvPersister", () => {
 
   it("removeClient calls remove", async () => {
     await persister.removeClient()
+    expect(storage.remove).toHaveBeenCalledWith("rq-cache-v1")
+  })
+})
+
+describe("queryPersister singleton", () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it("is a valid Persister with removeClient", () => {
+    expect(typeof queryPersister.persistClient).toBe("function")
+    expect(typeof queryPersister.restoreClient).toBe("function")
+    expect(typeof queryPersister.removeClient).toBe("function")
+  })
+
+  it("removeClient wipes the on-disk cache key (used on sign-out)", async () => {
+    await queryPersister.removeClient()
     expect(storage.remove).toHaveBeenCalledWith("rq-cache-v1")
   })
 })
