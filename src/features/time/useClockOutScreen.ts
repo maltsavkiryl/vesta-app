@@ -8,6 +8,9 @@ import { fireHaptic } from "@/utils/haptics"
 
 import { captureLocationSnapshot } from "./timeCapture"
 
+// Hours past which we surface an overtime callout on the clock-out summary.
+const OVERTIME_THRESHOLD_SECONDS = 6 * 3600
+
 export function useClockOutScreen() {
   const router = useRouter()
   const { confirmClockOut } = useTimeActions()
@@ -15,6 +18,8 @@ export function useClockOutScreen() {
   const clockSession = query.data?.clockSession
   const summary = useClockSummary()
   const [confirmed, setConfirmed] = useState(false)
+  const [isFinishing, setIsFinishing] = useState(false)
+  const [error, setError] = useState<string | undefined>()
 
   const handleDismiss = () => {
     router.replace("/(app)/(tabs)/time")
@@ -25,28 +30,39 @@ export function useClockOutScreen() {
       celebration: null,
       clockSession,
       confirmed,
+      error: undefined,
       handleDismiss,
       handleFinish: async () => {},
+      isFinishing: false,
       summary: null,
     }
   }
 
   const netSeconds = Math.max(summary.payableSeconds, 0)
   const workedLabel = formatDurationLabel(netSeconds)
-  const overtime = netSeconds > 6 * 3600 ? netSeconds - 6 * 3600 : 0
+  const overtime =
+    netSeconds > OVERTIME_THRESHOLD_SECONDS ? netSeconds - OVERTIME_THRESHOLD_SECONDS : 0
 
   const handleFinish = async () => {
-    const occurredAt = new Date().toISOString()
-    const location = await captureLocationSnapshot()
-    const result = await confirmClockOut({ occurredAt, location })
-    if (!result.ok) {
-      fireHaptic("error")
-      return
-    }
+    if (isFinishing) return
+    setIsFinishing(true)
+    setError(undefined)
+    try {
+      const occurredAt = new Date().toISOString()
+      const location = await captureLocationSnapshot()
+      const result = await confirmClockOut({ occurredAt, location })
+      if (!result.ok) {
+        fireHaptic("error")
+        setError(result.error.message)
+        return
+      }
 
-    fireHaptic("success")
-    // No auto-redirect — the celebration is a moment the employee dismisses.
-    setConfirmed(true)
+      fireHaptic("success")
+      // No auto-redirect — the celebration is a moment the employee dismisses.
+      setConfirmed(true)
+    } finally {
+      setIsFinishing(false)
+    }
   }
 
   return {
@@ -56,8 +72,10 @@ export function useClockOutScreen() {
     },
     clockSession,
     confirmed,
+    error,
     handleDismiss,
     handleFinish,
+    isFinishing,
     summary: {
       breakLabel: formatDurationLabel(summary.breakSeconds),
       clockOutTime: formatTimeLabel(new Date()),
