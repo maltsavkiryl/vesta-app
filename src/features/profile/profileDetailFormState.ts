@@ -76,12 +76,13 @@ export function createDirtyProfileState({
   }
 }
 
-export function saveProfileSection({
+export async function saveProfileSection({
   addressState,
   bankState,
   contactState,
   dirtyState,
   legalState,
+  onError,
   onSaved,
   personalState,
   section,
@@ -92,33 +93,41 @@ export function saveProfileSection({
   contactState: ContactState
   dirtyState: ReturnType<typeof createDirtyProfileState>
   legalState: LegalState
+  onError: (message: string) => void
   onSaved: () => void
   personalState: PersonalState
   section: SectionKey
-  updateProfile: (payload: Partial<UserProfile>) => void
+  updateProfile: (
+    payload: Partial<UserProfile>,
+  ) => Promise<{ ok: boolean; error?: { message: string } }>
 }) {
-  if (section === "personal" && dirtyState.personal) {
-    updateProfile(personalState)
-    onSaved()
+  const payloadBySection: Partial<Record<SectionKey, Partial<UserProfile>>> = {
+    personal: dirtyState.personal ? personalState : undefined,
+    contact: dirtyState.contact ? contactState : undefined,
+    address: dirtyState.address ? addressState : undefined,
+    banking: dirtyState.banking ? { bankAccount: bankState } : undefined,
+    legal: dirtyState.legal ? { legal: legalState } : undefined,
   }
 
-  if (section === "contact" && dirtyState.contact) {
-    updateProfile(contactState)
+  const payload = payloadBySection[section]
+  // Nothing changed for this section — close without a network call.
+  if (!payload) {
     onSaved()
+    return
   }
 
-  if (section === "address" && dirtyState.address) {
-    updateProfile(addressState)
-    onSaved()
+  // Only confirm the save (and close the editor) once the write actually
+  // succeeds — otherwise the user would lose their edits on a failed save.
+  try {
+    const result = await updateProfile(payload)
+    if (!result.ok) {
+      onError(result.error?.message ?? "Something went wrong. Please try again.")
+      return
+    }
+  } catch {
+    onError("Something went wrong. Please try again.")
+    return
   }
 
-  if (section === "banking" && dirtyState.banking) {
-    updateProfile({ bankAccount: bankState })
-    onSaved()
-  }
-
-  if (section === "legal" && dirtyState.legal) {
-    updateProfile({ legal: legalState })
-    onSaved()
-  }
+  onSaved()
 }

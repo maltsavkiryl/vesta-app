@@ -62,6 +62,10 @@ export function useProfileDetailScreen(section: SectionKey) {
       contactState,
       dirtyState,
       legalState,
+      onError: (message) => {
+        fireHaptic("error")
+        Alert.alert("Couldn't save changes", message)
+      },
       onSaved: () => {
         fireHaptic("success")
         router.back()
