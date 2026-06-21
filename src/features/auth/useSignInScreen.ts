@@ -13,6 +13,7 @@ export function useSignInScreen() {
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [error, setError] = useState<string>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const clearError = () => {
     if (error) setError(undefined)
@@ -39,22 +40,28 @@ export function useSignInScreen() {
   }
 
   const handleContinue = async () => {
+    if (isSubmitting) return
     if (!email.includes("@")) {
       fireHaptic("warning")
       setError("Please enter a valid email address.")
       return
     }
 
-    const result = await signIn({ email, password })
-    if (!result.ok) {
-      fireHaptic("error")
-      setError(result.error.message)
-      return
-    }
+    setIsSubmitting(true)
+    try {
+      const result = await signIn({ email, password })
+      if (!result.ok) {
+        fireHaptic("error")
+        setError(result.error.message)
+        return
+      }
 
-    fireHaptic("success")
-    setError(undefined)
-    router.replace("/")
+      fireHaptic("success")
+      setError(undefined)
+      router.replace("/")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return {
@@ -66,6 +73,7 @@ export function useSignInScreen() {
     handleContinue,
     handleEmailChange,
     handlePasswordChange,
+    isSubmitting,
     password,
     router,
   }

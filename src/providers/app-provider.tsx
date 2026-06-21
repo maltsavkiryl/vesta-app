@@ -2,8 +2,8 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRe
 import { useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
-import { DEMO_AUTH_CREDENTIALS } from "@/services/app/app.transformer"
 import { useAppSessionQuery } from "@/services/app/app.queries"
+import { DEMO_AUTH_CREDENTIALS } from "@/services/app/app.transformer"
 import {
   createClockLiveActivityPayload,
   endClockLiveActivity,
@@ -16,6 +16,13 @@ export interface AppContextValue {
   accountId: string | null
   isSignedIn: boolean
   needsOnboarding: boolean
+  /**
+   * True once the session query has resolved at least once. For a returning
+   * signed-in user the session is fetched async (initialData is undefined), so
+   * routing gates must wait for this before redirecting — otherwise they read a
+   * transient signed-out state and bounce sign-in → home.
+   */
+  isSessionReady: boolean
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -26,6 +33,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const accountId = sessionQuery.data?.accountId ?? null
   const isSignedIn = sessionQuery.data?.isSignedIn ?? false
   const needsOnboarding = sessionQuery.data?.needsOnboarding ?? false
+  const isSessionReady = sessionQuery.data !== undefined
   const clockSessionQuery = useQuery({
     enabled: Boolean(accountId),
     queryFn: () => appRepositories.time.getClockSession(accountId!),
@@ -79,8 +87,9 @@ export function AppProvider({ children }: PropsWithChildren) {
       accountId,
       isSignedIn,
       needsOnboarding,
+      isSessionReady,
     }),
-    [accountId, isSignedIn, needsOnboarding],
+    [accountId, isSignedIn, needsOnboarding, isSessionReady],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

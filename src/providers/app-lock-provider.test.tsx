@@ -66,8 +66,16 @@ describe("AppLockProvider", () => {
     await waitFor(() => expect(authenticateAsync).toHaveBeenCalled(), { timeout: 5000 })
     expect(screen.queryByLabelText("Unlock")).toBeTruthy()
 
+    // Wait for the cancelled auto-prompt to settle (button re-enabled) before
+    // retrying — otherwise the press is dropped by the in-flight guard and the
+    // overlay never clears (the source of the suite-load flake).
+    await waitFor(
+      () => expect(screen.getByLabelText("Unlock").props.accessibilityState?.disabled).toBe(false),
+      { timeout: 5000 },
+    )
+
     // Tapping Unlock re-prompts and succeeds, dismissing the lock overlay.
-    fireEvent.press(unlockButton)
+    fireEvent.press(screen.getByLabelText("Unlock"))
     await waitFor(() => expect(screen.queryByLabelText("Unlock")).toBeNull(), { timeout: 5000 })
     expect(screen.getByText("protected-content")).toBeTruthy()
   })

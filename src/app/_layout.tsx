@@ -18,7 +18,7 @@ import { usePushRegistration } from "@/services/notifications/usePushRegistratio
 import { useShiftReminders } from "@/services/notifications/useShiftReminders"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { ToastProvider } from "@/ui/feedback"
-import { initCrashReporting } from "@/utils/crashReporting"
+import { initCrashReporting, reportCrash } from "@/utils/crashReporting"
 import { loadDateFnsLocale } from "@/utils/formatDate"
 
 SplashScreen.preventAutoHideAsync()
@@ -100,9 +100,15 @@ export default function Root() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false)
 
   useEffect(() => {
+    // Always unblock the splash, even if i18n init fails — otherwise a rejected
+    // init would leave the app stuck on a hidden splash forever. Report the
+    // failure and continue (i18n falls back to its default bundle).
     initI18n()
-      .then(() => setIsI18nInitialized(true))
       .then(() => loadDateFnsLocale())
+      .catch((error) => {
+        reportCrash(error instanceof Error ? error : new Error(String(error)))
+      })
+      .finally(() => setIsI18nInitialized(true))
   }, [])
 
   const loaded = isI18nInitialized

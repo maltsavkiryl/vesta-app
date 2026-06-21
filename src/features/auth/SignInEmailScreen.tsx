@@ -19,6 +19,7 @@ export function SignInEmailScreen() {
     handleContinue,
     handleEmailChange,
     handlePasswordChange,
+    isSubmitting,
     password,
     router,
   } = useSignInScreen()
@@ -108,7 +109,13 @@ export function SignInEmailScreen() {
 
         <AuthError message={error} />
 
-        <Button fullWidth label="Log in with email" onPress={handleContinue} pressHaptic="none" />
+        <Button
+          fullWidth
+          isLoading={isSubmitting}
+          label="Log in with email"
+          onPress={handleContinue}
+          pressHaptic="none"
+        />
 
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: AUTH_SCREEN_PALETTE.divider }]} />
