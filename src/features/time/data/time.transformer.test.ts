@@ -3,6 +3,7 @@ import type { ClockSessionContext } from "@/core/models"
 import type { TimeEntryDto } from "./time.dto"
 import {
   idleClockSession,
+  optimisticClockSession,
   parseDurationSeconds,
   toClockSession,
   toTimeEntry,
@@ -64,6 +65,25 @@ describe("time.transformer", () => {
   it("treats a completed/absent entry as idle", () => {
     expect(toClockSession({ ...openDto, status: "Completed" }, null).state).toBe("idle")
     expect(toClockSession(null, null)).toEqual(idleClockSession())
+  })
+
+  it("builds an optimistic session from offline meta", () => {
+    const onBreak = optimisticClockSession({
+      establishmentUniqueCode: "est-1",
+      context,
+      breakStartedAt: "2026-06-20T10:00:00Z",
+      optimistic: {
+        state: "onBreak",
+        startedAt: "2026-06-20T08:00:00Z",
+        accumulatedBreakSeconds: 300,
+      },
+    })
+    expect(onBreak.state).toBe("onBreak")
+    expect(onBreak.startedAt).toBe("2026-06-20T08:00:00Z")
+    expect(onBreak.breakStartedAt).toBe("2026-06-20T10:00:00Z")
+    expect(onBreak.accumulatedBreakSeconds).toBe(300)
+    // No optimistic record → idle.
+    expect(optimisticClockSession({ establishmentUniqueCode: "est-1", context }).state).toBe("idle")
   })
 
   it("maps a completed entry to a history row", () => {

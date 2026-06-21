@@ -32,4 +32,6 @@ export interface EmployeePunchBody {
   establishmentUniqueCode: string
   lat?: number
   lng?: number
+  /** Set when replaying a punch captured offline, so it records at its real time. */
+  occurredAtUtc?: string
 }
