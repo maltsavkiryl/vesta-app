@@ -54,6 +54,11 @@ export function AppLockProvider({ children }: PropsWithChildren) {
   })
   const faceIdEnabled = profileQuery.data?.security.faceIdEnabled ?? false
   const lockEnabled = isSignedIn && faceIdEnabled
+  // While the profile is still loading for a signed-in user we don't yet know
+  // whether biometric lock is on, so cover the app to avoid flashing protected
+  // content before the lock decision is made. (The profile is cached after the
+  // first launch, so this only applies on a true cold start.)
+  const isResolvingLock = isSignedIn && Boolean(accountId) && profileQuery.data === undefined
 
   // Seed the lock state from the initial gate so cold start does not flash
   // protected content before the first effect runs.
@@ -138,18 +143,26 @@ export function AppLockProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<AppLockContextValue>(
     () => ({
-      isLocked: lockEnabled && locked,
+      isLocked: isResolvingLock || (lockEnabled && locked),
       isUnavailable: unavailable,
       unlock: () => void unlock(),
     }),
-    [lockEnabled, locked, unavailable, unlock],
+    [isResolvingLock, lockEnabled, locked, unavailable, unlock],
   )
+
+  // Distinguish "still deciding" (neutral cover, no prompt) from an active lock
+  // (branded lock + Unlock action that drives the biometric prompt).
+  const isResolvingOnly = value.isLocked && !(lockEnabled && locked)
 
   return (
     <AppLockContext.Provider value={value}>
       {children}
       {value.isLocked ? (
-        <AppLockOverlay authenticating={authenticating} onUnlock={() => void unlock()} />
+        <AppLockOverlay
+          authenticating={authenticating}
+          isResolving={isResolvingOnly}
+          onUnlock={() => void unlock()}
+        />
       ) : null}
     </AppLockContext.Provider>
   )
@@ -157,9 +170,11 @@ export function AppLockProvider({ children }: PropsWithChildren) {
 
 function AppLockOverlay({
   authenticating,
+  isResolving = false,
   onUnlock,
 }: {
   authenticating: boolean
+  isResolving?: boolean
   onUnlock: () => void
 }) {
   const tokens = useDesignTokens()
@@ -185,26 +200,30 @@ function AppLockOverlay({
           style={[styles.subtitle, { color: tokens.textSecondary }]}
         />
       </View>
-      <View style={styles.action}>
-        <Pressable
-          accessibilityLabel="Unlock"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: authenticating }}
-          disabled={authenticating}
-          onPress={onUnlock}
-          style={({ pressed }) => [
-            styles.unlockButton,
-            { backgroundColor: tokens.accent, opacity: pressed || authenticating ? 0.7 : 1 },
-          ]}
-        >
-          <Text
-            size="xs"
-            text={authenticating ? "Unlocking…" : "Unlock"}
-            weight="semiBold"
-            style={{ color: tokens.background }}
-          />
-        </Pressable>
-      </View>
+      {/* While we're still resolving whether the lock is even enabled, show a
+          neutral cover with no action — don't prompt or offer to unlock yet. */}
+      {isResolving ? null : (
+        <View style={styles.action}>
+          <Pressable
+            accessibilityLabel="Unlock"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: authenticating }}
+            disabled={authenticating}
+            onPress={onUnlock}
+            style={({ pressed }) => [
+              styles.unlockButton,
+              { backgroundColor: tokens.accent, opacity: pressed || authenticating ? 0.7 : 1 },
+            ]}
+          >
+            <Text
+              size="xs"
+              text={authenticating ? "Unlocking…" : "Unlock"}
+              weight="semiBold"
+              style={{ color: tokens.background }}
+            />
+          </Pressable>
+        </View>
+      )}
     </View>
   )
 }

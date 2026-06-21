@@ -10,7 +10,7 @@ import {
 } from "@/ui"
 
 export default function AppLayout() {
-  const { isSignedIn, needsOnboarding } = useAppSession()
+  const { isSignedIn, needsOnboarding, isSessionReady } = useAppSession()
   const { theme } = useAppTheme()
   const { shouldReduceMotion } = useAppMotion()
   const router = useRouter()
@@ -20,6 +20,10 @@ export default function AppLayout() {
   const closeActions = createHeaderActionOptions(theme, {
     left: { kind: "close", onPress: closeSheet },
   })
+
+  if (!isSessionReady) {
+    return null
+  }
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />

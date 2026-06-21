@@ -1,13 +1,19 @@
 import { Redirect, Stack } from "expo-router"
 
-import { useAppMotion } from "@/providers/motion-provider"
 import { useAppSession } from "@/providers/app-provider"
+import { useAppMotion } from "@/providers/motion-provider"
 import { useAppTheme } from "@/ui"
 
 export default function AuthLayout() {
-  const { isSignedIn, needsOnboarding } = useAppSession()
+  const { isSignedIn, needsOnboarding, isSessionReady } = useAppSession()
   const { theme } = useAppTheme()
   const { shouldReduceMotion } = useAppMotion()
+
+  // Don't flash the auth stack while the session is still resolving for a
+  // returning signed-in user.
+  if (!isSessionReady) {
+    return null
+  }
 
   if (isSignedIn && !needsOnboarding) {
     return <Redirect href="/(app)/(tabs)/home" />
