@@ -1,6 +1,22 @@
 # Vesta-mobile "15-star / 10-10 UI-UX" audit + fix plan (2026-06-21)
 
-Status: **AUDIT COMPLETE, IMPLEMENTATION NOT YET DONE** (interrupted by weekly usage limit).
+## Implemented in PR (wave 1)
+- core/date: formatFullDate/formatShortDate/formatMonthLabel local-noon parse (off-by-one fix).
+- schedule.utils: getWeekdayKey + enumerateDateRange local parse/emit.
+- home: upcomingShifts slice(0,6) — stop dropping the soonest shift.
+- ui/ErrorDetails: gate raw error + stack behind __DEV__ (no prod leak).
+- inbox tab badge capped "99+".
+- time: break start/end double-tap guard (breakPending).
+- cleanup: deleted orphaned formatCurrency/formatCompactCurrency + tests + wrappers.
+
+## Deferred (remaining for wave 2 — verified findings, not yet done)
+- Change-request no-op submit guard: needs the 3 picker-driven tests reworked (canSubmit must require a real change). Backend already rejects no-ops.
+- Auth/shell: cold-start biometric lock flash; session-loading redirect flicker; auth loading/double-submit; flaky app-lock test de-flake; i18n-init .catch.
+- Time: flushClockQueue concurrency lock + out-of-order replay; clock-out button loading/error; useTimeCardController loading/error vs mock; offline id collision; entry-detail loading-vs-not-found; live-activity stable session id.
+- Profile: save/join gate on result.ok (needs async mutation refactor).
+- Cross-cutting: date-fns subpath imports; TextField a11y label; SuccessState/ErrorDetails a11y announce; maskIban i18n; nav Dutch/English i18n; danger badge token.
+
+Status: **AUDIT COMPLETE; wave-1 fixes implemented + verified; wave-2 deferred.**
 Branch: `chore/mobile-15star` (off origin/main `51cc4ab`). Worktree: `~/Workspace/vesta-mobile-wt/15star`.
 
 Baseline validation on origin/main: `compile` clean, `depcruise` clean (509 modules), jest **292 pass / 1 flaky** (`app-lock-provider.test.tsx` — times out only under full-suite load). Repo-wide `lint:check` has pre-existing drift → lint only changed files. Earnings removal verified **clean** in time/profile/core (only orphaned `formatCurrency` helpers remain — delete).
