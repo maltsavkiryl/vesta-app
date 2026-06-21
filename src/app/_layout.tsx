@@ -14,6 +14,7 @@ import { MotionProvider } from "@/providers/motion-provider"
 import { appQueryKeys, createAppQueryClient } from "@/services/app/app.queries"
 import { queryPersister } from "@/services/app/query.persister"
 import { usePushRegistration } from "@/services/notifications/usePushRegistration"
+import { useShiftReminders } from "@/services/notifications/useShiftReminders"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { ToastProvider } from "@/ui/feedback"
 import { initCrashReporting } from "@/utils/crashReporting"
@@ -33,11 +34,12 @@ const queryClient = createAppQueryClient()
 
 /**
  * Headless component that wires up push-notification registration + deep-link
- * routing for the signed-in user. Rendered inside AppProvider so it can read
- * the session; renders nothing.
+ * routing and local shift reminders for the signed-in user. Rendered inside
+ * AppProvider so it can read the session; renders nothing.
  */
 function PushRegistration() {
   usePushRegistration()
+  useShiftReminders()
   return null
 }
 
