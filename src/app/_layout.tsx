@@ -13,6 +13,7 @@ import { AppProvider } from "@/providers/app-provider"
 import { MotionProvider } from "@/providers/motion-provider"
 import { appQueryKeys, createAppQueryClient } from "@/services/app/app.queries"
 import { queryPersister } from "@/services/app/query.persister"
+import { useClockLiveActivitySync } from "@/services/liveActivity/useClockLiveActivitySync"
 import { usePushRegistration } from "@/services/notifications/usePushRegistration"
 import { useShiftReminders } from "@/services/notifications/useShiftReminders"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
@@ -40,6 +41,7 @@ const queryClient = createAppQueryClient()
 function PushRegistration() {
   usePushRegistration()
   useShiftReminders()
+  useClockLiveActivitySync()
   return null
 }
 
