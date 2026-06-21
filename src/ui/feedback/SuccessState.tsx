@@ -1,5 +1,5 @@
-import type { ReactNode } from "react"
-import { StyleSheet, View, type ViewStyle } from "react-native"
+import { useEffect, type ReactNode } from "react"
+import { AccessibilityInfo, StyleSheet, View, type ViewStyle } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import { appTypography } from "../foundations/layout"
@@ -46,6 +46,12 @@ export function SuccessState({
 }: SuccessStateProps) {
   const tokens = useDesignTokens()
 
+  // Announce the outcome to screen readers — a success state is exactly the
+  // moment assistive tech should speak up.
+  useEffect(() => {
+    AccessibilityInfo.announceForAccessibility(subtitle ? `${title}. ${subtitle}` : title)
+  }, [title, subtitle])
+
   const backgroundColor =
     tone === "accent"
       ? tokens.accentSoft
@@ -57,7 +63,11 @@ export function SuccessState({
 
   return (
     <View style={[styles.container, style]}>
-      <View style={[styles.iconContainer, { backgroundColor }]}>
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.iconContainer, { backgroundColor }]}
+      >
         <Ionicons color={iconColor} name={icon} size={42} />
       </View>
       <View style={styles.textStack}>

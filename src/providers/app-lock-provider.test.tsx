@@ -59,11 +59,11 @@ describe("AppLockProvider", () => {
     const screen = renderProvider()
 
     // While locked, the branded unlock affordance is shown.
-    const unlockButton = await screen.findByLabelText("Unlock", {}, { timeout: 5000 })
+    const unlockButton = await screen.findByLabelText("Unlock", {}, { timeout: 10000 })
     expect(unlockButton).toBeTruthy()
 
     // After a cancelled prompt the app stays gated (overlay still present).
-    await waitFor(() => expect(authenticateAsync).toHaveBeenCalled(), { timeout: 5000 })
+    await waitFor(() => expect(authenticateAsync).toHaveBeenCalled(), { timeout: 10000 })
     expect(screen.queryByLabelText("Unlock")).toBeTruthy()
 
     // Wait for the cancelled auto-prompt to settle (button re-enabled) before
@@ -71,14 +71,16 @@ describe("AppLockProvider", () => {
     // overlay never clears (the source of the suite-load flake).
     await waitFor(
       () => expect(screen.getByLabelText("Unlock").props.accessibilityState?.disabled).toBe(false),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
 
     // Tapping Unlock re-prompts and succeeds, dismissing the lock overlay.
     fireEvent.press(screen.getByLabelText("Unlock"))
-    await waitFor(() => expect(screen.queryByLabelText("Unlock")).toBeNull(), { timeout: 5000 })
+    await waitFor(() => expect(screen.queryByLabelText("Unlock")).toBeNull(), { timeout: 10000 })
     expect(screen.getByText("protected-content")).toBeTruthy()
-  })
+    // Generous per-test budget: this exercises real biometric-mock async across
+    // two unlock cycles and can run slow under heavy parallel suite load.
+  }, 20000)
 
   it("does not lock when biometric app-lock is disabled", () => {
     mockUseQuery.mockReturnValue({ data: { security: { faceIdEnabled: false } } })

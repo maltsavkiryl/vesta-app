@@ -1,4 +1,4 @@
-import { format } from "date-fns"
+import { format } from "date-fns/format"
 
 import { formatTimeValue, parseDateValue } from "./date"
 import { formatDurationLabel } from "./date"

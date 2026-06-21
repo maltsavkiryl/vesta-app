@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { format } from "date-fns"
+import { format } from "date-fns/format"
 
 import { appRepositories } from "@/composition/repositories"
 import { formatTimeLabel, getClockSnapshot } from "@/core/date"

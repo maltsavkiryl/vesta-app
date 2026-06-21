@@ -1,4 +1,4 @@
-import { format } from "date-fns"
+import { format } from "date-fns/format"
 
 import { getDateFnsLocale, resolveSupportedLocale, type SupportedLocale } from "./format"
 import type { ClockSession, Shift } from "./models"
