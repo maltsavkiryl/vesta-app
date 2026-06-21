@@ -1,4 +1,4 @@
-import { getLocalToday } from "@/core/date"
+import { formatLocalDate, getLocalToday, resolveLocalDate } from "@/core/date"
 import type {
   AppStoreState,
   AvailabilityOverride,
@@ -32,7 +32,8 @@ export const availabilityWeekdayLabels: Record<AvailabilityWeekday, string> = {
 }
 
 export function getWeekdayKey(dateString: string): AvailabilityWeekday {
-  const date = new Date(dateString)
+  // Parse at local noon so the weekday never drifts across the UTC boundary.
+  const date = resolveLocalDate(dateString) ?? new Date()
   const day = date.getDay()
   return availabilityWeekdays[(day + 6) % 7] ?? "monday"
 }
@@ -61,7 +62,9 @@ export function enumerateDateRange(startDate: string, endDate: string) {
   const end = new Date(`${endDate}T12:00:00`)
 
   while (cursor <= end) {
-    dates.push(cursor.toISOString().slice(0, 10))
+    // Emit the LOCAL calendar day; toISOString() would report the UTC day and
+    // can shift the date in non-UTC zones.
+    dates.push(formatLocalDate(cursor))
     cursor.setDate(cursor.getDate() + 1)
   }
 

@@ -30,17 +30,23 @@ export function ErrorDetails(props: ErrorDetailsProps) {
         <Text tx="errorScreen:friendlySubtitle" />
       </View>
 
-      <ScrollView
-        contentContainerStyle={themed(errorSectionContentContainer)}
-        style={themed(errorSection)}
-      >
-        <Text style={themed(errorContent)} text={`${props.error}`.trim()} weight="bold" />
-        <Text
-          selectable
-          style={themed(errorBacktrace)}
-          text={`${props.errorInfo?.componentStack ?? ""}`.trim()}
-        />
-      </ScrollView>
+      {/* Never expose raw error messages or stack traces to end users in
+          production — show the technical detail only in development builds. */}
+      {__DEV__ ? (
+        <ScrollView
+          contentContainerStyle={themed(errorSectionContentContainer)}
+          style={themed(errorSection)}
+        >
+          <Text style={themed(errorContent)} text={`${props.error}`.trim()} weight="bold" />
+          <Text
+            selectable
+            style={themed(errorBacktrace)}
+            text={`${props.errorInfo?.componentStack ?? ""}`.trim()}
+          />
+        </ScrollView>
+      ) : (
+        <View style={themed(errorSection)} />
+      )}
 
       <AppButton label={translate("errorScreen:reset")} onPress={props.onReset} variant="danger" />
     </Screen>

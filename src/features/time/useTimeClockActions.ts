@@ -27,6 +27,9 @@ export function useTimeClockActions({
   // Drives an inline "Getting location…" affordance on the CTA instead of a
   // frozen button, so clock-in feels responsive while we resolve context.
   const [clockInPending, setClockInPending] = useState(false)
+  // Guards the break start/end punches against double-taps (a slow location +
+  // network round-trip would otherwise let a second tap fire a duplicate punch).
+  const [breakPending, setBreakPending] = useState(false)
 
   const handleClockIn = useCallback(async () => {
     if (clockInPending) return
@@ -93,34 +96,47 @@ export function useTimeClockActions({
   }, [clockInPending, employers, profileRole, shifts, startClock])
 
   const handleStartBreak = useCallback(async () => {
-    const result = await startBreak({
-      occurredAt: new Date().toISOString(),
-      location: await captureLocationSnapshot(),
-    })
-    if (!result.ok) {
-      fireHaptic("error")
-      Alert.alert("Break unavailable", result.error.message)
-      return
-    }
+    if (breakPending) return
+    setBreakPending(true)
+    try {
+      const result = await startBreak({
+        occurredAt: new Date().toISOString(),
+        location: await captureLocationSnapshot(),
+      })
+      if (!result.ok) {
+        fireHaptic("error")
+        Alert.alert("Break unavailable", result.error.message)
+        return
+      }
 
-    fireHaptic("success")
-  }, [startBreak])
+      fireHaptic("success")
+    } finally {
+      setBreakPending(false)
+    }
+  }, [breakPending, startBreak])
 
   const handleEndBreak = useCallback(async () => {
-    const result = await endBreak({
-      occurredAt: new Date().toISOString(),
-      location: await captureLocationSnapshot(),
-    })
-    if (!result.ok) {
-      fireHaptic("error")
-      Alert.alert("Break unavailable", result.error.message)
-      return
-    }
+    if (breakPending) return
+    setBreakPending(true)
+    try {
+      const result = await endBreak({
+        occurredAt: new Date().toISOString(),
+        location: await captureLocationSnapshot(),
+      })
+      if (!result.ok) {
+        fireHaptic("error")
+        Alert.alert("Break unavailable", result.error.message)
+        return
+      }
 
-    fireHaptic("success")
-  }, [endBreak])
+      fireHaptic("success")
+    } finally {
+      setBreakPending(false)
+    }
+  }, [breakPending, endBreak])
 
   return {
+    breakPending,
     clockInPending,
     handleClockIn,
     handleEndBreak,

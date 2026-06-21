@@ -61,7 +61,7 @@ export default function TabLayout() {
         name="inbox"
         options={{
           title: "Inbox",
-          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          tabBarBadge: unreadCount > 0 ? (unreadCount > 99 ? "99+" : unreadCount) : undefined,
           tabBarBadgeStyle: { backgroundColor: tokens.accent },
         }}
       />

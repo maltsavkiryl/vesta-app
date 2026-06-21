@@ -13,7 +13,7 @@ export function parseDateValue(value: string | Date | number) {
  * `yyyy-MM-dd` strings are parsed at local noon so the calendar day never
  * drifts across the UTC boundary (the bug this module fixes).
  */
-function resolveLocalDate(value: string): Date | null {
+export function resolveLocalDate(value: string): Date | null {
   const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
   if (dateOnly) {
     return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]), 12)
@@ -85,17 +85,17 @@ export function getRelativeDayLabel(value: string, locale?: string): string {
 }
 
 export function formatFullDate(dateString: string) {
-  const date = parseDateValue(dateString)
+  const date = resolveLocalDate(dateString)
   return date ? format(date, "EEEE, MMMM d", { locale: getDateFnsLocale() }) : "Unknown date"
 }
 
 export function formatShortDate(dateString: string) {
-  const date = parseDateValue(dateString)
+  const date = resolveLocalDate(dateString)
   return date ? format(date, "MMM d", { locale: getDateFnsLocale() }) : "Unknown date"
 }
 
 export function formatMonthLabel(dateString: string) {
-  const date = parseDateValue(dateString)
+  const date = resolveLocalDate(dateString)
   return date ? format(date, "MMMM yyyy", { locale: getDateFnsLocale() }) : "Unknown month"
 }
 

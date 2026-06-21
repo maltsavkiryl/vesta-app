@@ -1,16 +1,3 @@
-import {
-  formatCompactCurrency as formatCompactCurrencyLocalized,
-  formatCurrency as formatCurrencyLocalized,
-} from "@/core/format"
-
-export function formatCurrency(value: number, currency = "EUR") {
-  return formatCurrencyLocalized(value, { currency })
-}
-
-export function formatCompactCurrency(value: number, currency = "EUR") {
-  return formatCompactCurrencyLocalized(value, { currency })
-}
-
 export function maskIban(iban?: string) {
   if (!iban?.trim()) return "Not added"
 
