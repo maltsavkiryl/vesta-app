@@ -68,8 +68,12 @@ export const EMPLOYER_SECTION_CONTENT: Partial<
         }}
         onJoinSelectedEmployer={() => {
           if (!selectedJoinEmployer) return
-          joinEmployer(selectedJoinEmployer.id)
-          setJoinedEmployerId(selectedJoinEmployer.id)
+          // Only reflect the joined state once the mutation actually succeeds —
+          // otherwise a failed join would still show the success UI.
+          const employerId = selectedJoinEmployer.id
+          void joinEmployer(employerId).then((result) => {
+            if (result.ok) setJoinedEmployerId(employerId)
+          })
         }}
         onOpenQrScanner={() => router.push("/(app)/employer-join-scanner")}
         onSelectEmployer={(employerId) => {
