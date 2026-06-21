@@ -1,14 +1,12 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import { format } from "date-fns/format"
 import Animated from "react-native-reanimated"
-import { format } from "date-fns"
-
-import { translate } from "@/i18n/translate"
-import { useListItemEntrance } from "@/ui/foundations/motion"
 
 import { parseDateValue } from "@/core/date"
 import type { TimeEntry } from "@/core/models"
 import { getTimeEntryTimeRangeLabel, getTimeEntryWorkedLabel } from "@/core/timeEntries"
+import { translate } from "@/i18n/translate"
 import {
   AppScrollScreen,
   DateBadge,
@@ -20,6 +18,7 @@ import {
   appLayout,
   useDesignTokens,
 } from "@/ui"
+import { useListItemEntrance } from "@/ui/foundations/motion"
 
 export function RecentEntries({
   entries,
@@ -33,7 +32,11 @@ export function RecentEntries({
   const tokens = useDesignTokens()
 
   return (
-    <SectionBlock title={translate("time:recentEntries")} actionLabel={translate("time:viewAll")} onAction={onViewAll}>
+    <SectionBlock
+      title={translate("time:recentEntries")}
+      actionLabel={translate("time:viewAll")}
+      onAction={onViewAll}
+    >
       {entries.length > 0 ? (
         <ListCard style={styles.entriesCard}>
           {entries.slice(0, 4).map((entry, index, items) => (
@@ -152,7 +155,12 @@ function EntryRow({
         titleStyle={{ color: tokens.textPrimary }}
         trailing={
           <View style={styles.entryStatus}>
-            <Text text={trailingLabel} size="xs" weight="semiBold" style={{ color: trailingTone }} />
+            <Text
+              text={trailingLabel}
+              size="xs"
+              weight="semiBold"
+              style={{ color: trailingTone }}
+            />
             <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
           </View>
         }

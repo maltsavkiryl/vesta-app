@@ -67,7 +67,7 @@ export function SectionTitle({
       <Text size={textSize} style={{ color: tokens.textPrimary }} text={title} weight="semiBold" />
       <View style={styles.sectionHeaderActions}>
         {badgeLabel ? (
-          <View style={[styles.sectionBadge, { backgroundColor: `${tokens.danger}14` }]}>
+          <View style={[styles.sectionBadge, { backgroundColor: tokens.dangerSoft }]}>
             <Text size="xxs" style={{ color: tokens.danger }} text={badgeLabel} weight="semiBold" />
           </View>
         ) : null}

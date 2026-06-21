@@ -82,6 +82,10 @@ export function TextField({
       <View style={styles.inputRow}>
         {leftAccessory}
         <TextInput
+          // Name the input for screen readers from the field's label/caption.
+          // Spread props afterwards so an explicit caller value still wins.
+          accessibilityLabel={label}
+          accessibilityHint={caption}
           autoCorrect={false}
           placeholderTextColor={tokens.textMuted}
           selectionColor={tokens.accent}
