@@ -4,8 +4,10 @@ import type { AuthError } from "@/features/auth/data/auth.errors"
 import type {
   AuthRepository,
   CompleteOnboardingInput,
+  PendingEmployer,
   RegisterPayload,
   SignInPayload,
+  SignInResult,
 } from "@/features/auth/data/auth.repository"
 import { toAppSession, type AppSession } from "@/features/auth/data/auth.transformer"
 import type { DocumentUploadError } from "@/features/documents/data/documents.errors"
@@ -254,7 +256,20 @@ function createMockAuthRepository(): AuthRepository {
         accountId: account.id,
         signedInAt: new Date().toISOString(),
       })
-      return success(buildSessionForAccount(account.id))
+      return success<SignInResult>({
+        kind: "signed-in",
+        session: buildSessionForAccount(account.id),
+      })
+    },
+    getPendingEmployers(): PendingEmployer[] {
+      // Demo/mock auth signs in directly; there is never a pending choice.
+      return []
+    },
+    async selectEmployer() {
+      return failure<AuthError>({
+        type: "invalid-credentials",
+        message: "No employer selection is pending.",
+      })
     },
     async signOut() {
       setSession({ accountId: null })
@@ -575,10 +590,30 @@ function createApiRepositories() {
       async signIn() {
         const result = await authService.signIn()
         if (!result.ok) return result
+        // Multi-employer identities must pick an employer before a session exists.
+        if (result.data.kind === "select-employer") {
+          return success<SignInResult>({
+            kind: "select-employer",
+            employers: result.data.employers,
+          })
+        }
         ensureSeededAccount(result.data.accountId)
         setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
         // First-run onboarding is local app state, not the backend payroll-profile
         // completeness (which the lightweight wizard cannot satisfy).
+        return success<SignInResult>({
+          kind: "signed-in",
+          session: buildSessionForAccount(result.data.accountId),
+        })
+      },
+      getPendingEmployers(): PendingEmployer[] {
+        return authService.getPendingEmployers()
+      },
+      async selectEmployer(employerUniqueCode: string) {
+        const result = await authService.selectEmployer(employerUniqueCode)
+        if (!result.ok) return result
+        ensureSeededAccount(result.data.accountId)
+        setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
         return success(buildSessionForAccount(result.data.accountId))
       },
       async signOut() {
