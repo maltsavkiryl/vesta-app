@@ -54,9 +54,59 @@ describe("authService", () => {
     const result = await service.signIn()
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.data).toEqual({ accountId: "emp-1", profileComplete: true })
+      expect(result.data).toEqual({ kind: "signed-in", accountId: "emp-1", profileComplete: true })
     }
     expect(service.getCurrentAccountId()).toBe("emp-1")
+    expect(tokenStore.getAccessToken()).toBe(jwt)
+  })
+
+  it("returns a select-employer outcome and completes only once an employer is chosen", async () => {
+    const jwt = jwtWithExp(1893456000)
+    const authApi: any = {
+      post: jest.fn(async (url: string) => {
+        if (url.endsWith("/auth/employees/login"))
+          return {
+            ok: true,
+            status: 200,
+            data: {
+              memberships: [
+                { employerUniqueCode: "emp-1", employerName: "Bistro" },
+                { employerUniqueCode: "emp-2", employerName: "Cafe" },
+              ],
+            },
+          }
+        if (url.endsWith("/auth/employees/select-employer"))
+          return {
+            ok: true,
+            status: 200,
+            data: {
+              access_token: jwt,
+              token_type: "Bearer",
+              expires_in: 300,
+              profile_complete: true,
+            },
+          }
+        throw new Error("unexpected " + url)
+      }),
+    }
+    const service = createAuthService(authApi)
+    const result = await service.signIn()
+    expect(result.ok).toBe(true)
+    if (result.ok && result.data.kind === "select-employer") {
+      expect(result.data.employers).toEqual([
+        { uniqueCode: "emp-1", name: "Bistro" },
+        { uniqueCode: "emp-2", name: "Cafe" },
+      ])
+    } else {
+      throw new Error("expected select-employer outcome")
+    }
+    // No session token is stored until an employer is chosen.
+    expect(tokenStore.getAccessToken()).toBeNull()
+    expect(service.getPendingEmployers()).toHaveLength(2)
+
+    const selected = await service.selectEmployer("emp-2")
+    expect(selected.ok).toBe(true)
+    expect(service.getCurrentAccountId()).toBe("emp-2")
     expect(tokenStore.getAccessToken()).toBe(jwt)
   })
 

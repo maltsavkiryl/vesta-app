@@ -58,6 +58,11 @@ export function useSignInScreen() {
 
       fireHaptic("success")
       setError(undefined)
+      // A multi-employer identity must choose which employer to continue as.
+      if (result.data.kind === "select-employer") {
+        router.push("/(auth)/select-employer")
+        return
+      }
       router.replace("/")
     } finally {
       setIsSubmitting(false)

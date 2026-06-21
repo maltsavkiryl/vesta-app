@@ -13,26 +13,31 @@ import { tokenStore } from "./tokenStore"
 
 let currentAccountId: string | null = null
 
+export interface AuthPendingEmployer {
+  uniqueCode: string
+  name: string
+}
+export type AuthSignInOutcome =
+  | { kind: "signed-in"; accountId: string; profileComplete: boolean }
+  | { kind: "select-employer"; employers: AuthPendingEmployer[] }
+
+// Held between login and employer selection for a multi-employer identity. The
+// id token never leaves this module — the picker UI sends back only the chosen
+// employer code, not the token.
+let pendingIdToken: string | null = null
+let pendingEmployers: AuthPendingEmployer[] = []
+
 function expiresAtMs(token: AccessTokenResponse): number {
   const exp = decodeJwtExp(token.access_token)
   return exp ? exp * 1000 : Date.now() + token.expires_in * 1000
 }
 
 export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
-  async function exchange(
+  // Exchanges an id token + a chosen employer for an employee session token.
+  async function completeSelection(
     idToken: string,
+    employerUniqueCode: string,
   ): Promise<Result<{ accountId: string; profileComplete: boolean }, AuthError>> {
-    const login = await authApi.post<EmployeeLoginResponse>("/auth/employees/login", { idToken })
-    if (!login.ok || !login.data)
-      return failure<AuthError>({ type: "invalid-credentials", message: "Sign-in failed." })
-    const memberships = login.data.memberships
-    if (memberships.length === 0)
-      return failure<AuthError>({
-        type: "account-not-found",
-        message: "No employer is linked to this account yet.",
-      })
-    // TODO(slice-later): employer picker when memberships.length > 1
-    const employerUniqueCode = memberships[0].employerUniqueCode
     const selected = await authApi.post<AccessTokenResponse>("/auth/employees/select-employer", {
       idToken,
       employerUniqueCode,
@@ -49,16 +54,54 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
       profileComplete: selected.data.profile_complete,
     })
     currentAccountId = employerUniqueCode
+    pendingIdToken = null
+    pendingEmployers = []
     return success({
       accountId: employerUniqueCode,
       profileComplete: selected.data.profile_complete,
     })
   }
 
+  async function exchange(idToken: string): Promise<Result<AuthSignInOutcome, AuthError>> {
+    const login = await authApi.post<EmployeeLoginResponse>("/auth/employees/login", { idToken })
+    if (!login.ok || !login.data)
+      return failure<AuthError>({ type: "invalid-credentials", message: "Sign-in failed." })
+    const memberships = login.data.memberships
+    if (memberships.length === 0)
+      return failure<AuthError>({
+        type: "account-not-found",
+        message: "No employer is linked to this account yet.",
+      })
+    // A single membership signs in straight away; more than one needs a choice.
+    if (memberships.length === 1) {
+      const result = await completeSelection(idToken, memberships[0].employerUniqueCode)
+      return result.ok ? success<AuthSignInOutcome>({ kind: "signed-in", ...result.data }) : result
+    }
+    pendingIdToken = idToken
+    pendingEmployers = memberships.map((membership) => ({
+      uniqueCode: membership.employerUniqueCode,
+      name: membership.employerName,
+    }))
+    return success<AuthSignInOutcome>({ kind: "select-employer", employers: pendingEmployers })
+  }
+
   return {
-    async signIn(): Promise<Result<{ accountId: string; profileComplete: boolean }, AuthError>> {
+    async signIn(): Promise<Result<AuthSignInOutcome, AuthError>> {
       const idToken = await acquireIdToken()
       return exchange(idToken)
+    },
+    getPendingEmployers(): AuthPendingEmployer[] {
+      return pendingEmployers
+    },
+    async selectEmployer(
+      employerUniqueCode: string,
+    ): Promise<Result<{ accountId: string; profileComplete: boolean }, AuthError>> {
+      if (!pendingIdToken)
+        return failure<AuthError>({
+          type: "invalid-credentials",
+          message: "Your sign-in expired. Please sign in again.",
+        })
+      return completeSelection(pendingIdToken, employerUniqueCode)
     },
     async loadSession(): Promise<{ accountId: string; profileComplete: boolean } | null> {
       const token = await tokenStore.load()
@@ -72,8 +115,15 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
     async reauthenticate(): Promise<boolean> {
       try {
         const idToken = await refreshIdToken()
+        // Re-establish the previously-selected employer directly so a
+        // multi-employer user isn't re-prompted to pick on a token refresh.
+        const token = await tokenStore.load()
+        if (token?.accountId) {
+          const result = await completeSelection(idToken, token.accountId)
+          return result.ok
+        }
         const result = await exchange(idToken)
-        return result.ok
+        return result.ok && result.data.kind === "signed-in"
       } catch {
         return false
       }

@@ -26,6 +26,23 @@ export function useSignInMutation() {
     mutationFn: (payload: Parameters<typeof appRepositories.auth.signIn>[0]) =>
       appRepositories.auth.signIn(payload),
     onSuccess: (result) => {
+      // A multi-employer sign-in resolves to a picker, not a session yet.
+      if (!result.ok || result.data.kind !== "signed-in") return
+      queryClient.setQueryData(authQueryKeys.session, result.data.session)
+      if (result.data.session.accountId) {
+        invalidateSignedInResources(queryClient, result.data.session.accountId)
+      }
+    },
+  })
+}
+
+export function useSelectEmployerMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (employerUniqueCode: string) =>
+      appRepositories.auth.selectEmployer(employerUniqueCode),
+    onSuccess: (result) => {
       if (!result.ok) return
       queryClient.setQueryData(authQueryKeys.session, result.data)
       if (result.data.accountId) {
@@ -122,6 +139,7 @@ export function useCompleteOnboardingMutation() {
 export function useAuthActions() {
   const changePasswordMutation = useChangePasswordMutation()
   const signInMutation = useSignInMutation()
+  const selectEmployerMutation = useSelectEmployerMutation()
   const registerMutation = useRegisterMutation()
   const signOutMutation = useSignOutMutation()
   const requestPasswordResetMutation = useRequestPasswordResetMutation()
@@ -141,6 +159,9 @@ export function useAuthActions() {
         resetPasswordMutation.mutateAsync(payload),
       signIn: (payload: Parameters<typeof appRepositories.auth.signIn>[0]) =>
         signInMutation.mutateAsync(payload),
+      selectEmployer: (employerUniqueCode: string) =>
+        selectEmployerMutation.mutateAsync(employerUniqueCode),
+      getPendingEmployers: () => appRepositories.auth.getPendingEmployers(),
       signOut: (): Promise<AppSession> => signOutMutation.mutateAsync(),
     }),
     [
@@ -149,6 +170,7 @@ export function useAuthActions() {
       registerMutation,
       requestPasswordResetMutation,
       resetPasswordMutation,
+      selectEmployerMutation,
       signInMutation,
       signOutMutation,
     ],
