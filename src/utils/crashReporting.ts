@@ -1,62 +1,51 @@
-/**
- * If you're using Sentry
- *   Expo https://docs.expo.dev/guides/using-sentry/
- */
-// import * as Sentry from "@sentry/react-native"
+import * as Sentry from "@sentry/react-native"
 
 /**
- * If you're using Crashlytics: https://rnfirebase.io/crashlytics/usage
+ * Crash + error reporting via Sentry.
+ *
+ * Activation is gated on a DSN supplied at build time
+ * (`EXPO_PUBLIC_SENTRY_DSN`) and only runs in production builds — without a DSN
+ * (local dev, tests, PR previews) every call here is a safe no-op that still
+ * logs to the console in development. To turn it on: set the env var and ship a
+ * native build (the Sentry config plugin is registered in app.config.ts).
  */
-// import crashlytics from "@react-native-firebase/crashlytics"
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN
 
-/**
- * If you're using Bugsnag:
- *   RN   https://docs.bugsnag.com/platforms/react-native/)
- *   Expo https://docs.bugsnag.com/platforms/react-native/expo/
- */
-// import Bugsnag from "@bugsnag/react-native"
-// import Bugsnag from "@bugsnag/expo"
+/** Reporting is live only when a DSN is configured and we're not in dev. */
+const isCrashReportingEnabled = Boolean(SENTRY_DSN) && !__DEV__
 
-/**
- *  This is where you put your crash reporting service initialization code to call in `./app/app.tsx`
- */
 export const initCrashReporting = () => {
-  // Sentry.init({
-  //   dsn: "YOUR DSN HERE",
-  //   debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
-  // })
-  // Bugsnag.start("YOUR API KEY")
+  if (!isCrashReportingEnabled) return
+
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    // Capture a sampled slice of performance traces; tune from the dashboard.
+    tracesSampleRate: 0.2,
+  })
 }
 
 /**
- * Error classifications used to sort errors on error reporting services.
+ * Error classifications used to sort errors on the reporting service.
  */
 export enum ErrorType {
-  /**
-   * An error that would normally cause a red screen in dev
-   * and force the user to sign out and restart.
-   */
+  /** A crash-level error (e.g. a caught render failure forcing a restart). */
   FATAL = "Fatal",
-  /**
-   * An error caught by try/catch where defined using Reactotron.tron.error.
-   */
+  /** A handled error reported for visibility but recovered from. */
   HANDLED = "Handled",
 }
 
 /**
- * Manually report a handled error.
+ * Manually report a (handled) error. No-ops in dev beyond console logging, and
+ * when crash reporting isn't configured.
  */
 export const reportCrash = (error: Error, type: ErrorType = ErrorType.FATAL) => {
   if (__DEV__) {
-    // Log to console and Reactotron in development
-    const message = error.message || "Unknown"
     console.error(error)
-    console.log(message, type)
-  } else {
-    // In production, utilize crash reporting service of choice below:
-    // RN
-    // Sentry.captureException(error)
-    // crashlytics().recordError(error)
-    // Bugsnag.notify(error)
+    console.log(error.message || "Unknown", type)
+    return
   }
+
+  if (!isCrashReportingEnabled) return
+
+  Sentry.captureException(error, { tags: { errorType: type } })
 }
