@@ -119,35 +119,35 @@ export default function AppLayout() {
       />
       <Stack.Screen
         name="planning-todos"
-        options={createPushDetailOptions(theme, "Taken voor vandaag", {
+        options={createPushDetailOptions(theme, "Today's tasks", {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="planning-calls"
-        options={createPushDetailOptions(theme, "Open oproepen", {
+        options={createPushDetailOptions(theme, "Open calls", {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="planning-requests"
-        options={createPushDetailOptions(theme, "Mijn aanvragen", {
+        options={createPushDetailOptions(theme, "My requests", {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="planning-leave"
-        options={createPushDetailOptions(theme, "Verlof", {
+        options={createPushDetailOptions(theme, "Leave", {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
         })}
       />
       <Stack.Screen
         name="planning-swap-new"
-        options={createSheetOptions(theme, "Shift ruilen", {
+        options={createSheetOptions(theme, "Swap shift", {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
           ...closeActions,
@@ -156,7 +156,7 @@ export default function AppLayout() {
       />
       <Stack.Screen
         name="planning-change-new"
-        options={createSheetOptions(theme, "Wijziging aanvragen", {
+        options={createSheetOptions(theme, "Request change", {
           backgroundColor: groupedSheetBackground,
           motionEnabled: !shouldReduceMotion,
           ...closeActions,
