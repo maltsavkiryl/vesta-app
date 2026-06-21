@@ -63,31 +63,6 @@ export function toRelativeTime(value: string | number | Date, locale?: string): 
     : ""
 }
 
-export function formatCurrency(
-  value: number,
-  options?: { currency?: string; locale?: string },
-): string {
-  const { currency = "EUR", locale } = options ?? {}
-  return new Intl.NumberFormat(localeToBcp47[resolveSupportedLocale(locale)], {
-    currency,
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-    style: "currency",
-  }).format(value)
-}
-
-export function formatCompactCurrency(
-  value: number,
-  options?: { currency?: string; locale?: string },
-): string {
-  const { currency = "EUR", locale } = options ?? {}
-  return new Intl.NumberFormat(localeToBcp47[resolveSupportedLocale(locale)], {
-    currency,
-    maximumFractionDigits: 0,
-    style: "currency",
-  }).format(value)
-}
-
 export function formatNumber(value: number, locale?: string): string {
   return new Intl.NumberFormat(localeToBcp47[resolveSupportedLocale(locale)]).format(value)
 }

@@ -45,7 +45,7 @@ export function useHomeScreen() {
     return () => clearInterval(interval)
   }, [])
 
-  const upcomingShifts = home?.shifts.slice(1, 7) ?? []
+  const upcomingShifts = home?.shifts.slice(0, 6) ?? []
   const pendingTasks = useMemo(
     () => sortTasksByUrgency((home?.tasks ?? []).filter((task) => !task.completed)),
     [home?.tasks],

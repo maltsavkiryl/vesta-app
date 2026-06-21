@@ -1,4 +1,4 @@
-import { formatCurrency, formatLocalizedDate, formatNumber } from "./format"
+import { formatLocalizedDate, formatNumber } from "./format"
 
 // Intl inserts non-breaking / narrow no-break spaces as group separators in
 // some locales; normalise them so assertions stay readable.
@@ -21,26 +21,6 @@ describe("formatLocalizedDate", () => {
 
   it("returns an empty string for invalid input", () => {
     expect(formatLocalizedDate("not-a-date", "short", "en")).toBe("")
-  })
-})
-
-describe("formatCurrency", () => {
-  it("formats EUR the Dutch (BE) way", () => {
-    const result = normalize(formatCurrency(1234.56, { locale: "nl" }))
-    expect(result).toContain("1.234,56")
-    expect(result).toContain("€")
-  })
-
-  it("formats EUR the English way", () => {
-    const result = normalize(formatCurrency(1234.56, { locale: "en" }))
-    expect(result).toContain("1,234.56")
-    expect(result).toContain("€")
-  })
-
-  it("formats EUR the French (BE) way", () => {
-    const result = normalize(formatCurrency(1234.56, { locale: "fr" }))
-    expect(result).toContain("1 234,56")
-    expect(result).toContain("€")
   })
 })
 
