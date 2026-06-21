@@ -66,6 +66,7 @@ module.exports = (_: ConfigContext): ExpoConfig => {
       bundler: "metro",
     },
     plugins: [
+      "@sentry/react-native",
       "expo-localization",
       "expo-font",
       "expo-web-browser",
