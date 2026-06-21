@@ -110,6 +110,37 @@ describe("authService", () => {
     expect(tokenStore.getAccessToken()).toBe(jwt)
   })
 
+  it("signIn accepts a federated provider hint (Google) and signs in", async () => {
+    const jwt = jwtWithExp(1893456000)
+    const authApi: any = {
+      post: jest.fn(async (url: string) =>
+        url.endsWith("/auth/employees/login")
+          ? {
+              ok: true,
+              status: 200,
+              data: { memberships: [{ employerUniqueCode: "emp-1", employerName: "Bistro" }] },
+            }
+          : {
+              ok: true,
+              status: 200,
+              data: {
+                access_token: jwt,
+                token_type: "Bearer",
+                expires_in: 300,
+                profile_complete: true,
+              },
+            },
+      ),
+    }
+    const service = createAuthService(authApi)
+    const result = await service.signIn({ domainHint: "google.com" })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data).toEqual({ kind: "signed-in", accountId: "emp-1", profileComplete: true })
+    }
+    expect(tokenStore.getAccessToken()).toBe(jwt)
+  })
+
   it("loadSession rehydrates account state from storage after sign-in", async () => {
     const jwt = jwtWithExp(1893456000)
     const authApi: any = {

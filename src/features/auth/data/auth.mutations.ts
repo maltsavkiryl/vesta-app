@@ -36,6 +36,21 @@ export function useSignInMutation() {
   })
 }
 
+export function useGoogleSignInMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => appRepositories.auth.signInWithGoogle(),
+    onSuccess: (result) => {
+      if (!result.ok || result.data.kind !== "signed-in") return
+      queryClient.setQueryData(authQueryKeys.session, result.data.session)
+      if (result.data.session.accountId) {
+        invalidateSignedInResources(queryClient, result.data.session.accountId)
+      }
+    },
+  })
+}
+
 export function useSelectEmployerMutation() {
   const queryClient = useQueryClient()
 
@@ -139,6 +154,7 @@ export function useCompleteOnboardingMutation() {
 export function useAuthActions() {
   const changePasswordMutation = useChangePasswordMutation()
   const signInMutation = useSignInMutation()
+  const googleSignInMutation = useGoogleSignInMutation()
   const selectEmployerMutation = useSelectEmployerMutation()
   const registerMutation = useRegisterMutation()
   const signOutMutation = useSignOutMutation()
@@ -159,6 +175,7 @@ export function useAuthActions() {
         resetPasswordMutation.mutateAsync(payload),
       signIn: (payload: Parameters<typeof appRepositories.auth.signIn>[0]) =>
         signInMutation.mutateAsync(payload),
+      signInWithGoogle: () => googleSignInMutation.mutateAsync(),
       selectEmployer: (employerUniqueCode: string) =>
         selectEmployerMutation.mutateAsync(employerUniqueCode),
       getPendingEmployers: () => appRepositories.auth.getPendingEmployers(),
@@ -167,6 +184,7 @@ export function useAuthActions() {
     [
       changePasswordMutation,
       completeOnboardingMutation,
+      googleSignInMutation,
       registerMutation,
       requestPasswordResetMutation,
       resetPasswordMutation,

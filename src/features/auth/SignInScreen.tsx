@@ -1,7 +1,7 @@
-import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { MotionView, Text } from "@/ui"
@@ -9,15 +9,21 @@ import { usePressScale } from "@/ui/composites/app-motion"
 
 import { AuthBackgroundLayers, AUTH_SCREEN_PALETTE } from "./AuthFormLayout"
 import { AuthLogo } from "./AuthLogo"
+import { AuthError } from "./AuthScaffold"
+import { useSocialSignIn } from "./useSocialSignIn"
 
 function SignInButton({
   accessibilityLabel,
+  busy = false,
   children,
+  disabled = false,
   onPress,
   style,
 }: {
   accessibilityLabel: string
+  busy?: boolean
   children: React.ReactNode
+  disabled?: boolean
   onPress: () => void
   style: object | object[]
 }) {
@@ -28,11 +34,16 @@ function SignInButton({
       <Pressable
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
+        accessibilityState={{ busy, disabled }}
+        disabled={disabled}
         onPress={onPress}
-        style={Array.isArray(style) ? StyleSheet.flatten(style) : style}
+        style={[
+          Array.isArray(style) ? StyleSheet.flatten(style) : style,
+          disabled && !busy ? styles.buttonDisabled : null,
+        ]}
         {...pressHandlers}
       >
-        {children}
+        {busy ? <ActivityIndicator color={AUTH_SCREEN_PALETTE.socialText} /> : children}
       </Pressable>
     </Animated.View>
   )
@@ -41,11 +52,9 @@ function SignInButton({
 export function SignInScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const { error, handleGoogle, pendingProvider } = useSocialSignIn()
+  const isBusy = pendingProvider !== null
 
-  // All sign-in entry points (email + social) start the same real auth flow.
-  // Entra federates Apple/Google, so a provider hint can pre-select the IdP
-  // once that flow lands. TODO: pass an OIDC login_hint per provider so the
-  // social buttons skip straight to the matching federated identity provider.
   const startSignIn = () => router.push("/(auth)/sign-in-email")
 
   return (
@@ -79,11 +88,9 @@ export function SignInScreen() {
           <View style={styles.buttonGroup}>
             <SignInButton
               accessibilityLabel="Log in with email"
+              disabled={isBusy}
               onPress={startSignIn}
-              style={[
-                styles.emailButton,
-                { backgroundColor: AUTH_SCREEN_PALETTE.emailButtonBg },
-              ]}
+              style={[styles.emailButton, { backgroundColor: AUTH_SCREEN_PALETTE.emailButtonBg }]}
             >
               <Text
                 text="Log in with email"
@@ -109,6 +116,7 @@ export function SignInScreen() {
 
             <SignInButton
               accessibilityLabel="Continue with Apple"
+              disabled={isBusy}
               onPress={startSignIn}
               style={[
                 styles.socialButton,
@@ -129,7 +137,9 @@ export function SignInScreen() {
 
             <SignInButton
               accessibilityLabel="Continue with Google"
-              onPress={startSignIn}
+              busy={pendingProvider === "google"}
+              disabled={isBusy}
+              onPress={handleGoogle}
               style={[
                 styles.socialButton,
                 {
@@ -146,6 +156,8 @@ export function SignInScreen() {
                 style={{ color: AUTH_SCREEN_PALETTE.socialText }}
               />
             </SignInButton>
+
+            <AuthError message={error} />
           </View>
         </MotionView>
       </View>
@@ -157,6 +169,9 @@ const styles = StyleSheet.create({
   bottomContent: {
     gap: 24,
     paddingHorizontal: 24,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonGroup: {
     gap: 12,
