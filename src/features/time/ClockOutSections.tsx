@@ -107,10 +107,14 @@ export function ClockOutCelebration({
 }
 
 export function ClockOutContent({
+  error,
+  isFinishing = false,
   onFinish,
   onKeepWorking,
   summary,
 }: {
+  error?: string
+  isFinishing?: boolean
   onFinish: () => void | Promise<void>
   onKeepWorking: () => void
   summary: ClockOutSummaryData
@@ -147,8 +151,17 @@ export function ClockOutContent({
       </GroupedSection>
 
       <View style={styles.footerBlock}>
+        {error ? (
+          <Text
+            size="xs"
+            style={[styles.errorText, { color: tokens.danger }]}
+            text={error}
+            weight="medium"
+          />
+        ) : null}
         <View style={styles.footerActions}>
           <AppButton
+            isLoading={isFinishing}
             label="Confirm clock out"
             onPress={() => {
               void onFinish()
@@ -156,7 +169,12 @@ export function ClockOutContent({
             pressHaptic="none"
             variant="danger"
           />
-          <AppButton label="Keep working" onPress={onKeepWorking} variant="secondary" />
+          <AppButton
+            disabled={isFinishing}
+            label="Keep working"
+            onPress={onKeepWorking}
+            variant="secondary"
+          />
         </View>
       </View>
     </View>
@@ -180,6 +198,9 @@ const styles = StyleSheet.create({
   content: {
     gap: 20,
     padding: 20,
+  },
+  errorText: {
+    textAlign: "center",
   },
   footerActions: {
     alignSelf: "stretch",

@@ -18,7 +18,7 @@ export interface QueuedPunch {
 
 const QUEUE_KEY = "vesta.clock-queue"
 
-const ENDPOINT: Record<ClockPunchAction, string> = {
+export const ENDPOINT: Record<ClockPunchAction, string> = {
   "clock-in": "/employee/timer/clock-in",
   "clock-out": "/employee/timer/clock-out",
   "break-start": "/employee/timer/break/start",
@@ -47,20 +47,35 @@ export function isOfflineFailure(res: { ok: boolean; status?: number | null }): 
   return !res.ok && res.status == null
 }
 
+// Serialises concurrent flushes. getClockSession and sendPunch can both trigger
+// a flush at the same time; without this lock they'd each read the queue and
+// replay the same punches, double-posting them on reconnect.
+let inFlightFlush: Promise<boolean> | null = null
+
 /**
  * Replays queued punches in order. Stops at the first offline failure (keeping
  * the tail for later); drops a punch the server rejects (4xx/5xx) since retrying
  * it can never succeed. Returns true when the queue is fully drained.
+ *
+ * Concurrent calls share a single in-flight replay (no double-posting).
  */
 export async function flushClockQueue(http: HttpClient): Promise<boolean> {
-  let queue = loadClockQueue()
-  while (queue.length > 0) {
-    const next = queue[0]
-    const res = await http.post(ENDPOINT[next.action], next.body)
-    if (isOfflineFailure(res)) return false
-    // ok → synced; server reject → unrecoverable, drop it. Either way, advance.
-    queue = queue.slice(1)
-    setClockQueue(queue)
+  if (inFlightFlush) return inFlightFlush
+  inFlightFlush = (async () => {
+    let queue = loadClockQueue()
+    while (queue.length > 0) {
+      const next = queue[0]
+      const res = await http.post(ENDPOINT[next.action], next.body)
+      if (isOfflineFailure(res)) return false
+      // ok → synced; server reject → unrecoverable, drop it. Either way, advance.
+      queue = queue.slice(1)
+      setClockQueue(queue)
+    }
+    return true
+  })()
+  try {
+    return await inFlightFlush
+  } finally {
+    inFlightFlush = null
   }
-  return true
 }

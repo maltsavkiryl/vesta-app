@@ -44,6 +44,8 @@ export function ClockOutScreen() {
         <ClockOutCelebration data={screen.celebration} onDone={screen.handleDismiss} />
       ) : (
         <ClockOutContent
+          error={screen.error}
+          isFinishing={screen.isFinishing}
           onFinish={screen.handleFinish}
           onKeepWorking={router.back}
           summary={screen.summary}

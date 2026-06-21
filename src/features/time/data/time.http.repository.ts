@@ -26,6 +26,7 @@ import { load, remove, save } from "@/utils/storage"
 
 import type { EmployeePunchBody, TimeEntryDto, TimeEntryResultDto } from "./time.dto"
 import {
+  ENDPOINT,
   enqueuePunch,
   flushClockQueue,
   hasQueuedPunches,
@@ -82,16 +83,14 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
     action: ClockPunchAction,
     body: EmployeePunchBody,
   ): Promise<"ok" | "queued" | "rejected"> {
-    await flushClockQueue(http)
-    const res = await http.post(
-      {
-        "clock-in": "/employee/timer/clock-in",
-        "clock-out": "/employee/timer/clock-out",
-        "break-start": "/employee/timer/break/start",
-        "break-end": "/employee/timer/break/end",
-      }[action],
-      body,
-    )
+    const drained = await flushClockQueue(http)
+    // If older punches are still queued (offline / partial drain), this newer
+    // punch must go behind them to preserve order — never post it ahead.
+    if (!drained || hasQueuedPunches()) {
+      enqueuePunch({ action, body })
+      return "queued"
+    }
+    const res = await http.post(ENDPOINT[action], body)
     if (res.ok) return "ok"
     if (isOfflineFailure(res)) {
       enqueuePunch({ action, body })
@@ -223,7 +222,10 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
           employerId: meta.establishmentUniqueCode,
           venueName: meta.context.venueName,
           venueAddress: meta.context.venueAddress,
-          id: `pending-${occurredAtUtc}`,
+          // Sanitise the timestamp (drop ':'/'.') so the id is safe as a route
+          // param; this entry isn't in the synced history yet, so the detail
+          // screen treats an unknown id as a pending/not-yet-synced entry.
+          id: `pending-${occurredAtUtc.replace(/[:.]/g, "-")}`,
           date: occurredAtUtc.slice(0, 10),
           shiftLabel: "Clocked shift",
           clockInAt: meta.optimistic?.startedAt ?? occurredAtUtc,
