@@ -13,7 +13,6 @@ import { AppProvider } from "@/providers/app-provider"
 import { MotionProvider } from "@/providers/motion-provider"
 import { appQueryKeys, createAppQueryClient } from "@/services/app/app.queries"
 import { queryPersister } from "@/services/app/query.persister"
-import { useClockLiveActivitySync } from "@/services/liveActivity/useClockLiveActivitySync"
 import { usePushRegistration } from "@/services/notifications/usePushRegistration"
 import { useShiftReminders } from "@/services/notifications/useShiftReminders"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
@@ -37,11 +36,14 @@ const queryClient = createAppQueryClient()
  * Headless component that wires up push-notification registration + deep-link
  * routing and local shift reminders for the signed-in user. Rendered inside
  * AppProvider so it can read the session; renders nothing.
+ *
+ * Note: the clock Live Activity is synced by AppProvider's own effect — we must
+ * not also sync it here, or two starts race and iOS throws "Maximum number of
+ * activities for target already exists".
  */
 function PushRegistration() {
   usePushRegistration()
   useShiftReminders()
-  useClockLiveActivitySync()
   return null
 }
 
