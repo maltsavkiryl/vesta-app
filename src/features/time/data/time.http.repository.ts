@@ -5,11 +5,12 @@
  *  - GET  /employee/timer/entries?from&to                      history
  *  - POST /employee/timer/clock-in | clock-out | break/start | break/end
  *
- * The lean API returns clock state + durations only, so the rich UI context
- * (venue, the current break's start) is kept in a small local "clock meta"
- * record that the in-app punch actions maintain. There is no offline queue yet:
- * the backend records punches at server time (no client timestamp), so replaying
- * queued punches would record the wrong time — that needs a backend change first.
+ * Two cross-cutting concerns the lean API can't carry on its own:
+ *  1. Rich UI context (venue, the current break's start) — held in a small local
+ *     "clock-meta" record (MMKV) maintained by the in-app punch actions.
+ *  2. Offline resilience — every punch captures its real occurredAt; if it can't
+ *     reach the server it's queued (time.offlineQueue) and the UI falls back to an
+ *     optimistic local session until the queue drains on reconnect.
  */
 import { addLocalDays, getLocalToday } from "@/core/date"
 import type { ClockSession, TimeEntry } from "@/core/models"
@@ -24,7 +25,20 @@ import { failure, success, type Result } from "@/shared/result"
 import { load, remove, save } from "@/utils/storage"
 
 import type { EmployeePunchBody, TimeEntryDto, TimeEntryResultDto } from "./time.dto"
-import { idleClockSession, toClockSession, toTimeEntries, type ClockMeta } from "./time.transformer"
+import {
+  enqueuePunch,
+  flushClockQueue,
+  hasQueuedPunches,
+  isOfflineFailure,
+  type ClockPunchAction,
+} from "./time.offlineQueue"
+import {
+  idleClockSession,
+  optimisticClockSession,
+  toClockSession,
+  toTimeEntries,
+  type ClockMeta,
+} from "./time.transformer"
 
 const CLOCK_META_KEY = "vesta.clock-meta"
 const HISTORY_PAST_DAYS = 90
@@ -43,31 +57,68 @@ function toClockError(type: ClockError["type"], message: string): ClockError {
   return { type, message }
 }
 
+function secondsBetween(fromIso: string | undefined, toIso: string): number {
+  if (!fromIso) return 0
+  return Math.max(Math.floor((new Date(toIso).getTime() - new Date(fromIso).getTime()) / 1000), 0)
+}
+
 export function createTimeHttpRepository(http: HttpClient): TimeRepository {
   function punchBody(
     establishmentUniqueCode: string,
+    occurredAtUtc: string,
     input?: ClockCommandInput,
   ): EmployeePunchBody {
     return {
       establishmentUniqueCode,
       lat: input?.location?.latitude,
       lng: input?.location?.longitude,
+      occurredAtUtc,
     }
+  }
+
+  // Sends a punch; on offline failure queues it and returns "queued" so callers
+  // can fall back to optimistic local state. Server rejections surface as errors.
+  async function sendPunch(
+    action: ClockPunchAction,
+    body: EmployeePunchBody,
+  ): Promise<"ok" | "queued" | "rejected"> {
+    await flushClockQueue(http)
+    const res = await http.post(
+      {
+        "clock-in": "/employee/timer/clock-in",
+        "clock-out": "/employee/timer/clock-out",
+        "break-start": "/employee/timer/break/start",
+        "break-end": "/employee/timer/break/end",
+      }[action],
+      body,
+    )
+    if (res.ok) return "ok"
+    if (isOfflineFailure(res)) {
+      enqueuePunch({ action, body })
+      return "queued"
+    }
+    return "rejected"
   }
 
   async function getClockSession(): Promise<ClockSession> {
     const meta = loadClockMeta()
     if (!meta) return idleClockSession()
 
+    const drained = await flushClockQueue(http)
+    // Still offline with pending punches → trust the optimistic local session.
+    if (!drained || hasQueuedPunches()) return optimisticClockSession(meta)
+
     const res = await http.get<TimeEntryDto>("/employee/timer/current", {
       establishmentUniqueCode: meta.establishmentUniqueCode,
     })
-    // 404 → no open entry server-side; drop the stale local meta.
     if (!res.ok || !res.data) {
+      // 404 → no open entry server-side; drop the stale local meta.
       if (res.status === 404) clearClockMeta()
-      return idleClockSession()
+      return res.status === 404 ? idleClockSession() : optimisticClockSession(meta)
     }
-    return toClockSession(res.data, meta)
+    const session = toClockSession(res.data, meta)
+    if (session.state === "idle") clearClockMeta()
+    return session
   }
 
   async function getTimeEntries(): Promise<TimeEntry[]> {
@@ -88,7 +139,9 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
       return entries.find((entry) => entry.id === entryId) ?? null
     },
     async getTimeOverview(): Promise<TimeOverview> {
-      const [clockSession, timeEntries] = await Promise.all([getClockSession(), getTimeEntries()])
+      const clockSession = await getClockSession()
+      // History needs the network; return what we have offline rather than throw.
+      const timeEntries = hasQueuedPunches() ? [] : await getTimeEntries().catch(() => [])
       return { clockSession, timeEntries }
     },
     async clockIn(_accountId, input) {
@@ -96,47 +149,92 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
       if (!input?.clockContext || !establishment) {
         return failure(toClockError("no-clock-context", "Choose a workplace before starting."))
       }
-      const res = await http.post("/employee/timer/clock-in", punchBody(establishment, input))
-      if (!res.ok) {
+      const occurredAtUtc = new Date().toISOString()
+      const outcome = await sendPunch("clock-in", punchBody(establishment, occurredAtUtc, input))
+      if (outcome === "rejected") {
         return failure(toClockError("already-clocked-in", "Could not start the timer."))
       }
-      saveClockMeta({ establishmentUniqueCode: establishment, context: input.clockContext })
+      saveClockMeta({
+        establishmentUniqueCode: establishment,
+        context: input.clockContext,
+        optimistic: { state: "working", startedAt: occurredAtUtc, accumulatedBreakSeconds: 0 },
+      })
       return success(await getClockSession())
     },
     async startBreak(_accountId, input) {
       const meta = loadClockMeta()
       if (!meta) return failure(toClockError("not-clocked-in", "There is no active clock session."))
-      const res = await http.post(
-        "/employee/timer/break/start",
-        punchBody(meta.establishmentUniqueCode, input),
+      const occurredAtUtc = new Date().toISOString()
+      const outcome = await sendPunch(
+        "break-start",
+        punchBody(meta.establishmentUniqueCode, occurredAtUtc, input),
       )
-      if (!res.ok) return failure(toClockError("break-invalid", "Could not start a break."))
-      saveClockMeta({ ...meta, breakStartedAt: new Date().toISOString() })
+      if (outcome === "rejected")
+        return failure(toClockError("break-invalid", "Could not start a break."))
+      saveClockMeta({
+        ...meta,
+        breakStartedAt: occurredAtUtc,
+        optimistic: meta.optimistic ? { ...meta.optimistic, state: "onBreak" } : undefined,
+      })
       return success(await getClockSession())
     },
     async endBreak(_accountId, input) {
       const meta = loadClockMeta()
       if (!meta) return failure(toClockError("not-clocked-in", "There is no active clock session."))
-      const res = await http.post(
-        "/employee/timer/break/end",
-        punchBody(meta.establishmentUniqueCode, input),
+      const occurredAtUtc = new Date().toISOString()
+      const outcome = await sendPunch(
+        "break-end",
+        punchBody(meta.establishmentUniqueCode, occurredAtUtc, input),
       )
-      if (!res.ok) return failure(toClockError("break-invalid", "Could not end the break."))
-      saveClockMeta({ ...meta, breakStartedAt: undefined })
+      if (outcome === "rejected")
+        return failure(toClockError("break-invalid", "Could not end the break."))
+      saveClockMeta({
+        ...meta,
+        breakStartedAt: undefined,
+        optimistic: meta.optimistic
+          ? {
+              ...meta.optimistic,
+              state: "working",
+              accumulatedBreakSeconds:
+                meta.optimistic.accumulatedBreakSeconds +
+                secondsBetween(meta.breakStartedAt, occurredAtUtc),
+            }
+          : undefined,
+      })
       return success(await getClockSession())
     },
     async clockOut(_accountId, input): Promise<Result<TimeEntry, ClockError>> {
       const meta = loadClockMeta()
       if (!meta) return failure(toClockError("not-clocked-in", "There is no active clock session."))
-      const res = await http.post(
-        "/employee/timer/clock-out",
-        punchBody(meta.establishmentUniqueCode, input),
+      const occurredAtUtc = new Date().toISOString()
+      const outcome = await sendPunch(
+        "clock-out",
+        punchBody(meta.establishmentUniqueCode, occurredAtUtc, input),
       )
-      if (!res.ok) return failure(toClockError("not-clocked-in", "Could not clock out."))
+      if (outcome === "rejected")
+        return failure(toClockError("not-clocked-in", "Could not clock out."))
       clearClockMeta()
-      const entries = await getTimeEntries()
+      // History may be unavailable offline; the punch is queued and will sync.
+      const entries = await getTimeEntries().catch(() => [])
       const latest = entries[0]
-      if (!latest) return failure(toClockError("not-found", "Clocked out, but no entry was found."))
+      if (!latest) {
+        return success({
+          source: input?.clockContext?.source ?? "employer",
+          employerId: meta.establishmentUniqueCode,
+          venueName: meta.context.venueName,
+          venueAddress: meta.context.venueAddress,
+          id: `pending-${occurredAtUtc}`,
+          date: occurredAtUtc.slice(0, 10),
+          shiftLabel: "Clocked shift",
+          clockInAt: meta.optimistic?.startedAt ?? occurredAtUtc,
+          clockOutAt: occurredAtUtc,
+          grossSeconds: 0,
+          workedSeconds: 0,
+          breakSeconds: 0,
+          status: "review",
+          events: [],
+        })
+      }
       return success(latest)
     },
   }

@@ -8,6 +8,16 @@ export interface ClockMeta {
   establishmentUniqueCode: string
   context: ClockSessionContext
   breakStartedAt?: string
+  /**
+   * Optimistic local session, set while punches are queued offline. When present
+   * (and the queue is non-empty) the UI renders this instead of the server entry,
+   * so clocking in/out works without a connection.
+   */
+  optimistic?: {
+    state: Exclude<ClockState, "idle">
+    startedAt: string
+    accumulatedBreakSeconds: number
+  }
 }
 
 /** Parses a .NET TimeSpan ("HH:MM:SS" or "d.HH:MM:SS[.fff]") into seconds. */
@@ -40,6 +50,19 @@ export function idleClockSession(): ClockSession {
     ...emptyContext(),
     state: "idle",
     accumulatedBreakSeconds: 0,
+    events: [],
+  }
+}
+
+/** Builds the clock session from optimistic local meta (used while offline). */
+export function optimisticClockSession(meta: ClockMeta): ClockSession {
+  if (!meta.optimistic) return idleClockSession()
+  return {
+    ...meta.context,
+    state: meta.optimistic.state,
+    startedAt: meta.optimistic.startedAt,
+    breakStartedAt: meta.optimistic.state === "onBreak" ? meta.breakStartedAt : undefined,
+    accumulatedBreakSeconds: meta.optimistic.accumulatedBreakSeconds,
     events: [],
   }
 }
