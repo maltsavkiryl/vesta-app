@@ -51,7 +51,7 @@ import {
   setSession,
 } from "@/services/app/app.store"
 import { createSeededAccountRecord } from "@/services/app/app.transformer"
-import { failure, success } from "@/shared/result"
+import { failure, success, type Result } from "@/shared/result"
 
 function buildSessionForAccount(accountId: string | null): AppSession {
   const session = getSession()
@@ -256,6 +256,29 @@ function createMockAuthRepository(): AuthRepository {
         accountId: account.id,
         signedInAt: new Date().toISOString(),
       })
+      return success<SignInResult>({
+        kind: "signed-in",
+        session: buildSessionForAccount(account.id),
+      })
+    },
+    async signInWithGoogle() {
+      if (!Config.DEMO_AUTH_ENABLED) {
+        return failure<AuthError>({
+          type: "demo-disabled",
+          message: "Online sign-in isn't available yet.",
+        })
+      }
+      // Demo/mock has no real Google federation — sign in the demo employee so
+      // the social button works end-to-end in mock mode.
+      const db = ensureDb()
+      const account = db.accounts[0]
+      if (!account) {
+        return failure<AuthError>({
+          type: "account-not-found",
+          message: "No demo account is available.",
+        })
+      }
+      setSession({ accountId: account.id, signedInAt: new Date().toISOString() })
       return success<SignInResult>({
         kind: "signed-in",
         session: buildSessionForAccount(account.id),
@@ -585,26 +608,33 @@ function createMockHomeRepository(): HomeRepository {
 }
 
 function createApiRepositories() {
+  // Maps an auth-service outcome to a repository SignInResult, establishing the
+  // local session for the signed-in case. Shared by email/Entra and Google.
+  async function finishSignIn(
+    result: Awaited<ReturnType<typeof authService.signIn>>,
+  ): Promise<Result<SignInResult, AuthError>> {
+    if (!result.ok) return result
+    // Multi-employer identities must pick an employer before a session exists.
+    if (result.data.kind === "select-employer") {
+      return success<SignInResult>({ kind: "select-employer", employers: result.data.employers })
+    }
+    ensureSeededAccount(result.data.accountId)
+    setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
+    // First-run onboarding is local app state, not the backend payroll-profile
+    // completeness (which the lightweight wizard cannot satisfy).
+    return success<SignInResult>({
+      kind: "signed-in",
+      session: buildSessionForAccount(result.data.accountId),
+    })
+  }
+
   return {
     auth: {
       async signIn() {
-        const result = await authService.signIn()
-        if (!result.ok) return result
-        // Multi-employer identities must pick an employer before a session exists.
-        if (result.data.kind === "select-employer") {
-          return success<SignInResult>({
-            kind: "select-employer",
-            employers: result.data.employers,
-          })
-        }
-        ensureSeededAccount(result.data.accountId)
-        setSession({ accountId: result.data.accountId, signedInAt: new Date().toISOString() })
-        // First-run onboarding is local app state, not the backend payroll-profile
-        // completeness (which the lightweight wizard cannot satisfy).
-        return success<SignInResult>({
-          kind: "signed-in",
-          session: buildSessionForAccount(result.data.accountId),
-        })
+        return finishSignIn(await authService.signIn())
+      },
+      async signInWithGoogle() {
+        return finishSignIn(await authService.signIn({ domainHint: "google.com" }))
       },
       getPendingEmployers(): PendingEmployer[] {
         return authService.getPendingEmployers()

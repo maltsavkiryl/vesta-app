@@ -8,7 +8,12 @@ import {
 import type { AuthError } from "@/features/auth/data/auth.errors"
 import { failure, success, type Result } from "@/shared/result"
 
-import { acquireIdToken, refreshIdToken, signOutIdentity } from "./identityProvider"
+import {
+  acquireIdToken,
+  refreshIdToken,
+  signOutIdentity,
+  type AcquireIdTokenOptions,
+} from "./identityProvider"
 import { tokenStore } from "./tokenStore"
 
 let currentAccountId: string | null = null
@@ -86,8 +91,8 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
   }
 
   return {
-    async signIn(): Promise<Result<AuthSignInOutcome, AuthError>> {
-      const idToken = await acquireIdToken()
+    async signIn(options?: AcquireIdTokenOptions): Promise<Result<AuthSignInOutcome, AuthError>> {
+      const idToken = await acquireIdToken(options)
       return exchange(idToken)
     },
     getPendingEmployers(): AuthPendingEmployer[] {

@@ -28,7 +28,16 @@ function redirectUri(): string {
   return AuthSession.makeRedirectUri({ scheme: "vesta" })
 }
 
-export async function acquireIdToken(): Promise<string> {
+export interface AcquireIdTokenOptions {
+  /**
+   * Pre-selects a federated identity provider in the Entra (CIAM) sign-in flow,
+   * e.g. "google.com". Requires that provider to be configured as a social
+   * identity provider on the tenant; without it Entra shows its normal chooser.
+   */
+  domainHint?: string
+}
+
+export async function acquireIdToken(options?: AcquireIdTokenOptions): Promise<string> {
   if (Config.AUTH.devTokenEnabled) return devToken()
   const d = await discovery()
   const request = new AuthSession.AuthRequest({
@@ -36,6 +45,7 @@ export async function acquireIdToken(): Promise<string> {
     scopes: Config.AUTH.entra.scopes,
     redirectUri: redirectUri(),
     usePKCE: true,
+    ...(options?.domainHint ? { extraParams: { domain_hint: options.domainHint } } : {}),
   })
   const result = await request.promptAsync(d)
   if (result.type !== "success" || !result.params.code) throw new Error("entra-auth-cancelled")

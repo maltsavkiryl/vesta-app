@@ -53,6 +53,8 @@ export interface AuthRepository {
     nextPassword: string,
   ): Promise<Result<{ changedAt: string; email: string }, AuthError>>
   signIn(input: SignInPayload): Promise<Result<SignInResult, AuthError>>
+  /** Signs in via Google (Entra-federated); same outcome shape as signIn. */
+  signInWithGoogle(): Promise<Result<SignInResult, AuthError>>
   /** Completes sign-in for a multi-employer identity once an employer is chosen. */
   selectEmployer(employerUniqueCode: string): Promise<Result<AppSession, AuthError>>
   /** Employers awaiting selection from the most recent multi-employer sign-in. */
