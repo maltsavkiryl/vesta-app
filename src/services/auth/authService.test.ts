@@ -223,6 +223,57 @@ describe("authService", () => {
     expect(tokenStore.getAccessToken()).toBe(jwt)
   })
 
+  it("accepts an invitation, then establishes the session from refreshed memberships", async () => {
+    const jwt = jwtWithExp(1893456000)
+    const tokenPayload = {
+      access_token: jwt,
+      token_type: "Bearer",
+      expires_in: 300,
+      profile_complete: true,
+    }
+    const authApi: any = {
+      post: jest.fn(async (url: string) => {
+        if (url.endsWith("/auth/employee-invitations/accept"))
+          return { ok: true, status: 200, data: tokenPayload }
+        if (url.endsWith("/auth/employees/login"))
+          return {
+            ok: true,
+            status: 200,
+            data: { memberships: [{ employerUniqueCode: "emp-9", employerName: "New Bistro" }] },
+          }
+        if (url.endsWith("/auth/employees/select-employer"))
+          return { ok: true, status: 200, data: tokenPayload }
+        throw new Error("unexpected " + url)
+      }),
+    }
+    const service = createAuthService(authApi)
+
+    const result = await service.acceptInvitation("11111111-1111-1111-1111-111111111111")
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data).toEqual({ kind: "signed-in", accountId: "emp-9", profileComplete: true })
+    }
+    expect(service.getCurrentAccountId()).toBe("emp-9")
+    expect(tokenStore.getAccessToken()).toBe(jwt)
+  })
+
+  it("fails and stores no token when the invitation is invalid or expired", async () => {
+    const authApi: any = {
+      post: jest.fn(async (url: string) => {
+        if (url.endsWith("/auth/employee-invitations/accept"))
+          return { ok: false, status: 404, data: undefined }
+        throw new Error("unexpected " + url)
+      }),
+    }
+    const service = createAuthService(authApi)
+
+    const result = await service.acceptInvitation("bad-token")
+
+    expect(result.ok).toBe(false)
+    expect(tokenStore.getAccessToken()).toBeNull()
+  })
+
   it("signOut clears token and identity", async () => {
     const jwt = jwtWithExp(1893456000)
     const authApi: any = {

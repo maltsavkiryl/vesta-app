@@ -259,6 +259,14 @@ function createMockAuthRepository(): AuthRepository {
         message: "No employer selection is pending.",
       })
     },
+    async acceptInvitation() {
+      // Invitation acceptance is an online identity exchange; the mock/offline
+      // path cannot perform it.
+      return failure<AuthError>({
+        type: "validation",
+        message: "Accepting an invitation requires a network connection.",
+      })
+    },
     async signOut() {
       setSession({ accountId: null })
       return buildSessionForAccount(null)
@@ -600,6 +608,9 @@ function createApiRepositories() {
       },
       async signInWithGoogle() {
         return finishSignIn(await authService.signIn({ domainHint: "google.com" }))
+      },
+      async acceptInvitation(invitationToken: string) {
+        return finishSignIn(await authService.acceptInvitation(invitationToken))
       },
       getPendingEmployers(): PendingEmployer[] {
         return authService.getPendingEmployers()

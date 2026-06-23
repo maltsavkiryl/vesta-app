@@ -108,6 +108,33 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
         })
       return completeSelection(pendingIdToken, employerUniqueCode)
     },
+    // Accepts an employer invitation (from an email / notification deep link).
+    // The accept response is just a scoped token and omits the employer code,
+    // so once the membership exists server-side we re-run the login exchange to
+    // establish the session from the refreshed memberships — a single membership
+    // signs straight in, multiple yields the employer picker. One id token is
+    // reused for both calls.
+    async acceptInvitation(invitationToken: string): Promise<Result<AuthSignInOutcome, AuthError>> {
+      let idToken: string
+      try {
+        idToken = await acquireIdToken()
+      } catch {
+        return failure<AuthError>({
+          type: "invalid-credentials",
+          message: "We couldn't verify your identity. Please try again.",
+        })
+      }
+      const accepted = await authApi.post<AccessTokenResponse>(
+        "/auth/employee-invitations/accept",
+        { invitationToken, idToken },
+      )
+      if (!accepted.ok || !accepted.data)
+        return failure<AuthError>({
+          type: "validation",
+          message: "This invitation is invalid or has expired.",
+        })
+      return exchange(idToken)
+    },
     async loadSession(): Promise<{ accountId: string; profileComplete: boolean } | null> {
       const token = await tokenStore.load()
       if (!token) {
