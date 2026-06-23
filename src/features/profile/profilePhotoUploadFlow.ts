@@ -4,9 +4,7 @@ import { fireHaptic } from "@/utils/haptics"
 
 type ProfilePhotoAction = "camera" | "library" | "cancel"
 
-export type ProfilePhotoSelection =
-  | { kind: "cancelled" }
-  | { kind: "picked"; uri: string }
+export type ProfilePhotoSelection = { kind: "cancelled" } | { kind: "picked"; uri: string }
 
 function promptForProfilePhotoAction() {
   return new Promise<ProfilePhotoAction>((resolve) => {
@@ -84,10 +82,7 @@ export async function selectProfilePhoto(): Promise<ProfilePhotoSelection> {
     }
   } catch {
     fireHaptic("error")
-    Alert.alert(
-      "Photo unavailable",
-      "Rebuild the development app to enable profile photo changes.",
-    )
+    Alert.alert("Photo unavailable", "Rebuild the development app to enable profile photo changes.")
     return { kind: "cancelled" }
   }
 }

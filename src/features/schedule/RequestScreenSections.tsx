@@ -49,17 +49,12 @@ export function RequestSuccessContent({
 
   return (
     <AppScrollScreen
-      contentContainerStyle={{
-        justifyContent: "center",
-        minHeight: "100%",
-        paddingBottom: insets.bottom + 30,
-        paddingHorizontal: 20,
-      }}
+      contentContainerStyle={[styles.successScroll, { paddingBottom: insets.bottom + 30 }]}
       variant="grouped"
     >
       <SuccessState subtitle={successCopy} title="Request submitted" />
-      <View style={{ alignSelf: "stretch", gap: 14, paddingTop: 18 }}>
-        <SurfaceCard style={{ alignSelf: "stretch", gap: 10 }}>
+      <View style={styles.successBody}>
+        <SurfaceCard style={styles.successCard}>
           <Text
             size="xxs"
             style={{ color: tokens.textSecondary }}
@@ -138,7 +133,7 @@ export function RequestTargetSection({
             />
           )
         ) : requestDates.length > 0 ? (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          <View style={styles.chipWrap}>
             {requestDates.map((date) => (
               <SelectionChip
                 key={date}
@@ -176,7 +171,7 @@ export function RequestReasonSection({
   return (
     <GroupedSection bodyStyle={sectionBodyStyle} title={title}>
       <View style={groupBodyStyle}>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        <View style={styles.chipWrap}>
           {options.map((option) => {
             const selected = option === reason
             return (
@@ -208,8 +203,8 @@ export function RequestNoteSection({
       <View style={groupBodyStyle}>
         <TextField
           caption="Optional context shown with your request."
-          containerStyle={{ minHeight: 146 }}
-          inputStyle={{ fontSize: 15, minHeight: 96, paddingTop: 2 }}
+          containerStyle={styles.noteContainer}
+          inputStyle={styles.noteInput}
           multiline
           numberOfLines={4}
           onChangeText={setNote}
@@ -226,6 +221,19 @@ export function RequestNoteSection({
 const groupBodyStyle = { gap: 14 } as const
 
 const styles = StyleSheet.create({
+  chipWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  noteContainer: {
+    minHeight: 146,
+  },
+  noteInput: {
+    fontSize: 15,
+    minHeight: 96,
+    paddingTop: 2,
+  },
   shiftListCard: {
     gap: 0,
     overflow: "hidden",
@@ -233,6 +241,20 @@ const styles = StyleSheet.create({
   },
   shiftRow: {
     minHeight: 74,
+  },
+  successBody: {
+    alignSelf: "stretch",
+    gap: 14,
+    paddingTop: 18,
+  },
+  successCard: {
+    alignSelf: "stretch",
+    gap: 10,
+  },
+  successScroll: {
+    justifyContent: "center",
+    minHeight: "100%",
+    paddingHorizontal: 20,
   },
 })
 

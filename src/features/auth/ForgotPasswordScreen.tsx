@@ -103,12 +103,12 @@ export function ForgotPasswordScreen() {
               text={email}
               size="xs"
               weight="semiBold"
-              style={{ color: AUTH_SCREEN_PALETTE.panelText, textAlign: "center" }}
+              style={[styles.centerText, { color: AUTH_SCREEN_PALETTE.panelText }]}
             />
             <Text
               text="Use your new password the next time you sign in."
               size="xxs"
-              style={{ color: AUTH_SCREEN_PALETTE.panelMuted, textAlign: "center" }}
+              style={[styles.centerText, { color: AUTH_SCREEN_PALETTE.panelMuted }]}
             />
           </View>
           <Button
@@ -179,7 +179,10 @@ export function ForgotPasswordScreen() {
                     accessibilityLabel={showPassword ? "Hide password" : "Show password"}
                     icon={showPassword ? "eye-off-outline" : "eye-outline"}
                     onPress={() => setShowPassword((current) => !current)}
-                    style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}
+                    style={[
+                      styles.clearButton,
+                      { backgroundColor: AUTH_SCREEN_PALETTE.clearButton },
+                    ]}
                   />
                 }
               />
@@ -224,6 +227,9 @@ export function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
+  centerText: {
+    textAlign: "center",
+  },
   clearButton: {
     alignItems: "center",
     borderRadius: 10,
@@ -236,7 +242,7 @@ const styles = StyleSheet.create({
   },
   successBadge: {
     alignItems: "center",
-    backgroundColor: "rgba(60, 110, 220, 0.18)",
+    backgroundColor: AUTH_SCREEN_PALETTE.badgeTint,
     borderColor: AUTH_SCREEN_PALETTE.panelBorder,
     borderRadius: 999,
     borderWidth: 1,

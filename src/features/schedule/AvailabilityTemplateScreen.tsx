@@ -1,24 +1,23 @@
 import { StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 
 import type { AvailabilityWeekday } from "@/core/models"
+import { usePlanningAvailabilityQuery } from "@/features/planning/data/planning.queries"
 import { getFallbackAvailabilityTemplate } from "@/features/schedule/availability-template.utils"
 import {
   AvailabilityTemplateIntro,
   AvailabilityTemplateWeekdaySection,
 } from "@/features/schedule/AvailabilityTemplateSections"
-import { usePlanningAvailabilityQuery } from "@/features/planning/data/planning.queries"
+import { translate } from "@/i18n/translate"
 import { AppScrollScreen, EmptyState, Skeleton, SurfaceCard, useDesignTokens } from "@/ui"
 import { MotionView } from "@/ui/composites/app-motion"
-import { Ionicons } from "@expo/vector-icons"
-import { translate } from "@/i18n/translate"
 
 function AvailabilityTemplateSkeleton() {
-  const tokens = useDesignTokens()
   return (
     <SurfaceCard style={styles.skeletonCard}>
       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-        <View key={i} style={[styles.skeletonRow, { gap: 12 }]}>
+        <View key={i} style={styles.skeletonRow}>
           <Skeleton height={14} width={14} radius={999} />
           <View style={styles.skeletonText}>
             <Skeleton height={12} width={100} radius={6} />
@@ -100,6 +99,7 @@ const styles = StyleSheet.create({
   skeletonRow: {
     alignItems: "center",
     flexDirection: "row",
+    gap: 12,
     minHeight: 72,
     paddingVertical: 10,
   },

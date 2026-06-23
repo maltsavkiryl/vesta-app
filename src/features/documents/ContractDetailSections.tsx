@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, TextInput, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import type { DocumentContract } from "@/features/documents/data/documents.repository"
+import { translate } from "@/i18n/translate"
 import { Banner, Text, appTypography, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
-import { translate } from "@/i18n/translate"
 
 import { shareContractPdf } from "./documentShare"
 
@@ -34,22 +34,11 @@ export function ContractDetailHero({
   )
 }
 
-export function ContractPreview({
-  body,
-  mode,
-}: {
-  body: string
-  mode: "sign" | "view"
-}) {
+export function ContractPreview({ body, mode }: { body: string; mode: "sign" | "view" }) {
   const tokens = useDesignTokens()
 
   return (
-    <View
-      style={[
-        styles.preview,
-        { backgroundColor: tokens.surface, ...tokens.elevation1 },
-      ]}
-    >
+    <View style={[styles.preview, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
       <Text
         text={body}
         size="xxs"
@@ -96,11 +85,7 @@ export function ContractSignatureSection({
         value={signature}
       />
       <Banner tone="warning">
-        <Text
-          tx="documents:signatureDisclaimer"
-          size="xxs"
-          style={{ color: tokens.warning }}
-        />
+        <Text tx="documents:signatureDisclaimer" size="xxs" style={{ color: tokens.warning }} />
       </Banner>
     </>
   )

@@ -11,6 +11,7 @@ import {
   timeValueToDate,
   type AvailabilityTimeField,
 } from "@/features/schedule/availability.utils"
+import { translate } from "@/i18n/translate"
 import {
   DetailRow,
   GroupedSection,
@@ -21,7 +22,6 @@ import {
   useDesignTokens,
 } from "@/ui"
 import { MotionView } from "@/ui/composites/app-motion"
-import { translate } from "@/i18n/translate"
 
 const availabilityStatusIcons: Record<AvailabilityStatus, keyof typeof Ionicons.glyphMap> = {
   available: "checkmark-circle-outline",

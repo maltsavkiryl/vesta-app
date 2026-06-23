@@ -1,16 +1,10 @@
 import { useRef } from "react"
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native"
-import Animated from "react-native-reanimated"
+import { Pressable, StyleSheet, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import { Text, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
-import { translate } from "@/i18n/translate"
 
 import { normalizeEmployerInviteCode } from "./employerInviteCode"
 
@@ -76,11 +70,7 @@ export function EmployerInviteCodeEntry({
         value={code}
       />
 
-      <Text
-        text={helperText}
-        size="xxs"
-        style={[styles.helperText, { color: tokens.textMuted }]}
-      />
+      <Text text={helperText} size="xxs" style={[styles.helperText, { color: tokens.textMuted }]} />
 
       <Animated.View style={animatedStyle}>
         <Pressable

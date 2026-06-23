@@ -8,7 +8,12 @@ function ProfileAvatar({ avatarUri, initials }: { avatarUri?: string; initials: 
 
   return (
     <View style={[styles.avatarFrame, { backgroundColor: tokens.surface }]}>
-      <View style={[styles.avatar, { backgroundColor: avatarUri ? tokens.surface : tokens.textPrimary }]}>
+      <View
+        style={[
+          styles.avatar,
+          { backgroundColor: avatarUri ? tokens.surface : tokens.textPrimary },
+        ]}
+      >
         {avatarUri ? (
           <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
         ) : (
@@ -75,8 +80,8 @@ const styles = StyleSheet.create({
     width: 24,
   },
   avatarFrame: {
-    alignSelf: "center",
     alignItems: "center",
+    alignSelf: "center",
     borderRadius: 40,
     height: 80,
     justifyContent: "center",

@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import type { NotificationItem, NotificationKind } from "@/core/models"
 import type { TxKeyPath } from "@/i18n"
-import { Text, useDesignTokens } from "@/ui"
 import type { DesignTokens } from "@/ui"
+import { Text, useDesignTokens } from "@/ui"
 import { MotionPressable } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
@@ -40,12 +40,7 @@ export function NotificationsEmptyState() {
 
   return (
     <View style={styles.emptyState}>
-      <View
-        style={[
-          styles.emptyIcon,
-          { backgroundColor: tokens.surface, ...tokens.elevation1 },
-        ]}
-      >
+      <View style={[styles.emptyIcon, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
         <Ionicons color={tokens.textMuted} name="notifications-outline" size={30} />
       </View>
       <Text
@@ -264,12 +259,7 @@ function NotificationGroup({
         weight="semiBold"
         style={[styles.groupLabel, { color: tokens.textMuted }]}
       />
-      <View
-        style={[
-          styles.groupCard,
-          { backgroundColor: tokens.surface, ...tokens.elevation1 },
-        ]}
-      >
+      <View style={[styles.groupCard, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
         {items.map((item) => (
           <NotificationRowItem
             key={item.id}

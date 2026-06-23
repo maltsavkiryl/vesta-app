@@ -9,7 +9,9 @@ describe("getProfileSetupStatus", () => {
     expect(status.progress).toBe(35)
     expect(status.title).toBe("Account setup")
     expect(status.remainingCount).toBe(4)
-    expect(status.detail).toBe("Add your phone number so employers can reach you quickly about shifts.")
+    expect(status.detail).toBe(
+      "Add your phone number so employers can reach you quickly about shifts.",
+    )
   })
 
   it("marks the profile ready when all required setup details are present", () => {

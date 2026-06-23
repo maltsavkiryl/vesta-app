@@ -31,10 +31,7 @@ export function AuthTextField({
     <TextField
       accessibilityLabel={props.accessibilityLabel ?? label}
       autoCorrect={false}
-      containerStyle={[
-        hasVisibleLabel ? styles.labeledField : styles.bareField,
-        containerStyle,
-      ]}
+      containerStyle={[hasVisibleLabel ? styles.labeledField : styles.bareField, containerStyle]}
       inputStyle={[hasVisibleLabel ? styles.labeledInput : styles.bareInput, style]}
       label={hasVisibleLabel ? label : undefined}
       labelCase={labelCase}

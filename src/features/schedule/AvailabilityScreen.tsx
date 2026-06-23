@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react"
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { AppButton, AppScrollScreen, TextField, useDesignTokens } from "@/ui"
 import { useToast } from "@/ui/feedback"
-import { translate } from "@/i18n/translate"
 
 import {
   AvailabilityHoursSection,

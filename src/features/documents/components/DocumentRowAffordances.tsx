@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-import { Text, useDesignTokens } from "@/ui"
+import { Text } from "@/ui"
 
 type DocumentStatusIconProps = {
   backgroundColor: string
@@ -47,7 +47,12 @@ export function DocumentRowTail({
       ) : null}
       {isMissing ? (
         <View style={[styles.inlineAction, { backgroundColor: accent }]}>
-          <Text text={actionLabel} size="xxs" weight="semiBold" style={{ color: accentForeground }} />
+          <Text
+            text={actionLabel}
+            size="xxs"
+            weight="semiBold"
+            style={{ color: accentForeground }}
+          />
         </View>
       ) : (
         <Ionicons color={textSecondary} name="chevron-forward" size={15} />

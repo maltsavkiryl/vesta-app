@@ -2,11 +2,11 @@ import { useCallback, useState } from "react"
 import { useFocusEffect } from "@react-navigation/native"
 
 import type { Employer } from "@/core/models"
-import { consumePendingEmployerInviteCode } from "@/features/employers/employerQrScanSession"
 import {
   findEmployerByInviteCode,
   normalizeEmployerInviteCode,
 } from "@/features/employers/employerInviteCode"
+import { consumePendingEmployerInviteCode } from "@/features/employers/employerQrScanSession"
 import { fireHaptic } from "@/utils/haptics"
 
 import type { JoinMode, SectionKey } from "./profileSections"

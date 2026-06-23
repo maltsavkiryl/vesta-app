@@ -49,7 +49,7 @@ export function buildProfileOverviewSections({
     state.employers.length === 0
       ? "Link your first workplace"
       : state.employers.length === 1
-        ? state.employers[0]?.name ?? "1 linked"
+        ? (state.employers[0]?.name ?? "1 linked")
         : `${state.employers.length} linked`
   const contactSummary = state.profile.phone || "Add phone number"
   const addressSummary =

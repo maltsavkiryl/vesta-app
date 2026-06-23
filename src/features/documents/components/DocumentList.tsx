@@ -1,21 +1,16 @@
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import type { DocumentItem } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { Banner, Text, appLayout, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
-import { translate } from "@/i18n/translate"
-
 import { getDocumentStatusConfig, shouldShowDocumentRowStatus } from "../documents.status"
-import type { Contract, Payslip } from "../documents.types"
+import type { Payslip } from "../documents.types"
 import { DocumentContractCard } from "./DocumentContractCard"
-import {
-  DocumentRowTail,
-  DocumentStatusIcon,
-  PayslipSummary,
-} from "./DocumentRowAffordances"
+import { DocumentRowTail, DocumentStatusIcon, PayslipSummary } from "./DocumentRowAffordances"
 
 export function AttentionBanner({ count, onPress }: { count: number; onPress: () => void }) {
   const tokens = useDesignTokens()
@@ -41,7 +36,6 @@ export function AttentionBanner({ count, onPress }: { count: number; onPress: ()
 
 export function RequiredDocumentRow({
   document,
-  index = 0,
   onPress,
 }: {
   document: DocumentItem
@@ -55,9 +49,7 @@ export function RequiredDocumentRow({
   const { animatedStyle, pressHandlers } = usePressScale({})
 
   return (
-    <Animated.View
-      style={[styles.documentRowElevation, { ...tokens.elevation1 }, animatedStyle]}
-    >
+    <Animated.View style={[styles.documentRowElevation, { ...tokens.elevation1 }, animatedStyle]}>
       <Pressable
         accessibilityRole="button"
         onPress={onPress}
@@ -95,7 +87,6 @@ export function RequiredDocumentRow({
 }
 
 export function PayslipRow({
-  index = 0,
   onPress,
   payslip,
 }: {
@@ -107,9 +98,7 @@ export function PayslipRow({
   const { animatedStyle, pressHandlers } = usePressScale({})
 
   return (
-    <Animated.View
-      style={[styles.documentRowElevation, { ...tokens.elevation1 }, animatedStyle]}
-    >
+    <Animated.View style={[styles.documentRowElevation, { ...tokens.elevation1 }, animatedStyle]}>
       <Pressable
         accessibilityRole="button"
         onPress={onPress}
@@ -134,7 +123,11 @@ export function PayslipRow({
             style={{ color: tokens.textSecondary }}
           />
         </View>
-        <PayslipSummary amount={payslip.net} muted={tokens.textMuted} primary={tokens.textPrimary} />
+        <PayslipSummary
+          amount={payslip.net}
+          muted={tokens.textMuted}
+          primary={tokens.textPrimary}
+        />
         <Ionicons color={tokens.textMuted} name="chevron-forward" size={15} />
       </Pressable>
     </Animated.View>
