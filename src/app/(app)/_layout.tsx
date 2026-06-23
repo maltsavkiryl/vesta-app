@@ -7,15 +7,21 @@ import {
   createPushDetailOptions,
   createSheetOptions,
   useAppTheme,
+  useDesignTokens,
 } from "@/ui"
 
 export default function AppLayout() {
   const { isSignedIn, needsOnboarding, isSessionReady } = useAppSession()
+  // `theme` is retained for the native-navigation helpers below (header/sheet
+  // theming infrastructure); feature colours come from design tokens.
   const { theme } = useAppTheme()
+  const tokens = useDesignTokens()
   const { shouldReduceMotion } = useAppMotion()
   const router = useRouter()
-  const groupedSheetBackground = theme.isDark ? "#000000" : "#F2F2F7"
-  const secondarySheetBackground = theme.isDark ? "#2C2C2E" : "#F1F1F6"
+  // Token-backed (was hardcoded hex): groupedBackground/surfaceSecondary are
+  // byte-identical across light/dark, so this is a zero-visual-change cleanup.
+  const groupedSheetBackground = tokens.groupedBackground
+  const secondarySheetBackground = tokens.surfaceSecondary
   const closeSheet = () => router.back()
   const closeActions = createHeaderActionOptions(theme, {
     left: { kind: "close", onPress: closeSheet },
