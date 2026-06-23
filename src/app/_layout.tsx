@@ -17,11 +17,14 @@ import { usePushRegistration } from "@/services/notifications/usePushRegistratio
 import { useShiftReminders } from "@/services/notifications/useShiftReminders"
 import { ErrorBoundary, ThemeProvider, useAppTheme } from "@/ui"
 import { ToastProvider } from "@/ui/feedback"
+import { analytics, initAnalytics } from "@/utils/analytics"
 import { initCrashReporting, reportCrash } from "@/utils/crashReporting"
 import { loadDateFnsLocale } from "@/utils/formatDate"
 
 SplashScreen.preventAutoHideAsync()
 initCrashReporting()
+initAnalytics()
+analytics.track("app_started")
 
 if (__DEV__) {
   // Load Reactotron configuration in development. We don't want to
