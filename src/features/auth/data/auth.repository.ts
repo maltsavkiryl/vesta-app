@@ -57,6 +57,12 @@ export interface AuthRepository {
   signInWithGoogle(): Promise<Result<SignInResult, AuthError>>
   /** Completes sign-in for a multi-employer identity once an employer is chosen. */
   selectEmployer(employerUniqueCode: string): Promise<Result<AppSession, AuthError>>
+  /**
+   * Accepts an employer invitation reached via an email / notification deep
+   * link. Same outcome shape as signIn: a session, or an employer picker when
+   * the identity now belongs to more than one employer.
+   */
+  acceptInvitation(invitationToken: string): Promise<Result<SignInResult, AuthError>>
   /** Employers awaiting selection from the most recent multi-employer sign-in. */
   getPendingEmployers(): PendingEmployer[]
   signOut(): Promise<AppSession>
