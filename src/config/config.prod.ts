@@ -13,14 +13,18 @@ export default {
   SUPPORT_EMAIL: "support@vesta.services",
 
   AUTH: {
-    apiKey: "",
+    // Non-secret public client values, injected at build time via EAS
+    // environment variables (EXPO_PUBLIC_* are inlined into the bundle). The
+    // production build fails closed — login won't work — until these are set.
+    // See README "Production environment variables".
+    apiKey: process.env.EXPO_PUBLIC_VESTA_API_KEY ?? "",
     devTokenEnabled: false,
     devObjectId: "dev-employee-oid",
     devEmail: "demo.employee@vesta.local",
     devName: "Demo Employee",
     entra: {
-      authority: "",
-      clientId: "",
+      authority: process.env.EXPO_PUBLIC_ENTRA_AUTHORITY ?? "",
+      clientId: process.env.EXPO_PUBLIC_ENTRA_CLIENT_ID ?? "",
       scopes: ["openid", "profile", "email", "offline_access"],
     },
   },
