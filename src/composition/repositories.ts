@@ -17,7 +17,9 @@ import type {
   DocumentsRepository,
 } from "@/features/documents/data/documents.repository"
 import { getContracts } from "@/features/documents/documents.utils"
+import { createHomeHttpRepository } from "@/features/home/data/home.http.repository"
 import type { HomeRepository } from "@/features/home/data/home.repository"
+import { deriveHomeTasks } from "@/features/home/data/home.tasks"
 import { createNotificationsHttpRepository } from "@/features/notifications/data/notifications.http.repository"
 import type { NotificationsRepository } from "@/features/notifications/data/notifications.repository"
 import { createPlanningHttpRepository } from "@/features/planning/data/planning.http.repository"
@@ -80,48 +82,11 @@ function getUpdatedRequestPayload(input: CreateRequestInput): RequestItem {
 }
 
 function getHomeTasks(state: AppStoreState): HomeTask[] {
-  const tasks: HomeTask[] = []
-  const nextShiftToReview = state.shifts.find((shift) => shift.requiresResponse)
-  const nextPlanningWindow = state.planningWindows.find((window) => window.status === "open")
-
-  if (state.documents.some((document) => document.status === "action_required")) {
-    tasks.push({
-      id: "task-upload-id-card",
-      title: "Upload your ID card",
-      subtitle: "Required before the next payroll run",
-      urgency: "high",
-      actionLabel: "Upload",
-      action: {
-        type: "uploadDocument",
-        documentId: "document-1",
-        title: "ID card verification",
-      },
-    })
-  }
-
-  if (nextShiftToReview) {
-    tasks.push({
-      id: `task-review-${nextShiftToReview.id}`,
-      title: `Review ${nextShiftToReview.dayLabel} shift update`,
-      subtitle: nextShiftToReview.changeSummary ?? "Your manager needs a response on this shift",
-      urgency: "medium",
-      actionLabel: "Review",
-      action: { type: "respondToShift", shiftId: nextShiftToReview.id },
-    })
-  }
-
-  if (nextPlanningWindow) {
-    tasks.push({
-      id: `task-availability-${nextPlanningWindow.id}`,
-      title: `Set availability for ${nextPlanningWindow.label.toLowerCase()}`,
-      subtitle: "Help the team finalize rota planning",
-      urgency: "low",
-      actionLabel: "Set",
-      action: { type: "editAvailabilityOverride", date: nextPlanningWindow.startDate },
-    })
-  }
-
-  return tasks
+  return deriveHomeTasks({
+    documents: state.documents,
+    planningWindows: state.planningWindows,
+    shifts: state.shifts,
+  })
 }
 
 function getVisibleNotifications(state: AppStoreState) {
@@ -739,12 +704,22 @@ export function createAppRepositories(): AppRepositories {
   // and the schedule tab / shift / availability screens (PlanningRepository
   // extends ScheduleRepository).
   const planning = createPlanningHttpRepository(httpClient)
+  const documents = createDocumentsHttpRepository(httpClient, createMockDocumentsRepository())
+  const notifications = createNotificationsHttpRepository(httpClient)
+  // Home is an aggregate of endpoints that already exist — compose the real
+  // repositories rather than mock it (or add a bespoke aggregation endpoint).
+  const home = createHomeHttpRepository({
+    documents,
+    notifications,
+    profile: httpRepos.profile,
+    schedule: planning,
+  })
   return {
     auth: httpRepos.auth,
     profile: httpRepos.profile,
-    documents: createDocumentsHttpRepository(httpClient, createMockDocumentsRepository()),
-    home: createMockHomeRepository(),
-    notifications: createNotificationsHttpRepository(httpClient),
+    documents,
+    home,
+    notifications,
     planning,
     schedule: planning,
     time: createTimeHttpRepository(httpClient),
