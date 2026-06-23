@@ -32,6 +32,7 @@ const en = {
       reviewPayslip: "Review payslip",
       reviewPayslips: "Review payslips",
       reviewPlanning: "Review planning",
+      acceptInvitation: "Accept invitation",
       reviewProfile: "Review profile",
       reviewRequest: "Review request",
       reviewShift: "Review shift",

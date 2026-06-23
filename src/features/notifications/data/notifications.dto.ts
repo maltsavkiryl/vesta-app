@@ -16,6 +16,7 @@ export type NotificationTypeDto =
   | "ContractEndingSoon"
   | "ContractCommuteTravelDistanceMissing"
   | "DimonaFailed"
+  | "EmployeeInvitationPending"
 
 export interface NotificationDto {
   uniqueCode: string

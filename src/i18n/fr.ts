@@ -34,6 +34,7 @@ const fr: Translations = {
       reviewPayslip: "Consulter la fiche de paie",
       reviewPayslips: "Consulter les fiches de paie",
       reviewPlanning: "Consulter le planning",
+      acceptInvitation: "Accepter l'invitation",
       reviewProfile: "Consulter le profil",
       reviewRequest: "Consulter la demande",
       reviewShift: "Consulter le service",

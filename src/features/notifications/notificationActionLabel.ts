@@ -40,5 +40,7 @@ export function getNotificationActionLabelKey(action?: AppActionIntent): TxKeyPa
       return "notifications:actions.reviewRequest"
     case "respondToShift":
       return "notifications:actions.reviewShift"
+    case "acceptInvitation":
+      return "notifications:actions.acceptInvitation"
   }
 }
