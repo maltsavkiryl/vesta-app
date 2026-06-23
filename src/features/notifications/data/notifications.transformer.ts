@@ -1,5 +1,5 @@
 import { toRelativeTime } from "@/core/format"
-import type { NotificationItem, NotificationKind } from "@/core/models"
+import type { AppActionIntent, NotificationItem, NotificationKind } from "@/core/models"
 
 import type { NotificationDto, NotificationTypeDto } from "./notifications.dto"
 
@@ -15,6 +15,7 @@ const kindByTypeName: Record<NotificationTypeDto, NotificationKind> = {
   EmployerRegistered: "announcements",
   EmployeeOnboarded: "announcements",
   DimonaFailed: "announcements",
+  EmployeeInvitationPending: "announcements",
 }
 
 // Fallback when the enum arrives as its ordinal (1-based, mirroring the C# enum).
@@ -27,11 +28,24 @@ const kindByTypeOrdinal: Record<number, NotificationKind> = {
   6: "documents",
   7: "documents",
   8: "announcements",
+  9: "announcements",
 }
 
 function resolveKind(type: NotificationDto["type"]): NotificationKind {
   if (typeof type === "number") return kindByTypeOrdinal[type] ?? "announcements"
   return kindByTypeName[type] ?? "announcements"
+}
+
+// A pending-employer-invitation notification carries the invitation token in
+// `subjectId` (with `subjectType` "invitation"); surface a one-tap accept action
+// that routes through the shared /invite deep-link flow.
+function resolveAction(dto: NotificationDto): AppActionIntent | undefined {
+  const isInvitation =
+    dto.type === "EmployeeInvitationPending" || dto.type === 9 || dto.subjectType === "invitation"
+  if (isInvitation && dto.subjectId) {
+    return { type: "acceptInvitation", token: dto.subjectId }
+  }
+  return undefined
 }
 
 export function toNotificationItem(dto: NotificationDto): NotificationItem {
@@ -42,7 +56,6 @@ export function toNotificationItem(dto: NotificationDto): NotificationItem {
     body: dto.body ?? dto.subjectDisplay ?? "",
     relativeTime: toRelativeTime(dto.createdAtUtc),
     unread: !dto.isRead,
-    // Deep-link actions are derived from notification subjects in the navigation
-    // slice (S6); until then notifications open the inbox and mark themselves read.
+    action: resolveAction(dto),
   }
 }

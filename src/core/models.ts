@@ -281,6 +281,7 @@ export type AppActionIntent =
   | { type: "editAvailabilityOverride"; date?: string }
   | { type: "createScheduleRequest"; category?: RequestCategory; shiftId?: string }
   | { type: "respondToShift"; shiftId: string }
+  | { type: "acceptInvitation"; token: string }
 
 export interface HomeTask {
   id: string

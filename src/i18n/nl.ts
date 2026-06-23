@@ -34,6 +34,7 @@ const nl: Translations = {
       reviewPayslip: "Loonbrief bekijken",
       reviewPayslips: "Loonbrieven bekijken",
       reviewPlanning: "Planning bekijken",
+      acceptInvitation: "Uitnodiging accepteren",
       reviewProfile: "Profiel bekijken",
       reviewRequest: "Aanvraag bekijken",
       reviewShift: "Shift bekijken",

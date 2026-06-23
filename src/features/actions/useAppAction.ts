@@ -80,6 +80,13 @@ export function useAppAction() {
           router.push(`/(app)/shift/${action.shiftId}` as never)
           return "completed"
         }
+        case "acceptInvitation":
+          // Route through the shared invite deep-link screen, which runs the
+          // accept flow and routes the user (signed-in → app, multi-employer →
+          // picker) — the same path as the email/QR deep link.
+          fireHaptic("selection")
+          router.push(`/invite?token=${encodeURIComponent(action.token)}` as never)
+          return "opened"
       }
     },
     [respondToShift, router, state, uploadDocument],

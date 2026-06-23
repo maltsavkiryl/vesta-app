@@ -45,4 +45,21 @@ describe("notifications.transformer", () => {
     )
     expect(toNotificationItem({ ...baseDto, body: null, subjectDisplay: null }).body).toBe("")
   })
+
+  it("derives a one-tap accept action for a pending-invitation notification", () => {
+    const item = toNotificationItem({
+      ...baseDto,
+      type: "EmployeeInvitationPending",
+      subjectType: "invitation",
+      subjectId: "11111111-1111-1111-1111-111111111111",
+    })
+    expect(item.action).toEqual({
+      type: "acceptInvitation",
+      token: "11111111-1111-1111-1111-111111111111",
+    })
+  })
+
+  it("leaves non-invitation notifications without an action", () => {
+    expect(toNotificationItem(baseDto).action).toBeUndefined()
+  })
 })
