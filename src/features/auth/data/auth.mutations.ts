@@ -67,6 +67,22 @@ export function useSelectEmployerMutation() {
   })
 }
 
+export function useAcceptInvitationMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (invitationToken: string) => appRepositories.auth.acceptInvitation(invitationToken),
+    onSuccess: (result) => {
+      // A multi-employer identity resolves to the picker, not a session yet.
+      if (!result.ok || result.data.kind !== "signed-in") return
+      queryClient.setQueryData(authQueryKeys.session, result.data.session)
+      if (result.data.session.accountId) {
+        invalidateSignedInResources(queryClient, result.data.session.accountId)
+      }
+    },
+  })
+}
+
 export function useRegisterMutation() {
   const queryClient = useQueryClient()
 
@@ -156,6 +172,7 @@ export function useAuthActions() {
   const signInMutation = useSignInMutation()
   const googleSignInMutation = useGoogleSignInMutation()
   const selectEmployerMutation = useSelectEmployerMutation()
+  const acceptInvitationMutation = useAcceptInvitationMutation()
   const registerMutation = useRegisterMutation()
   const signOutMutation = useSignOutMutation()
   const requestPasswordResetMutation = useRequestPasswordResetMutation()
@@ -178,10 +195,13 @@ export function useAuthActions() {
       signInWithGoogle: () => googleSignInMutation.mutateAsync(),
       selectEmployer: (employerUniqueCode: string) =>
         selectEmployerMutation.mutateAsync(employerUniqueCode),
+      acceptInvitation: (invitationToken: string) =>
+        acceptInvitationMutation.mutateAsync(invitationToken),
       getPendingEmployers: () => appRepositories.auth.getPendingEmployers(),
       signOut: (): Promise<AppSession> => signOutMutation.mutateAsync(),
     }),
     [
+      acceptInvitationMutation,
       changePasswordMutation,
       completeOnboardingMutation,
       googleSignInMutation,
