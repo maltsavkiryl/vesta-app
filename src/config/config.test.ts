@@ -23,7 +23,6 @@ describe("production auth config", () => {
   function loadProdConfig() {
     let prodConfig: typeof import("./config.prod").default
     jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       prodConfig = require("./config.prod").default
     })
     return prodConfig!
