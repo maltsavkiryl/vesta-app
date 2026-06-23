@@ -36,6 +36,18 @@ What remains is mostly structural cleanup, wider feature migration, and removal 
 
 ## Priority 1: Finish The Theme Boundary Cleanup
 
+> **Status: COMPLETE (2026-06-23).** The target state below is achieved. Verified:
+> `grep -rn "theme\.colors\." src/features` returns **zero** — no feature reads raw
+> `theme.colors` for content; all feature/content colours come from
+> `useDesignTokens()`. The remaining `useAppTheme()` call sites are legitimate
+> provider/runtime infrastructure, not drift: `navigationTheme` in the root layout,
+> native header/sheet theming via `createHeaderActionOptions`/`createPushDetailOptions`/
+> `createSheetOptions`, and the dark/light **mode** feature in profile
+> (`setThemeContextOverride` / `themeContext`). The last hardcoded sheet hex in
+> `src/app/(app)/_layout.tsx` was replaced with `tokens.groupedBackground` /
+> `tokens.surfaceSecondary` (byte-identical, zero visual change). `src/theme/context.tsx`
+> remains, as intended, the provider/runtime layer that `useDesignTokens` is built on.
+
 ### Problem
 
 The codebase still has two styling systems in parallel:
