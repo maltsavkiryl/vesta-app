@@ -33,6 +33,10 @@ export const tokenStore = {
   isExpired(nowMs: number): boolean {
     return !cache || cache.expiresAt <= nowMs
   },
+  /** True when a token is held and expires within `leadMs` of `nowMs`. */
+  expiresWithin(nowMs: number, leadMs: number): boolean {
+    return cache != null && cache.expiresAt - leadMs <= nowMs
+  },
   async clear(): Promise<void> {
     cache = null
     await SecureStore.deleteItemAsync(KEY)
