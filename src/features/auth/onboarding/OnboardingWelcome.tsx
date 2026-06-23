@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { AppScrollScreen, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
@@ -15,7 +15,9 @@ export interface OnboardingWelcomeProps {
 export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelcomeProps) {
   const insets = useSafeAreaInsets()
   const tokens = useDesignTokens()
-  const { animatedStyle: startAnim, pressHandlers: startHandlers } = usePressScale({ pressedScale: 0.97 })
+  const { animatedStyle: startAnim, pressHandlers: startHandlers } = usePressScale({
+    pressedScale: 0.97,
+  })
   const { animatedStyle: skipAnim, pressHandlers: skipHandlers } = usePressScale({})
 
   return (

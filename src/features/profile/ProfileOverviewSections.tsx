@@ -5,10 +5,9 @@ import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 
 import { translate } from "@/i18n/translate"
-import { useCelebratePulse } from "@/ui/foundations/motion"
-
 import { ListCard, ListCardItem } from "@/ui"
 import { Pill, ProgressBar, SectionBlock, SurfaceCard, Text, useDesignTokens } from "@/ui"
+import { useCelebratePulse } from "@/ui/foundations/motion"
 
 import type { ProfileOverviewRow } from "./profileOverviewRows"
 import type { ProfileSetupStatus } from "./profileSetupStatus"

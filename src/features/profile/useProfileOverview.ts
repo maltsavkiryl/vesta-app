@@ -13,8 +13,8 @@ import { fireHaptic } from "@/utils/haptics"
 
 import { PROFILE_OVERVIEW_ORDER, buildProfileOverviewSections } from "./profileOverviewRows"
 import { selectProfilePhoto } from "./profilePhotoUploadFlow"
-import { getProfileSetupStatus } from "./profileSetupStatus"
 import { PROFILE_OVERVIEW_TITLES } from "./profileSections"
+import { getProfileSetupStatus } from "./profileSetupStatus"
 
 function getInitials(firstName: string, lastName: string) {
   return `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.toUpperCase()

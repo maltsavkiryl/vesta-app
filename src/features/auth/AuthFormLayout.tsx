@@ -19,6 +19,7 @@ export const AUTH_SCREEN_PALETTE = {
   canvas: "#020408",
   backgroundGradient: ["#020408", "#050919", "#0A1428"] as const,
   backCircleBg: "rgba(255, 255, 255, 0.08)",
+  badgeTint: "rgba(60, 110, 220, 0.18)",
   clearButton: "rgba(255, 255, 255, 0.12)",
   divider: "rgba(255, 255, 255, 0.12)",
   emailButtonBg: "rgba(60, 110, 220, 0.88)",
@@ -134,11 +135,7 @@ export function AuthFormLayout({
                 weight="semiBold"
                 style={{ color: AUTH_SCREEN_PALETTE.panelText }}
               />
-              <Text
-                text={subtitle}
-                size="xxs"
-                style={{ color: AUTH_SCREEN_PALETTE.panelMuted }}
-              />
+              <Text text={subtitle} size="xxs" style={{ color: AUTH_SCREEN_PALETTE.panelMuted }} />
             </View>
 
             {children}

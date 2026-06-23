@@ -4,8 +4,8 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatFullDate, getShiftTimeRange } from "@/core/date"
-import { translate } from "@/i18n/translate"
 import type { Shift } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import {
   ActionRow,
   AppButton,

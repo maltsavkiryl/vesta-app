@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native"
 import { Stack } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import {
   AppScrollScreen,
   EmptyState,
@@ -10,7 +11,6 @@ import {
   useAppTheme,
   useDesignTokens,
 } from "@/ui"
-import { translate } from "@/i18n/translate"
 
 import {
   ContractActionRow,
@@ -47,7 +47,8 @@ export function ContractDetailScreen() {
       <Stack.Screen
         options={{
           ...headerActions,
-          title: mode === "sign" ? translate("documents:signContract") : translate("documents:title"),
+          title:
+            mode === "sign" ? translate("documents:signContract") : translate("documents:title"),
         }}
       />
       {contract ? (

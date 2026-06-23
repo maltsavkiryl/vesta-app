@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import {
   AppScrollScreen,
   EmptyState,
@@ -12,7 +13,6 @@ import {
   useAppTheme,
   useDesignTokens,
 } from "@/ui"
-import { translate } from "@/i18n/translate"
 
 import { payslips } from "./documents.data"
 import { sharePayslipPdf } from "./documentShare"
@@ -92,7 +92,9 @@ export function PayslipDetailScreen() {
             weight="semiBold"
             style={[styles.caps, { color: tokens.textMuted }]}
           />
-          <View style={[styles.breakdown, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
+          <View
+            style={[styles.breakdown, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}
+          >
             {payslip.rows.map((row) => (
               <View
                 key={row.label}

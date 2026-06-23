@@ -28,7 +28,6 @@ export function JoinEmployerSection(props: {
   tokens: DesignTokens
 }) {
   const {
-    availableEmployers,
     codeMatchedEmployer,
     joinCode,
     joinedEmployer,

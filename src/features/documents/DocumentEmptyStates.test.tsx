@@ -122,7 +122,9 @@ describe("document empty states", () => {
 
     expect(screen.getByText("No contracts on file")).toBeTruthy()
     expect(
-      screen.getByText("Signed and pending agreements will appear here when your employer sends them."),
+      screen.getByText(
+        "Signed and pending agreements will appear here when your employer sends them.",
+      ),
     ).toBeTruthy()
   })
 
@@ -130,7 +132,9 @@ describe("document empty states", () => {
     renderDocumentsSection("legal-documents")
 
     expect(screen.getByText("Nothing needed right now")).toBeTruthy()
-    expect(screen.getByText("Anything that needs an upload or review will appear here.")).toBeTruthy()
+    expect(
+      screen.getByText("Anything that needs an upload or review will appear here."),
+    ).toBeTruthy()
   })
 
   it("shows a search-empty state for payslips", () => {

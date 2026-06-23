@@ -11,7 +11,6 @@ import { OnboardingNotifications } from "./onboarding/OnboardingNotifications"
 import { OnboardingRole } from "./onboarding/OnboardingRole"
 import { OnboardingWelcome } from "./onboarding/OnboardingWelcome"
 import { ProgressDots } from "./onboarding/ProgressDots"
-import { ONBOARDING_TOTAL_STEPS } from "./onboarding/types"
 import { useOnboardingScreen } from "./useOnboardingScreen"
 
 export function OnboardingScreen() {

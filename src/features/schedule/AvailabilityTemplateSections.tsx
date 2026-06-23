@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import type { AvailabilityTemplate, AvailabilityWeekday } from "@/core/models"
 import { getAvailabilityTemplateSummary } from "@/features/schedule/availability-template.utils"
@@ -97,12 +97,7 @@ function WeekdayRow({
         isLast={isLast}
         leading={
           <View style={styles.weekdayLeading}>
-            <View
-              style={[
-                styles.weekdayStatusDot,
-                { backgroundColor: dotColor },
-              ]}
-            />
+            <View style={[styles.weekdayStatusDot, { backgroundColor: dotColor }]} />
           </View>
         }
         onPress={onPress}
@@ -110,9 +105,7 @@ function WeekdayRow({
         style={styles.weekdayRow}
         subtitle={subtitle}
         title={availabilityWeekdayLabels[weekday]}
-        trailing={
-          <Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />
-        }
+        trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
       />
     </Animated.View>
   )
@@ -130,7 +123,7 @@ export function AvailabilityTemplateTotalSpan({
   return (
     <Text
       size="xxs"
-      style={{ color: tokens.textMuted, textAlign: "center" }}
+      style={[styles.centerText, { color: tokens.textMuted }]}
       text={`Total span ${durationLabel(startTime, endTime)}`}
       weight="medium"
     />
@@ -138,6 +131,9 @@ export function AvailabilityTemplateTotalSpan({
 }
 
 const styles = StyleSheet.create({
+  centerText: {
+    textAlign: "center",
+  },
   intro: {
     gap: 6,
   },

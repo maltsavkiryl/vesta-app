@@ -4,7 +4,10 @@ const TEST_EMPLOYER_ID = "bistro-noir"
 const TEST_INVITE_CODE = "111111"
 
 export function normalizeEmployerInviteCode(value: string) {
-  return value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6)
+  return value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 6)
 }
 
 export function findEmployerByInviteCode(employers: Employer[], rawCode: string) {
@@ -15,9 +18,7 @@ export function findEmployerByInviteCode(employers: Employer[], rawCode: string)
     return employers.find((employer) => employer.id === TEST_EMPLOYER_ID)
   }
 
-  return employers.find(
-    (employer) => normalizeEmployerInviteCode(employer.code) === normalizedCode,
-  )
+  return employers.find((employer) => normalizeEmployerInviteCode(employer.code) === normalizedCode)
 }
 
 export function parseQrInviteCodePayload(payload: string) {

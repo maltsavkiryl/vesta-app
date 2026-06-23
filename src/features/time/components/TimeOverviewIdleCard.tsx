@@ -9,8 +9,8 @@ import Animated, {
 } from "react-native-reanimated"
 
 import { translate } from "@/i18n/translate"
-import { useCelebratePulse } from "@/ui/foundations/motion"
 import { InCardActionButton, Text, appTypography, useDesignTokens } from "@/ui"
+import { useCelebratePulse } from "@/ui/foundations/motion"
 
 import { timeHeroColors } from "./TimeHeroCard"
 import { styles } from "./timeOverview.styles"
@@ -67,11 +67,23 @@ export function IdleCardContent({
         : translate("time:clock.readyToTrack")
   const statusPill =
     idleState.kind === "shift" ? (
-      <HeroStatusPill icon="checkmark-circle-outline" text={translate("time:clock.confirmed")} tone="success" />
+      <HeroStatusPill
+        icon="checkmark-circle-outline"
+        text={translate("time:clock.confirmed")}
+        tone="success"
+      />
     ) : idleState.kind === "unavailable" ? (
-      <HeroStatusPill icon="alert-circle-outline" text={translate("time:clock.setupNeeded")} tone="warning" />
+      <HeroStatusPill
+        icon="alert-circle-outline"
+        text={translate("time:clock.setupNeeded")}
+        tone="warning"
+      />
     ) : (
-      <HeroStatusPill icon="time-outline" text={translate("time:clock.noShiftNeeded")} tone="neutral" />
+      <HeroStatusPill
+        icon="time-outline"
+        text={translate("time:clock.noShiftNeeded")}
+        tone="neutral"
+      />
     )
 
   return (

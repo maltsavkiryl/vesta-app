@@ -23,7 +23,8 @@ function getSetupSteps(state: AppStoreState): SetupStep[] {
 
   return [
     {
-      complete: hasValue(profile.firstName) && hasValue(profile.lastName) && hasValue(profile.email),
+      complete:
+        hasValue(profile.firstName) && hasValue(profile.lastName) && hasValue(profile.email),
       detail: "Complete your profile basics so the rest of your setup stays accurate.",
       id: "identity",
       weight: 20,
@@ -76,7 +77,10 @@ function getSetupSteps(state: AppStoreState): SetupStep[] {
 
 export function getProfileSetupStatus(state: AppStoreState): ProfileSetupStatus {
   const steps = getSetupSteps(state)
-  const completedWeight = steps.reduce((total, step) => total + (step.complete ? step.weight : 0), 0)
+  const completedWeight = steps.reduce(
+    (total, step) => total + (step.complete ? step.weight : 0),
+    0,
+  )
   const remainingSteps = steps.filter((step) => !step.complete)
   const remainingCount = remainingSteps.length
 
@@ -90,7 +94,8 @@ export function getProfileSetupStatus(state: AppStoreState): ProfileSetupStatus 
   }
 
   return {
-    detail: remainingSteps[0]?.detail ?? "Finish the remaining setup details to keep your account ready.",
+    detail:
+      remainingSteps[0]?.detail ?? "Finish the remaining setup details to keep your account ready.",
     progress: completedWeight,
     remainingCount,
     title: completedWeight >= 70 ? "Almost ready" : "Account setup",

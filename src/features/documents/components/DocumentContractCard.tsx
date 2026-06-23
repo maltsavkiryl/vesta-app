@@ -1,13 +1,12 @@
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import { Ionicons } from "@expo/vector-icons"
+import Animated from "react-native-reanimated"
 
 import { Text, appLayout, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
 import { getDocumentStatusConfig } from "../documents.status"
 import type { Contract } from "../documents.types"
-
 import { DocumentStatusIcon } from "./DocumentRowAffordances"
 
 export function DocumentContractCard({
@@ -25,12 +24,7 @@ export function DocumentContractCard({
   const status = getDocumentStatusConfig(tokens, contract.status)
 
   return (
-    <View
-      style={[
-        styles.contractCard,
-        { backgroundColor: tokens.surface, ...tokens.elevation1 },
-      ]}
-    >
+    <View style={[styles.contractCard, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
       <View style={styles.contractHeader}>
         <DocumentStatusIcon
           backgroundColor={status.backgroundColor}
@@ -108,10 +102,7 @@ function ContractActionButton({
     <Animated.View style={[styles.actionFlex, animatedStyle]}>
       <Pressable
         onPress={onPress}
-        style={[
-          styles.actionBase,
-          ...(Array.isArray(baseStyle) ? baseStyle : [baseStyle]),
-        ]}
+        style={[styles.actionBase, ...(Array.isArray(baseStyle) ? baseStyle : [baseStyle])]}
         {...pressHandlers}
       >
         <Ionicons color={textColor} name={icon} size={14} />

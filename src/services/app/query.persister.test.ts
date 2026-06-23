@@ -1,8 +1,8 @@
+import * as storage from "@/utils/storage"
+
 import { createMmkvPersister, queryPersister } from "./query.persister"
 
 jest.mock("@/utils/storage")
-
-import * as storage from "@/utils/storage"
 
 describe("createMmkvPersister", () => {
   const persister = createMmkvPersister()
@@ -13,7 +13,11 @@ describe("createMmkvPersister", () => {
   })
 
   it("persistClient stores serialized client", async () => {
-    const client = { timestamp: 1, buster: "v1", clientState: { queries: [], mutations: [] } } as any
+    const client = {
+      timestamp: 1,
+      buster: "v1",
+      clientState: { queries: [], mutations: [] },
+    } as any
     await persister.persistClient(client)
     expect(storage.saveString).toHaveBeenCalledWith("rq-cache-v1", JSON.stringify(client))
   })

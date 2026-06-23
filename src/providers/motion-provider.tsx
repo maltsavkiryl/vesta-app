@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
 import { useAppSession } from "@/providers/app-provider"
-import { appQueryKeys } from "@/services/app/app.queries"
 import {
   normalizeMotionPreference,
   resolveMotionMode,
   type MotionMode,
   type MotionPreference,
 } from "@/providers/motion.utils"
+import { appQueryKeys } from "@/services/app/app.queries"
 
 export interface AppMotionContextValue {
   enterDistance: number

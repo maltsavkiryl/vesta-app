@@ -1,8 +1,8 @@
 /// <reference types="node" />
 import { ConfigPlugin, withDangerousMod } from "@expo/config-plugins"
-import { deflateSync } from "zlib"
 import fs from "fs"
 import path from "path"
+import { deflateSync } from "zlib"
 
 // Gradient matches the login screen exactly:
 //   colors: ["#020408", "#050919", "#0A1428"]
@@ -51,7 +51,7 @@ function projectOntoGradient(
   sx: number,
   sy: number,
   ex: number,
-  ey: number
+  ey: number,
 ) {
   const dx = ex - sx,
     dy = ey - sy
@@ -125,14 +125,14 @@ function injectGradient(storyboard: string): string {
     /<namedColor name="SplashScreenBackground">[\s\S]*?<\/namedColor>/,
     `<namedColor name="SplashScreenBackground">
             <color alpha="1.000" blue="0.031373" green="0.015686" red="0.007843" customColorSpace="sRGB" colorSpace="custom"/>
-        </namedColor>`
+        </namedColor>`,
   )
 
   // 2. Declare the gradient image resource (idempotent)
   if (!storyboard.includes('name="SplashGradient"')) {
     storyboard = storyboard.replace(
       /(<resources>)/,
-      '$1\n        <image name="SplashGradient" width="200" height="400"/>'
+      '$1\n        <image name="SplashGradient" width="200" height="400"/>',
     )
   }
 
@@ -143,7 +143,7 @@ function injectGradient(storyboard: string): string {
       `$1
                             <imageView id="SPLASH-GRADIENT-BG" userLabel="GradientBackground" image="SplashGradient" contentMode="scaleToFill" clipsSubviews="true" userInteractionEnabled="false" translatesAutoresizingMaskIntoConstraints="false">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                            </imageView>`
+                            </imageView>`,
     )
     storyboard = storyboard.replace(
       /(<constraints>)/,
@@ -151,7 +151,7 @@ function injectGradient(storyboard: string): string {
                             <constraint firstItem="SPLASH-GRADIENT-BG" firstAttribute="leading" secondItem="EXPO-ContainerView" secondAttribute="leading" id="splash-grad-leading"/>
                             <constraint firstItem="SPLASH-GRADIENT-BG" firstAttribute="trailing" secondItem="EXPO-ContainerView" secondAttribute="trailing" id="splash-grad-trailing"/>
                             <constraint firstItem="SPLASH-GRADIENT-BG" firstAttribute="top" secondItem="EXPO-ContainerView" secondAttribute="top" id="splash-grad-top"/>
-                            <constraint firstItem="SPLASH-GRADIENT-BG" firstAttribute="bottom" secondItem="EXPO-ContainerView" secondAttribute="bottom" id="splash-grad-bottom"/>`
+                            <constraint firstItem="SPLASH-GRADIENT-BG" firstAttribute="bottom" secondItem="EXPO-ContainerView" secondAttribute="bottom" id="splash-grad-bottom"/>`,
     )
   }
 
@@ -180,7 +180,7 @@ const withSplashGradient: ConfigPlugin = (config) => {
             { idiom: "universal", scale: "3x" },
           ],
           info: { version: 1, author: "expo" },
-        })
+        }),
       )
 
       // Inject gradient into the storyboard
@@ -195,7 +195,7 @@ const withSplashGradient: ConfigPlugin = (config) => {
         name,
         "Images.xcassets",
         "SplashScreenBackground.colorset",
-        "Contents.json"
+        "Contents.json",
       )
       if (fs.existsSync(colorsetPath)) {
         const colorset = JSON.parse(fs.readFileSync(colorsetPath, "utf-8"))
@@ -217,7 +217,7 @@ const withSplashGradient: ConfigPlugin = (config) => {
     async (config) => {
       const colorsPath = path.join(
         config.modRequest.platformProjectRoot,
-        "app/src/main/res/values/colors.xml"
+        "app/src/main/res/values/colors.xml",
       )
       if (fs.existsSync(colorsPath)) {
         fs.writeFileSync(
@@ -226,8 +226,8 @@ const withSplashGradient: ConfigPlugin = (config) => {
             .readFileSync(colorsPath, "utf-8")
             .replace(
               /<color name="splashscreen_background">[^<]*<\/color>/,
-              `<color name="splashscreen_background">${SPLASH_BG}</color>`
-            )
+              `<color name="splashscreen_background">${SPLASH_BG}</color>`,
+            ),
         )
       }
       return config

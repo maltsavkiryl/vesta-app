@@ -1,9 +1,9 @@
 import { useLocalSearchParams } from "expo-router"
 
+import { usePlanningShiftById } from "@/features/planning/usePlanningShiftById"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { openVenueInMaps } from "@/features/schedule/openVenueInMaps"
-import { usePlanningShiftById } from "@/features/planning/usePlanningShiftById"
 import { fireHaptic } from "@/utils/haptics"
 
 export function useShiftDetailScreen() {

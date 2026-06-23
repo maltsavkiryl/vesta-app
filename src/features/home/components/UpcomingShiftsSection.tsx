@@ -4,9 +4,9 @@ import Animated from "react-native-reanimated"
 
 import type { Shift } from "@/core/models"
 import { translate } from "@/i18n/translate"
-import { useListItemEntrance } from "@/ui/foundations/motion"
-import { usePressScale } from "@/ui/composites/app-motion"
 import { EmptyState, SectionBlock, Text, useDesignTokens } from "@/ui"
+import { usePressScale } from "@/ui/composites/app-motion"
+import { useListItemEntrance } from "@/ui/foundations/motion"
 
 function UpcomingShiftCard({
   index,
@@ -100,7 +100,11 @@ export function UpcomingShiftsSection({
                 key={shift.id}
                 style={index === shifts.length - 1 ? undefined : styles.upcomingSeparator}
               >
-                <UpcomingShiftCard index={index} shift={shift} onPress={() => onShiftPress(shift)} />
+                <UpcomingShiftCard
+                  index={index}
+                  shift={shift}
+                  onPress={() => onShiftPress(shift)}
+                />
               </View>
             ))}
           </ScrollView>

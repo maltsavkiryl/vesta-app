@@ -2,12 +2,12 @@ import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "expo-router"
 import { useFocusEffect } from "@react-navigation/native"
 
-import { consumePendingEmployerInviteCode } from "@/features/employers/employerQrScanSession"
+import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import {
   findEmployerByInviteCode,
   normalizeEmployerInviteCode,
 } from "@/features/employers/employerInviteCode"
-import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { consumePendingEmployerInviteCode } from "@/features/employers/employerQrScanSession"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
 import { fireHaptic } from "@/utils/haptics"
 

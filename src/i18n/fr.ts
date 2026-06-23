@@ -76,7 +76,8 @@ const fr: Translations = {
     },
     schedule: {
       noShifts: "Aucun service à venir",
-      noShiftsSubtitle: "Votre planning est vide. Les nouveaux services apparaîtront ici une fois planifiés.",
+      noShiftsSubtitle:
+        "Votre planning est vide. Les nouveaux services apparaîtront ici une fois planifiés.",
       loadError: "Impossible de charger votre planning",
       loadErrorSubtitle: "Vérifiez votre connexion et réessayez.",
       openInMaps: "Ouvrir dans Plans",
@@ -109,7 +110,8 @@ const fr: Translations = {
       title: "Disponibilité",
       weeklyTemplate: "Modèle hebdomadaire",
       editDate: "Modifier la date sélectionnée",
-      selfServiceDisabled: "La disponibilité en libre-service n'est pas activée par votre employeur.",
+      selfServiceDisabled:
+        "La disponibilité en libre-service n'est pas activée par votre employeur.",
       editAccessibilityLabel: "Modifier la disponibilité",
       weeklyDefaultTitle: "Modèle hebdomadaire",
       forThisDate: "Disponibilité pour cette date",
@@ -178,7 +180,8 @@ const fr: Translations = {
       evening: "Bonsoir",
     },
     errorTitle: "Une erreur est survenue",
-    errorSubtitle: "Impossible de charger votre page d'accueil. Vérifiez votre connexion et réessayez.",
+    errorSubtitle:
+      "Impossible de charger votre page d'accueil. Vérifiez votre connexion et réessayez.",
     payrollNudge: {
       title: "Finish setting up payroll",
       cta: "Compléter le profil",
@@ -188,7 +191,8 @@ const fr: Translations = {
       title: "À venir",
       viewAll: "Voir tout",
       empty: "Aucun service à venir",
-      emptySubtitle: "Vos prochains services planifiés apparaîtront ici dès que le planning sera publié.",
+      emptySubtitle:
+        "Vos prochains services planifiés apparaîtront ici dès que le planning sera publié.",
     },
     tasks: {
       title: "Tâches",
@@ -213,7 +217,8 @@ const fr: Translations = {
     recentEntries: "Entrées récentes",
     viewAll: "Voir tout",
     noEntriesTitle: "Aucune entrée",
-    noEntriesSubtitle: "Pointez via l'onglet Temps pour commencer à construire votre historique de travail.",
+    noEntriesSubtitle:
+      "Pointez via l'onglet Temps pour commencer à construire votre historique de travail.",
     historyEmptyTitle: "Aucun historique pour le moment",
     historyEmptySubtitle: "Les services terminés apparaissent ici après votre première sortie.",
     entriesTotal: "{{count}} entrées au total",
@@ -247,8 +252,7 @@ const fr: Translations = {
     contractNotFoundSubtitle:
       "Ce contrat n'est plus disponible dans votre liste de documents locale.",
     documentNotFound: "Document introuvable",
-    documentNotFoundSubtitle:
-      "Ce fichier téléversé n'est plus disponible dans le stockage local.",
+    documentNotFoundSubtitle: "Ce fichier téléversé n'est plus disponible dans le stockage local.",
     paidOn: "Payé le {{date}}",
     yourSignature: "VOTRE SIGNATURE",
     signaturePlaceholder: "Saisissez votre nom légal complet...",

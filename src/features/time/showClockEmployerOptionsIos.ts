@@ -1,3 +1,7 @@
+// This module is the iOS-specific variant, dispatched by platform at the call
+// site and imported by explicit name — renaming to .ios.ts would break the
+// import on Android, so the platform-components rule is disabled here.
+// eslint-disable-next-line react-native/split-platform-components
 import { ActionSheetIOS } from "react-native"
 
 import type { ClockEmployerOptionSheetItem } from "./showClockEmployerOptions.types"

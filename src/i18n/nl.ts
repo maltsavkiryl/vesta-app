@@ -76,7 +76,8 @@ const nl: Translations = {
     },
     schedule: {
       noShifts: "Geen aankomende shifts",
-      noShiftsSubtitle: "Je planning is leeg. Nieuwe shifts verschijnen hier zodra ze ingepland zijn.",
+      noShiftsSubtitle:
+        "Je planning is leeg. Nieuwe shifts verschijnen hier zodra ze ingepland zijn.",
       loadError: "Kon je planning niet laden",
       loadErrorSubtitle: "Controleer je verbinding en probeer opnieuw.",
       openInMaps: "Openen in Kaarten",
@@ -178,7 +179,8 @@ const nl: Translations = {
       evening: "Goedenavond",
     },
     errorTitle: "Er is iets misgegaan",
-    errorSubtitle: "We konden je startpagina niet laden. Controleer je verbinding en probeer opnieuw.",
+    errorSubtitle:
+      "We konden je startpagina niet laden. Controleer je verbinding en probeer opnieuw.",
     payrollNudge: {
       title: "Finish setting up payroll",
       cta: "Profiel voltooien",
@@ -188,7 +190,8 @@ const nl: Translations = {
       title: "Aankomend",
       viewAll: "Alles bekijken",
       empty: "Geen aankomende shifts",
-      emptySubtitle: "Je volgende ingeplande shifts verschijnen hier zodra de planning gepubliceerd is.",
+      emptySubtitle:
+        "Je volgende ingeplande shifts verschijnen hier zodra de planning gepubliceerd is.",
     },
     tasks: {
       title: "Taken",
@@ -213,7 +216,8 @@ const nl: Translations = {
     recentEntries: "Recente registraties",
     viewAll: "Alles bekijken",
     noEntriesTitle: "Nog geen registraties",
-    noEntriesSubtitle: "In- en uitklokken via het tabblad Tijd om je werkgeschiedenis op te bouwen.",
+    noEntriesSubtitle:
+      "In- en uitklokken via het tabblad Tijd om je werkgeschiedenis op te bouwen.",
     historyEmptyTitle: "Nog niets in je geschiedenis",
     historyEmptySubtitle: "Voltooide shifts verschijnen hier nadat je voor het eerst uitklokt.",
     entriesTotal: "{{count}} registraties totaal",
@@ -243,8 +247,7 @@ const nl: Translations = {
     payslipNotFound: "Loonbrief niet gevonden",
     payslipNotFoundSubtitle: "Deze loonbrief is niet meer beschikbaar in de huidige lokale lijst.",
     contractNotFound: "Contract niet gevonden",
-    contractNotFoundSubtitle:
-      "Dit contract is niet meer beschikbaar in je lokale documentenlijst.",
+    contractNotFoundSubtitle: "Dit contract is niet meer beschikbaar in je lokale documentenlijst.",
     documentNotFound: "Document niet gevonden",
     documentNotFoundSubtitle: "Dit geüploade bestand is niet meer beschikbaar in lokale opslag.",
     paidOn: "Betaald op {{date}}",

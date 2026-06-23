@@ -1,16 +1,16 @@
 /* eslint-disable react-native/no-color-literals */
 import { useRef } from "react"
 import { Alert, Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
+import { CameraView, useCameraPermissions, type BarcodeScanningResult } from "expo-camera"
 import { Stack, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { CameraView, useCameraPermissions, type BarcodeScanningResult } from "expo-camera"
+import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { translate } from "@/i18n/translate"
 import { AppButton, Text, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 import { fireHaptic } from "@/utils/haptics"
-import { translate } from "@/i18n/translate"
 
 import { parseQrInviteCodePayload } from "./employerInviteCode"
 import { setPendingEmployerInviteCode } from "./employerQrScanSession"
@@ -32,18 +32,14 @@ export function EmployerQrScannerScreen() {
     const parsedCode = parseQrInviteCodePayload(data)
     if (!parsedCode) {
       fireHaptic("warning")
-      Alert.alert(
-        translate("employers:invalidQrTitle"),
-        translate("employers:invalidQrSubtitle"),
-        [
-          {
-            text: translate("common:actions.ok"),
-            onPress: () => {
-              handlingScanRef.current = false
-            },
+      Alert.alert(translate("employers:invalidQrTitle"), translate("employers:invalidQrSubtitle"), [
+        {
+          text: translate("common:actions.ok"),
+          onPress: () => {
+            handlingScanRef.current = false
           },
-        ],
-      )
+        },
+      ])
       return
     }
 
@@ -76,13 +72,7 @@ export function EmployerQrScannerScreen() {
                   accessibilityLabel={translate("employers:closeScanner")}
                   accessibilityRole="button"
                   onPress={closeScanner}
-                  style={[
-                    styles.closeButton,
-                    {
-                      backgroundColor: "rgba(15, 23, 42, 0.72)",
-                      borderColor: "rgba(255, 255, 255, 0.2)",
-                    },
-                  ]}
+                  style={[styles.closeButton, styles.scanCloseButton]}
                   {...closeHandlers}
                 >
                   <Ionicons color="#FFFFFF" name="close" size={20} />
@@ -93,17 +83,8 @@ export function EmployerQrScannerScreen() {
             <View style={styles.centerContent}>
               <View style={styles.targetFrame} />
               <View style={styles.copyBlock}>
-                <Text
-                  tx="employers:scanQrTitle"
-                  size="sm"
-                  weight="bold"
-                  style={styles.lightText}
-                />
-                <Text
-                  tx="employers:scanQrSubtitle"
-                  size="xs"
-                  style={styles.subtleLightText}
-                />
+                <Text tx="employers:scanQrTitle" size="sm" weight="bold" style={styles.lightText} />
+                <Text tx="employers:scanQrSubtitle" size="xs" style={styles.subtleLightText} />
               </View>
             </View>
           </View>
@@ -140,7 +121,7 @@ export function EmployerQrScannerScreen() {
             <Text
               tx="employers:cameraNeededSubtitle"
               size="xs"
-              style={{ color: tokens.textSecondary, textAlign: "center" }}
+              style={[styles.centerText, { color: tokens.textSecondary }]}
             />
           </View>
           <AppButton
@@ -159,6 +140,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
+  },
+  centerText: {
+    textAlign: "center",
   },
   closeButton: {
     alignItems: "center",
@@ -198,6 +182,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 20,
+  },
+  scanCloseButton: {
+    backgroundColor: "rgba(15, 23, 42, 0.72)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   screen: {
     flex: 1,
