@@ -1,6 +1,6 @@
 {
   "name": "Vesta",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
   "packageManager": "pnpm@10.7.1",
