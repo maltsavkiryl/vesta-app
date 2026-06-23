@@ -1,22 +1,26 @@
 /**
  * Offline clock-punch queue. When a punch can't reach the server (no signal),
- * it's persisted here and replayed in order once connectivity returns. Each
- * queued punch carries its real occurredAtUtc, so the backend records it at the
- * time it actually happened, not when it finally syncs.
+ * it's persisted and replayed in order once connectivity returns. Each queued
+ * punch carries its real occurredAtUtc, so the backend records it at the time it
+ * actually happened, not when it finally syncs.
+ *
+ * This is now a thin specialization of the generic offline mutation outbox
+ * ({@link createOfflineMutationQueue}); the queue mechanics live there so other
+ * features can reuse them. The storage key is unchanged so queues persisted by
+ * earlier app versions still drain after this refactor.
  */
 import type { HttpClient } from "@/services/api/httpClient"
-import { load, remove, save } from "@/utils/storage"
+import {
+  createOfflineMutationQueue,
+  isOfflineFailure,
+  type QueuedMutation,
+} from "@/services/offline/offlineMutationQueue"
 
 import type { EmployeePunchBody } from "./time.dto"
 
 export type ClockPunchAction = "clock-in" | "clock-out" | "break-start" | "break-end"
 
-export interface QueuedPunch {
-  action: ClockPunchAction
-  body: EmployeePunchBody
-}
-
-const QUEUE_KEY = "vesta.clock-queue"
+export type QueuedPunch = QueuedMutation<ClockPunchAction, EmployeePunchBody>
 
 export const ENDPOINT: Record<ClockPunchAction, string> = {
   "clock-in": "/employee/timer/clock-in",
@@ -25,57 +29,25 @@ export const ENDPOINT: Record<ClockPunchAction, string> = {
   "break-end": "/employee/timer/break/end",
 }
 
+const clockQueue = createOfflineMutationQueue<ClockPunchAction, EmployeePunchBody>({
+  storageKey: "vesta.clock-queue",
+  endpointFor: (action) => ENDPOINT[action],
+})
+
 export function loadClockQueue(): QueuedPunch[] {
-  return load<QueuedPunch[]>(QUEUE_KEY) ?? []
+  return clockQueue.load()
 }
 
-function setClockQueue(queue: QueuedPunch[]) {
-  if (queue.length === 0) remove(QUEUE_KEY)
-  else save(QUEUE_KEY, queue)
-}
-
-export function enqueuePunch(punch: QueuedPunch) {
-  setClockQueue([...loadClockQueue(), punch])
+export function enqueuePunch(punch: QueuedPunch): void {
+  clockQueue.enqueue(punch)
 }
 
 export function hasQueuedPunches(): boolean {
-  return loadClockQueue().length > 0
+  return clockQueue.hasQueued()
 }
 
-/** A failed response with no HTTP status is a network/offline failure (retryable). */
-export function isOfflineFailure(res: { ok: boolean; status?: number | null }): boolean {
-  return !res.ok && res.status == null
+export function flushClockQueue(http: HttpClient): Promise<boolean> {
+  return clockQueue.flush(http)
 }
 
-// Serialises concurrent flushes. getClockSession and sendPunch can both trigger
-// a flush at the same time; without this lock they'd each read the queue and
-// replay the same punches, double-posting them on reconnect.
-let inFlightFlush: Promise<boolean> | null = null
-
-/**
- * Replays queued punches in order. Stops at the first offline failure (keeping
- * the tail for later); drops a punch the server rejects (4xx/5xx) since retrying
- * it can never succeed. Returns true when the queue is fully drained.
- *
- * Concurrent calls share a single in-flight replay (no double-posting).
- */
-export async function flushClockQueue(http: HttpClient): Promise<boolean> {
-  if (inFlightFlush) return inFlightFlush
-  inFlightFlush = (async () => {
-    let queue = loadClockQueue()
-    while (queue.length > 0) {
-      const next = queue[0]
-      const res = await http.post(ENDPOINT[next.action], next.body)
-      if (isOfflineFailure(res)) return false
-      // ok → synced; server reject → unrecoverable, drop it. Either way, advance.
-      queue = queue.slice(1)
-      setClockQueue(queue)
-    }
-    return true
-  })()
-  try {
-    return await inFlightFlush
-  } finally {
-    inFlightFlush = null
-  }
-}
+export { isOfflineFailure }
