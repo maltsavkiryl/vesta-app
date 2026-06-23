@@ -60,6 +60,27 @@ pnpm lint:check
 `pnpm lint` rewrites files. Use `pnpm lint:check` when you only want validation.
 `pnpm doctor` runs `expo-doctor` directly when you want to validate the Expo/EAS setup surface without running the full check suite.
 
+## Production environment variables
+
+The production build reads these `EXPO_PUBLIC_*` variables at build time (they are
+inlined into the JS bundle, so they must be **non-secret public client values** —
+never private secrets). Set them as EAS environment variables for the
+`production` / `preview` build profiles (or in a gitignored `.env.local` for local
+prod-config builds). Login fails closed until they are provided.
+
+| Variable | Purpose |
+|----------|---------|
+| `EXPO_PUBLIC_VESTA_API_KEY` | Public client key for the rate-limited login endpoints |
+| `EXPO_PUBLIC_ENTRA_AUTHORITY` | Entra (Azure AD) authority URL for the OIDC tenant |
+| `EXPO_PUBLIC_ENTRA_CLIENT_ID` | Entra public client (application) ID |
+
+```bash
+# one-time, per EAS environment
+eas env:create --environment production --name EXPO_PUBLIC_ENTRA_AUTHORITY --value "https://login.microsoftonline.com/<tenant>/v2.0"
+eas env:create --environment production --name EXPO_PUBLIC_ENTRA_CLIENT_ID --value "<client-id>"
+eas env:create --environment production --name EXPO_PUBLIC_VESTA_API_KEY --value "<public-api-key>"
+```
+
 ## Architecture Notes
 
 - `src/app` contains Expo Router route files.

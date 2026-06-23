@@ -19,8 +19,10 @@ export default {
     devEmail: "demo.employee@vesta.local",
     devName: "Demo Employee",
     entra: {
-      authority: "",
-      clientId: "",
+      // Dev bypasses Entra via devTokenEnabled, but allow pointing at a real
+      // tenant when testing the OIDC path locally (supplied via env, uncommitted).
+      authority: process.env.EXPO_PUBLIC_ENTRA_AUTHORITY ?? "",
+      clientId: process.env.EXPO_PUBLIC_ENTRA_CLIENT_ID ?? "",
       scopes: ["openid", "profile", "email", "offline_access"],
     },
   },
