@@ -354,9 +354,21 @@ const nl: Translations = {
     errorSubtitle:
       "We konden je startpagina niet laden. Controleer je verbinding en probeer opnieuw.",
     payrollNudge: {
-      title: "Finish setting up payroll",
+      title: "Rond je loonconfiguratie af",
       cta: "Profiel voltooien",
       dismiss: "Sluiten",
+      subtitle: "Voeg je {{list}} toe zodat je op tijd betaald wordt.",
+      listTwo: "{{a}} en {{b}}",
+      listMany: "{{head}} en {{last}}",
+      a11y: "Rond je loonconfiguratie af. {{subtitle}}",
+      gaps: {
+        name: "naam",
+        emailAddress: "e-mailadres",
+        phoneNumber: "telefoonnummer",
+        bankAccount: "bankrekening",
+        nationalNumber: "rijksregisternummer",
+        homeAddress: "thuisadres",
+      },
     },
     upcoming: {
       title: "Aankomend",

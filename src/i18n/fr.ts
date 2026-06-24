@@ -358,9 +358,21 @@ const fr: Translations = {
     errorSubtitle:
       "Impossible de charger votre page d'accueil. Vérifiez votre connexion et réessayez.",
     payrollNudge: {
-      title: "Finish setting up payroll",
+      title: "Finalisez la configuration de la paie",
       cta: "Compléter le profil",
       dismiss: "Ignorer",
+      subtitle: "Ajoutez votre {{list}} pour être payé à temps.",
+      listTwo: "{{a}} et {{b}}",
+      listMany: "{{head}} et {{last}}",
+      a11y: "Finalisez la configuration de la paie. {{subtitle}}",
+      gaps: {
+        name: "nom",
+        emailAddress: "adresse e-mail",
+        phoneNumber: "numéro de téléphone",
+        bankAccount: "compte bancaire",
+        nationalNumber: "numéro national",
+        homeAddress: "adresse du domicile",
+      },
     },
     upcoming: {
       title: "À venir",
