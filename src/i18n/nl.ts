@@ -121,6 +121,46 @@ const nl: Translations = {
       timeOffSubtitle: "Gebruik dit als de hele dag niet meer past",
       openTime: "Tijd openen",
     },
+    shiftNotFound: "Shift niet gevonden.",
+    quickActionsPrompt: "Kies een planningsactie.",
+    maps: {
+      unavailableTitle: "Kaarten niet beschikbaar",
+      unavailableBody: "Stel een kaarten-app in op dit toestel om de shiftlocatie te openen.",
+    },
+    requestFlow: {
+      shiftSectionTitle: "Shift",
+      datesSectionTitle: "Datums",
+      affectedDates: "Betrokken datums",
+      pickShiftHint:
+        "Kies de exacte shift die ondersteuning nodig heeft zodat iedereen de juiste context bekijkt.",
+      markDaysHint: "Markeer de dagen die niet meer passen bij je huidige beschikbaarheid.",
+      chooseDatesHint: "Kies een of meer datums zodat je manager de aanvraag snel kan beoordelen.",
+      swapSuccess:
+        "Je manager en het team dat vervangingen coördineert hebben nu de shiftdetails en reden.",
+      datesSuccess:
+        "Je manager heeft nu de datums en context die nodig zijn om deze aanvraag te beoordelen.",
+      swapQuestion: "Waarom wil je ruilen?",
+      swapTitle: "Shift ruilen",
+      swapCta: "Ruilaanvraag versturen",
+      unavailabilityQuestion: "Waarom verandert je beschikbaarheid?",
+      unavailabilityTitle: "Onbeschikbaarheid",
+      unavailabilityCta: "Onbeschikbaarheid versturen",
+      timeOffQuestion: "Waarom heb je verlof nodig?",
+      timeOffTitle: "Verlof",
+      timeOffCta: "Verlof versturen",
+      incompleteError: "Kies waarvoor de aanvraag is en voeg een reden toe voordat je verstuurt.",
+    },
+    availabilityState: {
+      dateOverride: "Datum-uitzondering in gebruik",
+      weeklyTemplate: "Je wekelijkse sjabloon in gebruik",
+      unavailable: "Onbeschikbaar",
+      preferred: "Voorkeur om te werken",
+      available: "Beschikbaar",
+      unavailableDesc: "Je hebt deze datum als onbeschikbaar gemarkeerd.",
+      freeDesc: "Je bent vrij op deze datum, tenzij later een nieuwe shift wordt toegewezen.",
+      overrideDesc: "De beschikbaarheid voor deze datum gebruikt een datum-uitzondering.",
+      shiftsListed: "{{count}} shifts staan hieronder vermeld.",
+    },
     calls: {
       title: "Open oproepen",
       noCallsTitle: "Geen open oproepen",
@@ -163,6 +203,9 @@ const nl: Translations = {
       endTime: "Eindtijd",
       end: "Einde",
       totalSpan: "Totale duur",
+      customDateHint: "Deze datum gebruikt momenteel zijn eigen aangepaste beschikbaarheid.",
+      customDateWarning:
+        "Sla dit scherm alleen op als deze datum moet afwijken van je gebruikelijke uren.",
       templateHint:
         "Stel hier je gebruikelijke patroon in en pas specifieke datums alleen aan wanneer er iets verandert.",
     },
@@ -203,6 +246,7 @@ const nl: Translations = {
         "Verlofaanvragen verschijnen hier zodra het volgende planningsvenster opent.",
       noteLabel: "Notitie",
       managerNotePlaceholder: "Iets wat je manager moet weten",
+      noteHelper: "Optionele context die bij je aanvraag wordt getoond.",
     },
     leave: {
       title: "Verlof",
@@ -388,6 +432,17 @@ const nl: Translations = {
       viewAll: "Alles bekijken",
     },
     topFocus: "Belangrijkste focus",
+    cockpit: {
+      viewShift: "Shift bekijken",
+      nextShiftTitle: "Je volgende shift staat klaar",
+      reviewUpdates: "Updates bekijken",
+      freshActivity: "Niets dringends, maar er is nieuwe activiteit",
+      reviewPlanning: "Planning bekijken",
+      clearBody: "Je bent voorlopig vrij. Een goed moment om aankomend werk te bekijken.",
+      underControl: "Alles wat belangrijk is, is onder controle",
+      morePending: "Nog {{count}} te gaan",
+      updatesWaiting: "{{count}} updates wachten nog op je",
+    },
     loadingA11y: "Startpagina laden",
     earnings: {
       title: "{{month}} inkomsten",

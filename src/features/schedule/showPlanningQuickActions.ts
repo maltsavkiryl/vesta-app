@@ -1,6 +1,8 @@
 import { Alert } from "react-native"
 import type { ButtonProps } from "@expo/ui/swift-ui"
 
+import { translate } from "@/i18n/translate"
+
 type SystemImageName = NonNullable<ButtonProps["systemImage"]>
 
 export type PlanningQuickActionOption = {
@@ -19,7 +21,7 @@ export function showPlanningQuickActions({
   options: PlanningQuickActionOption[]
   title: string
 }) {
-  Alert.alert(title, "Choose a planning action.", [
+  Alert.alert(title, translate("planning:quickActionsPrompt"), [
     ...options.map((option) => ({
       text: option.label,
       onPress: () => {

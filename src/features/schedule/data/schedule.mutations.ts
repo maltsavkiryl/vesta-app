@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
 import type { AvailabilityOverride, AvailabilityTemplate } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { useAppSession } from "@/providers/app-provider"
 import { failure, success } from "@/shared/result"
 
@@ -100,7 +101,7 @@ export function useDeclineShiftMutation() {
       return Promise.resolve(
         shift
           ? success(shift)
-          : failure({ type: "not-found" as const, message: "Shift not found." }),
+          : failure({ type: "not-found" as const, message: translate("planning:shiftNotFound") }),
       )
     },
     onSuccess: (result) => {

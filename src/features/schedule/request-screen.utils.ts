@@ -1,5 +1,6 @@
 import { formatFullDate, formatShortDate, getLocalToday, getShiftTimeRange } from "@/core/date"
 import type { RequestCategory, Shift } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 export function formatRequestDateListLabel(dates: string[]) {
   if (dates.length === 0) return ""
@@ -15,51 +16,51 @@ export function getTodayDateString() {
 export function getTargetSectionCopy(category: RequestCategory) {
   if (category === "shift_change") {
     return {
-      sectionTitle: "Shift",
-      subtitle: "Pick the exact shift that needs support so everyone reviews the right context.",
+      sectionTitle: translate("planning:requestFlow.shiftSectionTitle"),
+      subtitle: translate("planning:requestFlow.pickShiftHint"),
     }
   }
 
   if (category === "availability_issue") {
     return {
-      sectionTitle: "Affected dates",
-      subtitle: "Mark the days that no longer match your current availability.",
+      sectionTitle: translate("planning:requestFlow.affectedDates"),
+      subtitle: translate("planning:requestFlow.markDaysHint"),
     }
   }
 
   return {
-    sectionTitle: "Dates",
-    subtitle: "Choose one or more dates so your manager can review the request quickly.",
+    sectionTitle: translate("planning:requestFlow.datesSectionTitle"),
+    subtitle: translate("planning:requestFlow.chooseDatesHint"),
   }
 }
 
 export function getRequestSuccessCopy(category: RequestCategory) {
   return category === "shift_change"
-    ? "Your manager and the team coordinating replacements now have the shift details and reason."
-    : "Your manager now has the dates and context they need to review this request."
+    ? translate("planning:requestFlow.swapSuccess")
+    : translate("planning:requestFlow.datesSuccess")
 }
 
 export function getRequestActionCopy(category: RequestCategory) {
   if (category === "shift_change") {
     return {
-      reasonTitle: "Why do you need a swap?",
-      screenTitle: "Shift swap",
-      submitLabel: "Send shift swap",
+      reasonTitle: translate("planning:requestFlow.swapQuestion"),
+      screenTitle: translate("planning:requestFlow.swapTitle"),
+      submitLabel: translate("planning:requestFlow.swapCta"),
     }
   }
 
   if (category === "availability_issue") {
     return {
-      reasonTitle: "Why is your availability changing?",
-      screenTitle: "Unavailability",
-      submitLabel: "Send unavailability",
+      reasonTitle: translate("planning:requestFlow.unavailabilityQuestion"),
+      screenTitle: translate("planning:requestFlow.unavailabilityTitle"),
+      submitLabel: translate("planning:requestFlow.unavailabilityCta"),
     }
   }
 
   return {
-    reasonTitle: "Why do you need time off?",
-    screenTitle: "Time off",
-    submitLabel: "Send time off",
+    reasonTitle: translate("planning:requestFlow.timeOffQuestion"),
+    screenTitle: translate("planning:requestFlow.timeOffTitle"),
+    submitLabel: translate("planning:requestFlow.timeOffCta"),
   }
 }
 

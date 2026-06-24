@@ -207,7 +207,7 @@ export function RequestNoteSection({
     <GroupedSection bodyStyle={sectionBodyStyle} title={translate("planning:requests.noteLabel")}>
       <View style={groupBodyStyle}>
         <TextField
-          caption="Optional context shown with your request."
+          caption={translate("planning:requests.noteHelper")}
           containerStyle={styles.noteContainer}
           inputStyle={styles.noteInput}
           multiline

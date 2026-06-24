@@ -10,6 +10,7 @@ import {
   getRequestsForDate,
   getShiftsForDate,
 } from "@/features/schedule/schedule.utils"
+import { translate } from "@/i18n/translate"
 
 const DEFAULT_DAY_STATE = {
   availabilityStatus: "available" as const,
@@ -88,14 +89,14 @@ export function useSchedulePlanningState({
       ? planningCoverage?.dates.find((date) => !state.availabilityOverrides[date])
       : undefined
   const availabilitySourceLabel = selectedDayState.hasOverride
-    ? "Using a date override"
-    : "Using your weekly template"
+    ? translate("planning:availabilityState.dateOverride")
+    : translate("planning:availabilityState.weeklyTemplate")
   const selectedDateAvailabilityLabel =
     selectedDayAvailability.status === "unavailable"
-      ? "Unavailable"
+      ? translate("planning:availabilityState.unavailable")
       : selectedDayAvailability.status === "preferred"
-        ? "Preferred to work"
-        : "Available"
+        ? translate("planning:availabilityState.preferred")
+        : translate("planning:availabilityState.available")
   const selectedDateAvailabilitySubtitle =
     selectedDayAvailability.status === "unavailable"
       ? availabilitySourceLabel
@@ -105,14 +106,16 @@ export function useSchedulePlanningState({
   const selectedDateSubtitle = hasSelectedDayShift
     ? ""
     : selectedDayAvailability.status === "unavailable"
-      ? "You marked this date as unavailable."
-      : "You are free on this date unless a new shift is assigned later."
+      ? translate("planning:availabilityState.unavailableDesc")
+      : translate("planning:availabilityState.freeDesc")
   const selectedDateOverrideNote =
     hasSelectedDayShift && selectedDayState.hasOverride
-      ? "Availability for this date is using a date override."
+      ? translate("planning:availabilityState.overrideDesc")
       : null
   const selectedDateShiftNote =
-    selectedDayShifts.length > 1 ? `${selectedDayShifts.length} shifts are listed below.` : null
+    selectedDayShifts.length > 1
+      ? translate("planning:availabilityState.shiftsListed", { count: selectedDayShifts.length })
+      : null
 
   const getDayState = (date: string) =>
     state ? getCalendarDayState(state, date) : DEFAULT_DAY_STATE
