@@ -31,7 +31,7 @@ function LeaveBalanceSkeleton() {
   )
 }
 
-export function PlanningLeaveScreen() {
+export function PlanningLeaveScreen({ embedded = false }: { embedded?: boolean }) {
   const tokens = useDesignTokens()
   const screen = usePlanningLeaveScreen()
   const { onRefresh, refreshing } = useRefreshHandler(screen.refetch)
@@ -44,7 +44,7 @@ export function PlanningLeaveScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title={translate("planning:leave.title")} />
+        {embedded ? null : <PageHeader delay={0} title={translate("planning:leave.title")} />}
         <EmptyState
           actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
@@ -65,7 +65,7 @@ export function PlanningLeaveScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title={translate("planning:leave.title")} />
+      {embedded ? null : <PageHeader delay={0} title={translate("planning:leave.title")} />}
 
       {isFirstLoad ? (
         <LeaveBalanceSkeleton />

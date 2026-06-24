@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react"
+import { Platform } from "react-native"
 import * as Notifications from "expo-notifications"
 
 import { useAppAction } from "@/features/actions/useAppAction"
@@ -40,7 +41,10 @@ export function usePushRegistration(): void {
 
   // Register for push + forward token to the backend.
   useEffect(() => {
-    if (!isSignedIn) return
+    // expo-notifications native APIs (push token, getLastNotificationResponse,
+    // response listeners) aren't implemented on web and throw there; push isn't
+    // supported on web anyway, so skip the whole flow.
+    if (!isSignedIn || Platform.OS === "web") return
 
     let cancelled = false
     setForegroundHandler()
@@ -58,7 +62,10 @@ export function usePushRegistration(): void {
 
   // Route notification taps through the deep-link layer.
   useEffect(() => {
-    if (!isSignedIn) return
+    // expo-notifications native APIs (push token, getLastNotificationResponse,
+    // response listeners) aren't implemented on web and throw there; push isn't
+    // supported on web anyway, so skip the whole flow.
+    if (!isSignedIn || Platform.OS === "web") return
 
     const handledIds = new Set<string>()
 

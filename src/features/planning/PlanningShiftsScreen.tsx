@@ -12,7 +12,7 @@ import {
 } from "./PlanningShiftsSections"
 import { usePlanningShiftsScreen } from "./usePlanningShiftsScreen"
 
-export function PlanningShiftsScreen() {
+export function PlanningShiftsScreen({ embedded = false }: { embedded?: boolean }) {
   const tokens = useDesignTokens()
   const screen = usePlanningShiftsScreen()
   const { onRefresh, refreshing } = useRefreshHandler(screen.refetch)
@@ -25,7 +25,9 @@ export function PlanningShiftsScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title={translate("planning:sections.mySchedule")} />
+        {embedded ? null : (
+          <PageHeader delay={0} title={translate("planning:sections.mySchedule")} />
+        )}
         <EmptyState
           actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
@@ -44,7 +46,7 @@ export function PlanningShiftsScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title={translate("planning:sections.mySchedule")} />
+      {embedded ? null : <PageHeader delay={0} title={translate("planning:sections.mySchedule")} />}
       {screen.isLoading && screen.shifts.length === 0 ? (
         <PlanningAgendaSectionSkeleton />
       ) : screen.agendaSections.length === 0 ? (
