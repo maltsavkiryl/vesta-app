@@ -8,6 +8,7 @@ import {
 } from "expo-location"
 
 import type { LocationSnapshot, ProofPhoto } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 export function buildAddressLabel(components: {
   city?: string | null
@@ -47,7 +48,10 @@ export async function captureLocationSnapshot(): Promise<LocationSnapshot | unde
   const permission = await requestForegroundPermissionsAsync()
 
   if (!permission.granted) {
-    Alert.alert("Location not shared", "The entry will still be saved without a map snapshot.")
+    Alert.alert(
+      translate("time:capture.locationNotShared"),
+      translate("time:capture.savedWithoutMap"),
+    )
     return undefined
   }
 
@@ -77,7 +81,10 @@ export async function captureLocationSnapshot(): Promise<LocationSnapshot | unde
       accuracyMeters: position.coords.accuracy ?? undefined,
     }
   } catch {
-    Alert.alert("Location unavailable", "We couldn't capture your location for this event.")
+    Alert.alert(
+      translate("time:capture.locationUnavailable"),
+      translate("time:capture.locationFailed"),
+    )
     return undefined
   }
 }
@@ -93,7 +100,7 @@ export async function captureLocationSnapshot(): Promise<LocationSnapshot | unde
 export async function captureClockInProofPhoto(): Promise<ProofPhoto | null> {
   const permission = await requestCameraPermissionsAsync()
   if (!permission.granted) {
-    Alert.alert("Camera access needed", "This workplace requires a photo to clock in.")
+    Alert.alert(translate("time:capture.cameraNeeded"), translate("time:capture.photoRequired"))
     return null
   }
 

@@ -70,6 +70,7 @@ const nl: Translations = {
     title: "Mijn planning",
     quickActionsA11y: "Planningstools openen",
     addToCalendarA11y: "Mijn shifts aan mijn telefoonagenda toevoegen",
+    repoUnavailable: "Planning-repository niet beschikbaar.",
     sections: {
       mySchedule: "Mijn planning",
       todaysTasks: "Taken voor vandaag",
@@ -542,6 +543,44 @@ const nl: Translations = {
       startBreak: "Pauze starten",
       clockOut: "Uitklokken",
     },
+    startTimer: "Timer starten",
+    chooseWorkplacePrompt: "Kies de werkplek voor deze timer.",
+    noManualEmployer:
+      "Geen gekoppelde werkgever staat momenteel timerstarts toe zonder geplande shift.",
+    clockedShift: "Geklokte shift",
+    capture: {
+      locationNotShared: "Locatie niet gedeeld",
+      savedWithoutMap: "De registratie wordt nog steeds opgeslagen zonder kaartmomentopname.",
+      locationUnavailable: "Locatie niet beschikbaar",
+      locationFailed: "We konden je locatie voor deze gebeurtenis niet vastleggen.",
+      cameraNeeded: "Cameratoegang nodig",
+      photoRequired: "Deze werkplek vereist een foto om in te klokken.",
+    },
+    card: {
+      setupNeeded: "Configuratie nodig",
+      manualDisabled:
+        "Handmatige tijdregistratie is niet ingeschakeld voor je gekoppelde werkplekken",
+      askEmployer: "Vraag je werkgever om inklokken zonder geplande shift in te schakelen.",
+      onlyManual:
+        "Je kunt alleen tijd starten vanaf een werkplek die handmatig inklokken toestaat.",
+      noWorkplaceReady: "Geen werkplek klaar",
+      scheduledShift: "Geplande shift",
+      noShiftNeeded: "Hier is geen geplande shift nodig.",
+      trackUnscheduled: "Start tijdregistratie ook wanneer je niet ingepland bent.",
+      inGeofence: "In geofence",
+      closestFirst: "De dichtstbijzijnde werkplek wordt eerst voorgesteld.",
+      chooseThenTrack:
+        "Kies een werkplek en start vervolgens tijdregistratie zonder geplande shift.",
+    },
+    errors: {
+      loadFailed: "Tijdregistraties laden mislukt",
+      chooseWorkplace: "Kies een werkplek voordat je start.",
+      startFailed: "Kon de timer niet starten.",
+      noSession: "Er is geen actieve kloksessie.",
+      breakStartFailed: "Kon geen pauze starten.",
+      breakEndFailed: "Kon de pauze niet beëindigen.",
+      clockOutFailed: "Kon niet uitklokken.",
+    },
   },
   profile: {
     completeness: {
@@ -709,6 +748,22 @@ const nl: Translations = {
     view: "Bekijken",
     reviewSign: "Bekijken & ondertekenen",
     netPayShort: "Nettoloon",
+    uploadSourcePrompt: "Kies een uploadbron.",
+    takePhoto: "Foto maken",
+    browseFiles: "Bestanden bladeren",
+    fileTooLarge: "Kies een bestand kleiner dan 10 MB.",
+    fileType: "Upload een PDF-, JPG- of PNG-bestand.",
+    uploadCameraNeeded: "Cameratoegang nodig",
+    uploadCameraNeededBody: "Sta cameratoegang toe om een documentfoto te maken.",
+    uploadFailed: "Kan bestand niet uploaden",
+    uploadComplete: "Upload voltooid",
+    uploadUnavailable: "Uploaden niet beschikbaar",
+    uploadDevBuild: "Herbouw de ontwikkel-app om document-uploads in te schakelen.",
+  },
+  calendar: {
+    unavailable: "Agenda niet beschikbaar",
+    setupFailed: "Vesta kon je agenda-feed momenteel niet instellen.",
+    openFailed: "Vesta kon je agenda-feed niet openen.",
   },
   employers: {
     scanQrTitle: "Scan de werkgever-QR-code",

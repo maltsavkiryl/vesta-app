@@ -20,6 +20,7 @@ import type {
   TimeRepository,
   ClockCommandInput,
 } from "@/features/time/data/time.repository"
+import { translate } from "@/i18n/translate"
 import type { HttpClient } from "@/services/api/httpClient"
 import { failure, success, type Result } from "@/shared/result"
 import { load, remove, save } from "@/utils/storage"
@@ -126,7 +127,7 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
       from: addLocalDays(today, -HISTORY_PAST_DAYS),
       to: today,
     })
-    if (!res.ok || !res.data) throw new Error("Failed to load time entries")
+    if (!res.ok || !res.data) throw new Error(translate("time:errors.loadFailed"))
     return toTimeEntries(res.data.entries ?? [])
   }
 
@@ -146,12 +147,12 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
     async clockIn(_accountId, input) {
       const establishment = input?.clockContext?.employerId
       if (!input?.clockContext || !establishment) {
-        return failure(toClockError("no-clock-context", "Choose a workplace before starting."))
+        return failure(toClockError("no-clock-context", translate("time:errors.chooseWorkplace")))
       }
       const occurredAtUtc = new Date().toISOString()
       const outcome = await sendPunch("clock-in", punchBody(establishment, occurredAtUtc, input))
       if (outcome === "rejected") {
-        return failure(toClockError("already-clocked-in", "Could not start the timer."))
+        return failure(toClockError("already-clocked-in", translate("time:errors.startFailed")))
       }
       saveClockMeta({
         establishmentUniqueCode: establishment,
@@ -162,14 +163,14 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
     },
     async startBreak(_accountId, input) {
       const meta = loadClockMeta()
-      if (!meta) return failure(toClockError("not-clocked-in", "There is no active clock session."))
+      if (!meta) return failure(toClockError("not-clocked-in", translate("time:errors.noSession")))
       const occurredAtUtc = new Date().toISOString()
       const outcome = await sendPunch(
         "break-start",
         punchBody(meta.establishmentUniqueCode, occurredAtUtc, input),
       )
       if (outcome === "rejected")
-        return failure(toClockError("break-invalid", "Could not start a break."))
+        return failure(toClockError("break-invalid", translate("time:errors.breakStartFailed")))
       saveClockMeta({
         ...meta,
         breakStartedAt: occurredAtUtc,
@@ -179,14 +180,14 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
     },
     async endBreak(_accountId, input) {
       const meta = loadClockMeta()
-      if (!meta) return failure(toClockError("not-clocked-in", "There is no active clock session."))
+      if (!meta) return failure(toClockError("not-clocked-in", translate("time:errors.noSession")))
       const occurredAtUtc = new Date().toISOString()
       const outcome = await sendPunch(
         "break-end",
         punchBody(meta.establishmentUniqueCode, occurredAtUtc, input),
       )
       if (outcome === "rejected")
-        return failure(toClockError("break-invalid", "Could not end the break."))
+        return failure(toClockError("break-invalid", translate("time:errors.breakEndFailed")))
       saveClockMeta({
         ...meta,
         breakStartedAt: undefined,
@@ -204,14 +205,14 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
     },
     async clockOut(_accountId, input): Promise<Result<TimeEntry, ClockError>> {
       const meta = loadClockMeta()
-      if (!meta) return failure(toClockError("not-clocked-in", "There is no active clock session."))
+      if (!meta) return failure(toClockError("not-clocked-in", translate("time:errors.noSession")))
       const occurredAtUtc = new Date().toISOString()
       const outcome = await sendPunch(
         "clock-out",
         punchBody(meta.establishmentUniqueCode, occurredAtUtc, input),
       )
       if (outcome === "rejected")
-        return failure(toClockError("not-clocked-in", "Could not clock out."))
+        return failure(toClockError("not-clocked-in", translate("time:errors.clockOutFailed")))
       clearClockMeta()
       // History may be unavailable offline; the punch is queued and will sync.
       const entries = await getTimeEntries().catch(() => [])
@@ -227,7 +228,7 @@ export function createTimeHttpRepository(http: HttpClient): TimeRepository {
           // screen treats an unknown id as a pending/not-yet-synced entry.
           id: `pending-${occurredAtUtc.replace(/[:.]/g, "-")}`,
           date: occurredAtUtc.slice(0, 10),
-          shiftLabel: "Clocked shift",
+          shiftLabel: translate("time:clockedShift"),
           clockInAt: meta.optimistic?.startedAt ?? occurredAtUtc,
           clockOutAt: occurredAtUtc,
           grossSeconds: 0,

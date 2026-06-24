@@ -1,5 +1,7 @@
 import { Alert, Platform } from "react-native"
 
+import { translate } from "@/i18n/translate"
+
 import type { ClockEmployerOptionSheetItem } from "./showClockEmployerOptions.types"
 
 export async function showClockEmployerOptions({
@@ -16,8 +18,8 @@ export async function showClockEmployerOptions({
 
   return new Promise((resolve) => {
     Alert.alert(
-      "Start timer",
-      "Choose the workplace for this timer.",
+      translate("time:startTimer"),
+      translate("time:chooseWorkplacePrompt"),
       [
         ...options.map((option) => ({
           onPress: () => resolve(option.id),

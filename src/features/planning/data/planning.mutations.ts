@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
 import type { PlanningTodo, PlanningTodosResult } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { useAppSession } from "@/providers/app-provider"
 
 import { planningQueryKeys } from "./planning.queries"
@@ -32,7 +33,7 @@ export function useClaimCallMutation(callsParams: GetOpenCallsParams = {}) {
 
   return useMutation({
     mutationFn: (input: ClaimCallInput) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.claimCall(input)
     },
     onSuccess: (result) => {
@@ -55,7 +56,7 @@ export function useCompleteTodoMutation() {
 
   return useMutation({
     mutationFn: (input: CompleteTodoInput) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.completeTodo(input)
     },
     onMutate: async (input) => {
@@ -103,7 +104,7 @@ export function useUncompleteTodoMutation() {
 
   return useMutation({
     mutationFn: (input: CompleteTodoInput) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.uncompleteTodo(input)
     },
     onMutate: async (input) => {
@@ -148,7 +149,7 @@ export function useCreateShiftSwapMutation() {
 
   return useMutation({
     mutationFn: (params: CreateShiftSwapParams) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.createShiftSwap(params)
     },
     onSuccess: (result) => {
@@ -168,7 +169,7 @@ export function useDecideShiftSwapMutation() {
 
   return useMutation({
     mutationFn: (params: DecideShiftSwapParams) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.decideShiftSwap(params)
     },
     onSuccess: (result) => {
@@ -189,7 +190,7 @@ export function useCancelShiftSwapMutation() {
 
   return useMutation({
     mutationFn: (swapCode: string) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.cancelShiftSwap(swapCode)
     },
     onSuccess: (result) => {
@@ -209,7 +210,7 @@ export function useCreateShiftChangeMutation() {
 
   return useMutation({
     mutationFn: (params: CreateShiftChangeParams) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.createShiftChange(params)
     },
     onSuccess: (result) => {
@@ -235,7 +236,7 @@ export function useSaveAvailabilityMutation() {
       template: import("@/core/models").AvailabilityTemplate
       overrides: import("@/core/models").AvailabilityOverride[]
     }) => {
-      if (!appRepositories.planning) throw new Error("Planning repository not available.")
+      if (!appRepositories.planning) throw new Error(translate("planning:repoUnavailable"))
       return appRepositories.planning.saveMyAvailability(template, overrides)
     },
     onSuccess: (result) => {

@@ -70,6 +70,7 @@ const fr: Translations = {
     title: "Mon planning",
     quickActionsA11y: "Ouvrir les outils de planning",
     addToCalendarA11y: "Ajouter mes services à l'agenda de mon téléphone",
+    repoUnavailable: "Référentiel de planning indisponible.",
     sections: {
       mySchedule: "Mon planning",
       todaysTasks: "Tâches du jour",
@@ -549,6 +550,43 @@ const fr: Translations = {
       startBreak: "Démarrer la pause",
       clockOut: "Pointer la sortie",
     },
+    startTimer: "Démarrer le minuteur",
+    chooseWorkplacePrompt: "Choisissez le lieu de travail pour ce minuteur.",
+    noManualEmployer:
+      "Aucun employeur lié n'autorise actuellement le démarrage du minuteur sans service planifié.",
+    clockedShift: "Service pointé",
+    capture: {
+      locationNotShared: "Localisation non partagée",
+      savedWithoutMap: "L'entrée sera tout de même enregistrée sans capture de carte.",
+      locationUnavailable: "Localisation indisponible",
+      locationFailed: "Nous n'avons pas pu capturer votre localisation pour cet événement.",
+      cameraNeeded: "Accès à la caméra nécessaire",
+      photoRequired: "Ce lieu de travail exige une photo pour pointer.",
+    },
+    card: {
+      setupNeeded: "Configuration requise",
+      manualDisabled: "Le suivi manuel du temps n'est pas activé pour vos lieux de travail liés",
+      askEmployer: "Demandez à votre employeur d'activer les pointages sans service planifié.",
+      onlyManual:
+        "Vous ne pouvez démarrer le temps que depuis un lieu de travail autorisant les pointages manuels.",
+      noWorkplaceReady: "Aucun lieu de travail prêt",
+      scheduledShift: "Service planifié",
+      noShiftNeeded: "Aucun service planifié n'est nécessaire ici.",
+      trackUnscheduled: "Démarrez le suivi du temps même lorsque vous n'êtes pas planifié.",
+      inGeofence: "Dans la zone",
+      closestFirst: "Le lieu de travail le plus proche est proposé en premier.",
+      chooseThenTrack:
+        "Choisissez un lieu de travail, puis démarrez le suivi du temps sans service planifié.",
+    },
+    errors: {
+      loadFailed: "Échec du chargement des entrées de temps",
+      chooseWorkplace: "Choisissez un lieu de travail avant de commencer.",
+      startFailed: "Impossible de démarrer le minuteur.",
+      noSession: "Aucune session de pointage active.",
+      breakStartFailed: "Impossible de démarrer une pause.",
+      breakEndFailed: "Impossible de terminer la pause.",
+      clockOutFailed: "Impossible de pointer la sortie.",
+    },
   },
   profile: {
     completeness: {
@@ -719,6 +757,23 @@ const fr: Translations = {
     view: "Voir",
     reviewSign: "Vérifier et signer",
     netPayShort: "Salaire net",
+    uploadSourcePrompt: "Choisissez une source de téléversement.",
+    takePhoto: "Prendre une photo",
+    browseFiles: "Parcourir les fichiers",
+    fileTooLarge: "Choisissez un fichier de moins de 10 Mo.",
+    fileType: "Téléversez un fichier PDF, JPG ou PNG.",
+    uploadCameraNeeded: "Accès à la caméra nécessaire",
+    uploadCameraNeededBody: "Autorisez l'accès à la caméra pour prendre une photo du document.",
+    uploadFailed: "Impossible de téléverser le fichier",
+    uploadComplete: "Téléversement terminé",
+    uploadUnavailable: "Téléversement indisponible",
+    uploadDevBuild:
+      "Reconstruisez l'app de développement pour activer les téléversements de documents.",
+  },
+  calendar: {
+    unavailable: "Agenda indisponible",
+    setupFailed: "Vesta n'a pas pu configurer votre flux d'agenda pour le moment.",
+    openFailed: "Vesta n'a pas pu ouvrir votre flux d'agenda.",
   },
   employers: {
     scanQrTitle: "Scanner le QR code de l'employeur",

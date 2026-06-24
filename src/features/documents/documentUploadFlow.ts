@@ -1,5 +1,6 @@
 import { Alert } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 import { showNativeUploadOptions, type UploadSource } from "./showUploadOptions"
@@ -22,11 +23,11 @@ const ACCEPTED_UPLOAD_TYPES = ["application/pdf", "image/jpeg", "image/png"]
 
 function getUploadValidationError(asset: SelectedUploadAsset) {
   if (asset.fileSize && asset.fileSize > MAX_UPLOAD_SIZE_BYTES) {
-    return "Choose a file smaller than 10 MB."
+    return translate("documents:fileTooLarge")
   }
 
   if (asset.mimeType && !ACCEPTED_UPLOAD_TYPES.includes(asset.mimeType)) {
-    return "Upload a PDF, JPG, or PNG file."
+    return translate("documents:fileType")
   }
 
   return null
@@ -36,7 +37,10 @@ async function takeDocumentPhoto() {
   const ImagePicker = await import("expo-image-picker")
   const permission = await ImagePicker.requestCameraPermissionsAsync()
   if (!permission.granted) {
-    Alert.alert("Camera access needed", "Allow camera access to take a document photo.")
+    Alert.alert(
+      translate("documents:uploadCameraNeeded"),
+      translate("documents:uploadCameraNeededBody"),
+    )
     return null
   }
 
@@ -97,7 +101,7 @@ export async function uploadDocumentFromSource({
     const validationError = getUploadValidationError(asset)
     if (validationError) {
       fireHaptic("warning")
-      Alert.alert("Cannot upload file", validationError)
+      Alert.alert(translate("documents:uploadFailed"), validationError)
       return "failed"
     }
 
@@ -117,16 +121,16 @@ export async function uploadDocumentFromSource({
       "message" in result.error
     ) {
       fireHaptic("error")
-      Alert.alert("Cannot upload file", String(result.error.message))
+      Alert.alert(translate("documents:uploadFailed"), String(result.error.message))
       return "failed"
     }
 
     fireHaptic("success")
-    Alert.alert("Upload complete", `${target.title} has been uploaded.`)
+    Alert.alert(translate("documents:uploadComplete"), `${target.title} has been uploaded.`)
     return "completed"
   } catch {
     fireHaptic("error")
-    Alert.alert("Upload unavailable", "Rebuild the development app to enable document uploads.")
+    Alert.alert(translate("documents:uploadUnavailable"), translate("documents:uploadDevBuild"))
     return "failed"
   }
 }
