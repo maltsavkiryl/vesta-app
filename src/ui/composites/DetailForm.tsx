@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 import { KeyboardTypeOptions, StyleSheet, TextInput, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 import { Text } from "@/ui/primitives/Text"
 
@@ -16,7 +17,7 @@ export function DetailFieldRow({
   label,
   multiline,
   onChangeText,
-  placeholder = "Not added",
+  placeholder = translate("common:states.notAdded"),
   value,
 }: {
   autoCapitalize?: "none" | "sentences" | "words" | "characters"

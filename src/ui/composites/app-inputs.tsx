@@ -9,6 +9,7 @@ import {
   type ViewStyle,
 } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 
 export function SearchField({
@@ -16,7 +17,7 @@ export function SearchField({
   leftAccessory,
   onChangeText,
   onClear,
-  placeholder = "Search",
+  placeholder = translate("common:actions.search"),
   rightAccessory,
   style,
   value,

@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useUnreadNotificationsQuery } from "@/features/notifications/data/notifications.queries"
+import { translate } from "@/i18n/translate"
 import { useDesignTokens } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -54,18 +55,18 @@ export default function TabLayout() {
         tabBarIcon: ({ focused }) => tabBarIcon(route.name, focused),
       })}
     >
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="schedule" options={{ title: "Planning" }} />
-      <Tabs.Screen name="time" options={{ title: "Time" }} />
+      <Tabs.Screen name="home" options={{ title: translate("common:nav.home") }} />
+      <Tabs.Screen name="schedule" options={{ title: translate("common:nav.planning") }} />
+      <Tabs.Screen name="time" options={{ title: translate("common:nav.time") }} />
       <Tabs.Screen
         name="inbox"
         options={{
-          title: "Inbox",
+          title: translate("common:nav.inbox"),
           tabBarBadge: unreadCount > 0 ? (unreadCount > 99 ? "99+" : unreadCount) : undefined,
           tabBarBadgeStyle: { backgroundColor: tokens.accent },
         }}
       />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      <Tabs.Screen name="profile" options={{ title: translate("common:nav.profile") }} />
     </Tabs>
   )
 }
