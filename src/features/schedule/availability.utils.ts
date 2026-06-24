@@ -1,4 +1,5 @@
 import type { AvailabilityStatus } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 export const TIME_REFERENCE_DATE = "2026-01-01"
 export type AvailabilityTimeField = "startTime" | "endTime"
@@ -7,9 +8,21 @@ export const availabilityStatusOptions: Record<
   AvailabilityStatus,
   { label: string; description: string; tone: "dark" | "success" | "accent" }
 > = {
-  unavailable: { label: "Unavailable", description: "Day off", tone: "dark" },
-  available: { label: "Available", description: "Can work if needed", tone: "success" },
-  preferred: { label: "Preferred", description: "Best day for me to work", tone: "accent" },
+  unavailable: {
+    label: translate("planning:availabilityState.unavailable"),
+    description: translate("planning:availabilityStatus.unavailableDesc"),
+    tone: "dark",
+  },
+  available: {
+    label: translate("planning:availabilityState.available"),
+    description: translate("planning:availabilityStatus.availableDesc"),
+    tone: "success",
+  },
+  preferred: {
+    label: translate("planning:availabilityStatus.preferred"),
+    description: translate("planning:availabilityStatus.preferredDesc"),
+    tone: "accent",
+  },
 }
 
 export function nearestMinute(minute: number) {

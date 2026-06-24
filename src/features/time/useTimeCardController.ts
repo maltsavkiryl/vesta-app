@@ -58,9 +58,11 @@ function buildIdleClockCardState(
     recommendedOption.context.scheduledEnd
   ) {
     return {
-      actionLabel: "Clock in",
+      actionLabel: translate("time:clockIn"),
       detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.context.venueAddress}`,
-      helperLabel: `Available from ${getClockInOpenLabel(recommendedOption.context.scheduledStart)}`,
+      helperLabel: translate("time:availableFrom", {
+        time: getClockInOpenLabel(recommendedOption.context.scheduledStart),
+      }),
       kind: "shift",
       subtitle: `${recommendedOption.context.role ?? translate("time:card.scheduledShift")} · ${getPlannedDurationLabel(
         recommendedOption.context.scheduledStart,
