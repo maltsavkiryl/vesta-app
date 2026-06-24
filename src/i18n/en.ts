@@ -65,6 +65,8 @@ const en = {
   },
   planning: {
     title: "My Planning",
+    quickActionsA11y: "Open planning tools",
+    addToCalendarA11y: "Add my shifts to my phone calendar",
     sections: {
       mySchedule: "My Schedule",
       todaysTasks: "Today's Tasks",
@@ -87,6 +89,34 @@ const en = {
       loadErrorSubtitle: "Check your connection and try again.",
       openInMaps: "Open in Maps",
       openInMapsA11y: "Open venue in Maps",
+    },
+    shiftDetail: {
+      notFoundTitle: "Shift no longer available",
+      notFoundSubtitle:
+        "This shift is no longer in your planning. It may have been removed or changed.",
+      whatChanged: "What changed",
+      actionNeeded: "Action needed",
+      actionNeededBody:
+        "Your manager is waiting for a response before the rota is locked. Let them know if you're in.",
+      accept: "I'll be there",
+      acceptA11y: "Accept this shift",
+      decline: "Can't make it",
+      declineA11y: "Decline this shift, I can't make it",
+      declinedTitle: "You declined this shift",
+      declinedBody:
+        "We've let your manager know you can't make it. They may reach out about cover.",
+      planTitle: "Plan for this shift",
+      venue: "Venue",
+      address: "Address",
+      time: "Time",
+      team: "Team",
+      managerNote: "Manager note",
+      changeTitle: "Need to change this shift?",
+      replacementTitle: "Request a replacement",
+      replacementSubtitle: "Start a shift change request from this shift",
+      timeOffTitle: "Request time off",
+      timeOffSubtitle: "Use this if the whole day no longer works for you",
+      openTime: "Open Time",
     },
     calls: {
       title: "Open Calls",
@@ -125,6 +155,13 @@ const en = {
       resetToDefault: "Reset to weekly default",
       saveSuccess: "Availability saved!",
       forbiddenTitle: "Self-service not enabled",
+      startTime: "Start time",
+      start: "Start",
+      endTime: "End time",
+      end: "End",
+      totalSpan: "Total span",
+      templateHint:
+        "Set your usual pattern here, then adjust specific dates only when something changes.",
     },
     requests: {
       title: "My Requests",
@@ -155,6 +192,13 @@ const en = {
       requestedEndTime: "End time",
       swapDecided: "Swap decided",
       swapCancelled: "Request cancelled",
+      noShiftsTitle: "No upcoming shifts to update",
+      noShiftsSubtitle:
+        "When a shift is scheduled, you can ask for a replacement or report a conflict here.",
+      noDatesTitle: "No dates open right now",
+      noDatesSubtitle: "Time-off requests appear here when the next planning window opens.",
+      noteLabel: "Note",
+      managerNotePlaceholder: "Anything your manager should know",
     },
     leave: {
       title: "Leave",

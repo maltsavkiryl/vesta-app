@@ -67,6 +67,8 @@ const nl: Translations = {
   },
   planning: {
     title: "Mijn planning",
+    quickActionsA11y: "Planningstools openen",
+    addToCalendarA11y: "Mijn shifts aan mijn telefoonagenda toevoegen",
     sections: {
       mySchedule: "Mijn planning",
       todaysTasks: "Taken voor vandaag",
@@ -90,6 +92,34 @@ const nl: Translations = {
       loadErrorSubtitle: "Controleer je verbinding en probeer opnieuw.",
       openInMaps: "Openen in Kaarten",
       openInMapsA11y: "Locatie openen in Kaarten",
+    },
+    shiftDetail: {
+      notFoundTitle: "Shift niet meer beschikbaar",
+      notFoundSubtitle:
+        "Deze shift staat niet meer in je planning. Mogelijk is hij verwijderd of gewijzigd.",
+      whatChanged: "Wat is er gewijzigd",
+      actionNeeded: "Actie vereist",
+      actionNeededBody:
+        "Je manager wacht op een reactie voordat het rooster wordt vastgezet. Laat weten of je erbij bent.",
+      accept: "Ik ben er",
+      acceptA11y: "Deze shift accepteren",
+      decline: "Lukt niet",
+      declineA11y: "Deze shift weigeren, ik kan niet",
+      declinedTitle: "Je hebt deze shift geweigerd",
+      declinedBody:
+        "We hebben je manager laten weten dat je niet kunt. Ze nemen mogelijk contact op voor vervanging.",
+      planTitle: "Plan voor deze shift",
+      venue: "Locatie",
+      address: "Adres",
+      time: "Tijd",
+      team: "Team",
+      managerNote: "Notitie van manager",
+      changeTitle: "Moet je deze shift wijzigen?",
+      replacementTitle: "Vervanging aanvragen",
+      replacementSubtitle: "Start een shiftwijziging vanaf deze shift",
+      timeOffTitle: "Verlof aanvragen",
+      timeOffSubtitle: "Gebruik dit als de hele dag niet meer past",
+      openTime: "Tijd openen",
     },
     calls: {
       title: "Open oproepen",
@@ -128,6 +158,13 @@ const nl: Translations = {
       resetToDefault: "Terugzetten naar wekelijks sjabloon",
       saveSuccess: "Beschikbaarheid opgeslagen!",
       forbiddenTitle: "Zelf instellen niet ingeschakeld",
+      startTime: "Starttijd",
+      start: "Start",
+      endTime: "Eindtijd",
+      end: "Einde",
+      totalSpan: "Totale duur",
+      templateHint:
+        "Stel hier je gebruikelijke patroon in en pas specifieke datums alleen aan wanneer er iets verandert.",
     },
     requests: {
       title: "Mijn aanvragen",
@@ -158,6 +195,14 @@ const nl: Translations = {
       requestedEndTime: "Eindtijd",
       swapDecided: "Ruil besloten",
       swapCancelled: "Aanvraag geannuleerd",
+      noShiftsTitle: "Geen aankomende shifts om te wijzigen",
+      noShiftsSubtitle:
+        "Wanneer een shift is ingepland, kun je hier vervanging vragen of een conflict melden.",
+      noDatesTitle: "Geen data beschikbaar op dit moment",
+      noDatesSubtitle:
+        "Verlofaanvragen verschijnen hier zodra het volgende planningsvenster opent.",
+      noteLabel: "Notitie",
+      managerNotePlaceholder: "Iets wat je manager moet weten",
     },
     leave: {
       title: "Verlof",

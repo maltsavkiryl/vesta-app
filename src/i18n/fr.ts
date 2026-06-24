@@ -67,6 +67,8 @@ const fr: Translations = {
   },
   planning: {
     title: "Mon planning",
+    quickActionsA11y: "Ouvrir les outils de planning",
+    addToCalendarA11y: "Ajouter mes services à l'agenda de mon téléphone",
     sections: {
       mySchedule: "Mon planning",
       todaysTasks: "Tâches du jour",
@@ -90,6 +92,34 @@ const fr: Translations = {
       loadErrorSubtitle: "Vérifiez votre connexion et réessayez.",
       openInMaps: "Ouvrir dans Plans",
       openInMapsA11y: "Ouvrir le lieu dans Plans",
+    },
+    shiftDetail: {
+      notFoundTitle: "Service plus disponible",
+      notFoundSubtitle:
+        "Ce service n'est plus dans votre planning. Il a peut-être été supprimé ou modifié.",
+      whatChanged: "Ce qui a changé",
+      actionNeeded: "Action requise",
+      actionNeededBody:
+        "Votre manager attend une réponse avant de verrouiller le planning. Faites-lui savoir si vous êtes disponible.",
+      accept: "Je serai là",
+      acceptA11y: "Accepter ce service",
+      decline: "Indisponible",
+      declineA11y: "Refuser ce service, je ne suis pas disponible",
+      declinedTitle: "Vous avez refusé ce service",
+      declinedBody:
+        "Nous avons informé votre manager que vous n'êtes pas disponible. Il pourrait vous contacter pour un remplacement.",
+      planTitle: "Préparez ce service",
+      venue: "Lieu",
+      address: "Adresse",
+      time: "Heure",
+      team: "Équipe",
+      managerNote: "Note du manager",
+      changeTitle: "Besoin de modifier ce service ?",
+      replacementTitle: "Demander un remplacement",
+      replacementSubtitle: "Lancez une demande de modification depuis ce service",
+      timeOffTitle: "Demander un congé",
+      timeOffSubtitle: "Utilisez ceci si toute la journée ne vous convient plus",
+      openTime: "Ouvrir Heures",
     },
     calls: {
       title: "Appels ouverts",
@@ -129,6 +159,13 @@ const fr: Translations = {
       resetToDefault: "Réinitialiser au modèle hebdomadaire",
       saveSuccess: "Disponibilité enregistrée !",
       forbiddenTitle: "Libre-service non activé",
+      startTime: "Heure de début",
+      start: "Début",
+      endTime: "Heure de fin",
+      end: "Fin",
+      totalSpan: "Durée totale",
+      templateHint:
+        "Définissez votre modèle habituel ici, puis ajustez des dates précises uniquement en cas de changement.",
     },
     requests: {
       title: "Mes demandes",
@@ -159,6 +196,14 @@ const fr: Translations = {
       requestedEndTime: "Heure de fin",
       swapDecided: "Échange décidé",
       swapCancelled: "Demande annulée",
+      noShiftsTitle: "Aucun service à venir à modifier",
+      noShiftsSubtitle:
+        "Lorsqu'un service est planifié, vous pouvez demander un remplacement ou signaler un conflit ici.",
+      noDatesTitle: "Aucune date disponible pour le moment",
+      noDatesSubtitle:
+        "Les demandes de congé apparaissent ici dès l'ouverture de la prochaine fenêtre de planning.",
+      noteLabel: "Note",
+      managerNotePlaceholder: "Tout ce que votre manager devrait savoir",
     },
     leave: {
       title: "Congés",

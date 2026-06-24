@@ -173,18 +173,22 @@ export function AvailabilityHoursSection({
   return (
     <GroupedSection title={translate("planning:availability.availableHours")}>
       <ListRow
-        subtitle="Start time"
-        title="Start"
+        subtitle={translate("planning:availability.startTime")}
+        title={translate("planning:availability.start")}
         trailing={<AvailabilityTimeValue value={startTime} />}
         onPress={() => onPressTime("startTime")}
       />
       <ListRow
-        subtitle="End time"
-        title="End"
+        subtitle={translate("planning:availability.endTime")}
+        title={translate("planning:availability.end")}
         trailing={<AvailabilityTimeValue value={endTime} />}
         onPress={() => onPressTime("endTime")}
       />
-      <DetailRow isLast label="Total span" value={durationLabel(startTime, endTime)} />
+      <DetailRow
+        isLast
+        label={translate("planning:availability.totalSpan")}
+        value={durationLabel(startTime, endTime)}
+      />
       {activeTimeField && Platform.OS === "android" ? (
         <DateTimePicker
           display="default"

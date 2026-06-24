@@ -29,8 +29,8 @@ export function ShiftDetailEmptyState() {
       actionLabel="Back to Planning"
       icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
       onAction={() => router.replace("/(app)/(tabs)/schedule")}
-      subtitle="This shift is no longer in your planning. It may have been removed or changed."
-      title="Shift no longer available"
+      subtitle={translate("planning:shiftDetail.notFoundSubtitle")}
+      title={translate("planning:shiftDetail.notFoundTitle")}
     />
   )
 }
@@ -128,7 +128,12 @@ export function ShiftChangeSummaryCallout({ summary }: { summary: string }) {
     >
       <Ionicons color={tokens.warning} name="sparkles-outline" size={16} />
       <View style={styles.flex}>
-        <Text size="xxs" style={{ color: tokens.warning }} text="What changed" weight="semiBold" />
+        <Text
+          size="xxs"
+          style={{ color: tokens.warning }}
+          text={translate("planning:shiftDetail.whatChanged")}
+          weight="semiBold"
+        />
         <Text size="xxs" style={{ color: tokens.textPrimary }} text={summary} />
       </View>
     </View>
@@ -149,27 +154,27 @@ export function ShiftActionNeededSection({
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection headerContent={callout} title="Action needed">
+    <GroupedSection headerContent={callout} title={translate("planning:shiftDetail.actionNeeded")}>
       <View style={styles.groupBody}>
         <Text
           size="xs"
           style={{ color: tokens.textSecondary }}
-          text="Your manager is waiting for a response before the rota is locked. Let them know if you're in."
+          text={translate("planning:shiftDetail.actionNeededBody")}
         />
         <View style={styles.responseActions}>
           <AppButton
-            accessibilityLabel="Accept this shift"
+            accessibilityLabel={translate("planning:shiftDetail.acceptA11y")}
             fullWidth
-            label="I'll be there"
+            label={translate("planning:shiftDetail.accept")}
             onPress={() => {
               void onAcknowledge()
             }}
             pressHaptic="none"
           />
           <AppButton
-            accessibilityLabel="Decline this shift, I can't make it"
+            accessibilityLabel={translate("planning:shiftDetail.declineA11y")}
             fullWidth
-            label="Can't make it"
+            label={translate("planning:shiftDetail.decline")}
             onPress={() => {
               void onDecline()
             }}
@@ -199,13 +204,13 @@ export function ShiftDeclinedSection() {
         <Text
           size="xxs"
           style={{ color: tokens.danger }}
-          text="You declined this shift"
+          text={translate("planning:shiftDetail.declinedTitle")}
           weight="semiBold"
         />
         <Text
           size="xxs"
           style={{ color: tokens.textPrimary }}
-          text="We've let your manager know you can't make it. They may reach out about cover."
+          text={translate("planning:shiftDetail.declinedBody")}
         />
       </View>
     </View>
@@ -216,11 +221,18 @@ export function ShiftDeclinedSection() {
 
 export function ShiftPlanSection({ shift }: { shift: Shift }) {
   return (
-    <GroupedSection title="Plan for this shift">
-      <ShiftPlanRow label="Venue" value={shift.venueName} />
-      <ShiftPlanRow label="Address" value={shift.venueAddress} />
-      <ShiftPlanRow label="Time" value={getShiftTimeRange(shift)} />
-      <ShiftPlanRow isLast label="Team" value={shift.coworkers?.join(", ") ?? "To be confirmed"} />
+    <GroupedSection title={translate("planning:shiftDetail.planTitle")}>
+      <ShiftPlanRow label={translate("planning:shiftDetail.venue")} value={shift.venueName} />
+      <ShiftPlanRow label={translate("planning:shiftDetail.address")} value={shift.venueAddress} />
+      <ShiftPlanRow
+        label={translate("planning:shiftDetail.time")}
+        value={getShiftTimeRange(shift)}
+      />
+      <ShiftPlanRow
+        isLast
+        label={translate("planning:shiftDetail.team")}
+        value={shift.coworkers?.join(", ") ?? "To be confirmed"}
+      />
     </GroupedSection>
   )
 }
@@ -231,7 +243,7 @@ export function ShiftManagerNoteSection({ note }: { note: string }) {
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection title="Manager note">
+    <GroupedSection title={translate("planning:shiftDetail.managerNote")}>
       <View style={[styles.groupBody, styles.noteBody]}>
         <Ionicons color={tokens.textMuted} name="chatbubble-ellipses-outline" size={14} />
         <Text size="xs" style={[styles.flex, { color: tokens.textPrimary }]} text={note} />
@@ -249,7 +261,7 @@ export function ShiftRequestActions({ shift }: { shift: Shift }) {
   return (
     <GroupedSection
       bodyStyle={[styles.actionSectionBody, { backgroundColor: tokens.transparent }]}
-      title="Need to change this shift?"
+      title={translate("planning:shiftDetail.changeTitle")}
     >
       <View style={styles.actionStack}>
         <ActionRow
@@ -257,16 +269,16 @@ export function ShiftRequestActions({ shift }: { shift: Shift }) {
           onPress={() =>
             router.push(`/(app)/request?category=shift_change&shiftId=${shift.id}` as never)
           }
-          subtitle="Start a shift change request from this shift"
-          title="Request a replacement"
+          subtitle={translate("planning:shiftDetail.replacementSubtitle")}
+          title={translate("planning:shiftDetail.replacementTitle")}
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
 
         <ActionRow
           leading={<Ionicons color={tokens.accent} name="calendar-clear-outline" size={18} />}
           onPress={() => router.push("/(app)/request?category=time_off" as never)}
-          subtitle="Use this if the whole day no longer works for you"
-          title="Request time off"
+          subtitle={translate("planning:shiftDetail.timeOffSubtitle")}
+          title={translate("planning:shiftDetail.timeOffTitle")}
           trailing={<Ionicons color={tokens.textMuted} name="chevron-forward-outline" size={16} />}
         />
       </View>
@@ -279,7 +291,12 @@ export function ShiftRequestActions({ shift }: { shift: Shift }) {
 export function ShiftOpenTimeAction() {
   const router = useRouter()
 
-  return <AppButton label="Open Time" onPress={() => router.push("/(app)/(tabs)/time" as never)} />
+  return (
+    <AppButton
+      label={translate("planning:shiftDetail.openTime")}
+      onPress={() => router.push("/(app)/(tabs)/time" as never)}
+    />
+  )
 }
 
 // ─── Plan row ─────────────────────────────────────────────────────────────────
