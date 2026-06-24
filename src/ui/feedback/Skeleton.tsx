@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated"
 
+import { translate } from "@/i18n/translate"
 import { useAppMotion } from "@/providers/motion-provider"
 import { useDesignTokens } from "@/ui/foundations/tokens"
 
@@ -81,7 +82,7 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: Ske
       <View
         accessible
         accessibilityRole="image"
-        accessibilityLabel="Loading"
+        accessibilityLabel={translate("common:a11y.loading")}
         accessibilityState={{ busy: true }}
         style={[
           { backgroundColor: tokens.surfaceSecondary, borderRadius: radius, height, width },
@@ -96,7 +97,7 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: Ske
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel="Loading"
+      accessibilityLabel={translate("common:a11y.loading")}
       accessibilityState={{ busy: true }}
       onLayout={handleLayout}
       style={[

@@ -17,6 +17,11 @@ const fr: Translations = {
       loading: "Chargement…",
       retry: "Réessayer",
     },
+    a11y: {
+      loading: "Chargement",
+      closeSheet: "Fermer la feuille",
+      dragHandle: "Poignée",
+    },
   },
   errorScreen: {
     friendlySubtitle:
@@ -56,6 +61,8 @@ const fr: Translations = {
     },
     markAllRead: "Tout marquer comme lu",
     title: "Notifications",
+    inbox: "Boîte de réception",
+    dismissNotification: "Ignorer la notification",
     unread: "{{count}} non lues",
   },
   planning: {
@@ -316,11 +323,15 @@ const fr: Translations = {
     tasks: {
       title: "Tâches",
       viewAll: "Voir tout",
+      pending: "En attente",
+      completed: "Terminé",
     },
     updates: {
       title: "Mises à jour",
       viewAll: "Voir tout",
     },
+    topFocus: "Priorité",
+    loadingA11y: "Chargement de l'accueil",
     earnings: {
       title: "Revenus {{month}}",
       hoursWorked: "Heures travaillées",
@@ -390,6 +401,11 @@ const fr: Translations = {
     loadErrorSubtitle: "Vérifiez votre connexion et réessayez.",
     searchPlaceholder: "Rechercher des documents...",
     markAllReadSuccess: "Toutes les notifications marquées comme lues",
+    searchDocuments: "Rechercher des documents",
+    uploadDocument: "Téléverser un document",
+    view: "Voir",
+    reviewSign: "Vérifier et signer",
+    netPayShort: "Salaire net",
   },
   employers: {
     scanQrTitle: "Scanner le QR code de l'employeur",
@@ -402,6 +418,7 @@ const fr: Translations = {
     invalidQrTitle: "QR code invalide",
     invalidQrSubtitle: "Ce QR code ne contient pas de code d'invitation à 6 chiffres.",
     closeScanner: "Fermer le scanner",
+    inviteCodeInput: "Saisie du code d'invitation",
   },
 }
 

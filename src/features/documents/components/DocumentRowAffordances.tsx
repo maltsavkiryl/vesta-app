@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { Text } from "@/ui"
 
 type DocumentStatusIconProps = {
@@ -73,7 +74,7 @@ export function PayslipSummary({
   return (
     <View style={styles.payslipTail}>
       <Text text={amount} size="xs" weight="bold" style={{ color: primary }} />
-      <Text text="Net pay" size="xxs" style={{ color: muted }} />
+      <Text text={translate("documents:netPayShort")} size="xxs" style={{ color: muted }} />
     </View>
   )
 }

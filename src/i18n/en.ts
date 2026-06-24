@@ -15,6 +15,11 @@ const en = {
       loading: "Loading…",
       retry: "Try again",
     },
+    a11y: {
+      loading: "Loading",
+      closeSheet: "Close sheet",
+      dragHandle: "Drag handle",
+    },
   },
   errorScreen: {
     friendlySubtitle:
@@ -54,6 +59,8 @@ const en = {
     },
     markAllRead: "Mark all read",
     title: "Notifications",
+    inbox: "Inbox",
+    dismissNotification: "Dismiss notification",
     unread: "{{count}} unread",
   },
   planning: {
@@ -305,11 +312,15 @@ const en = {
     tasks: {
       title: "Tasks",
       viewAll: "View all",
+      pending: "Pending",
+      completed: "Completed",
     },
     updates: {
       title: "Updates",
       viewAll: "View all",
     },
+    topFocus: "Top focus",
+    loadingA11y: "Loading home",
     earnings: {
       title: "{{month}} earnings",
       hoursWorked: "Hours worked",
@@ -376,6 +387,11 @@ const en = {
     loadErrorSubtitle: "Check your connection and try again.",
     searchPlaceholder: "Search documents...",
     markAllReadSuccess: "All notifications marked as read",
+    searchDocuments: "Search documents",
+    uploadDocument: "Upload document",
+    view: "View",
+    reviewSign: "Review & sign",
+    netPayShort: "Net pay",
   },
   employers: {
     scanQrTitle: "Scan the employer QR code",
@@ -387,6 +403,7 @@ const en = {
     invalidQrTitle: "Invalid QR code",
     invalidQrSubtitle: "This QR code does not contain a 6-digit invite code.",
     closeScanner: "Close scanner",
+    inviteCodeInput: "Invite code input",
   },
 }
 
