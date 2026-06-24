@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import { EmployerInviteCodeEntry } from "@/features/employers/EmployerInviteCodeEntry"
+import { translate } from "@/i18n/translate"
 import {
   AppButton,
   AppSegmentedControl,
@@ -55,12 +56,12 @@ export function OnboardingEmployer({
     <View style={onboardingStyles.section}>
       <View style={onboardingStyles.titleBlock}>
         <Text
-          text="Join your employer"
+          text={translate("onboarding:employer.title")}
           weight="bold"
           style={[appTypography.onboardingTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Use your invite code or choose the workplace you want to start with."
+          text={translate("onboarding:employer.subtitle")}
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
@@ -69,8 +70,8 @@ export function OnboardingEmployer({
       <AppSegmentedControl
         onChange={onModeChange}
         options={[
-          { label: "Invite code", value: "code" },
-          { label: "Search", value: "search" },
+          { label: translate("onboarding:employer.inviteCode"), value: "code" },
+          { label: translate("onboarding:employer.search"), value: "search" },
         ]}
         style={styles.segmentedControl}
         value={joinMode}
@@ -88,10 +89,10 @@ export function OnboardingEmployer({
       ) : (
         <View style={styles.stack}>
           <AuthTextField
-            label="Search"
+            label={translate("onboarding:employer.search")}
             labelCase="default"
             onChangeText={onSearchChange}
-            placeholder="Search by name or city..."
+            placeholder={translate("onboarding:employer.searchPlaceholder")}
             value={search}
           />
           {searchResults.map((employer) => (
@@ -149,10 +150,23 @@ export function OnboardingEmployer({
             </View>
           </View>
           <View style={styles.previewStats}>
-            <PreviewStat label="City" value={previewEmployer.city} />
-            <PreviewStat label="Code" value={previewEmployer.code} />
+            <PreviewStat
+              label={translate("onboarding:employer.city")}
+              value={previewEmployer.city}
+            />
+            <PreviewStat
+              label={translate("onboarding:employer.code")}
+              value={previewEmployer.code}
+            />
           </View>
-          <AppButton label={joined ? "Selected" : "Use this employer"} onPress={onJoin} />
+          <AppButton
+            label={
+              joined
+                ? translate("onboarding:employer.selected")
+                : translate("onboarding:employer.useThisEmployer")
+            }
+            onPress={onJoin}
+          />
         </View>
       ) : null}
 
@@ -166,13 +180,13 @@ export function OnboardingEmployer({
           <Ionicons color={tokens.success} name="checkmark-circle-outline" size={24} />
           <View style={styles.flex}>
             <Text
-              text="Employer selected"
+              text={translate("onboarding:employer.employerSelected")}
               size="xs"
               weight="semiBold"
               style={{ color: tokens.textPrimary }}
             />
             <Text
-              text={`${previewEmployer.name} will be used when you finish onboarding.`}
+              text={translate("onboarding:employer.willBeUsed", { name: previewEmployer.name })}
               size="xxs"
               style={{ color: tokens.textSecondary }}
             />

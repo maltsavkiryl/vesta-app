@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import {
   SelectionChip,
   SelectionIndicator,
@@ -31,37 +32,47 @@ export function OnboardingAvailability({
     <View style={onboardingStyles.section}>
       <View style={onboardingStyles.titleBlock}>
         <Text
-          text="Your availability"
+          text={translate("onboarding:availability.title")}
           weight="bold"
           style={[appTypography.onboardingTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Let your employer know when you can work. You can always change this later."
+          text={translate("onboarding:availability.subtitle")}
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
       </View>
-      <Text text="DAYS" size="xxs" weight="semiBold" style={{ color: tokens.textMuted }} />
+      <Text
+        text={translate("onboarding:availability.days")}
+        size="xxs"
+        weight="semiBold"
+        style={{ color: tokens.textMuted }}
+      />
       <View style={styles.dayWrap}>
         {ONBOARDING_DAYS.map((day) => {
           return (
             <SelectionChip
-              key={day}
-              onPress={() => onDayToggle(day)}
-              label={day}
-              selected={availabilityDays.includes(day)}
+              key={day.id}
+              onPress={() => onDayToggle(day.id)}
+              label={translate(day.labelKey)}
+              selected={availabilityDays.includes(day.id)}
             />
           )
         })}
       </View>
 
-      <Text text="TYPICAL HOURS" size="xxs" weight="semiBold" style={{ color: tokens.textMuted }} />
+      <Text
+        text={translate("onboarding:availability.typicalHours")}
+        size="xxs"
+        weight="semiBold"
+        style={{ color: tokens.textMuted }}
+      />
       {ONBOARDING_TIME_SLOTS.map((slot) => (
         <ChoiceRow
           key={slot.id}
           selected={timeSlot === slot.id}
-          subtitle={slot.sub}
-          title={slot.label}
+          subtitle={translate(slot.subKey)}
+          title={translate(slot.labelKey)}
           onPress={() => onTimeSlotChange(slot.id)}
         />
       ))}
