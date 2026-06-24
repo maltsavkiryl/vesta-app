@@ -6,6 +6,7 @@ import {
   type EmployeeLoginResponse,
 } from "@/features/auth/data/auth.api"
 import type { AuthError } from "@/features/auth/data/auth.errors"
+import { translate } from "@/i18n/translate"
 import { failure, success, type Result } from "@/shared/result"
 
 import {
@@ -131,7 +132,7 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
       if (!accepted.ok || !accepted.data)
         return failure<AuthError>({
           type: "validation",
-          message: "This invitation is invalid or has expired.",
+          message: translate("auth:acceptInvitation.invalidExpired"),
         })
       return exchange(idToken)
     },

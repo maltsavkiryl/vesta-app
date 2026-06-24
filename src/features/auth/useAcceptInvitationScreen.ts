@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useLocalSearchParams, useRouter } from "expo-router"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 export type AcceptInvitationStatus = "working" | "error"
@@ -28,7 +29,7 @@ export function useAcceptInvitationScreen() {
     const run = async () => {
       if (!token) {
         setStatus("error")
-        setError("This invitation link is missing its code. Ask your manager to resend it.")
+        setError(translate("auth:acceptInvitation.missingCode"))
         return
       }
       const result = await acceptInvitation(token)

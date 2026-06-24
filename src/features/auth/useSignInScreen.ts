@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useRouter } from "expo-router"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { translate } from "@/i18n/translate"
 import { DEMO_AUTH_CREDENTIALS } from "@/providers/app-provider"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -43,7 +44,7 @@ export function useSignInScreen() {
     if (isSubmitting) return
     if (!email.includes("@")) {
       fireHaptic("warning")
-      setError("Please enter a valid email address.")
+      setError(translate("auth:validation.emailInvalid"))
       return
     }
 
