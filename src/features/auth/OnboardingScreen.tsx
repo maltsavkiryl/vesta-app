@@ -51,7 +51,7 @@ export function OnboardingScreen() {
   if (step === 0) {
     return (
       <OnboardingWelcome
-        firstName={accountState?.profile.firstName ?? "there"}
+        firstName={accountState?.profile.firstName ?? ""}
         onSkip={complete}
         onStart={next}
       />

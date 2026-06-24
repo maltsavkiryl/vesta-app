@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { Text, useDesignTokens } from "@/ui"
 
 export function HomeHeader({
@@ -30,7 +31,7 @@ export function HomeHeader({
           />
         </View>
         <Text
-          text={firstName}
+          text={firstName.trim() || translate("home:greeting.welcomeBack")}
           weight="bold"
           style={[styles.headerTitle, { color: tokens.textPrimary }]}
         />

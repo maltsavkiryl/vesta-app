@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { translate } from "@/i18n/translate"
 import { AppScrollScreen, MotionView, Text, appTypography, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
@@ -19,6 +20,13 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
     pressedScale: 0.97,
   })
   const { animatedStyle: skipAnim, pressHandlers: skipHandlers } = usePressScale({})
+
+  const trimmedName = firstName.trim()
+  const title = trimmedName
+    ? translate("onboarding:welcome.titleNamed", { name: trimmedName })
+    : translate("onboarding:welcome.title")
+  const getStartedLabel = translate("onboarding:welcome.getStarted")
+  const skipLabel = translate("onboarding:welcome.skip")
 
   return (
     <AppScrollScreen
@@ -37,25 +45,25 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
       </MotionView>
       <MotionView delay={60} style={styles.welcomeCopy}>
         <Text
-          text={`Welcome to Vesta,\n${firstName}.`}
+          text={title}
           weight="bold"
           style={[appTypography.onboardingHeroTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Let's get your account ready in a few quick steps. You can change everything later."
+          text={translate("onboarding:welcome.subtitle")}
           size="sm"
           style={{ color: tokens.textSecondary }}
         />
         <Animated.View style={startAnim}>
           <Pressable
-            accessibilityLabel="Get started"
+            accessibilityLabel={getStartedLabel}
             accessibilityRole="button"
             onPress={onStart}
             style={[styles.darkButton, { backgroundColor: tokens.textPrimary }]}
             {...startHandlers}
           >
             <Text
-              text="Get started"
+              text={getStartedLabel}
               size="sm"
               weight="semiBold"
               style={{ color: tokens.background }}
@@ -65,13 +73,13 @@ export function OnboardingWelcome({ firstName, onStart, onSkip }: OnboardingWelc
         </Animated.View>
         <Animated.View style={skipAnim}>
           <Pressable
-            accessibilityLabel="Skip for now"
+            accessibilityLabel={skipLabel}
             accessibilityRole="button"
             onPress={onSkip}
             style={styles.skipButton}
             {...skipHandlers}
           >
-            <Text text="Skip for now" size="xxs" style={{ color: tokens.textMuted }} />
+            <Text text={skipLabel} size="xxs" style={{ color: tokens.textMuted }} />
           </Pressable>
         </Animated.View>
       </MotionView>
