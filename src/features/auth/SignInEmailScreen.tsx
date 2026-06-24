@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { Button, Text, useDesignTokens } from "@/ui"
 
 import { AuthAccessoryButton } from "./AuthAccessoryButton"
@@ -34,8 +35,8 @@ export function SignInEmailScreen() {
 
         router.replace("/(auth)/sign-in")
       }}
-      subtitle="Use the same work account you use for planning and timesheets."
-      title="Log in with email"
+      subtitle={translate("auth:emailSubtitle")}
+      title={translate("auth:loginWithEmail")}
     >
       <View style={styles.form}>
         <AuthTextField
@@ -43,11 +44,11 @@ export function SignInEmailScreen() {
           autoComplete="email"
           containerStyle={styles.field}
           keyboardType="email-address"
-          label="Email"
+          label={translate("auth:fields.email")}
           labelCase="default"
           onChangeText={handleEmailChange}
           onSubmitEditing={handleContinue}
-          placeholder="Email"
+          placeholder={translate("auth:fields.email")}
           placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
           returnKeyType="next"
           showLabel={false}
@@ -57,7 +58,7 @@ export function SignInEmailScreen() {
           rightAccessory={
             email.length > 0 ? (
               <AuthAccessoryButton
-                accessibilityLabel="Clear email"
+                accessibilityLabel={translate("auth:fields.clearEmail")}
                 icon="close"
                 onPress={clearEmail}
                 style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}
@@ -70,11 +71,11 @@ export function SignInEmailScreen() {
           autoCapitalize="none"
           autoComplete="off"
           containerStyle={styles.field}
-          label="Password"
+          label={translate("auth:fields.password")}
           labelCase="default"
           onChangeText={handlePasswordChange}
           onSubmitEditing={handleContinue}
-          placeholder="Password"
+          placeholder={translate("auth:fields.password")}
           placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
           returnKeyType="done"
           secureTextEntry
@@ -85,7 +86,7 @@ export function SignInEmailScreen() {
           rightAccessory={
             password.length > 0 ? (
               <AuthAccessoryButton
-                accessibilityLabel="Clear password"
+                accessibilityLabel={translate("auth:fields.clearPassword")}
                 icon="close"
                 onPress={clearPassword}
                 style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}
@@ -100,7 +101,7 @@ export function SignInEmailScreen() {
           style={styles.inlineLinkRow}
         >
           <Text
-            text="Forgot password?"
+            text={translate("auth:forgotPassword")}
             size="xxs"
             weight="medium"
             style={{ color: tokens.accent }}
@@ -112,34 +113,38 @@ export function SignInEmailScreen() {
         <Button
           fullWidth
           isLoading={isSubmitting}
-          label="Log in with email"
+          label={translate("auth:loginWithEmail")}
           onPress={handleContinue}
           pressHaptic="none"
         />
 
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: AUTH_SCREEN_PALETTE.divider }]} />
-          <Text text="or" size="xxs" style={{ color: AUTH_SCREEN_PALETTE.panelMuted }} />
+          <Text
+            text={translate("auth:or")}
+            size="xxs"
+            style={{ color: AUTH_SCREEN_PALETTE.panelMuted }}
+          />
           <View style={[styles.dividerLine, { backgroundColor: AUTH_SCREEN_PALETTE.divider }]} />
         </View>
 
         <Button
           fullWidth
-          label="Create account"
+          label={translate("auth:createAccount")}
           onPress={() => router.replace("/(auth)/register")}
           variant="secondary"
         />
 
         {__DEV__ && fillDemoCredentials ? (
           <Pressable
-            accessibilityLabel="Fill demo credentials"
+            accessibilityLabel={translate("auth:fillDemoLabel")}
             accessibilityRole="button"
             hitSlop={8}
             onPress={fillDemoCredentials}
             style={styles.inlineLinkRow}
           >
             <Text
-              text="Fill demo credentials (dev)"
+              text={translate("auth:fillDemo")}
               size="xxs"
               weight="medium"
               style={{ color: tokens.accent }}

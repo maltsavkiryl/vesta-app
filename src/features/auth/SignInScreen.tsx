@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { translate } from "@/i18n/translate"
 import { MotionView, Text } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
@@ -73,13 +74,13 @@ export function SignInScreen() {
         >
           <View style={styles.textBlock}>
             <Text
-              text={"Your work life,\nsimplified"}
+              text={translate("auth:heroTitle")}
               size="xl"
               weight="bold"
               style={[styles.headline, { color: AUTH_SCREEN_PALETTE.heroText }]}
             />
             <Text
-              text="Shifts, timesheets, and payroll — everything you need, in one place."
+              text={translate("auth:heroSubtitle")}
               size="xs"
               style={[styles.subtitle, { color: AUTH_SCREEN_PALETTE.heroMuted }]}
             />
@@ -87,13 +88,13 @@ export function SignInScreen() {
 
           <View style={styles.buttonGroup}>
             <SignInButton
-              accessibilityLabel="Log in with email"
+              accessibilityLabel={translate("auth:loginWithEmail")}
               disabled={isBusy}
               onPress={startSignIn}
               style={[styles.emailButton, { backgroundColor: AUTH_SCREEN_PALETTE.emailButtonBg }]}
             >
               <Text
-                text="Log in with email"
+                text={translate("auth:loginWithEmail")}
                 size="xs"
                 weight="semiBold"
                 style={{ color: AUTH_SCREEN_PALETTE.emailButtonText }}
@@ -105,7 +106,7 @@ export function SignInScreen() {
                 style={[styles.dividerLine, { backgroundColor: AUTH_SCREEN_PALETTE.divider }]}
               />
               <Text
-                text="or continue with"
+                text={translate("auth:orContinue")}
                 size="xxs"
                 style={{ color: AUTH_SCREEN_PALETTE.heroMuted }}
               />
@@ -115,7 +116,7 @@ export function SignInScreen() {
             </View>
 
             <SignInButton
-              accessibilityLabel="Continue with Apple"
+              accessibilityLabel={translate("auth:continueApple")}
               disabled={isBusy}
               onPress={startSignIn}
               style={[
@@ -128,7 +129,7 @@ export function SignInScreen() {
             >
               <Ionicons color={AUTH_SCREEN_PALETTE.socialText} name="logo-apple" size={18} />
               <Text
-                text="Continue with Apple"
+                text={translate("auth:continueApple")}
                 size="xs"
                 weight="medium"
                 style={{ color: AUTH_SCREEN_PALETTE.socialText }}
@@ -136,7 +137,7 @@ export function SignInScreen() {
             </SignInButton>
 
             <SignInButton
-              accessibilityLabel="Continue with Google"
+              accessibilityLabel={translate("auth:continueGoogle")}
               busy={pendingProvider === "google"}
               disabled={isBusy}
               onPress={handleGoogle}
@@ -150,7 +151,7 @@ export function SignInScreen() {
             >
               <Ionicons color={AUTH_SCREEN_PALETTE.socialText} name="logo-google" size={16} />
               <Text
-                text="Continue with Google"
+                text={translate("auth:continueGoogle")}
                 size="xs"
                 weight="medium"
                 style={{ color: AUTH_SCREEN_PALETTE.socialText }}

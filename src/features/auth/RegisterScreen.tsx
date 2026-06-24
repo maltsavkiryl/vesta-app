@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { Button } from "@/ui"
 
 import { AuthAccessoryButton } from "./AuthAccessoryButton"
@@ -37,20 +38,20 @@ export function RegisterScreen() {
   return (
     <AuthFormLayout
       onBack={() => router.replace("/(auth)/sign-in")}
-      subtitle="Add your details to continue."
-      title="Create account"
+      subtitle={translate("auth:registerSubtitle")}
+      title={translate("auth:createAccount")}
     >
       <View style={styles.form}>
         <View style={styles.nameRow}>
           <AuthTextField
-            accessibilityLabel="First name"
+            accessibilityLabel={translate("auth:fields.firstName")}
             autoCapitalize="words"
             autoComplete="given-name"
             containerStyle={[sharedFieldStyle, styles.nameField]}
             onChangeText={setFirstName}
-            label="First name"
+            label={translate("auth:fields.firstName")}
             labelCase="default"
-            placeholder="First name"
+            placeholder={translate("auth:fields.firstName")}
             placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
             returnKeyType="next"
             showLabel={false}
@@ -59,14 +60,14 @@ export function RegisterScreen() {
             value={firstName}
           />
           <AuthTextField
-            accessibilityLabel="Last name"
+            accessibilityLabel={translate("auth:fields.lastName")}
             autoCapitalize="words"
             autoComplete="family-name"
             containerStyle={[sharedFieldStyle, styles.nameField]}
             onChangeText={setLastName}
-            label="Last name"
+            label={translate("auth:fields.lastName")}
             labelCase="default"
-            placeholder="Last name"
+            placeholder={translate("auth:fields.lastName")}
             placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
             returnKeyType="next"
             showLabel={false}
@@ -77,15 +78,15 @@ export function RegisterScreen() {
         </View>
 
         <AuthTextField
-          accessibilityLabel="Email"
+          accessibilityLabel={translate("auth:fields.email")}
           autoCapitalize="none"
           autoComplete="email"
           containerStyle={sharedFieldStyle}
           keyboardType="email-address"
-          label="Email"
+          label={translate("auth:fields.email")}
           labelCase="default"
           onChangeText={setEmail}
-          placeholder="Email"
+          placeholder={translate("auth:fields.email")}
           placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
           returnKeyType="next"
           showLabel={false}
@@ -95,14 +96,14 @@ export function RegisterScreen() {
         />
 
         <AuthTextField
-          accessibilityLabel="Password"
+          accessibilityLabel={translate("auth:fields.password")}
           autoCapitalize="none"
           autoComplete="new-password"
           containerStyle={sharedFieldStyle}
-          label="Password"
+          label={translate("auth:fields.password")}
           labelCase="default"
           onChangeText={setPassword}
-          placeholder="Password"
+          placeholder={translate("auth:fields.password")}
           placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
           returnKeyType="next"
           secureTextEntry={!showPassword}
@@ -121,14 +122,14 @@ export function RegisterScreen() {
         />
 
         <AuthTextField
-          accessibilityLabel="Confirm password"
+          accessibilityLabel={translate("auth:fields.confirmPassword")}
           autoCapitalize="none"
           containerStyle={sharedFieldStyle}
-          label="Confirm password"
+          label={translate("auth:fields.confirmPassword")}
           labelCase="default"
           onChangeText={setConfirmPassword}
           onSubmitEditing={handleSubmit}
-          placeholder="Confirm password"
+          placeholder={translate("auth:fields.confirmPassword")}
           placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
           returnKeyType="done"
           secureTextEntry={!showPassword}
@@ -140,10 +141,15 @@ export function RegisterScreen() {
 
         <AuthError message={error} />
 
-        <Button fullWidth label="Create account" onPress={handleSubmit} pressHaptic="none" />
         <Button
           fullWidth
-          label="Sign in instead"
+          label={translate("auth:createAccount")}
+          onPress={handleSubmit}
+          pressHaptic="none"
+        />
+        <Button
+          fullWidth
+          label={translate("auth:signInInstead")}
           onPress={() => router.replace("/(auth)/sign-in")}
           variant="secondary"
         />

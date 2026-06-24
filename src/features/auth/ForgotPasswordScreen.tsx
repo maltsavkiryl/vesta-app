@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { translate } from "@/i18n/translate"
 import { Button, Text } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -106,14 +107,14 @@ export function ForgotPasswordScreen() {
               style={[styles.centerText, { color: AUTH_SCREEN_PALETTE.panelText }]}
             />
             <Text
-              text="Use your new password the next time you sign in."
+              text={translate("auth:resetSuccessHint")}
               size="xxs"
               style={[styles.centerText, { color: AUTH_SCREEN_PALETTE.panelMuted }]}
             />
           </View>
           <Button
             fullWidth
-            label="Back to sign in"
+            label={translate("auth:backToSignIn")}
             onPress={() => router.replace("/(auth)/sign-in")}
             pressHaptic="none"
           />
@@ -126,13 +127,13 @@ export function ForgotPasswordScreen() {
             autoComplete="email"
             containerStyle={sharedFieldStyle}
             keyboardType="email-address"
-            label="Email"
+            label={translate("auth:fields.email")}
             labelCase="default"
             onChangeText={(value) => {
               setEmail(value)
               clearError()
             }}
-            placeholder="Email"
+            placeholder={translate("auth:fields.email")}
             placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
             returnKeyType={step === "verify" ? "done" : "next"}
             showLabel={false}
@@ -143,7 +144,7 @@ export function ForgotPasswordScreen() {
             rightAccessory={
               email.length > 0 ? (
                 <AuthAccessoryButton
-                  accessibilityLabel="Clear email"
+                  accessibilityLabel={translate("auth:fields.clearEmail")}
                   icon="close"
                   onPress={() => {
                     setEmail("")
@@ -160,13 +161,13 @@ export function ForgotPasswordScreen() {
                 autoCapitalize="none"
                 autoComplete="new-password"
                 containerStyle={sharedFieldStyle}
-                label="New password"
+                label={translate("auth:fields.newPassword")}
                 labelCase="default"
                 onChangeText={(value) => {
                   setNextPassword(value)
                   clearError()
                 }}
-                placeholder="New password"
+                placeholder={translate("auth:fields.newPassword")}
                 placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
                 returnKeyType="next"
                 secureTextEntry={!showPassword}
@@ -190,13 +191,13 @@ export function ForgotPasswordScreen() {
                 autoCapitalize="none"
                 autoComplete="new-password"
                 containerStyle={sharedFieldStyle}
-                label="Confirm password"
+                label={translate("auth:fields.confirmPassword")}
                 labelCase="default"
                 onChangeText={(value) => {
                   setConfirmPassword(value)
                   clearError()
                 }}
-                placeholder="Confirm password"
+                placeholder={translate("auth:fields.confirmPassword")}
                 placeholderTextColor={AUTH_SCREEN_PALETTE.fieldPlaceholder}
                 returnKeyType="done"
                 secureTextEntry={!showPassword}
@@ -216,7 +217,7 @@ export function ForgotPasswordScreen() {
           />
           <Button
             fullWidth
-            label="Back to sign in"
+            label={translate("auth:backToSignIn")}
             onPress={() => router.replace("/(auth)/sign-in")}
             variant="secondary"
           />
