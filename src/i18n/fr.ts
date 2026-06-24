@@ -398,6 +398,7 @@ const fr: Translations = {
     },
   },
   onboarding: {
+    startUsingVesta: "Commencer avec Vesta",
     welcome: {
       titleNamed: "Bienvenue chez Vesta,\n{{name}}.",
       title: "Bienvenue chez Vesta.",
@@ -490,6 +491,10 @@ const fr: Translations = {
       useThisEmployer: "Utiliser cet employeur",
       employerSelected: "Employeur sélectionné",
       willBeUsed: "{{name}} sera utilisé lorsque vous terminerez l'intégration.",
+      codeHelperEmpty: "Saisissez ou collez votre code d'invitation",
+      codeHelperRemaining: "Encore {{count}} à saisir",
+      codeHelperFound: "Employeur trouvé !",
+      codeHelperNotRecognized: "Code non reconnu",
     },
   },
   home: {
@@ -805,6 +810,13 @@ const fr: Translations = {
       chooseHowToAdd: "Choisissez comment ajouter un lieu de travail",
       workplaceAdded: "Lieu de travail ajouté",
       addWorkplace: "Ajouter un lieu de travail",
+      search: "Rechercher",
+      searchByHint: "Recherchez par nom, ville, type ou code d'invitation.",
+      staffCount: "{{count}} employés",
+      peopleCount: "{{count}} personnes",
+      noResults: "Aucun résultat",
+      noResultsFor: 'Aucun résultat pour "{{query}}"',
+      nowLinked: "{{name}} est désormais lié à votre profil.",
     },
     appearance: {
       title: "Apparence",
@@ -905,6 +917,8 @@ const fr: Translations = {
       codeHint:
         "Utilisez le code partagé par votre manager pour lier le bon lieu de travail à votre profil.",
       browseHint: "Parcourez les lieux de travail et choisissez celui que vous voulez ajouter.",
+      codeMoreNeeded: "Encore {{count}} caractères requis.",
+      codeMatched: "Associé à {{name}}.",
     },
     overviewTitles: {
       employment: "Travail",

@@ -70,7 +70,7 @@ export function EmployersSection({
   return (
     <>
       <GroupedSection
-        actionLabel="Join"
+        actionLabel={translate("profile:employer.join")}
         title={translate("profile:employer.linkedWorkplaces")}
         onAction={onOpenJoinEmployer}
       >
@@ -79,7 +79,10 @@ export function EmployersSection({
             <ListRow
               key={employer.id}
               title={employer.name}
-              subtitle={`${employer.type} - ${employer.city} - ${employer.teamSize} people`}
+              subtitle={`${employer.type} - ${employer.city} - ${translate(
+                "profile:employer.peopleCount",
+                { count: employer.teamSize },
+              )}`}
               isLast={index === employers.length - 1}
               leading={<Ionicons color={tokens.accent} name="business-outline" size={18} />}
               trailing={<StatusBadge label={translate("profile:employer.linked")} tone="success" />}
@@ -96,7 +99,7 @@ export function EmployersSection({
 
       {availableEmployers.length > 0 ? (
         <GroupedSection
-          actionLabel="Search"
+          actionLabel={translate("profile:employer.search")}
           title={translate("profile:employer.availableInvitations")}
           onAction={onOpenJoinEmployer}
         >

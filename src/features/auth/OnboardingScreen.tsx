@@ -26,6 +26,7 @@ export function OnboardingScreen() {
     code,
     codeHelperText,
     complete,
+    isCompleting,
     joinMode,
     joined,
     next,
@@ -150,9 +151,13 @@ export function OnboardingScreen() {
 
       <MotionView delay={95}>
         <AppButton
-          disabled={!canContinue}
+          disabled={!canContinue || isCompleting}
           label={
-            step === 5 ? "Start using Vesta" : step === 2 && !joined ? "Skip for now" : "Continue"
+            step === 5
+              ? translate("onboarding:startUsingVesta")
+              : step === 2 && !joined
+                ? translate("onboarding:welcome.skip")
+                : translate("common:actions.continue")
           }
           onPress={next}
           pressHaptic={step === 5 ? "none" : "selection"}

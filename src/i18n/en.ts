@@ -385,6 +385,7 @@ const en = {
     },
   },
   onboarding: {
+    startUsingVesta: "Start using Vesta",
     welcome: {
       titleNamed: "Welcome to Vesta,\n{{name}}.",
       title: "Welcome to Vesta.",
@@ -474,6 +475,10 @@ const en = {
       useThisEmployer: "Use this employer",
       employerSelected: "Employer selected",
       willBeUsed: "{{name}} will be used when you finish onboarding.",
+      codeHelperEmpty: "Type or paste your invite code",
+      codeHelperRemaining: "{{count}} more to enter",
+      codeHelperFound: "Employer found!",
+      codeHelperNotRecognized: "Code not recognized",
     },
   },
   home: {
@@ -780,6 +785,13 @@ const en = {
       chooseHowToAdd: "Choose how you want to add a workplace",
       workplaceAdded: "Workplace added",
       addWorkplace: "Add workplace",
+      search: "Search",
+      searchByHint: "Search by name, city, type, or invite code.",
+      staffCount: "{{count}} staff",
+      peopleCount: "{{count}} people",
+      noResults: "No results",
+      noResultsFor: 'No results for "{{query}}"',
+      nowLinked: "{{name}} is now linked to your profile.",
     },
     appearance: {
       title: "Appearance",
@@ -870,6 +882,8 @@ const en = {
       findTab: "Find a workplace",
       codeHint: "Use the code your manager shared to link the right workplace to your profile.",
       browseHint: "Browse workplaces and choose the one you want to add.",
+      codeMoreNeeded: "{{count}} more characters needed.",
+      codeMatched: "Matched with {{name}}.",
     },
     overviewTitles: {
       employment: "Work",

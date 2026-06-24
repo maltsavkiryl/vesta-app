@@ -36,6 +36,9 @@ export function useOnboardingScreen() {
     timeoff: true,
     updates: false,
   })
+  // Guards the final "complete onboarding" punch against double-taps while the
+  // mutation is in flight.
+  const [isCompleting, setIsCompleting] = useState(false)
 
   const employers = useMemo(
     () => [
@@ -68,12 +71,12 @@ export function useOnboardingScreen() {
   const activeEmployer = foundEmployer ?? selectedEmployer
   const codeHelperText =
     code.length === 0
-      ? "Type or paste your invite code"
+      ? translate("onboarding:employer.codeHelperEmpty")
       : code.length < 6
-        ? `${6 - code.length} more character${code.length === 5 ? "" : "s"}`
+        ? translate("onboarding:employer.codeHelperRemaining", { count: 6 - code.length })
         : foundEmployer
-          ? "Employer found!"
-          : "Code not recognized"
+          ? translate("onboarding:employer.codeHelperFound")
+          : translate("onboarding:employer.codeHelperNotRecognized")
   const canContinue = [
     true,
     Boolean(selectedRole),
@@ -96,17 +99,30 @@ export function useOnboardingScreen() {
   )
 
   const complete = useCallback(async () => {
-    const result = await completeOnboarding({
-      role: selectedRole || "Waiter",
-      employerId: (activeEmployer ?? accountState?.employers[0])?.id ?? "",
-    })
-    if (!result.ok) {
-      fireHaptic("error")
-      return
+    if (isCompleting) return
+    setIsCompleting(true)
+    try {
+      const result = await completeOnboarding({
+        role: selectedRole || "Waiter",
+        employerId: (activeEmployer ?? accountState?.employers[0])?.id ?? "",
+      })
+      if (!result.ok) {
+        fireHaptic("error")
+        return
+      }
+      fireHaptic("success")
+      router.replace("/")
+    } finally {
+      setIsCompleting(false)
     }
-    fireHaptic("success")
-    router.replace("/")
-  }, [accountState?.employers, activeEmployer, completeOnboarding, router, selectedRole])
+  }, [
+    accountState?.employers,
+    activeEmployer,
+    completeOnboarding,
+    isCompleting,
+    router,
+    selectedRole,
+  ])
 
   const next = useCallback(() => {
     if (step === ONBOARDING_TOTAL_STEPS - 1) {
@@ -135,6 +151,7 @@ export function useOnboardingScreen() {
     code,
     codeHelperText,
     complete,
+    isCompleting,
     joinMode,
     joined,
     next,
