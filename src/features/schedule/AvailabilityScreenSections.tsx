@@ -98,8 +98,8 @@ export function AvailabilityTemplateSection({
         }
         subtitle={
           existingOverride
-            ? "This date is currently using its own custom availability."
-            : "Save this screen only if this date should differ from your usual hours."
+            ? translate("planning:availability.customDateHint")
+            : translate("planning:availability.customDateWarning")
         }
         title={summary}
       />

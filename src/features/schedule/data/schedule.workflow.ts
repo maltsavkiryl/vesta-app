@@ -1,3 +1,4 @@
+import { translate } from "@/i18n/translate"
 import type { Result } from "@/shared/result"
 
 import type { ScheduleError } from "./schedule.errors"
@@ -13,7 +14,7 @@ export function createRequestWorkflow(
       ok: false,
       error: {
         type: "validation",
-        message: "Choose what the request is for and add a reason before sending it.",
+        message: translate("planning:requestFlow.incompleteError"),
       },
     })
   }

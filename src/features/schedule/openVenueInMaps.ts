@@ -1,5 +1,7 @@
 import { Alert, Linking, Platform } from "react-native"
 
+import { translate } from "@/i18n/translate"
+
 export function getVenueMapUrl(address: string, platformName = Platform.OS) {
   const encodedAddress = encodeURIComponent(address)
 
@@ -35,6 +37,6 @@ export async function openVenueInMaps(
     }
   } catch {}
 
-  showAlert("Maps unavailable", "Set up a maps app on this device to open the shift location.")
+  showAlert(translate("planning:maps.unavailableTitle"), translate("planning:maps.unavailableBody"))
   return false
 }

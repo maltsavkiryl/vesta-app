@@ -1,4 +1,5 @@
 import { getShiftTimeRange } from "@/core/date"
+import { translate } from "@/i18n/translate"
 
 import type { CockpitAction, HomeCockpitDeckProps } from "./homeCockpit.types"
 
@@ -27,7 +28,7 @@ export function getPrimaryCockpitAction({
       onPress: () => onOpenTask(priorityTask),
       subtitle:
         pendingTaskCount > 1
-          ? `${priorityTask.subtitle} · ${pendingTaskCount - 1} more waiting`
+          ? `${priorityTask.subtitle} · ${translate("home:cockpit.morePending", { count: pendingTaskCount - 1 })}`
           : priorityTask.subtitle,
       title: priorityTask.title,
     }
@@ -36,28 +37,28 @@ export function getPrimaryCockpitAction({
   if (nextShift) {
     return {
       icon: "calendar-clear-outline",
-      label: "View shift",
+      label: translate("home:cockpit.viewShift"),
       onPress: onOpenSchedule,
       subtitle: `${nextShift.dayLabel} · ${getShiftTimeRange(nextShift)} · ${nextShift.venueName}`,
-      title: "Your next shift is lined up",
+      title: translate("home:cockpit.nextShiftTitle"),
     }
   }
 
   if (unreadCount > 0) {
     return {
       icon: "notifications-outline",
-      label: "Review updates",
+      label: translate("home:cockpit.reviewUpdates"),
       onPress: onOpenNotifications,
-      subtitle: `${unreadCount} update${unreadCount === 1 ? "" : "s"} still waiting for you`,
-      title: "Nothing urgent, but there is fresh activity",
+      subtitle: translate("home:cockpit.updatesWaiting", { count: unreadCount }),
+      title: translate("home:cockpit.freshActivity"),
     }
   }
 
   return {
     icon: "sparkles-outline",
-    label: "Review planning",
+    label: translate("home:cockpit.reviewPlanning"),
     onPress: onOpenSchedule,
-    subtitle: "You are clear for now. This is a good moment to review upcoming work.",
-    title: "Everything important is under control",
+    subtitle: translate("home:cockpit.clearBody"),
+    title: translate("home:cockpit.underControl"),
   }
 }

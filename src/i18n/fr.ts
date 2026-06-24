@@ -121,6 +121,48 @@ const fr: Translations = {
       timeOffSubtitle: "Utilisez ceci si toute la journée ne vous convient plus",
       openTime: "Ouvrir Heures",
     },
+    shiftNotFound: "Service introuvable.",
+    quickActionsPrompt: "Choisissez une action de planning.",
+    maps: {
+      unavailableTitle: "Plans indisponible",
+      unavailableBody:
+        "Configurez une app de cartes sur cet appareil pour ouvrir le lieu du service.",
+    },
+    requestFlow: {
+      shiftSectionTitle: "Service",
+      datesSectionTitle: "Dates",
+      affectedDates: "Dates concernées",
+      pickShiftHint:
+        "Choisissez le service exact qui nécessite de l'aide pour que chacun examine le bon contexte.",
+      markDaysHint: "Marquez les jours qui ne correspondent plus à vos disponibilités actuelles.",
+      chooseDatesHint:
+        "Choisissez une ou plusieurs dates pour que votre manager puisse examiner la demande rapidement.",
+      swapSuccess:
+        "Votre manager et l'équipe qui coordonne les remplacements ont désormais les détails du service et le motif.",
+      datesSuccess:
+        "Votre manager dispose désormais des dates et du contexte nécessaires pour examiner cette demande.",
+      swapQuestion: "Pourquoi avez-vous besoin d'un échange ?",
+      swapTitle: "Échange de service",
+      swapCta: "Envoyer l'échange",
+      unavailabilityQuestion: "Pourquoi votre disponibilité change-t-elle ?",
+      unavailabilityTitle: "Indisponibilité",
+      unavailabilityCta: "Envoyer l'indisponibilité",
+      timeOffQuestion: "Pourquoi avez-vous besoin d'un congé ?",
+      timeOffTitle: "Congé",
+      timeOffCta: "Envoyer le congé",
+      incompleteError: "Choisissez l'objet de la demande et ajoutez un motif avant de l'envoyer.",
+    },
+    availabilityState: {
+      dateOverride: "Exception de date utilisée",
+      weeklyTemplate: "Votre modèle hebdomadaire utilisé",
+      unavailable: "Indisponible",
+      preferred: "Préfère travailler",
+      available: "Disponible",
+      unavailableDesc: "Vous avez marqué cette date comme indisponible.",
+      freeDesc: "Vous êtes libre à cette date, sauf si un nouveau service est attribué plus tard.",
+      overrideDesc: "La disponibilité de cette date utilise une exception de date.",
+      shiftsListed: "{{count}} services sont listés ci-dessous.",
+    },
     calls: {
       title: "Appels ouverts",
       noCallsTitle: "Aucun appel ouvert",
@@ -164,6 +206,9 @@ const fr: Translations = {
       endTime: "Heure de fin",
       end: "Fin",
       totalSpan: "Durée totale",
+      customDateHint: "Cette date utilise actuellement sa propre disponibilité personnalisée.",
+      customDateWarning:
+        "N'enregistrez cet écran que si cette date doit différer de vos heures habituelles.",
       templateHint:
         "Définissez votre modèle habituel ici, puis ajustez des dates précises uniquement en cas de changement.",
     },
@@ -204,6 +249,7 @@ const fr: Translations = {
         "Les demandes de congé apparaissent ici dès l'ouverture de la prochaine fenêtre de planning.",
       noteLabel: "Note",
       managerNotePlaceholder: "Tout ce que votre manager devrait savoir",
+      noteHelper: "Contexte optionnel affiché avec votre demande.",
     },
     leave: {
       title: "Congés",
@@ -392,6 +438,18 @@ const fr: Translations = {
       viewAll: "Voir tout",
     },
     topFocus: "Priorité",
+    cockpit: {
+      viewShift: "Voir le service",
+      nextShiftTitle: "Votre prochain service est prêt",
+      reviewUpdates: "Voir les mises à jour",
+      freshActivity: "Rien d'urgent, mais il y a de l'activité récente",
+      reviewPlanning: "Voir le planning",
+      clearBody:
+        "Vous êtes libre pour l'instant. C'est un bon moment pour examiner le travail à venir.",
+      underControl: "Tout ce qui est important est sous contrôle",
+      morePending: "{{count}} en attente",
+      updatesWaiting: "{{count}} mises à jour vous attendent",
+    },
     loadingA11y: "Chargement de l'accueil",
     earnings: {
       title: "Revenus {{month}}",
