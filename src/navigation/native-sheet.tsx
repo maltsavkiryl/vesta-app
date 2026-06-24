@@ -7,6 +7,7 @@ import type {
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack"
 
+import { translate } from "@/i18n/translate"
 import type { Theme } from "@/ui/foundations/theme"
 import { Text } from "@/ui/primitives/Text"
 import { firePressHaptic, type PressHapticIntent } from "@/utils/haptics"
@@ -257,7 +258,7 @@ export function createHeaderActionOptions(
             <HeaderProminentActionButton
               disabled={rightAction.disabled}
               haptic={rightAction.haptic}
-              label={rightAction.label ?? "Save"}
+              label={rightAction.label ?? translate("common:actions.save")}
               onPress={rightAction.onPress}
               theme={theme}
             />

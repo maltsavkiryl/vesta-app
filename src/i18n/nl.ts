@@ -30,6 +30,14 @@ const nl: Translations = {
     reset: "App herstarten",
     title: "Er is iets misgegaan",
   },
+  appLock: {
+    locked: "Vesta is vergrendeld",
+    subtitle: "Ontgrendel met biometrie om door te gaan.",
+    unlocking: "Ontgrendelen…",
+    unlock: "Ontgrendelen",
+    usePasscode: "Toegangscode gebruiken",
+    prompt: "Vesta ontgrendelen",
+  },
   notifications: {
     actions: {
       editTemplate: "Sjabloon bewerken",
@@ -115,6 +123,7 @@ const nl: Translations = {
       openInMapsA11y: "Locatie openen in Kaarten",
     },
     shiftDetail: {
+      backToPlanning: "Terug naar planning",
       notFoundTitle: "Shift niet meer beschikbaar",
       notFoundSubtitle:
         "Deze shift staat niet meer in je planning. Mogelijk is hij verwijderd of gewijzigd.",
@@ -181,6 +190,13 @@ const nl: Translations = {
       freeDesc: "Je bent vrij op deze datum, tenzij later een nieuwe shift wordt toegewezen.",
       overrideDesc: "De beschikbaarheid voor deze datum gebruikt een datum-uitzondering.",
       shiftsListed: "{{count}} shifts staan hieronder vermeld.",
+    },
+    calendarA11y: {
+      available: "beschikbaar",
+      preferred: "voorkeur om te werken",
+      unavailable: "niet beschikbaar",
+      shiftCount: "{{count}} shifts",
+      needsResponse: "reactie vereist",
     },
     requestCategories: {
       timeOffTitle: "Verlof",
@@ -252,6 +268,9 @@ const nl: Translations = {
       endTime: "Eindtijd",
       end: "Einde",
       totalSpan: "Totale duur",
+      totalSpanValue: "Totale duur {{duration}}",
+      overrideIntro:
+        "Gebruik andere beschikbaarheid dan je gebruikelijke {{weekday}}-uren voor deze datum.",
       customDateHint: "Deze datum gebruikt momenteel zijn eigen aangepaste beschikbaarheid.",
       customDateWarning:
         "Sla dit scherm alleen op als deze datum moet afwijken van je gebruikelijke uren.",
@@ -626,6 +645,7 @@ const nl: Translations = {
       overtime: "Overuren",
       confirm: "Uitklokken bevestigen",
       keepWorking: "Doorwerken",
+      backToTime: "Terug naar Tijd",
     },
     entryDetail: {
       notFoundTitle: "Registratie niet meer beschikbaar",
@@ -746,6 +766,17 @@ const nl: Translations = {
     },
     settings: {
       notifications: "Meldingen",
+      enabled: "Ingeschakeld",
+      muted: "Gedempt",
+      lastChanged: "Laatst gewijzigd {{date}}",
+      saving: "Opslaan…",
+      savePassword: "Wachtwoord opslaan",
+      payrollReadyDesc: "Klaar om naar werkgever te sturen",
+      payrollMissingDesc: "Voeg een IBAN toe om te verifiëren",
+      ready: "Klaar",
+      missing: "Ontbreekt",
+      faceIdOn: "Ingeschakeld om app te ontgrendelen",
+      faceIdOff: "Gebruik biometrie van het toestel om sneller te ontgrendelen",
       language: "Taal",
       accountAccess: "Accounttoegang",
       password: "Wachtwoord",
@@ -1034,6 +1065,14 @@ const nl: Translations = {
       "Ondertekende en lopende overeenkomsten verschijnen hier zodra je werkgever ze verstuurt.",
     payslipsEmptyFiltered: "Probeer een andere maand of wis de zoekopdracht.",
     payslipsEmpty: "Loonbrieven verschijnen hier nadat de loonadministratie is gepubliceerd.",
+    clearSearch: "Zoekopdracht wissen",
+    legalNoMatchTitle: "Geen overeenkomende juridische documenten",
+    legalNothingTitle: "Momenteel niets nodig",
+    contractsNoMatchTitle: "Geen overeenkomende contracten",
+    contractsNoneTitle: "Geen contracten in dossier",
+    payslipsNoMatchTitle: "Geen overeenkomende loonbrieven",
+    payslipsNoneTitle: "Nog geen loonbrieven",
+    uploadsStillNeeded: "{{count}} documenten moeten nog geüpload worden",
     chooseFileFirst: "Kies een bestand voordat je het document uploadt.",
     shareCannot: "Dit toestel kan het geselecteerde bestand niet delen.",
     shareContractPdfFailed: "Vesta kon de contract-PDF niet aanmaken.",

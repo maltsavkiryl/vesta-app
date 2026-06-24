@@ -26,7 +26,7 @@ export function ShiftDetailEmptyState() {
 
   return (
     <EmptyState
-      actionLabel="Back to Planning"
+      actionLabel={translate("planning:shiftDetail.backToPlanning")}
       icon={<Ionicons color={tokens.textMuted} name="calendar-outline" size={18} />}
       onAction={() => router.replace("/(app)/(tabs)/schedule")}
       subtitle={translate("planning:shiftDetail.notFoundSubtitle")}

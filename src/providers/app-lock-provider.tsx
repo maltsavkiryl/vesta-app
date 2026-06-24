@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useQuery } from "@tanstack/react-query"
 
 import { appRepositories } from "@/composition/repositories"
+import { translate } from "@/i18n/translate"
 import { useAppSession } from "@/providers/app-provider"
 import { appQueryKeys } from "@/services/app/app.queries"
 import { Text, useDesignTokens } from "@/ui"
@@ -86,8 +87,8 @@ export function AppLockProvider({ children }: PropsWithChildren) {
 
       setUnavailable(false)
       const result = await LocalAuthentication.authenticateAsync({
-        fallbackLabel: "Use passcode",
-        promptMessage: "Unlock Vesta",
+        fallbackLabel: translate("appLock:usePasscode"),
+        promptMessage: translate("appLock:prompt"),
       })
 
       if (result.success) {
@@ -190,13 +191,13 @@ function AppLockOverlay({
         </View>
         <Text
           size="lg"
-          text="Vesta is locked"
+          text={translate("appLock:locked")}
           weight="bold"
           style={{ color: tokens.textPrimary }}
         />
         <Text
           size="xs"
-          text="Unlock with biometrics to continue."
+          text={translate("appLock:subtitle")}
           style={[styles.subtitle, { color: tokens.textSecondary }]}
         />
       </View>
@@ -205,7 +206,7 @@ function AppLockOverlay({
       {isResolving ? null : (
         <View style={styles.action}>
           <Pressable
-            accessibilityLabel="Unlock"
+            accessibilityLabel={translate("appLock:unlock")}
             accessibilityRole="button"
             accessibilityState={{ disabled: authenticating }}
             disabled={authenticating}
@@ -217,7 +218,7 @@ function AppLockOverlay({
           >
             <Text
               size="xs"
-              text={authenticating ? "Unlocking…" : "Unlock"}
+              text={authenticating ? translate("appLock:unlocking") : translate("appLock:unlock")}
               weight="semiBold"
               style={{ color: tokens.background }}
             />

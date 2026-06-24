@@ -32,7 +32,7 @@ export function AttentionBanner({ count, onPress }: { count: number; onPress: ()
       }
     >
       <Text
-        text={`${count} document${count > 1 ? "s" : ""} still need${count === 1 ? "s" : ""} an upload`}
+        text={translate("documents:uploadsStillNeeded", { count })}
         size="xxs"
         weight="medium"
         style={[styles.flex, { color: tokens.danger }]}

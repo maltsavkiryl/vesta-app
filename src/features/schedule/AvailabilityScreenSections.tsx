@@ -70,7 +70,7 @@ export function AvailabilityIntro({ date, weekdayLabel }: { date: string; weekda
         <Text
           size="xs"
           style={{ color: tokens.textSecondary }}
-          text={`Use different availability than your usual ${weekdayLabel} hours for this date.`}
+          text={translate("planning:availability.overrideIntro", { weekday: weekdayLabel })}
         />
       </View>
     </MotionView>
