@@ -13,6 +13,7 @@ import {
   getTimeEntryWorkedLabel,
 } from "@/core/timeEntries"
 import { TimeHeroCard, timeHeroColors } from "@/features/time/components/TimeHeroCard"
+import { translate } from "@/i18n/translate"
 import {
   DetailRow,
   GroupedSection,
@@ -30,13 +31,13 @@ export function TimeEntryDetailEmptyState() {
     <SurfaceCard style={styles.emptyCard}>
       <Text
         style={{ color: tokens.textPrimary }}
-        text="Entry no longer available"
+        text={translate("time:entryDetail.notFoundTitle")}
         weight="semiBold"
       />
       <Text
         size="xs"
         style={{ color: tokens.textSecondary }}
-        text="This time entry is no longer in your saved history."
+        text={translate("time:entryDetail.notFoundSubtitle")}
       />
     </SurfaceCard>
   )
@@ -86,10 +87,17 @@ export function TimeEntryHero({
 
 export function TimeEntrySummarySection({ entry }: { entry: TimeEntry }) {
   return (
-    <GroupedSection title="Shift summary">
-      <DetailRow label="Worked" value={getTimeEntryWorkedLabel(entry)} />
-      <DetailRow label="Breaks" value={getTimeEntryBreakLabel(entry)} />
-      <DetailRow isLast label="Gross span" value={getTimeEntryGrossLabel(entry)} />
+    <GroupedSection title={translate("time:shiftSummary")}>
+      <DetailRow label={translate("time:worked")} value={getTimeEntryWorkedLabel(entry)} />
+      <DetailRow
+        label={translate("time:entryDetail.breaks")}
+        value={getTimeEntryBreakLabel(entry)}
+      />
+      <DetailRow
+        isLast
+        label={translate("time:entryDetail.grossSpan")}
+        value={getTimeEntryGrossLabel(entry)}
+      />
     </GroupedSection>
   )
 }
@@ -102,7 +110,7 @@ export function TimeEntryMapSection({
   mapRegion: NonNullable<ReturnType<typeof import("@/core/timeEntries").getTimeEntryMapRegion>>
 }) {
   return (
-    <GroupedSection title="Clock-in location">
+    <GroupedSection title={translate("time:entryDetail.clockInLocation")}>
       <View style={styles.mapWrapper}>
         <MapView
           initialRegion={mapRegion}
@@ -142,7 +150,7 @@ export function TimeEntryPhotoSection({ capturedAt, uri }: { capturedAt: string;
         <Text
           size="xxs"
           style={[styles.photoSectionTitle, { color: tokens.textMuted }]}
-          text="Clock-in proof photo"
+          text={translate("time:entryDetail.proofPhoto")}
           weight="semiBold"
         />
         <Text
@@ -167,7 +175,7 @@ export function TimeEntryBreaksSection({
   const tokens = useDesignTokens()
 
   return (
-    <GroupedSection title="Breaks">
+    <GroupedSection title={translate("time:entryDetail.breaks")}>
       {breakSegments.map((segment, index) => (
         <View
           key={segment.id}
@@ -213,7 +221,7 @@ export function TimeEntryBreaksSection({
 
 export function TimeEntryTimelineSection({ events }: { events: TimeEntryEvent[] }) {
   return (
-    <GroupedSection title="Timeline">
+    <GroupedSection title={translate("time:entryDetail.timeline")}>
       {events.map((event, index) => (
         <TimelineRow key={event.id} event={event} isLast={index === events.length - 1} />
       ))}

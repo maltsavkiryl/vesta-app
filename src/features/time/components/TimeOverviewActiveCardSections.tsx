@@ -2,6 +2,7 @@ import { Pressable, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { type SharedValue } from "react-native-reanimated"
 
+import { translate } from "@/i18n/translate"
 import { Text, appTypography, useDesignTokens } from "@/ui"
 
 import { formatHours, formatSeconds } from "../time.utils"
@@ -113,7 +114,12 @@ export function ActiveCardActions({
           ]}
         >
           <Ionicons color={tokens.warning} name="play-outline" size={17} />
-          <Text text="End break" size="xs" weight="semiBold" style={{ color: tokens.warning }} />
+          <Text
+            text={translate("time:activeCard.endBreak")}
+            size="xs"
+            weight="semiBold"
+            style={{ color: tokens.warning }}
+          />
         </Pressable>
       ) : (
         <View style={styles.actionGrid}>
@@ -132,7 +138,7 @@ export function ActiveCardActions({
           >
             <Ionicons color={tokens.accentForeground} name="cafe-outline" size={16} />
             <Text
-              text="Start break"
+              text={translate("time:activeCard.startBreak")}
               size="xs"
               weight="medium"
               style={{ color: tokens.accentForeground }}
@@ -150,7 +156,7 @@ export function ActiveCardActions({
           >
             <Ionicons color={tokens.accentForeground} name="log-out-outline" size={17} />
             <Text
-              text="Clock out"
+              text={translate("time:activeCard.clockOut")}
               size="xs"
               weight="semiBold"
               style={{ color: tokens.accentForeground }}
