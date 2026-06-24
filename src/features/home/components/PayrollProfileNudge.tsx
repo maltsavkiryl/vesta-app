@@ -3,37 +3,43 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { PayrollProfileGap } from "@/features/profile/payrollProfile"
+import type { TxKeyPath } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import { AppButton, MotionView, SurfaceCard, Text, useDesignTokens } from "@/ui"
 
 // Short, conversational fragments used to weave the gaps into a single sentence.
 // Keep these warm and plain — they read as "Add your bank account and home address…".
-const GAP_PHRASES: Record<string, string> = {
-  firstName: "name",
-  lastName: "name",
-  email: "email address",
-  phone: "phone number",
-  iban: "bank account",
-  ssin: "national number",
-  address: "home address",
+const GAP_PHRASE_KEYS: Record<string, TxKeyPath> = {
+  firstName: "home:payrollNudge.gaps.name",
+  lastName: "home:payrollNudge.gaps.name",
+  email: "home:payrollNudge.gaps.emailAddress",
+  phone: "home:payrollNudge.gaps.phoneNumber",
+  iban: "home:payrollNudge.gaps.bankAccount",
+  ssin: "home:payrollNudge.gaps.nationalNumber",
+  address: "home:payrollNudge.gaps.homeAddress",
 }
 
 function buildSubtitle(gaps: PayrollProfileGap[]): string {
   // De-duplicate phrases (first/last name both map to "name") while preserving order.
   const phrases = gaps
-    .map((gap) => GAP_PHRASES[gap.key] ?? gap.label.toLowerCase())
+    .map((gap) =>
+      GAP_PHRASE_KEYS[gap.key] ? translate(GAP_PHRASE_KEYS[gap.key]) : gap.label.toLowerCase(),
+    )
     .filter((phrase, index, all) => all.indexOf(phrase) === index)
 
   let list: string
   if (phrases.length === 1) {
     list = phrases[0]
   } else if (phrases.length === 2) {
-    list = `${phrases[0]} and ${phrases[1]}`
+    list = translate("home:payrollNudge.listTwo", { a: phrases[0], b: phrases[1] })
   } else {
-    list = `${phrases.slice(0, -1).join(", ")}, and ${phrases[phrases.length - 1]}`
+    list = translate("home:payrollNudge.listMany", {
+      head: phrases.slice(0, -1).join(", "),
+      last: phrases[phrases.length - 1],
+    })
   }
 
-  return `Add your ${list} so you get paid on time.`
+  return translate("home:payrollNudge.subtitle", { list })
 }
 
 export function PayrollProfileNudge({
@@ -57,7 +63,7 @@ export function PayrollProfileNudge({
     [tokens.accentSoft],
   )
 
-  const accessibilityLabel = `Finish setting up payroll. ${subtitle}`
+  const accessibilityLabel = translate("home:payrollNudge.a11y", { subtitle })
 
   return (
     <MotionView>

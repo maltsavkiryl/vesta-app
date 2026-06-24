@@ -7,6 +7,7 @@ import { payslips } from "@/features/documents/documents.data"
 import { useHomeQuery } from "@/features/home/data/home.queries"
 import { useProfileQuery } from "@/features/profile/data/profile.queries"
 import { getPayrollProfileGaps } from "@/features/profile/payrollProfile"
+import { translate } from "@/i18n/translate"
 
 import type { TaskItem } from "./components/HomeTaskSections"
 import { deriveHomeScreenPolicy, sortTasksByUrgency } from "./homeScreenPolicy"
@@ -25,10 +26,10 @@ const GAP_SECTION_ROUTE: Record<string, string> = {
 
 function getGreeting() {
   const hour = new Date().getHours()
-  if (hour < 5) return "Good night"
-  if (hour < 12) return "Good morning"
-  if (hour < 18) return "Good afternoon"
-  return "Good evening"
+  if (hour < 5) return translate("home:greeting.night")
+  if (hour < 12) return translate("home:greeting.morning")
+  if (hour < 18) return translate("home:greeting.afternoon")
+  return translate("home:greeting.evening")
 }
 
 export function useHomeScreen() {

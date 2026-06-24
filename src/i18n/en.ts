@@ -350,6 +350,18 @@ const en = {
       title: "Finish setting up payroll",
       cta: "Complete profile",
       dismiss: "Dismiss",
+      subtitle: "Add your {{list}} so you get paid on time.",
+      listTwo: "{{a}} and {{b}}",
+      listMany: "{{head}}, and {{last}}",
+      a11y: "Finish setting up payroll. {{subtitle}}",
+      gaps: {
+        name: "name",
+        emailAddress: "email address",
+        phoneNumber: "phone number",
+        bankAccount: "bank account",
+        nationalNumber: "national number",
+        homeAddress: "home address",
+      },
     },
     upcoming: {
       title: "Upcoming",
