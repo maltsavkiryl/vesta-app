@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Pressable } from "react-native"
+import { Platform, Pressable } from "react-native"
 import Animated, {
   Easing,
   LinearTransition,
@@ -122,7 +122,11 @@ export function TimeOverviewCard({
     </Animated.View>
   )
 
-  if (!collapsible) return animatedCard
+  // On web, a whole-card toggle button can't wrap the card's own buttons (Clock
+  // in/out, breaks) — that nests <button> in <button> (invalid HTML) and lets
+  // inner clicks bubble to the toggle. Web relies on the header CollapseToggle
+  // chevron instead; native keeps tap-anywhere via the responder system.
+  if (!collapsible || Platform.OS === "web") return animatedCard
 
   return (
     <Pressable
