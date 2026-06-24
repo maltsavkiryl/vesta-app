@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { HomeTask, NotificationItem } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { ListCardItem, Text, useDesignTokens } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
@@ -109,7 +110,11 @@ export const TaskRow = memo(function TaskRow({
         />
       }
       style={{ backgroundColor: tokens.surface }}
-      subtitle={item.completed ? `Done ${item.completedDate}` : item.subtitle}
+      subtitle={
+        item.completed
+          ? translate("home:tasks.doneOn", { date: item.completedDate })
+          : item.subtitle
+      }
       subtitleStyle={{ color: item.completed ? tokens.textMuted : tokens.textSecondary }}
       title={item.title}
       titleStyle={[

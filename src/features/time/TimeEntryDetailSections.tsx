@@ -54,7 +54,11 @@ export function TimeEntryHero({
     <TimeHeroCard contentStyle={styles.heroContent} variant="compact">
       <View style={styles.heroTopRow}>
         <StatusBadge
-          label={entry.status === "approved" ? "Approved" : "Needs review"}
+          label={
+            entry.status === "approved"
+              ? translate("time:entryDetail.approved")
+              : translate("time:entryDetail.needsReview")
+          }
           tone={entry.status === "approved" ? "success" : "warning"}
         />
         <Text
@@ -192,7 +196,7 @@ export function TimeEntryBreaksSection({
             <Text
               size="xs"
               style={{ color: tokens.textPrimary }}
-              text={`Break ${index + 1}`}
+              text={translate("time:entryDetail.breakNumber", { number: index + 1 })}
               weight="semiBold"
             />
             <Text
@@ -279,7 +283,7 @@ function TimelineRow({ event, isLast }: { event: TimeEntryEvent; isLast: boolean
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={event.location?.addressLabel ?? "No location captured"}
+          text={event.location?.addressLabel ?? translate("time:entryDetail.noLocation")}
         />
       </View>
       <Text
