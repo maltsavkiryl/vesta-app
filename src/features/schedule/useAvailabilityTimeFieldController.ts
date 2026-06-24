@@ -9,6 +9,7 @@ import {
   nearestMinute,
   type AvailabilityTimeField,
 } from "@/features/schedule/availability.utils"
+import { translate } from "@/i18n/translate"
 
 type AvailabilityTimeRouteState = {
   timeField?: string
@@ -75,7 +76,10 @@ export function useAvailabilityTimeFieldController({
             date,
             field,
             returnTo: "availability",
-            title: field === "startTime" ? "Choose start time" : "Choose end time",
+            title:
+              field === "startTime"
+                ? translate("planning:availability.chooseStartTime")
+                : translate("planning:availability.chooseEndTime"),
             value: field === "startTime" ? startTime : endTime,
           },
           pathname: "/(app)/availability-time-picker",

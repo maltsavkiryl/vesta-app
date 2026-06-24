@@ -271,6 +271,8 @@ const nl: Translations = {
       totalSpanValue: "Totale duur {{duration}}",
       overrideIntro:
         "Gebruik andere beschikbaarheid dan je gebruikelijke {{weekday}}-uren voor deze datum.",
+      chooseStartTime: "Kies starttijd",
+      chooseEndTime: "Kies eindtijd",
       customDateHint: "Deze datum gebruikt momenteel zijn eigen aangepaste beschikbaarheid.",
       customDateWarning:
         "Sla dit scherm alleen op als deze datum moet afwijken van je gebruikelijke uren.",
@@ -657,6 +659,7 @@ const nl: Translations = {
       timeline: "Tijdlijn",
       approved: "Goedgekeurd",
       needsReview: "Nakijken nodig",
+      review: "Nakijken",
       breakNumber: "Pauze {{number}}",
       noLocation: "Geen locatie vastgelegd",
     },
@@ -670,6 +673,8 @@ const nl: Translations = {
       onShift: "Aan het werk {{hours}} · {{venue}}",
       onBreakA11y: "Op pauze {{hours}}",
       payableA11y: "Betaalbare tijd {{hours}}",
+      expandCard: "Tijdkaart uitvouwen",
+      collapseCard: "Tijdkaart invouwen",
     },
     startTimer: "Timer starten",
     entryDetailTitle: "Registratiedetails",
@@ -679,6 +684,7 @@ const nl: Translations = {
     noManualEmployer:
       "Geen gekoppelde werkgever staat momenteel timerstarts toe zonder geplande shift.",
     clockedShift: "Geklokte shift",
+    manualTimer: "Handmatige timer",
     capture: {
       locationNotShared: "Locatie niet gedeeld",
       savedWithoutMap: "De registratie wordt nog steeds opgeslagen zonder kaartmomentopname.",
@@ -877,6 +883,8 @@ const nl: Translations = {
       dark: "Donker",
       motionReduced: "Beperkt",
       motionFull: "Volledig",
+      currentSubtitle: "Huidige weergave",
+      useSubtitle: "Deze weergave gebruiken",
     },
     setup: {
       accountSetup: "Accountconfiguratie",
@@ -946,6 +954,8 @@ const nl: Translations = {
     photo: {
       takePhoto: "Foto maken",
       choosePhoto: "Foto kiezen",
+      change: "Profielfoto wijzigen",
+      add: "Profielfoto toevoegen",
       title: "Profielfoto",
       prompt: "Kies hoe je je profielfoto wilt bijwerken.",
       cameraNeeded: "Cameratoegang nodig",
@@ -1088,6 +1098,7 @@ const nl: Translations = {
     reviewSign: "Bekijken & ondertekenen",
     sign: "Ondertekenen",
     uploadedDocument: "Geüpload document",
+    upload: "Uploaden",
     statusAvailable: "Beschikbaar",
     statusMissing: "Ontbreekt",
     statusPending: "In behandeling",

@@ -113,7 +113,9 @@ export function RegisterScreen() {
           value={password}
           rightAccessory={
             <AuthAccessoryButton
-              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+              accessibilityLabel={
+                showPassword ? translate("auth:hidePassword") : translate("auth:showPassword")
+              }
               icon={showPassword ? "eye-off-outline" : "eye-outline"}
               onPress={toggleShowPassword}
               style={[styles.clearButton, { backgroundColor: AUTH_SCREEN_PALETTE.clearButton }]}

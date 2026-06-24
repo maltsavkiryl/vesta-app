@@ -140,7 +140,10 @@ function EntryRow({
   const weekday = date ? format(date, "EEE") : "--"
   const day = date ? format(date, "d") : "--"
   const statusColor = entry.status === "approved" ? tokens.success : tokens.warning
-  const trailingLabel = entry.status === "approved" ? "Approved" : "Review"
+  const trailingLabel =
+    entry.status === "approved"
+      ? translate("time:entryDetail.approved")
+      : translate("time:entryDetail.review")
   const trailingTone = statusColor
 
   return (

@@ -27,7 +27,9 @@ export function ThemeOption({
   selected: boolean
 }) {
   const tokens = useDesignTokens()
-  const subtitle = selected ? "Current appearance" : "Use this appearance"
+  const subtitle = selected
+    ? translate("profile:appearance.currentSubtitle")
+    : translate("profile:appearance.useSubtitle")
 
   return (
     <SelectionRow

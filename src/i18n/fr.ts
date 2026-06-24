@@ -275,6 +275,8 @@ const fr: Translations = {
       totalSpanValue: "Durée totale {{duration}}",
       overrideIntro:
         "Utilisez une disponibilité différente de vos heures habituelles du {{weekday}} pour cette date.",
+      chooseStartTime: "Choisir l'heure de début",
+      chooseEndTime: "Choisir l'heure de fin",
       customDateHint: "Cette date utilise actuellement sa propre disponibilité personnalisée.",
       customDateWarning:
         "N'enregistrez cet écran que si cette date doit différer de vos heures habituelles.",
@@ -665,6 +667,7 @@ const fr: Translations = {
       timeline: "Chronologie",
       approved: "Approuvé",
       needsReview: "À vérifier",
+      review: "Vérifier",
       breakNumber: "Pause {{number}}",
       noLocation: "Aucune position enregistrée",
     },
@@ -678,6 +681,8 @@ const fr: Translations = {
       onShift: "En service {{hours}} · {{venue}}",
       onBreakA11y: "En pause {{hours}}",
       payableA11y: "Temps payable {{hours}}",
+      expandCard: "Développer la carte de temps",
+      collapseCard: "Réduire la carte de temps",
     },
     startTimer: "Démarrer le minuteur",
     entryDetailTitle: "Détails de l'entrée",
@@ -687,6 +692,7 @@ const fr: Translations = {
     noManualEmployer:
       "Aucun employeur lié n'autorise actuellement le démarrage du minuteur sans service planifié.",
     clockedShift: "Service pointé",
+    manualTimer: "Minuteur manuel",
     capture: {
       locationNotShared: "Localisation non partagée",
       savedWithoutMap: "L'entrée sera tout de même enregistrée sans capture de carte.",
@@ -885,6 +891,8 @@ const fr: Translations = {
       dark: "Sombre",
       motionReduced: "Réduit",
       motionFull: "Complet",
+      currentSubtitle: "Apparence actuelle",
+      useSubtitle: "Utiliser cette apparence",
     },
     setup: {
       accountSetup: "Configuration du compte",
@@ -958,6 +966,8 @@ const fr: Translations = {
     photo: {
       takePhoto: "Prendre une photo",
       choosePhoto: "Choisir une photo",
+      change: "Changer la photo de profil",
+      add: "Ajouter une photo de profil",
       title: "Photo de profil",
       prompt: "Choisissez comment mettre à jour votre photo de profil.",
       cameraNeeded: "Accès à la caméra nécessaire",
@@ -1103,6 +1113,7 @@ const fr: Translations = {
     reviewSign: "Vérifier et signer",
     sign: "Signer",
     uploadedDocument: "Document téléversé",
+    upload: "Téléverser",
     statusAvailable: "Disponible",
     statusMissing: "Manquant",
     statusPending: "En attente",
