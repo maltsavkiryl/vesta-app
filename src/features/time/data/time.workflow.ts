@@ -7,6 +7,7 @@ import type {
   Shift,
   UserProfile,
 } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { persistLocalAsset } from "@/services/app/file-storage.service"
 import { failure, success, type Result } from "@/shared/result"
 
@@ -160,7 +161,7 @@ export function resolveClockStart(input: {
   if (!recommendedOption) {
     return failure({
       type: "no-clock-context",
-      message: "No linked employer currently allows timer starts without a scheduled shift.",
+      message: translate("time:noManualEmployer"),
     })
   }
 

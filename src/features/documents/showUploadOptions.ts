@@ -1,5 +1,7 @@
 import { Alert } from "react-native"
 
+import { translate } from "@/i18n/translate"
+
 export type UploadSource = "camera" | "files"
 
 export function showNativeUploadOptions({
@@ -11,9 +13,9 @@ export function showNativeUploadOptions({
   onSelect: (source: UploadSource) => void
   title: string
 }) {
-  Alert.alert(title, "Choose an upload source.", [
-    { text: "Take photo", onPress: () => onSelect("camera") },
-    { text: "Browse files", onPress: () => onSelect("files") },
+  Alert.alert(title, translate("documents:uploadSourcePrompt"), [
+    { text: translate("documents:takePhoto"), onPress: () => onSelect("camera") },
+    { text: translate("documents:browseFiles"), onPress: () => onSelect("files") },
     { style: "cancel", text: "Cancel", onPress: onCancel },
   ])
 }

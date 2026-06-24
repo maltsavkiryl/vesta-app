@@ -4,6 +4,8 @@
 // eslint-disable-next-line react-native/split-platform-components
 import { ActionSheetIOS } from "react-native"
 
+import { translate } from "@/i18n/translate"
+
 import type { ClockEmployerOptionSheetItem } from "./showClockEmployerOptions.types"
 
 export function showClockEmployerOptionsIos({
@@ -16,7 +18,7 @@ export function showClockEmployerOptionsIos({
       {
         cancelButtonIndex: options.length,
         options: [...options.map((option) => option.title), "Cancel"],
-        title: "Choose the workplace for this timer.",
+        title: translate("time:chooseWorkplacePrompt"),
       },
       (buttonIndex) => {
         const selectedOption = options[buttonIndex]

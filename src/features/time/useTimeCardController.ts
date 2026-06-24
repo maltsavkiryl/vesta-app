@@ -9,6 +9,7 @@ import type { IdleClockCardState } from "@/features/time/components/timeOverview
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { useTimeDataQuery } from "@/features/time/data/time.queries"
 import { formatClockStartDistance, resolveClockStart } from "@/features/time/data/time.workflow"
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 import { useTimeClockActions } from "./useTimeClockActions"
@@ -39,13 +40,13 @@ function buildIdleClockCardState(
 ): IdleClockCardState {
   if (!resolution.ok) {
     return {
-      actionLabel: "Setup needed",
-      detailLabel: "Manual time tracking is not enabled for your linked workplaces",
+      actionLabel: translate("time:card.setupNeeded"),
+      detailLabel: translate("time:card.manualDisabled"),
       disabled: true,
-      helperLabel: "Ask your employer to enable clock-ins without a scheduled shift.",
+      helperLabel: translate("time:card.askEmployer"),
       kind: "unavailable",
-      subtitle: "You can only start time from a workplace that allows manual clock-ins.",
-      title: "No workplace ready",
+      subtitle: translate("time:card.onlyManual"),
+      title: translate("time:card.noWorkplaceReady"),
     }
   }
 
@@ -61,7 +62,7 @@ function buildIdleClockCardState(
       detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.context.venueAddress}`,
       helperLabel: `Available from ${getClockInOpenLabel(recommendedOption.context.scheduledStart)}`,
       kind: "shift",
-      subtitle: `${recommendedOption.context.role ?? "Scheduled shift"} · ${getPlannedDurationLabel(
+      subtitle: `${recommendedOption.context.role ?? translate("time:card.scheduledShift")} · ${getPlannedDurationLabel(
         recommendedOption.context.scheduledStart,
         recommendedOption.context.scheduledEnd,
       )} planned`,
@@ -71,27 +72,27 @@ function buildIdleClockCardState(
 
   if (mode === "single-employer") {
     return {
-      actionLabel: "Start timer",
+      actionLabel: translate("time:startTimer"),
       detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.locationLabel}`,
-      helperLabel: "No scheduled shift is needed here.",
+      helperLabel: translate("time:card.noShiftNeeded"),
       kind: "single-employer",
-      subtitle: "Start tracking time even when you are not scheduled.",
+      subtitle: translate("time:card.trackUnscheduled"),
       title: recommendedOption.context.venueName,
     }
   }
 
   const distanceLabel = recommendedOption.inGeofence
-    ? "In geofence"
+    ? translate("time:card.inGeofence")
     : formatClockStartDistance(recommendedOption.distanceMeters)
 
   return {
-    actionLabel: "Start timer",
+    actionLabel: translate("time:startTimer"),
     detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.locationLabel}`,
     helperLabel: distanceLabel
       ? `${distanceLabel} away. Closest workplace is suggested first.`
-      : "Closest workplace is suggested first.",
+      : translate("time:card.closestFirst"),
     kind: "multiple-employers",
-    subtitle: "Choose a workplace, then start tracking time without a scheduled shift.",
+    subtitle: translate("time:card.chooseThenTrack"),
     title: recommendedOption.context.venueName,
   }
 }

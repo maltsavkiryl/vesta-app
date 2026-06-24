@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react"
 import { Alert, Linking } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 import { getCalendarFeedUrl } from "./data/calendar.service"
@@ -18,7 +19,7 @@ export function useCalendarSync() {
     try {
       const url = await getCalendarFeedUrl()
       if (!url) {
-        Alert.alert("Calendar unavailable", "Vesta couldn't set up your calendar feed right now.")
+        Alert.alert(translate("calendar:unavailable"), translate("calendar:setupFailed"))
         return
       }
 
@@ -27,7 +28,7 @@ export function useCalendarSync() {
       await Linking.openURL(target)
       fireHaptic("success")
     } catch {
-      Alert.alert("Calendar unavailable", "Vesta couldn't open your calendar feed.")
+      Alert.alert(translate("calendar:unavailable"), translate("calendar:openFailed"))
     } finally {
       setIsSyncing(false)
     }
