@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import type { DesignTokens } from "@/ui"
 
 import type { DisplayDocumentStatus, DocumentStatusConfig } from "./documents.types"
@@ -14,37 +15,37 @@ export function getDocumentStatusConfig(
       backgroundColor: `${tokens.accent}14`,
       color: tokens.accent,
       icon: "document-text-outline",
-      label: "Available",
+      label: translate("documents:statusAvailable"),
     },
     missing: {
       backgroundColor: `${tokens.danger}14`,
       color: tokens.danger,
       icon: "alert-circle-outline",
-      label: "Missing",
+      label: translate("documents:statusMissing"),
     },
     pending: {
       backgroundColor: `${tokens.warning}14`,
       color: tokens.warning,
       icon: "time-outline",
-      label: "Pending",
+      label: translate("documents:statusPending"),
     },
     processing: {
       backgroundColor: `${tokens.warning}14`,
       color: tokens.warning,
       icon: "time-outline",
-      label: "Under review",
+      label: translate("documents:underReview"),
     },
     signed: {
       backgroundColor: `${tokens.success}14`,
       color: tokens.success,
       icon: "checkmark-circle-outline",
-      label: "Signed",
+      label: translate("documents:statusSigned"),
     },
     verified: {
       backgroundColor: `${tokens.success}14`,
       color: tokens.success,
       icon: "checkmark-circle-outline",
-      label: "Approved",
+      label: translate("documents:statusApproved"),
     },
   } satisfies Record<
     "available" | "missing" | "pending" | "processing" | "signed" | "verified",

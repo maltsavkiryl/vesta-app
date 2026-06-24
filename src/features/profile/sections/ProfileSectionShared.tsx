@@ -66,9 +66,13 @@ export function AppearanceSection({
     <GroupedSection title={translate("profile:appearance.title")}>
       {(
         [
-          { icon: "phone-portrait-outline", label: "System", value: "system" },
-          { icon: "sunny-outline", label: "Light", value: "light" },
-          { icon: "moon-outline", label: "Dark", value: "dark" },
+          {
+            icon: "phone-portrait-outline",
+            label: translate("profile:appearance.system"),
+            value: "system",
+          },
+          { icon: "sunny-outline", label: translate("profile:appearance.light"), value: "light" },
+          { icon: "moon-outline", label: translate("profile:appearance.dark"), value: "dark" },
         ] satisfies Array<{
           icon: keyof typeof Ionicons.glyphMap
           label: string
@@ -99,9 +103,21 @@ export function MotionSection({
     <GroupedSection title={translate("profile:appearance.motion")}>
       {(
         [
-          { icon: "phone-portrait-outline", label: "System", value: "system" },
-          { icon: "swap-vertical-outline", label: "Reduced", value: "reduced" },
-          { icon: "sparkles-outline", label: "Full", value: "full" },
+          {
+            icon: "phone-portrait-outline",
+            label: translate("profile:appearance.system"),
+            value: "system",
+          },
+          {
+            icon: "swap-vertical-outline",
+            label: translate("profile:appearance.motionReduced"),
+            value: "reduced",
+          },
+          {
+            icon: "sparkles-outline",
+            label: translate("profile:appearance.motionFull"),
+            value: "full",
+          },
         ] satisfies Array<{
           icon: keyof typeof Ionicons.glyphMap
           label: string
