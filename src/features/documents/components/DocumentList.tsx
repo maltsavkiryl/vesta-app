@@ -80,7 +80,7 @@ export function RequiredDocumentRow({
         <DocumentRowTail
           accent={tokens.accent}
           accentForeground={tokens.accentForeground}
-          actionLabel={isMissing ? "Upload" : "View"}
+          actionLabel={isMissing ? translate("documents:upload") : translate("documents:view")}
           isMissing={isMissing}
           showStatusText={showsStatusText}
           statusBackgroundColor={status.backgroundColor}
