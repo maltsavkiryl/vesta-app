@@ -62,6 +62,7 @@ const nl: Translations = {
     },
     markAllRead: "Alles als gelezen markeren",
     title: "Meldingen",
+    bellA11yUnread: "Meldingen, je hebt ongelezen items",
     inbox: "Postvak",
     dismissNotification: "Melding sluiten",
     unread: "{{count}} ongelezen",

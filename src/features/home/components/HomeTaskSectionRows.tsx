@@ -122,6 +122,7 @@ export const TaskRow = memo(function TaskRow({
         ) : (
           <View style={styles.taskActions}>
             <Pressable
+              accessibilityRole="button"
               onPress={onComplete}
               style={[styles.taskButton, { backgroundColor: tokens.accentMuted }]}
             >

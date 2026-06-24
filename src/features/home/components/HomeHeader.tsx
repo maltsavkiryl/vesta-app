@@ -44,7 +44,14 @@ export function HomeHeader({
         ) : null}
       </View>
 
-      <Pressable hitSlop={10} onPress={onNotificationsPress}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          hasUnread ? translate("notifications:bellA11yUnread") : translate("notifications:title")
+        }
+        hitSlop={10}
+        onPress={onNotificationsPress}
+      >
         <View
           style={[
             styles.notificationButton,
