@@ -172,12 +172,23 @@ const nl: Translations = {
       hoursLabel: "Uren",
     },
   },
+  onboarding: {
+    welcome: {
+      titleNamed: "Welkom bij Vesta,\n{{name}}.",
+      title: "Welkom bij Vesta.",
+      subtitle:
+        "Laten we je account in een paar snelle stappen klaarmaken. Je kunt later alles aanpassen.",
+      getStarted: "Aan de slag",
+      skip: "Nu overslaan",
+    },
+  },
   home: {
     greeting: {
       night: "Goedenacht",
       morning: "Goedemorgen",
       afternoon: "Goedemiddag",
       evening: "Goedenavond",
+      welcomeBack: "Welkom terug",
     },
     errorTitle: "Er is iets misgegaan",
     errorSubtitle:

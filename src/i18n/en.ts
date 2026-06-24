@@ -169,12 +169,23 @@ const en = {
       hoursLabel: "Hours",
     },
   },
+  onboarding: {
+    welcome: {
+      titleNamed: "Welcome to Vesta,\n{{name}}.",
+      title: "Welcome to Vesta.",
+      subtitle:
+        "Let's get your account ready in a few quick steps. You can change everything later.",
+      getStarted: "Get started",
+      skip: "Skip for now",
+    },
+  },
   home: {
     greeting: {
       night: "Good night",
       morning: "Good morning",
       afternoon: "Good afternoon",
       evening: "Good evening",
+      welcomeBack: "Welcome back",
     },
     errorTitle: "Something went wrong",
     errorSubtitle: "We couldn't load your home overview. Check your connection and try again.",

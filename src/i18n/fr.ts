@@ -173,12 +173,23 @@ const fr: Translations = {
       hoursLabel: "Heures",
     },
   },
+  onboarding: {
+    welcome: {
+      titleNamed: "Bienvenue chez Vesta,\n{{name}}.",
+      title: "Bienvenue chez Vesta.",
+      subtitle:
+        "Préparons votre compte en quelques étapes rapides. Vous pourrez tout modifier plus tard.",
+      getStarted: "Commencer",
+      skip: "Passer pour l'instant",
+    },
+  },
   home: {
     greeting: {
       night: "Bonne nuit",
       morning: "Bonjour",
       afternoon: "Bon après-midi",
       evening: "Bonsoir",
+      welcomeBack: "Bon retour",
     },
     errorTitle: "Une erreur est survenue",
     errorSubtitle:
