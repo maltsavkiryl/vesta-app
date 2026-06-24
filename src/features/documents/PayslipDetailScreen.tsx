@@ -26,7 +26,7 @@ export function PayslipDetailScreen() {
   const headerActions = payslip
     ? createHeaderActionOptions(theme, {
         right: {
-          accessibilityLabel: "Download payslip PDF",
+          accessibilityLabel: translate("documents:downloadPayslipA11y"),
           iconName: "cloud-download-outline",
           iosIconName: "icloud.and.arrow.down",
           kind: "icon",

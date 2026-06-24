@@ -9,6 +9,7 @@ const fr: Translations = {
       close: "Fermer",
       done: "Terminé",
       ok: "OK",
+      openSettings: "Ouvrir les réglages",
       retry: "Réessayer",
       save: "Enregistrer",
       search: "Rechercher",
@@ -251,6 +252,9 @@ const fr: Translations = {
       alreadyClaimed: "Ce service a déjà été pris",
       forbidden: "Vous n'êtes pas éligible pour ce service",
       conflict: "Cet appel entre en conflit avec votre planning actuel.",
+      modeOpenCall: "Ouvert",
+      modeUrgent: "Urgent",
+      modeFillIn: "Remplacement",
     },
     todos: {
       title: "Tâches du jour",
@@ -350,6 +354,7 @@ const fr: Translations = {
       employer: "Employeur",
       total: "Total",
       hoursLabel: "Heures",
+      hoursUnit: "h",
     },
   },
   auth: {
@@ -706,6 +711,8 @@ const fr: Translations = {
     capture: {
       locationNotShared: "Localisation non partagée",
       savedWithoutMap: "L'entrée sera tout de même enregistrée sans capture de carte.",
+      locationPermissionDeniedBody:
+        "L'accès à la localisation a été refusé. Ouvrez les Réglages pour autoriser Vesta à utiliser votre localisation.",
       locationUnavailable: "Localisation indisponible",
       locationFailed: "Nous n'avons pas pu capturer votre localisation pour cet événement.",
       cameraNeeded: "Accès à la caméra nécessaire",
@@ -1077,6 +1084,7 @@ const fr: Translations = {
     signatureDisclaimer:
       "En signant, vous confirmez avoir lu et accepté toutes les conditions de ce document.",
     downloadAction: "Télécharger",
+    downloadPayslipA11y: "Télécharger le PDF de la fiche de paie",
     signContract: "Signer le contrat",
     shareFile: "Partager le fichier",
     uploadDetails: "Détails du téléversement",
@@ -1085,6 +1093,8 @@ const fr: Translations = {
     uploaded: "Téléversé",
     fileName: "Nom du fichier",
     format: "Format",
+    unknown: "Inconnu",
+    unknownFormat: "Inconnu",
     loadError: "Impossible de charger les documents",
     loadErrorSubtitle: "Vérifiez votre connexion et réessayez.",
     searchPlaceholder: "Rechercher des documents...",

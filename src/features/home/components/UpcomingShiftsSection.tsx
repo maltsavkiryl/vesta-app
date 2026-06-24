@@ -2,6 +2,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 
+import { formatDayOfMonth, formatMonthAbbr } from "@/core/date"
 import type { Shift } from "@/core/models"
 import { translate } from "@/i18n/translate"
 import { EmptyState, SectionBlock, Text, useDesignTokens } from "@/ui"
@@ -20,7 +21,8 @@ function UpcomingShiftCard({
   const tokens = useDesignTokens()
   const { animatedStyle: pressStyle, pressHandlers } = usePressScale({ pressedScale: 0.975 })
   const { animatedStyle: entranceStyle } = useListItemEntrance(index, { baseDelay: 30, step: 40 })
-  const dayNumber = shift.date.split("-")[2]
+  const dayNumber = formatDayOfMonth(shift.date)
+  const monthAbbr = formatMonthAbbr(shift.date)
 
   return (
     <Animated.View style={[entranceStyle, pressStyle]}>
@@ -46,11 +48,19 @@ function UpcomingShiftCard({
           />
         </View>
 
-        <Text
-          text={dayNumber}
-          weight="bold"
-          style={[styles.dayNumber, { color: tokens.textPrimary }]}
-        />
+        <View style={styles.dayNumberRow}>
+          <Text
+            text={dayNumber}
+            weight="bold"
+            style={[styles.dayNumber, { color: tokens.textPrimary }]}
+          />
+          <Text
+            text={monthAbbr}
+            size="xxs"
+            weight="semiBold"
+            style={[styles.monthAbbr, { color: tokens.textMuted }]}
+          />
+        </View>
 
         <View style={styles.copyStack}>
           <Text
@@ -129,7 +139,15 @@ const styles = StyleSheet.create({
   dayNumber: {
     fontSize: 32,
     lineHeight: 36,
+  },
+  dayNumberRow: {
+    alignItems: "flex-end",
+    flexDirection: "row",
+    gap: 4,
     marginTop: 10,
+  },
+  monthAbbr: {
+    marginBottom: 4,
   },
   upcomingCard: {
     borderCurve: "continuous",

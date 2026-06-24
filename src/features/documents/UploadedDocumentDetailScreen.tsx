@@ -16,6 +16,23 @@ import {
 import { useDocumentsStateQuery } from "./data/documents.queries"
 import { useOpenDocument } from "./useOpenDocument"
 
+function formatMimeType(mimeType: string): string {
+  const lower = mimeType.toLowerCase()
+  if (lower === "application/pdf") return "PDF"
+  if (lower.startsWith("image/jpeg") || lower.startsWith("image/jpg")) return "JPEG"
+  if (lower.startsWith("image/png")) return "PNG"
+  if (lower.startsWith("image/")) return "Image"
+  if (
+    lower === "application/msword" ||
+    lower === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  )
+    return "Word"
+  if (lower === "text/plain") return "Text"
+  // Strip subtype prefix for unknown types (e.g. "application/zip" → "zip")
+  const slash = mimeType.lastIndexOf("/")
+  return slash >= 0 ? mimeType.slice(slash + 1).toUpperCase() : mimeType
+}
+
 export function UploadedDocumentDetailScreen() {
   const tokens = useDesignTokens()
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -54,16 +71,20 @@ export function UploadedDocumentDetailScreen() {
             />
             <DetailItem
               label={translate("documents:fileName")}
-              value={document.uploadedFileName ?? "Unknown"}
+              value={document.uploadedFileName ?? translate("documents:unknown")}
             />
             <DetailItem
               label={translate("documents:uploaded")}
-              value={document.uploadedAt ?? "Unknown"}
+              value={document.uploadedAt ?? translate("documents:unknown")}
             />
             <DetailItem
               isLast
               label={translate("documents:format")}
-              value={document.uploadedMimeType ?? "Unknown"}
+              value={
+                document.uploadedMimeType
+                  ? formatMimeType(document.uploadedMimeType)
+                  : translate("documents:unknownFormat")
+              }
             />
           </GroupedSection>
 

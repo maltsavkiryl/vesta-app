@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { Alert } from "react-native"
 
 import type { Employer, Shift, UserProfile } from "@/core/models"
@@ -28,12 +28,16 @@ export function useTimeClockActions({
   // Drives an inline "Getting location…" affordance on the CTA instead of a
   // frozen button, so clock-in feels responsive while we resolve context.
   const [clockInPending, setClockInPending] = useState(false)
+  // Synchronous ref guard — useState updates are async so two rapid taps could
+  // both pass the pending check before the first tap's state update renders.
+  const clockInPendingRef = useRef(false)
   // Guards the break start/end punches against double-taps (a slow location +
   // network round-trip would otherwise let a second tap fire a duplicate punch).
   const [breakPending, setBreakPending] = useState(false)
 
   const handleClockIn = useCallback(async () => {
-    if (clockInPending) return
+    if (clockInPendingRef.current) return
+    clockInPendingRef.current = true
     setClockInPending(true)
     try {
       const occurredAt = new Date().toISOString()
@@ -75,7 +79,10 @@ export function useTimeClockActions({
       let proofPhoto: Awaited<ReturnType<typeof captureClockInProofPhoto>> | undefined
       if (selectedEmployer?.clockConfig.proofRequired) {
         proofPhoto = await captureClockInProofPhoto()
-        if (proofPhoto === null) return
+        if (proofPhoto === null) {
+          fireHaptic("warning")
+          return
+        }
       }
 
       const result = await startClock({
@@ -92,9 +99,10 @@ export function useTimeClockActions({
 
       fireHaptic("success")
     } finally {
+      clockInPendingRef.current = false
       setClockInPending(false)
     }
-  }, [clockInPending, employers, profileRole, shifts, startClock])
+  }, [employers, profileRole, shifts, startClock])
 
   const handleStartBreak = useCallback(async () => {
     if (breakPending) return

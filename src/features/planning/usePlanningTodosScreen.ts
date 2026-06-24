@@ -5,6 +5,8 @@
  * code needed in the URL. The response is a KioskTodosResultDto containing
  * a list of todos plus optional dressNote and note.
  */
+import { useState } from "react"
+
 import { getLocalToday } from "@/core/date"
 import {
   useCompleteTodoMutation,
@@ -16,6 +18,8 @@ import { useAppSession } from "@/providers/app-provider"
 export function usePlanningTodosScreen() {
   const { accountId } = useAppSession()
   const today = getLocalToday()
+  const [completingIds, setCompletingIds] = useState<Set<string>>(new Set())
+  const [uncompletingIds, setUncompletingIds] = useState<Set<string>>(new Set())
 
   const query = usePlanningTodosQuery()
   const completeMutation = useCompleteTodoMutation()
@@ -23,12 +27,30 @@ export function usePlanningTodosScreen() {
 
   const handleComplete = async (todoId: string) => {
     if (!accountId) return
-    await completeMutation.mutateAsync({ todoCode: todoId })
+    setCompletingIds((prev) => new Set(prev).add(todoId))
+    try {
+      await completeMutation.mutateAsync({ todoCode: todoId })
+    } finally {
+      setCompletingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(todoId)
+        return next
+      })
+    }
   }
 
   const handleUncomplete = async (todoId: string) => {
     if (!accountId) return
-    await uncompleteMutation.mutateAsync({ todoCode: todoId })
+    setUncompletingIds((prev) => new Set(prev).add(todoId))
+    try {
+      await uncompleteMutation.mutateAsync({ todoCode: todoId })
+    } finally {
+      setUncompletingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(todoId)
+        return next
+      })
+    }
   }
 
   const result = query.state ?? null
@@ -38,18 +60,18 @@ export function usePlanningTodosScreen() {
 
   return {
     completedTodos,
+    completingIds,
     dressNote: result?.dressNote,
     handleComplete,
     handleUncomplete,
-    isCompleting: completeMutation.isPending,
     isError: query.isError,
     isLoading: query.isLoading,
-    isUncompleting: uncompleteMutation.isPending,
     note: result?.note,
     pendingTodos,
     refetch: query.refetch,
     today,
     todos,
+    uncompletingIds,
   }
 }
 

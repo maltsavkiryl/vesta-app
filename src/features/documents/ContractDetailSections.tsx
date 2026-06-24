@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 
@@ -38,7 +38,11 @@ export function ContractPreview({ body, mode }: { body: string; mode: "sign" | "
   const tokens = useDesignTokens()
 
   return (
-    <View style={[styles.preview, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}>
+    <ScrollView
+      contentContainerStyle={styles.previewContent}
+      showsVerticalScrollIndicator
+      style={[styles.preview, { backgroundColor: tokens.surface, ...tokens.elevation1 }]}
+    >
       <Text
         text={body}
         size="xxs"
@@ -47,7 +51,7 @@ export function ContractPreview({ body, mode }: { body: string; mode: "sign" | "
           ...styles.contractBody,
         }}
       />
-    </View>
+    </ScrollView>
   )
 }
 
@@ -171,7 +175,9 @@ const styles = StyleSheet.create({
   preview: {
     borderCurve: "continuous",
     borderRadius: 14,
-    maxHeight: 320,
+    maxHeight: 400,
+  },
+  previewContent: {
     padding: 16,
   },
   primaryAction: {

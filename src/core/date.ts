@@ -99,6 +99,16 @@ export function formatMonthLabel(dateString: string) {
   return date ? format(date, "MMMM yyyy", { locale: getDateFnsLocale() }) : "Unknown month"
 }
 
+export function formatMonthAbbr(dateString: string) {
+  const date = resolveLocalDate(dateString)
+  return date ? format(date, "MMM", { locale: getDateFnsLocale() }) : ""
+}
+
+export function formatDayOfMonth(dateString: string) {
+  const date = resolveLocalDate(dateString)
+  return date ? format(date, "d") : ""
+}
+
 export function formatTimeLabel(date: Date) {
   return format(date, "HH:mm")
 }

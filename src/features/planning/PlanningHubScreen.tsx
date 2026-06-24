@@ -9,7 +9,7 @@
  * existing /(app)/availability/* stack screens.
  */
 import { useState } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -78,6 +78,7 @@ export function PlanningHubScreen() {
             <Pressable
               accessibilityLabel={translate("planning:addToCalendarA11y")}
               accessibilityRole="button"
+              accessibilityState={{ busy: isSyncing }}
               disabled={isSyncing}
               onPress={() => {
                 void syncToCalendar()
@@ -90,7 +91,11 @@ export function PlanningHubScreen() {
                 },
               ]}
             >
-              <Ionicons color={tokens.accent} name="download-outline" size={17} />
+              {isSyncing ? (
+                <ActivityIndicator color={tokens.accent} size="small" />
+              ) : (
+                <Ionicons color={tokens.accent} name="calendar-number-outline" size={17} />
+              )}
             </Pressable>
             <Pressable
               accessibilityLabel={translate("planning:availability.editAccessibilityLabel")}

@@ -9,6 +9,7 @@ const nl: Translations = {
       close: "Sluiten",
       done: "Klaar",
       ok: "Oké",
+      openSettings: "Instellingen openen",
       retry: "Opnieuw proberen",
       save: "Opslaan",
       search: "Zoeken",
@@ -248,6 +249,9 @@ const nl: Translations = {
       alreadyClaimed: "Deze shift is al geclaimed",
       forbidden: "Je komt niet in aanmerking voor deze shift",
       conflict: "Dit oproep conflicteert met je huidige planning.",
+      modeOpenCall: "Open",
+      modeUrgent: "Urgent",
+      modeFillIn: "Invaller",
     },
     todos: {
       title: "Taken voor vandaag",
@@ -346,6 +350,7 @@ const nl: Translations = {
       employer: "Werkgever",
       total: "Totaal",
       hoursLabel: "Uren",
+      hoursUnit: "u",
     },
   },
   auth: {
@@ -698,6 +703,8 @@ const nl: Translations = {
     capture: {
       locationNotShared: "Locatie niet gedeeld",
       savedWithoutMap: "De registratie wordt nog steeds opgeslagen zonder kaartmomentopname.",
+      locationPermissionDeniedBody:
+        "Locatietoegang is geweigerd. Open Instellingen om Vesta toegang tot je locatie te geven.",
       locationUnavailable: "Locatie niet beschikbaar",
       locationFailed: "We konden je locatie voor deze gebeurtenis niet vastleggen.",
       cameraNeeded: "Cameratoegang nodig",
@@ -1062,6 +1069,7 @@ const nl: Translations = {
     signatureDisclaimer:
       "Door te ondertekenen bevestig je dat je alle voorwaarden van dit document hebt gelezen en ermee akkoord gaat.",
     downloadAction: "Downloaden",
+    downloadPayslipA11y: "Loonstrook PDF downloaden",
     signContract: "Contract ondertekenen",
     shareFile: "Bestand delen",
     uploadDetails: "Uploadgegevens",
@@ -1070,6 +1078,8 @@ const nl: Translations = {
     uploaded: "Geüpload",
     fileName: "Bestandsnaam",
     format: "Formaat",
+    unknown: "Onbekend",
+    unknownFormat: "Onbekend",
     loadError: "Documenten konden niet worden geladen",
     loadErrorSubtitle: "Controleer je verbinding en probeer opnieuw.",
     searchPlaceholder: "Documenten zoeken...",

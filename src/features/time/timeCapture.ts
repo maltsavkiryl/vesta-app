@@ -1,4 +1,4 @@
-import { Alert } from "react-native"
+import { Alert, Linking } from "react-native"
 import { CameraType, launchCameraAsync, requestCameraPermissionsAsync } from "expo-image-picker"
 import {
   Accuracy,
@@ -48,10 +48,24 @@ export async function captureLocationSnapshot(): Promise<LocationSnapshot | unde
   const permission = await requestForegroundPermissionsAsync()
 
   if (!permission.granted) {
-    Alert.alert(
-      translate("time:capture.locationNotShared"),
-      translate("time:capture.savedWithoutMap"),
-    )
+    if (!permission.canAskAgain) {
+      Alert.alert(
+        translate("time:capture.locationNotShared"),
+        translate("time:capture.locationPermissionDeniedBody"),
+        [
+          { text: translate("common:actions.cancel"), style: "cancel" },
+          {
+            text: translate("common:actions.openSettings"),
+            onPress: () => void Linking.openSettings(),
+          },
+        ],
+      )
+    } else {
+      Alert.alert(
+        translate("time:capture.locationNotShared"),
+        translate("time:capture.savedWithoutMap"),
+      )
+    }
     return undefined
   }
 
