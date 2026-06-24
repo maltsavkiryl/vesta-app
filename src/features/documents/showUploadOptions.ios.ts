@@ -1,5 +1,7 @@
 import { ActionSheetIOS } from "react-native"
 
+import { translate } from "@/i18n/translate"
+
 export type UploadSource = "camera" | "files"
 
 export function showNativeUploadOptions({
@@ -14,7 +16,11 @@ export function showNativeUploadOptions({
   ActionSheetIOS.showActionSheetWithOptions(
     {
       cancelButtonIndex: 2,
-      options: ["Take Photo", "Browse Files", "Cancel"],
+      options: [
+        translate("documents:takePhoto"),
+        translate("documents:browseFiles"),
+        translate("common:actions.cancel"),
+      ],
       title,
     },
     (buttonIndex) => {

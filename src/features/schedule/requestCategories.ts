@@ -27,7 +27,12 @@ export const requestCategoryConfig: Record<RequestCategory, RequestCategoryConfi
   time_off: {
     description: translate("planning:requestCategories.timeOffDesc"),
     icon: "calendar-clear-outline",
-    reasonPresets: ["Personal", "Medical", "Family", "Travel"],
+    reasonPresets: [
+      translate("planning:reasonPresets.personal"),
+      translate("planning:reasonPresets.medical"),
+      translate("planning:reasonPresets.family"),
+      translate("planning:reasonPresets.travel"),
+    ],
     systemImage: "calendar.badge.plus",
     title: translate("planning:requestCategories.timeOffTitle"),
     tone: "accent",
@@ -36,7 +41,12 @@ export const requestCategoryConfig: Record<RequestCategory, RequestCategoryConfi
   shift_change: {
     description: translate("planning:requestCategories.shiftChangeDesc"),
     icon: "swap-horizontal-outline",
-    reasonPresets: ["Running late", "Need replacement", "Schedule conflict", "Transport issue"],
+    reasonPresets: [
+      translate("planning:reasonPresets.runningLate"),
+      translate("planning:reasonPresets.needReplacement"),
+      translate("planning:reasonPresets.scheduleConflict"),
+      translate("planning:reasonPresets.transportIssue"),
+    ],
     systemImage: "arrow.left.arrow.right.circle",
     title: translate("planning:requestCategories.shiftChangeTitle"),
     tone: "warning",
@@ -46,10 +56,10 @@ export const requestCategoryConfig: Record<RequestCategory, RequestCategoryConfi
     description: translate("planning:requestCategories.availabilityIssueDesc"),
     icon: "alert-circle-outline",
     reasonPresets: [
-      "Class or exam",
-      "Family commitment",
-      "Existing appointment",
-      "Unexpected conflict",
+      translate("planning:reasonPresets.classExam"),
+      translate("planning:reasonPresets.familyCommitment"),
+      translate("planning:reasonPresets.existingAppointment"),
+      translate("planning:reasonPresets.unexpectedConflict"),
     ],
     systemImage: "exclamationmark.circle",
     title: translate("planning:requestCategories.availabilityIssueTitle"),
