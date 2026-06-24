@@ -21,8 +21,8 @@ export function HomeTasksSection({
 
   return (
     <SectionBlock
-      actionLabel="View all"
-      badgeLabel={`${tasks.length} pending`}
+      actionLabel={translate("home:tasks.viewAll")}
+      badgeLabel={translate("home:tasks.pendingCount", { count: tasks.length })}
       title={translate("home:tasks.title")}
       onAction={onViewAll}
     >
@@ -53,7 +53,7 @@ export function HomeUpdatesSection({
 
   return (
     <SectionBlock
-      actionLabel="View all"
+      actionLabel={translate("home:updates.viewAll")}
       title={translate("home:updates.title")}
       onAction={onViewAll}
     >

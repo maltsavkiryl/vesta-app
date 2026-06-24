@@ -42,7 +42,10 @@ export function ActiveCardHeader({
   // The big timer is the honest payable (worked-minus-break) figure. Total time
   // on shift is shown beneath so nothing is hidden.
   const heroSeconds = isOnBreak ? breakSeconds : payableSeconds
-  const onShiftLabel = `On shift ${formatHours(elapsedSeconds)} · ${venueLabel}`
+  const onShiftLabel = translate("time:activeCard.onShift", {
+    hours: formatHours(elapsedSeconds),
+    venue: venueLabel,
+  })
 
   return (
     <View style={styles.heroTopRow}>
@@ -52,8 +55,8 @@ export function ActiveCardHeader({
           weight="bold"
           accessibilityLabel={
             isOnBreak
-              ? `On break ${formatHours(breakSeconds)}`
-              : `Payable time ${formatHours(payableSeconds)}`
+              ? translate("time:activeCard.onBreakA11y", { hours: formatHours(breakSeconds) })
+              : translate("time:activeCard.payableA11y", { hours: formatHours(payableSeconds) })
           }
           style={[
             appTypography.heroValue,
@@ -72,7 +75,9 @@ export function ActiveCardHeader({
       <View style={styles.headerActions}>
         <HeroStatusPill
           icon={isOnBreak ? "cafe-outline" : "pulse-outline"}
-          text={isOnBreak ? "On break" : "Working"}
+          text={
+            isOnBreak ? translate("time:activeCard.onBreak") : translate("time:activeCard.working")
+          }
           tone={isOnBreak ? "warning" : "success"}
         />
         {showCollapseToggle && onToggleCollapsed ? (

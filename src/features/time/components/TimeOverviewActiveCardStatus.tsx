@@ -2,6 +2,7 @@ import { View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatDurationLabel, formatTimeValue } from "@/core/date"
+import { translate } from "@/i18n/translate"
 import { ProgressBar, Text, useDesignTokens } from "@/ui"
 
 import { formatSeconds } from "../time.utils"
@@ -89,7 +90,7 @@ export function ActiveCardLocation({ clockSession }: { clockSession: ClockSessio
       <Text
         ellipsizeMode="tail"
         numberOfLines={1}
-        text={`Checked in at ${liveLocationLabel}`}
+        text={translate("time:activeCard.checkedInAt", { location: liveLocationLabel })}
         size="xxs"
         weight="medium"
         style={[styles.flex, { color: tokens.success }]}

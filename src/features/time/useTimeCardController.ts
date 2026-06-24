@@ -91,7 +91,7 @@ function buildIdleClockCardState(
     actionLabel: translate("time:startTimer"),
     detailLabel: `${recommendedOption.context.venueName} · ${recommendedOption.locationLabel}`,
     helperLabel: distanceLabel
-      ? `${distanceLabel} away. Closest workplace is suggested first.`
+      ? translate("time:card.distanceAwayClosest", { distance: distanceLabel })
       : translate("time:card.closestFirst"),
     kind: "multiple-employers",
     subtitle: translate("time:card.chooseThenTrack"),

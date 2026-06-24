@@ -1,5 +1,6 @@
 import { getRelativeDayLabel } from "@/core/date"
 import type { NotificationItem, Shift } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 import type { TaskItem } from "./components/HomeTaskSections"
 
@@ -38,10 +39,13 @@ export function deriveHomeScreenPolicy({
   const homeSummary = priorityTask
     ? ""
     : nextShift
-      ? `Next shift ${nextShift.date ? getRelativeDayLabel(nextShift.date) : nextShift.dayLabel} at ${nextShift.startTime}`
+      ? translate("home:summary.nextShift", {
+          day: nextShift.date ? getRelativeDayLabel(nextShift.date) : nextShift.dayLabel,
+          time: nextShift.startTime,
+        })
       : unreadCount > 0
-        ? `${unreadCount} update${unreadCount === 1 ? "" : "s"} waiting`
-        : "You're clear for now"
+        ? translate("home:summary.updatesWaiting", { count: unreadCount })
+        : translate("home:summary.allClear")
 
   return {
     hasMeaningfulUpdates,
