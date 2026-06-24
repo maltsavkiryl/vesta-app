@@ -1,6 +1,7 @@
 const en = {
   common: {
     actions: {
+      continue: "Continue",
       back: "Back",
       cancel: "Cancel",
       close: "Close",
@@ -293,6 +294,43 @@ const en = {
       title: "Choose your workplace",
       subtitle: "You're linked to more than one workplace. Choose which one to continue as.",
       empty: "No workplaces to choose from. Please sign in again.",
+    },
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    validation: {
+      nameRequired: "Please enter your full name.",
+      emailRequired: "Enter your email to continue.",
+      emailInvalid: "Please enter a valid email address.",
+      passwordMin6: "Use a password with at least 6 characters.",
+      passwordMin8: "Password must be at least 8 characters.",
+      passwordsMismatch: "Passwords don't match.",
+      passwordsMismatchNew: "The new passwords do not match.",
+    },
+    reset: {
+      title: "Reset password",
+      createTitle: "Create a new password",
+      updatedTitle: "Password updated",
+      confirmEmail: "Confirm your email to continue.",
+      setNew: "Set a new password for your account.",
+      success: "You can now sign in with this account.",
+      save: "Save new password",
+    },
+    acceptInvitation: {
+      connecting: "Hang tight while we connect you to your workplace.",
+      failed: "We couldn't accept this invitation.",
+      joiningTitle: "Joining your workplace",
+      problemTitle: "Invitation problem",
+      missingCode: "This invitation link is missing its code. Ask your manager to resend it.",
+      invalidExpired: "This invitation is invalid or has expired.",
+    },
+    chooseRoleError: "Choose a role before completing onboarding.",
+    errors: {
+      onlineUnavailable: "Online sign-in isn't available yet.",
+      accountNotFound: "No account was found for that email.",
+      wrongPassword: "Incorrect password for this account.",
+      accountExists: "An account already exists for that email.",
+      missingAccount: "Missing account.",
+      currentPasswordWrong: "Current password is incorrect.",
     },
   },
   onboarding: {

@@ -1,4 +1,5 @@
 import Config from "@/config"
+import { translate } from "@/i18n/translate"
 import { applyAppAction, normalizeEmail } from "@/services/app/app-state.reducer"
 import {
   commitAccountPasswordChange,
@@ -26,7 +27,7 @@ export function signIn(payload: SignInPayload): {
 } {
   if (!Config.DEMO_AUTH_ENABLED) {
     return {
-      result: { ok: false, message: "Online sign-in isn't available yet." },
+      result: { ok: false, message: translate("auth:errors.onlineUnavailable") },
       session: getSession(),
       state: null,
     }
@@ -38,7 +39,7 @@ export function signIn(payload: SignInPayload): {
 
   if (!account) {
     return {
-      result: { ok: false, message: "No account was found for that email." },
+      result: { ok: false, message: translate("auth:errors.accountNotFound") },
       session: db.session,
       state: null,
     }
@@ -46,7 +47,7 @@ export function signIn(payload: SignInPayload): {
 
   if (account.password !== payload.password) {
     return {
-      result: { ok: false, message: "Incorrect password for this account." },
+      result: { ok: false, message: translate("auth:errors.wrongPassword") },
       session: db.session,
       state: null,
     }
@@ -72,7 +73,7 @@ export function register(payload: RegisterPayload) {
     return {
       result: {
         ok: false,
-        message: "An account already exists for that email.",
+        message: translate("auth:errors.accountExists"),
       } satisfies AuthResult,
       session: db.session,
       state: null,
@@ -101,7 +102,7 @@ export function requestPasswordReset(email: string) {
   const db = ensureDb()
   const normalized = normalizeEmail(email)
   const account = db.accounts.find((candidate) => candidate.email === normalized)
-  if (!account) return { ok: false, message: "No account was found for that email." }
+  if (!account) return { ok: false, message: translate("auth:errors.accountNotFound") }
 
   commitAccountAction(
     account.id,
@@ -119,7 +120,7 @@ export function changePassword(accountId: string, currentPassword: string, nextP
   const account = db.accounts.find((candidate) => candidate.id === accountId)
   if (!account) {
     return {
-      result: { ok: false, message: "Missing account." } satisfies AuthResult,
+      result: { ok: false, message: translate("auth:errors.missingAccount") } satisfies AuthResult,
       session: db.session,
       state: null,
     }
@@ -127,7 +128,10 @@ export function changePassword(accountId: string, currentPassword: string, nextP
 
   if (account.password !== currentPassword) {
     return {
-      result: { ok: false, message: "Current password is incorrect." } satisfies AuthResult,
+      result: {
+        ok: false,
+        message: translate("auth:errors.currentPasswordWrong"),
+      } satisfies AuthResult,
       session: db.session,
       state: null,
     }
@@ -150,7 +154,7 @@ export function resetPassword(email: string, nextPassword: string) {
     return {
       result: {
         ok: false,
-        message: "No account was found for that email.",
+        message: translate("auth:errors.accountNotFound"),
       } satisfies AuthResult,
       session: db.session,
       state: null,

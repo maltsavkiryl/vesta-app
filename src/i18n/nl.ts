@@ -3,6 +3,7 @@ import { Translations } from "./en"
 const nl: Translations = {
   common: {
     actions: {
+      continue: "Doorgaan",
       back: "Terug",
       cancel: "Annuleren",
       close: "Sluiten",
@@ -300,6 +301,43 @@ const nl: Translations = {
       title: "Kies je werkplek",
       subtitle: "Je bent gekoppeld aan meer dan één werkplek. Kies met welke je verdergaat.",
       empty: "Geen werkplekken om uit te kiezen. Log opnieuw in.",
+    },
+    showPassword: "Wachtwoord tonen",
+    hidePassword: "Wachtwoord verbergen",
+    validation: {
+      nameRequired: "Voer je volledige naam in.",
+      emailRequired: "Voer je e-mail in om verder te gaan.",
+      emailInvalid: "Voer een geldig e-mailadres in.",
+      passwordMin6: "Gebruik een wachtwoord van minstens 6 tekens.",
+      passwordMin8: "Wachtwoord moet minstens 8 tekens bevatten.",
+      passwordsMismatch: "Wachtwoorden komen niet overeen.",
+      passwordsMismatchNew: "De nieuwe wachtwoorden komen niet overeen.",
+    },
+    reset: {
+      title: "Wachtwoord opnieuw instellen",
+      createTitle: "Maak een nieuw wachtwoord",
+      updatedTitle: "Wachtwoord bijgewerkt",
+      confirmEmail: "Bevestig je e-mail om verder te gaan.",
+      setNew: "Stel een nieuw wachtwoord in voor je account.",
+      success: "Je kunt nu inloggen met dit account.",
+      save: "Nieuw wachtwoord opslaan",
+    },
+    acceptInvitation: {
+      connecting: "Even geduld terwijl we je verbinden met je werkplek.",
+      failed: "We konden deze uitnodiging niet accepteren.",
+      joiningTitle: "Aansluiten bij je werkplek",
+      problemTitle: "Probleem met uitnodiging",
+      missingCode: "Deze uitnodigingslink mist de code. Vraag je manager om hem opnieuw te sturen.",
+      invalidExpired: "Deze uitnodiging is ongeldig of verlopen.",
+    },
+    chooseRoleError: "Kies een functie voordat je de onboarding voltooit.",
+    errors: {
+      onlineUnavailable: "Online inloggen is nog niet beschikbaar.",
+      accountNotFound: "Geen account gevonden voor dat e-mailadres.",
+      wrongPassword: "Onjuist wachtwoord voor dit account.",
+      accountExists: "Er bestaat al een account voor dat e-mailadres.",
+      missingAccount: "Ontbrekend account.",
+      currentPasswordWrong: "Huidig wachtwoord is onjuist.",
     },
   },
   onboarding: {

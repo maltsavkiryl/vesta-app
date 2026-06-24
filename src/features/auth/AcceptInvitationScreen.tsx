@@ -17,10 +17,14 @@ export function AcceptInvitationScreen() {
       onBack={handleBackToSignIn}
       subtitle={
         isWorking
-          ? "Hang tight while we connect you to your workplace."
-          : "We couldn't accept this invitation."
+          ? translate("auth:acceptInvitation.connecting")
+          : translate("auth:acceptInvitation.failed")
       }
-      title={isWorking ? "Joining your workplace" : "Invitation problem"}
+      title={
+        isWorking
+          ? translate("auth:acceptInvitation.joiningTitle")
+          : translate("auth:acceptInvitation.problemTitle")
+      }
     >
       <View style={styles.body}>
         {isWorking ? (

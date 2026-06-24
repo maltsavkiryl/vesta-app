@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useRouter } from "expo-router"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 export function useRegisterScreen() {
@@ -23,25 +24,25 @@ export function useRegisterScreen() {
   const handleSubmit = async () => {
     if (!firstName.trim() || !lastName.trim()) {
       fireHaptic("warning")
-      setError("Please enter your full name.")
+      setError(translate("auth:validation.nameRequired"))
       return
     }
 
     if (!email.includes("@")) {
       fireHaptic("warning")
-      setError("Please enter a valid email address.")
+      setError(translate("auth:validation.emailInvalid"))
       return
     }
 
     if (password.length < 8) {
       fireHaptic("warning")
-      setError("Password must be at least 8 characters.")
+      setError(translate("auth:validation.passwordMin8"))
       return
     }
 
     if (password !== confirmPassword) {
       fireHaptic("warning")
-      setError("Passwords don't match.")
+      setError(translate("auth:validation.passwordsMismatch"))
       return
     }
 

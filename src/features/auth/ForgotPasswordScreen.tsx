@@ -37,7 +37,7 @@ export function ForgotPasswordScreen() {
   const handleVerify = async () => {
     if (!email.includes("@")) {
       fireHaptic("warning")
-      setError("Enter your email to continue.")
+      setError(translate("auth:validation.emailRequired"))
       return
     }
     setError(undefined)
@@ -54,13 +54,13 @@ export function ForgotPasswordScreen() {
   const handleReset = async () => {
     if (nextPassword.length < 6) {
       fireHaptic("warning")
-      setError("Use a password with at least 6 characters.")
+      setError(translate("auth:validation.passwordMin6"))
       return
     }
 
     if (nextPassword !== confirmPassword) {
       fireHaptic("warning")
-      setError("The new passwords do not match.")
+      setError(translate("auth:validation.passwordsMismatchNew"))
       return
     }
 
@@ -81,17 +81,17 @@ export function ForgotPasswordScreen() {
       onBack={() => router.replace("/(auth)/sign-in")}
       title={
         step === "verify"
-          ? "Reset password"
+          ? translate("auth:reset.title")
           : step === "reset"
-            ? "Create a new password"
-            : "Password updated"
+            ? translate("auth:reset.createTitle")
+            : translate("auth:reset.updatedTitle")
       }
       subtitle={
         step === "verify"
-          ? "Confirm your email to continue."
+          ? translate("auth:reset.confirmEmail")
           : step === "reset"
-            ? "Set a new password for your account."
-            : "You can now sign in with this account."
+            ? translate("auth:reset.setNew")
+            : translate("auth:reset.success")
       }
     >
       {step === "done" ? (
@@ -177,7 +177,9 @@ export function ForgotPasswordScreen() {
                 value={nextPassword}
                 rightAccessory={
                   <AuthAccessoryButton
-                    accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                    accessibilityLabel={
+                      showPassword ? translate("auth:hidePassword") : translate("auth:showPassword")
+                    }
                     icon={showPassword ? "eye-off-outline" : "eye-outline"}
                     onPress={() => setShowPassword((current) => !current)}
                     style={[
@@ -211,7 +213,11 @@ export function ForgotPasswordScreen() {
           ) : null}
           <Button
             fullWidth
-            label={step === "verify" ? "Continue" : "Save new password"}
+            label={
+              step === "verify"
+                ? translate("common:actions.continue")
+                : translate("auth:reset.save")
+            }
             onPress={step === "verify" ? handleVerify : handleReset}
             pressHaptic="none"
           />

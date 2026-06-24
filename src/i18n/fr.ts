@@ -3,6 +3,7 @@ import { Translations } from "./en"
 const fr: Translations = {
   common: {
     actions: {
+      continue: "Continuer",
       back: "Retour",
       cancel: "Annuler",
       close: "Fermer",
@@ -304,6 +305,43 @@ const fr: Translations = {
       subtitle:
         "Vous êtes lié à plusieurs lieux de travail. Choisissez celui avec lequel continuer.",
       empty: "Aucun lieu de travail disponible. Veuillez vous reconnecter.",
+    },
+    showPassword: "Afficher le mot de passe",
+    hidePassword: "Masquer le mot de passe",
+    validation: {
+      nameRequired: "Veuillez saisir votre nom complet.",
+      emailRequired: "Saisissez votre e-mail pour continuer.",
+      emailInvalid: "Veuillez saisir une adresse e-mail valide.",
+      passwordMin6: "Utilisez un mot de passe d'au moins 6 caractères.",
+      passwordMin8: "Le mot de passe doit comporter au moins 8 caractères.",
+      passwordsMismatch: "Les mots de passe ne correspondent pas.",
+      passwordsMismatchNew: "Les nouveaux mots de passe ne correspondent pas.",
+    },
+    reset: {
+      title: "Réinitialiser le mot de passe",
+      createTitle: "Créer un nouveau mot de passe",
+      updatedTitle: "Mot de passe mis à jour",
+      confirmEmail: "Confirmez votre e-mail pour continuer.",
+      setNew: "Définissez un nouveau mot de passe pour votre compte.",
+      success: "Vous pouvez maintenant vous connecter avec ce compte.",
+      save: "Enregistrer le nouveau mot de passe",
+    },
+    acceptInvitation: {
+      connecting: "Un instant, nous vous connectons à votre lieu de travail.",
+      failed: "Nous n'avons pas pu accepter cette invitation.",
+      joiningTitle: "Connexion à votre lieu de travail",
+      problemTitle: "Problème d'invitation",
+      missingCode: "Ce lien d'invitation n'a pas de code. Demandez à votre manager de le renvoyer.",
+      invalidExpired: "Cette invitation est invalide ou a expiré.",
+    },
+    chooseRoleError: "Choisissez un poste avant de terminer l'intégration.",
+    errors: {
+      onlineUnavailable: "La connexion en ligne n'est pas encore disponible.",
+      accountNotFound: "Aucun compte trouvé pour cet e-mail.",
+      wrongPassword: "Mot de passe incorrect pour ce compte.",
+      accountExists: "Un compte existe déjà pour cet e-mail.",
+      missingAccount: "Compte manquant.",
+      currentPasswordWrong: "Le mot de passe actuel est incorrect.",
     },
   },
   onboarding: {
