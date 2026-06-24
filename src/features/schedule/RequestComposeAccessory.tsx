@@ -21,10 +21,7 @@ export function RequestComposeAccessory() {
   )
 
   return (
-    <View
-      pointerEvents="box-none"
-      style={[styles.container, styles.horizontalOffset, positionStyle]}
-    >
+    <View style={[styles.container, styles.horizontalOffset, positionStyle]}>
       <Host matchContents>
         <Menu
           label={
@@ -64,6 +61,7 @@ export function RequestComposeAccessory() {
 const styles = StyleSheet.create({
   container: {
     alignItems: "flex-end",
+    pointerEvents: "box-none",
     position: "absolute",
   },
   horizontalOffset: {

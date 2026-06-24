@@ -45,7 +45,6 @@ export function TimeHeroCard({
       <LinearGradient
         colors={["#020408", "#050919", "#0A1428"]}
         end={{ x: 0.92, y: 0.08 }}
-        pointerEvents="none"
         start={{ x: 0.08, y: 0.98 }}
         style={styles.heroGradient}
       />
@@ -56,7 +55,6 @@ export function TimeHeroCard({
           "rgba(60, 110, 220, 0.00)",
         ]}
         end={{ x: 1, y: 0 }}
-        pointerEvents="none"
         start={{ x: 0.52, y: 0.48 }}
         style={[
           styles.heroTopBloom,
@@ -70,7 +68,6 @@ export function TimeHeroCard({
           "rgba(100, 140, 220, 0.00)",
         ]}
         end={{ x: 0.3, y: 0.62 }}
-        pointerEvents="none"
         start={{ x: 0, y: 1 }}
         style={[
           styles.heroBottomBloom,
@@ -78,7 +75,6 @@ export function TimeHeroCard({
         ]}
       />
       <View
-        pointerEvents="none"
         style={[
           styles.heroEdgeHighlight,
           usesCompactGradient ? styles.compactEdgeHighlight : styles.defaultEdgeHighlight,
@@ -153,14 +149,18 @@ const styles = StyleSheet.create({
   },
   heroBottomBloom: {
     ...StyleSheet.absoluteFillObject,
+    pointerEvents: "none",
   },
   heroEdgeHighlight: {
     ...StyleSheet.absoluteFillObject,
+    pointerEvents: "none",
   },
   heroGradient: {
     ...StyleSheet.absoluteFillObject,
+    pointerEvents: "none",
   },
   heroTopBloom: {
     ...StyleSheet.absoluteFillObject,
+    pointerEvents: "none",
   },
 })
