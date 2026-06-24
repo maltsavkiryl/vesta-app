@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react"
 
 import type { UserProfile } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { GroupedSection } from "@/ui"
 import { DetailFieldGroup, DetailFieldRow } from "@/ui"
 
@@ -22,20 +23,20 @@ export function PersonalEditSections({
 }) {
   return (
     <>
-      <GroupedSection title="Profile">
+      <GroupedSection title={translate("profile:edit.profile")}>
         <DetailFieldGroup>
           <DetailFieldRow
-            label="First name"
+            label={translate("profile:edit.firstName")}
             onChangeText={(firstName) => setPersonalState((current) => ({ ...current, firstName }))}
             value={personalState.firstName}
           />
           <DetailFieldRow
-            label="Last name"
+            label={translate("profile:edit.lastName")}
             onChangeText={(lastName) => setPersonalState((current) => ({ ...current, lastName }))}
             value={personalState.lastName}
           />
           <DetailFieldRow
-            label="Preferred name"
+            label={translate("profile:edit.preferredName")}
             onChangeText={(preferredName) =>
               setPersonalState((current) => ({ ...current, preferredName }))
             }
@@ -43,15 +44,15 @@ export function PersonalEditSections({
           />
           <DetailFieldRow
             keyboardType="numbers-and-punctuation"
-            label="Date of birth"
+            label={translate("profile:edit.dateOfBirth")}
             onChangeText={(dateOfBirth) =>
               setPersonalState((current) => ({ ...current, dateOfBirth }))
             }
-            placeholder="DD/MM/YYYY"
+            placeholder={translate("profile:edit.dobPlaceholder")}
             value={personalState.dateOfBirth}
           />
           <DetailFieldRow
-            label="Nationality"
+            label={translate("profile:edit.nationality")}
             onChangeText={(nationality) =>
               setPersonalState((current) => ({ ...current, nationality }))
             }
@@ -59,10 +60,10 @@ export function PersonalEditSections({
           />
         </DetailFieldGroup>
       </GroupedSection>
-      <GroupedSection title="About">
+      <GroupedSection title={translate("profile:edit.about")}>
         <DetailFieldGroup>
           <DetailFieldRow
-            label="Employee note"
+            label={translate("profile:edit.employeeNote")}
             multiline
             onChangeText={(bio) => setPersonalState((current) => ({ ...current, bio }))}
             value={personalState.bio}
@@ -82,27 +83,27 @@ export function ContactEditSections({
 }) {
   return (
     <>
-      <GroupedSection title="Reachability">
+      <GroupedSection title={translate("profile:edit.reachability")}>
         <DetailFieldGroup>
           <DetailFieldRow
             autoCapitalize="none"
             keyboardType="email-address"
-            label="Email"
+            label={translate("profile:edit.email")}
             onChangeText={(email) => setContactState((current) => ({ ...current, email }))}
             value={contactState.email}
           />
           <DetailFieldRow
             keyboardType="phone-pad"
-            label="Mobile phone"
+            label={translate("profile:edit.mobilePhone")}
             onChangeText={(phone) => setContactState((current) => ({ ...current, phone }))}
             value={contactState.phone}
           />
         </DetailFieldGroup>
       </GroupedSection>
-      <GroupedSection title="Emergency contact">
+      <GroupedSection title={translate("profile:edit.emergencyContact")}>
         <DetailFieldGroup>
           <DetailFieldRow
-            label="Full name"
+            label={translate("profile:edit.fullName")}
             onChangeText={(name) =>
               setContactState((current) => ({
                 ...current,
@@ -112,7 +113,7 @@ export function ContactEditSections({
             value={contactState.emergencyContact.name}
           />
           <DetailFieldRow
-            label="Relationship"
+            label={translate("profile:edit.relationship")}
             onChangeText={(relationship) =>
               setContactState((current) => ({
                 ...current,
@@ -123,7 +124,7 @@ export function ContactEditSections({
           />
           <DetailFieldRow
             keyboardType="phone-pad"
-            label="Phone"
+            label={translate("profile:edit.phone")}
             onChangeText={(phone) =>
               setContactState((current) => ({
                 ...current,
@@ -146,10 +147,10 @@ export function AddressEditSections({
   setAddressState: Dispatch<SetStateAction<AddressState>>
 }) {
   return (
-    <GroupedSection title="Home address">
+    <GroupedSection title={translate("profile:edit.homeAddress")}>
       <DetailFieldGroup>
         <DetailFieldRow
-          label="Street and number"
+          label={translate("profile:edit.streetAndNumber")}
           onChangeText={(street) =>
             setAddressState((current) => ({
               ...current,
@@ -160,7 +161,7 @@ export function AddressEditSections({
         />
         <DetailFieldRow
           keyboardType="number-pad"
-          label="Postal code"
+          label={translate("profile:edit.postalCode")}
           onChangeText={(postalCode) =>
             setAddressState((current) => ({
               ...current,
@@ -170,7 +171,7 @@ export function AddressEditSections({
           value={addressState.address.postalCode}
         />
         <DetailFieldRow
-          label="City"
+          label={translate("profile:edit.city")}
           onChangeText={(city) =>
             setAddressState((current) => ({
               ...current,
@@ -181,7 +182,7 @@ export function AddressEditSections({
           value={addressState.address.city}
         />
         <DetailFieldRow
-          label="Country"
+          label={translate("profile:edit.country")}
           onChangeText={(country) =>
             setAddressState((current) => ({
               ...current,
@@ -203,27 +204,27 @@ export function BankingEditSections({
   setBankState: Dispatch<SetStateAction<BankingState>>
 }) {
   return (
-    <GroupedSection title="Payroll account">
+    <GroupedSection title={translate("profile:edit.payrollAccount")}>
       <DetailFieldGroup>
         <DetailFieldRow
           autoCapitalize="characters"
-          label="IBAN"
+          label={translate("profile:edit.iban")}
           onChangeText={(iban) => setBankState((current) => ({ ...current, iban }))}
           value={bankState.iban}
         />
         <DetailFieldRow
           autoCapitalize="characters"
-          label="BIC"
+          label={translate("profile:edit.bic")}
           onChangeText={(bic) => setBankState((current) => ({ ...current, bic }))}
           value={bankState.bic}
         />
         <DetailFieldRow
-          label="Bank name"
+          label={translate("profile:edit.bankName")}
           onChangeText={(bankName) => setBankState((current) => ({ ...current, bankName }))}
           value={bankState.bankName}
         />
         <DetailFieldRow
-          label="Account holder"
+          label={translate("profile:edit.accountHolder")}
           onChangeText={(accountHolder) =>
             setBankState((current) => ({ ...current, accountHolder }))
           }
@@ -243,11 +244,11 @@ export function LegalEditSections({
 }) {
   return (
     <>
-      <GroupedSection title="Identity">
+      <GroupedSection title={translate("profile:edit.identity")}>
         <DetailFieldGroup>
           <DetailFieldRow
             keyboardType="numbers-and-punctuation"
-            label="National register number"
+            label={translate("profile:edit.nationalRegisterNumber")}
             onChangeText={(nationalRegisterNumber) =>
               setLegalState((current) => ({ ...current, nationalRegisterNumber }))
             }
@@ -255,13 +256,13 @@ export function LegalEditSections({
           />
           <DetailFieldRow
             autoCapitalize="characters"
-            label="Tax ID"
+            label={translate("profile:edit.taxId")}
             onChangeText={(taxId) => setLegalState((current) => ({ ...current, taxId }))}
             value={legalState.taxId}
           />
           <DetailFieldRow
             keyboardType="numbers-and-punctuation"
-            label="Social security"
+            label={translate("profile:edit.socialSecurity")}
             onChangeText={(socialSecurityNumber) =>
               setLegalState((current) => ({ ...current, socialSecurityNumber }))
             }
@@ -269,17 +270,17 @@ export function LegalEditSections({
           />
         </DetailFieldGroup>
       </GroupedSection>
-      <GroupedSection title="Employment compliance">
+      <GroupedSection title={translate("profile:edit.employmentCompliance")}>
         <DetailFieldGroup>
           <DetailFieldRow
-            label="Work permit status"
+            label={translate("profile:edit.workPermitStatus")}
             onChangeText={(workPermitStatus) =>
               setLegalState((current) => ({ ...current, workPermitStatus }))
             }
             value={legalState.workPermitStatus}
           />
           <DetailFieldRow
-            label="Payroll status"
+            label={translate("profile:edit.payrollStatus")}
             onChangeText={(payrollStatus) =>
               setLegalState((current) => ({ ...current, payrollStatus }))
             }
