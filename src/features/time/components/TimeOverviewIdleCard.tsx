@@ -146,8 +146,10 @@ export function IdleCardContent({
 
             <Animated.View style={[styles.idleDetailsViewport, idleDetailsAnimatedStyle]}>
               <Animated.View
-                pointerEvents={collapsed ? "none" : "auto"}
-                style={detailsContentAnimatedStyle}
+                style={[
+                  detailsContentAnimatedStyle,
+                  collapsed ? styles.detailsNonInteractive : styles.detailsInteractive,
+                ]}
               >
                 <View importantForAccessibility={collapsed ? "no-hide-descendants" : "auto"}>
                   <IdleDetails

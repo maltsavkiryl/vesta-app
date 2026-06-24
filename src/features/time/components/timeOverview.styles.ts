@@ -56,6 +56,12 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 14,
   },
+  detailsInteractive: {
+    pointerEvents: "auto",
+  },
+  detailsNonInteractive: {
+    pointerEvents: "none",
+  },
   flex: {
     flex: 1,
     minWidth: 0,
