@@ -54,11 +54,16 @@ export function useOnboardingScreen() {
   const foundEmployer = findEmployerByInviteCode(employers, code)
   const searchResults =
     search.trim().length > 1
-      ? employers.filter(
-          (employer) =>
-            employer.name.toLowerCase().includes(search.toLowerCase()) ||
-            employer.city.toLowerCase().includes(search.toLowerCase()),
-        )
+      ? employers
+          .filter(
+            (employer) =>
+              employer.name.toLowerCase().includes(search.toLowerCase()) ||
+              employer.city.toLowerCase().includes(search.toLowerCase()),
+          )
+          // Cap rendered rows: the employer directory can be large and these
+          // lists are plain .map() (no virtualization). 25 keeps the common
+          // case fast; users narrow further by typing.
+          .slice(0, 25)
       : []
   const activeEmployer = foundEmployer ?? selectedEmployer
   const codeHelperText =

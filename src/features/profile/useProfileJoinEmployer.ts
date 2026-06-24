@@ -32,17 +32,21 @@ export function useProfileJoinEmployer({
     (employer) => !employers.some((existing) => existing.id === employer.id),
   )
   const codeMatchedEmployer = findEmployerByInviteCode(availableEmployers, joinCode)
-  const searchResults = availableEmployers.filter((employer) => {
-    const query = joinSearch.trim().toLowerCase()
-    if (!query) return true
+  const searchResults = availableEmployers
+    .filter((employer) => {
+      const query = joinSearch.trim().toLowerCase()
+      if (!query) return true
 
-    return (
-      employer.name.toLowerCase().includes(query) ||
-      employer.type.toLowerCase().includes(query) ||
-      employer.city.toLowerCase().includes(query) ||
-      employer.code.toLowerCase().includes(query)
-    )
-  })
+      return (
+        employer.name.toLowerCase().includes(query) ||
+        employer.type.toLowerCase().includes(query) ||
+        employer.city.toLowerCase().includes(query) ||
+        employer.code.toLowerCase().includes(query)
+      )
+    })
+    // Cap rendered rows — an empty query would otherwise render the entire
+    // directory through a plain .map() (no virtualization). Users narrow by typing.
+    .slice(0, 25)
   const selectedJoinEmployer =
     joinMode === "code"
       ? codeMatchedEmployer
