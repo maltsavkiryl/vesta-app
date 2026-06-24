@@ -399,6 +399,11 @@ const fr: Translations = {
   },
   onboarding: {
     startUsingVesta: "Commencer avec Vesta",
+    personal: {
+      title: "Vos informations",
+      subtitle:
+        "Ajoutez vos informations personnelles pour que votre employeur puisse configurer la paie et les contrats. Vous pourrez les modifier plus tard dans votre profil.",
+    },
     welcome: {
       titleNamed: "Bienvenue chez Vesta,\n{{name}}.",
       title: "Bienvenue chez Vesta.",
@@ -419,6 +424,10 @@ const fr: Translations = {
       noWorkplace: "Aucun lieu de travail sélectionné",
       daysPerWeek: "{{count}} jours/semaine",
       enabledCount: "{{count}} activées",
+      nameLabel: "Nom",
+      emailLabel: "E-mail",
+      phoneLabel: "Téléphone",
+      notProvided: "Non renseigné",
     },
     role: {
       title: "Quel est votre poste ?",

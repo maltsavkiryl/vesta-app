@@ -5,11 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { translate } from "@/i18n/translate"
 import { AppButton, AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
 
-import { OnboardingAvailability } from "./onboarding/OnboardingAvailability"
 import { OnboardingDone } from "./onboarding/OnboardingDone"
-import { OnboardingEmployer } from "./onboarding/OnboardingEmployer"
-import { OnboardingNotifications } from "./onboarding/OnboardingNotifications"
-import { OnboardingRole } from "./onboarding/OnboardingRole"
+import { OnboardingPersonalInfo } from "./onboarding/OnboardingPersonalInfo"
 import { OnboardingWelcome } from "./onboarding/OnboardingWelcome"
 import { ProgressDots } from "./onboarding/ProgressDots"
 import { useOnboardingScreen } from "./useOnboardingScreen"
@@ -19,35 +16,20 @@ export function OnboardingScreen() {
   const tokens = useDesignTokens()
   const {
     accountState,
-    activeEmployer,
-    availabilityDays,
     back,
+    bankState,
     canContinue,
-    code,
-    codeHelperText,
     complete,
+    contactState,
     isCompleting,
-    joinMode,
-    joined,
+    legalState,
     next,
-    notifications,
-    router,
-    search,
-    searchResults,
-    selectedEmployerId,
-    selectedRole,
-    setAvailabilityDays,
-    setCode,
-    setJoinMode,
-    setJoined,
-    setNotifications,
-    setSearch,
-    setSelectedEmployerId,
-    setSelectedRole,
-    setTimeSlot,
+    personalState,
+    setBankState,
+    setContactState,
+    setLegalState,
+    setPersonalState,
     step,
-    timeSlot,
-    roleLabel,
   } = useOnboardingScreen()
 
   if (step === 0) {
@@ -80,71 +62,22 @@ export function OnboardingScreen() {
 
       <MotionView delay={55} key={step} style={styles.stepContent}>
         {step === 1 ? (
-          <OnboardingRole selectedRole={selectedRole} onSelectRole={setSelectedRole} />
+          <OnboardingPersonalInfo
+            bankState={bankState}
+            contactState={contactState}
+            legalState={legalState}
+            personalState={personalState}
+            setBankState={setBankState}
+            setContactState={setContactState}
+            setLegalState={setLegalState}
+            setPersonalState={setPersonalState}
+          />
         ) : null}
         {step === 2 ? (
-          <OnboardingEmployer
-            code={code}
-            codeHelperText={codeHelperText}
-            joined={joined}
-            joinMode={joinMode}
-            search={search}
-            searchResults={searchResults}
-            selectedEmployerId={selectedEmployerId}
-            onCodeChange={(value) => {
-              setCode(value)
-              setJoined(false)
-            }}
-            onJoin={() => {
-              if (activeEmployer) {
-                setSelectedEmployerId(activeEmployer.id)
-                setJoined(true)
-              }
-            }}
-            onModeChange={(mode) => {
-              setJoinMode(mode)
-              setCode("")
-              setSearch("")
-              setJoined(false)
-            }}
-            onOpenQrScanner={() => router.push("/(auth)/employer-join-scanner")}
-            onSearchChange={setSearch}
-            onSelectEmployer={(id) => {
-              setSelectedEmployerId(id)
-              setJoined(false)
-            }}
-            previewEmployer={activeEmployer}
-          />
-        ) : null}
-        {step === 3 ? (
-          <OnboardingAvailability
-            availabilityDays={availabilityDays}
-            onDayToggle={(day) =>
-              setAvailabilityDays((current) =>
-                current.includes(day) ? current.filter((item) => item !== day) : [...current, day],
-              )
-            }
-            onTimeSlotChange={setTimeSlot}
-            timeSlot={timeSlot}
-          />
-        ) : null}
-        {step === 4 ? (
-          <OnboardingNotifications
-            notifications={notifications}
-            onToggle={(key) =>
-              setNotifications((current) => ({
-                ...current,
-                [key]: !current[key],
-              }))
-            }
-          />
-        ) : null}
-        {step === 5 ? (
           <OnboardingDone
-            availabilityDays={availabilityDays}
-            employerName={activeEmployer?.name}
-            enabledNotifications={Object.values(notifications).filter(Boolean).length}
-            role={roleLabel}
+            email={contactState.email}
+            fullName={`${personalState.firstName} ${personalState.lastName}`.trim()}
+            phone={contactState.phone}
           />
         ) : null}
       </MotionView>
@@ -153,14 +86,12 @@ export function OnboardingScreen() {
         <AppButton
           disabled={!canContinue || isCompleting}
           label={
-            step === 5
+            step === 2
               ? translate("onboarding:startUsingVesta")
-              : step === 2 && !joined
-                ? translate("onboarding:welcome.skip")
-                : translate("common:actions.continue")
+              : translate("common:actions.continue")
           }
           onPress={next}
-          pressHaptic={step === 5 ? "none" : "selection"}
+          pressHaptic={step === 2 ? "none" : "selection"}
         />
       </MotionView>
     </AppScrollScreen>

@@ -386,6 +386,11 @@ const en = {
   },
   onboarding: {
     startUsingVesta: "Start using Vesta",
+    personal: {
+      title: "Your details",
+      subtitle:
+        "Add your personal information so your employer can set up payroll and contracts. You can change any of this later in your profile.",
+    },
     welcome: {
       titleNamed: "Welcome to Vesta,\n{{name}}.",
       title: "Welcome to Vesta.",
@@ -406,6 +411,10 @@ const en = {
       noWorkplace: "No workplace selected",
       daysPerWeek: "{{count}} days/week",
       enabledCount: "{{count}} enabled",
+      nameLabel: "Name",
+      emailLabel: "Email",
+      phoneLabel: "Phone",
+      notProvided: "Not provided",
     },
     role: {
       title: "What's your role?",

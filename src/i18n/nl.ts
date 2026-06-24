@@ -394,6 +394,11 @@ const nl: Translations = {
   },
   onboarding: {
     startUsingVesta: "Vesta gebruiken",
+    personal: {
+      title: "Je gegevens",
+      subtitle:
+        "Vul je persoonlijke gegevens in zodat je werkgever loon en contracten kan instellen. Je kunt dit later altijd aanpassen in je profiel.",
+    },
     welcome: {
       titleNamed: "Welkom bij Vesta,\n{{name}}.",
       title: "Welkom bij Vesta.",
@@ -414,6 +419,10 @@ const nl: Translations = {
       noWorkplace: "Geen werkplek geselecteerd",
       daysPerWeek: "{{count}} dagen/week",
       enabledCount: "{{count}} ingeschakeld",
+      nameLabel: "Naam",
+      emailLabel: "E-mail",
+      phoneLabel: "Telefoon",
+      notProvided: "Niet ingevuld",
     },
     role: {
       title: "Wat is je functie?",
