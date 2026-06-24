@@ -12,6 +12,7 @@ import { DocumentsHeader } from "@/features/documents/components/DocumentsHeader
 import { payslips } from "@/features/documents/documents.data"
 import { shareContractPdf } from "@/features/documents/documentShare"
 import { useDocumentsScreen } from "@/features/documents/useDocumentsScreen"
+import { translate } from "@/i18n/translate"
 import { EmptyState, Skeleton, SurfaceCard, appLayout, useDesignTokens } from "@/ui"
 
 import type { SectionKey } from "./profileSections"
@@ -46,7 +47,7 @@ function DocumentsEmptyState({
 function DocumentsListSkeleton({ rows = 3 }: { rows?: number }) {
   return (
     <View
-      accessibilityLabel="Loading documents"
+      accessibilityLabel={translate("profile:documents.loadingA11y")}
       accessibilityState={{ busy: true }}
       style={styles.list}
     >
@@ -69,7 +70,7 @@ function DocumentsErrorState({ onRetry, subtitle }: { onRetry: () => void; subti
       actionLabel="Try again"
       onAction={onRetry}
       subtitle={subtitle}
-      title="Couldn't load documents"
+      title={translate("documents:loadError")}
     />
   )
 }
@@ -107,7 +108,7 @@ function LegalDocumentsContent() {
         ) : isError ? (
           <DocumentsErrorState
             onRetry={refetch}
-            subtitle="We couldn't load your required documents. Check your connection and try again."
+            subtitle={translate("profile:documents.requiredLoadErrorSubtitle")}
           />
         ) : filteredDocuments.length > 0 ? (
           filteredDocuments.map((document) => (
@@ -179,7 +180,7 @@ function ContractsContent() {
         ) : isError ? (
           <DocumentsErrorState
             onRetry={refetch}
-            subtitle="We couldn't load your contracts. Check your connection and try again."
+            subtitle={translate("profile:documents.contractsLoadErrorSubtitle")}
           />
         ) : filteredContracts.length > 0 ? (
           filteredContracts.map((contract) => (

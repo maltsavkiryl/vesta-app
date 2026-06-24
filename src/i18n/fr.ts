@@ -269,6 +269,10 @@ const fr: Translations = {
       getStarted: "Commencer",
       skip: "Passer pour l'instant",
     },
+    done: {
+      title: "Prêt à commencer",
+      subtitle: "Votre compte est prêt. Voici la configuration avec laquelle vous démarrerez.",
+    },
     role: {
       title: "Quel est votre poste ?",
       subtitle: "Nous personnaliserons votre expérience selon votre façon de travailler.",
@@ -532,6 +536,44 @@ const fr: Translations = {
       privacyPreview: "Aperçu de la confidentialité",
       maskedNationalNumber: "Numéro national masqué",
       hidden: "Masqué",
+    },
+    detailHints: {
+      address:
+        "Cette adresse est utilisée pour les documents d'emploi, la correspondance de paie et le courrier légalement requis.",
+      bank: "Les coordonnées bancaires sont masquées dans l'app et utilisées par la paie uniquement après vérification par votre employeur.",
+      reachability:
+        "Votre employeur actif peut utiliser ces coordonnées pour les changements de planning et les mises à jour urgentes de service.",
+      identity:
+        "Les numéros d'identité restent masqués après l'enregistrement. Vesta n'expose que ce que la paie et la conformité de l'emploi exigent.",
+    },
+    documents: {
+      loadingA11y: "Chargement des documents",
+      requiredLoadErrorSubtitle:
+        "Impossible de charger vos documents requis. Vérifiez votre connexion et réessayez.",
+      contractsLoadErrorSubtitle:
+        "Impossible de charger vos contrats. Vérifiez votre connexion et réessayez.",
+    },
+    employer: {
+      linked: "Lié",
+      linkedWorkplaces: "Lieux de travail liés",
+      noLinkedTitle: "Aucun lieu de travail lié",
+      noLinkedSubtitle:
+        "Rejoignez un lieu de travail pour recevoir services, documents et mises à jour de paie dans l'app.",
+      availableInvitations: "Invitations disponibles",
+      join: "Rejoindre",
+      askManagerCode: "Demandez à votre manager le code de lieu de travail à 6 caractères.",
+      browseWorkplaces: "Parcourir les lieux de travail",
+      searchPlaceholder: "Rechercher par nom, type ou ville",
+      results: "Résultats",
+      noResultsHint: "Essayez un autre terme ou demandez un code d'invitation à votre manager.",
+      joinWorkplace: "AJOUTER UN LIEU DE TRAVAIL",
+      chooseHowToAdd: "Choisissez comment ajouter un lieu de travail",
+      workplaceAdded: "Lieu de travail ajouté",
+      addWorkplace: "Ajouter un lieu de travail",
+    },
+    appearance: {
+      title: "Apparence",
+      motion: "Animations",
     },
   },
   documents: {

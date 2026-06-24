@@ -6,6 +6,7 @@ import SegmentedControl from "@react-native-segmented-control/segmented-control"
 
 import type { Employer } from "@/core/models"
 import { TimeHeroCard, timeHeroColors } from "@/features/time/components/TimeHeroCard"
+import { translate } from "@/i18n/translate"
 import { AppButton, Text } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
@@ -31,7 +32,12 @@ export function JoinModeHero({ joinMode, tokens }: { joinMode: JoinMode; tokens:
     <TimeHeroCard contentStyle={styles.joinModeContent} gradientVariant="compact" style={cardStyle}>
       <View style={styles.joinModeTop}>
         <View style={styles.joinModeCopy}>
-          <Text text="JOIN WORKPLACE" size="xxs" weight="semiBold" style={eyebrowStyle} />
+          <Text
+            text={translate("profile:employer.joinWorkplace")}
+            size="xxs"
+            weight="semiBold"
+            style={eyebrowStyle}
+          />
           <Text
             text={joinMode === "code" ? "Enter a workplace code" : "Find a workplace"}
             size="lg"
@@ -81,7 +87,7 @@ export function JoinModePicker({
   return (
     <View style={styles.modePickerCard}>
       <Text
-        text="Choose how you want to add a workplace"
+        text={translate("profile:employer.chooseHowToAdd")}
         size="xs"
         weight="semiBold"
         style={{ color: tokens.textPrimary }}
@@ -134,14 +140,19 @@ export function JoinSuccessCard({
       <View style={successIconStyle}>
         <Ionicons color={tokens.success} name="checkmark-circle-outline" size={34} />
       </View>
-      <Text text="Workplace added" size="sm" weight="bold" style={titleStyle} />
+      <Text
+        text={translate("profile:employer.workplaceAdded")}
+        size="sm"
+        weight="bold"
+        style={titleStyle}
+      />
       <Text
         text={`${joinedEmployer.name} is now linked to your profile.`}
         size="xs"
         style={bodyStyle}
       />
       <AppButton
-        label="Done"
+        label={translate("common:actions.done")}
         variant="secondary"
         onPress={() => {
           if (router.canGoBack()) {

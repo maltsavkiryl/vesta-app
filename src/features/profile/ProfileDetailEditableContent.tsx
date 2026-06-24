@@ -12,6 +12,7 @@ import {
   PersonalEditSections,
 } from "@/features/profile/ProfileEditableSections"
 import { SectionFooter } from "@/features/profile/sections/ProfileSectionShared"
+import { translate } from "@/i18n/translate"
 import { maskSensitiveId } from "@/utils/formatters"
 
 import type { SectionKey } from "./profileSections"
@@ -31,7 +32,7 @@ export const EDITABLE_SECTION_CONTENT: Partial<
     render: ({ addressState, setAddressState }) => (
       <>
         <AddressEditSections addressState={addressState} setAddressState={setAddressState} />
-        <SectionFooter text="This address is used for employment records, payroll correspondence, and legally required mail." />
+        <SectionFooter text={translate("profile:detailHints.address")} />
       </>
     ),
   },
@@ -40,7 +41,7 @@ export const EDITABLE_SECTION_CONTENT: Partial<
     render: ({ bankState, setBankState, tokens }) => (
       <>
         <BankingEditSections bankState={bankState} setBankState={setBankState} />
-        <SectionFooter text="Bank details are masked in the app and only used by payroll once your employer verifies them." />
+        <SectionFooter text={translate("profile:detailHints.bank")} />
         <BankingVerificationSection hasIban={Boolean(bankState.iban)} tokens={tokens} />
       </>
     ),
@@ -50,7 +51,7 @@ export const EDITABLE_SECTION_CONTENT: Partial<
     render: ({ contactState, setContactState }) => (
       <>
         <ContactEditSections contactState={contactState} setContactState={setContactState} />
-        <SectionFooter text="Your active employer can use these details for schedule changes and urgent shift updates." />
+        <SectionFooter text={translate("profile:detailHints.reachability")} />
       </>
     ),
   },
@@ -59,7 +60,7 @@ export const EDITABLE_SECTION_CONTENT: Partial<
     render: ({ legalState, setLegalState, tokens }) => (
       <>
         <LegalEditSections legalState={legalState} setLegalState={setLegalState} />
-        <SectionFooter text="Identity numbers stay hidden after saving. Vesta only exposes what payroll and employment compliance require." />
+        <SectionFooter text={translate("profile:detailHints.identity")} />
         <LegalPrivacyPreviewSection
           maskedNationalNumber={maskSensitiveId(legalState.nationalRegisterNumber)}
           tokens={tokens}

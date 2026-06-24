@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { Employer } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { EmptyState, GroupedSection, ListRow, StatusBadge, Text } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
@@ -42,7 +43,12 @@ export function EmployerSwitchCard({
       </View>
       <View style={styles.activeStatus}>
         <View style={[styles.activeDot, { backgroundColor: tokens.success }]} />
-        <Text text="Linked" size="xxs" weight="semiBold" style={{ color: tokens.success }} />
+        <Text
+          text={translate("profile:employer.linked")}
+          size="xxs"
+          weight="semiBold"
+          style={{ color: tokens.success }}
+        />
       </View>
     </View>
   )
@@ -63,7 +69,11 @@ export function EmployersSection({
 }) {
   return (
     <>
-      <GroupedSection actionLabel="Join" title="Linked workplaces" onAction={onOpenJoinEmployer}>
+      <GroupedSection
+        actionLabel="Join"
+        title={translate("profile:employer.linkedWorkplaces")}
+        onAction={onOpenJoinEmployer}
+      >
         {employers.length > 0 ? (
           employers.map((employer, index) => (
             <ListRow
@@ -72,14 +82,14 @@ export function EmployersSection({
               subtitle={`${employer.type} - ${employer.city} - ${employer.teamSize} people`}
               isLast={index === employers.length - 1}
               leading={<Ionicons color={tokens.accent} name="business-outline" size={18} />}
-              trailing={<StatusBadge label="Linked" tone="success" />}
+              trailing={<StatusBadge label={translate("profile:employer.linked")} tone="success" />}
             />
           ))
         ) : (
           <EmptyState
             icon={<Ionicons color={tokens.textMuted} name="business-outline" size={18} />}
-            subtitle="Join a workplace to receive shifts, documents, and payroll updates in the app."
-            title="No linked workplaces"
+            subtitle={translate("profile:employer.noLinkedSubtitle")}
+            title={translate("profile:employer.noLinkedTitle")}
           />
         )}
       </GroupedSection>
@@ -87,7 +97,7 @@ export function EmployersSection({
       {availableEmployers.length > 0 ? (
         <GroupedSection
           actionLabel="Search"
-          title="Available invitations"
+          title={translate("profile:employer.availableInvitations")}
           onAction={onOpenJoinEmployer}
         >
           {availableEmployers.map((employer, index) => (
@@ -101,7 +111,12 @@ export function EmployersSection({
                 <Ionicons color={tokens.textSecondary} name="add-circle-outline" size={18} />
               }
               trailing={
-                <Text text="Join" size="xs" weight="semiBold" style={{ color: tokens.accent }} />
+                <Text
+                  text={translate("profile:employer.join")}
+                  size="xs"
+                  weight="semiBold"
+                  style={{ color: tokens.accent }}
+                />
               }
             />
           ))}

@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 
 import type { Employer } from "@/core/models"
 import { EmployerInviteCodeEntry } from "@/features/employers/EmployerInviteCodeEntry"
+import { translate } from "@/i18n/translate"
 import { Banner, GroupedSection, ListRow, SurfaceCard, Text, TextField } from "@/ui"
 import type { DesignTokens } from "@/ui"
 
@@ -28,7 +29,7 @@ export function InviteCodePanel({
       <View style={styles.joinCodeHint}>
         <Ionicons color={tokens.textSecondary} name="sparkles-outline" size={16} />
         <Text
-          text="Ask your manager for the 6-character workplace code."
+          text={translate("profile:employer.askManagerCode")}
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
@@ -73,7 +74,7 @@ export function EmployerSearchPanel({
     <>
       <Banner
         icon={<Ionicons color={tokens.accent} name="business-outline" size={16} />}
-        title="Browse workplaces"
+        title={translate("profile:employer.browseWorkplaces")}
         tone="accent"
       >
         Search by name, city, type, or invite code.
@@ -84,12 +85,12 @@ export function EmployerSearchPanel({
           autoCapitalize="words"
           leftAccessory={<Ionicons color={tokens.textMuted} name="search-outline" size={16} />}
           onChangeText={onChangeSearch}
-          placeholder="Search by name, type or city"
+          placeholder={translate("profile:employer.searchPlaceholder")}
           value={joinSearch}
         />
       </View>
 
-      <GroupedSection title="Results">
+      <GroupedSection title={translate("profile:employer.results")}>
         {searchResults.length > 0 ? (
           searchResults.map((employer, index) => {
             const selected = selectedJoinEmployerId === employer.id
@@ -143,7 +144,7 @@ export function EmployerSearchPanel({
               style={{ color: tokens.textPrimary, textAlign: "center" }}
             />
             <Text
-              text="Try a different term or ask your manager for an invite code."
+              text={translate("profile:employer.noResultsHint")}
               size="xxs"
               style={{ color: tokens.textMuted, textAlign: "center" }}
             />

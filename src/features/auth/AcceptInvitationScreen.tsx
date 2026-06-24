@@ -1,5 +1,6 @@
 import { ActivityIndicator, StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { Button, useDesignTokens } from "@/ui"
 
 import { AuthFormLayout } from "./AuthFormLayout"
@@ -27,7 +28,7 @@ export function AcceptInvitationScreen() {
         ) : (
           <>
             <AuthError message={error} />
-            <Button fullWidth label="Back to sign in" onPress={handleBackToSignIn} />
+            <Button fullWidth label={translate("auth:backToSignIn")} onPress={handleBackToSignIn} />
           </>
         )}
       </View>

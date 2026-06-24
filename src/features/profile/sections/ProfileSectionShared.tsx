@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import { LANGUAGE_OPTIONS } from "@/features/profile/profileSections"
+import { translate } from "@/i18n/translate"
 import { GroupedSection, SelectionIndicator, SelectionRow, Text, useDesignTokens } from "@/ui"
 
 export { LANGUAGE_OPTIONS }
@@ -62,7 +63,7 @@ export function AppearanceSection({
   selectedTheme: "system" | "light" | "dark"
 }) {
   return (
-    <GroupedSection title="Appearance">
+    <GroupedSection title={translate("profile:appearance.title")}>
       {(
         [
           { icon: "phone-portrait-outline", label: "System", value: "system" },
@@ -95,7 +96,7 @@ export function MotionSection({
   selectedMotionPreference: "system" | "reduced" | "full"
 }) {
   return (
-    <GroupedSection title="Motion">
+    <GroupedSection title={translate("profile:appearance.motion")}>
       {(
         [
           { icon: "phone-portrait-outline", label: "System", value: "system" },
