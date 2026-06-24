@@ -39,7 +39,11 @@ export function JoinModeHero({ joinMode, tokens }: { joinMode: JoinMode; tokens:
             style={eyebrowStyle}
           />
           <Text
-            text={joinMode === "code" ? "Enter a workplace code" : "Find a workplace"}
+            text={
+              joinMode === "code"
+                ? translate("profile:employerJoin.enterCodeTab")
+                : translate("profile:employerJoin.findTab")
+            }
             size="lg"
             weight="bold"
             style={titleStyle}
@@ -47,8 +51,8 @@ export function JoinModeHero({ joinMode, tokens }: { joinMode: JoinMode; tokens:
           <Text
             text={
               joinMode === "code"
-                ? "Use the code your manager shared to link the right workplace to your profile."
-                : "Browse workplaces and choose the one you want to add."
+                ? translate("profile:employerJoin.codeHint")
+                : translate("profile:employerJoin.browseHint")
             }
             size="xs"
             style={subtitleStyle}

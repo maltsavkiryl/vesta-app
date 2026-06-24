@@ -1,4 +1,5 @@
 import type { UserProfile } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 import type { SectionKey } from "./profileSections"
 
@@ -121,11 +122,11 @@ export async function saveProfileSection({
   try {
     const result = await updateProfile(payload)
     if (!result.ok) {
-      onError(result.error?.message ?? "Something went wrong. Please try again.")
+      onError(result.error?.message ?? translate("profile:formError"))
       return
     }
   } catch {
-    onError("Something went wrong. Please try again.")
+    onError(translate("profile:formError"))
     return
   }
 

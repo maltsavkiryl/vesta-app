@@ -1,5 +1,6 @@
 import { Alert, type AlertButton } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 type ProfilePhotoAction = "camera" | "library" | "cancel"
@@ -9,8 +10,8 @@ export type ProfilePhotoSelection = { kind: "cancelled" } | { kind: "picked"; ur
 function promptForProfilePhotoAction() {
   return new Promise<ProfilePhotoAction>((resolve) => {
     const options: AlertButton[] = [
-      { text: "Take photo", onPress: () => resolve("camera") },
-      { text: "Choose photo", onPress: () => resolve("library") },
+      { text: translate("profile:photo.takePhoto"), onPress: () => resolve("camera") },
+      { text: translate("profile:photo.choosePhoto"), onPress: () => resolve("library") },
       {
         style: "cancel" as const,
         text: "Cancel",
@@ -18,7 +19,7 @@ function promptForProfilePhotoAction() {
       },
     ]
 
-    Alert.alert("Profile photo", "Choose how to update your profile photo.", options)
+    Alert.alert(translate("profile:photo.title"), translate("profile:photo.prompt"), options)
   })
 }
 
@@ -27,7 +28,10 @@ async function takeProfilePhoto() {
   const permission = await ImagePicker.requestCameraPermissionsAsync()
 
   if (!permission.granted) {
-    Alert.alert("Camera access needed", "Allow camera access to take a profile photo.")
+    Alert.alert(
+      translate("profile:photo.cameraNeeded"),
+      translate("profile:photo.cameraNeededBody"),
+    )
     return null
   }
 
@@ -48,7 +52,7 @@ async function chooseProfilePhoto() {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
 
   if (!permission.granted) {
-    Alert.alert("Photo access needed", "Allow photo library access to choose a profile photo.")
+    Alert.alert(translate("profile:photo.photoNeeded"), translate("profile:photo.photoNeededBody"))
     return null
   }
 
@@ -82,7 +86,7 @@ export async function selectProfilePhoto(): Promise<ProfilePhotoSelection> {
     }
   } catch {
     fireHaptic("error")
-    Alert.alert("Photo unavailable", "Rebuild the development app to enable profile photo changes.")
+    Alert.alert(translate("profile:photo.unavailable"), translate("profile:photo.devBuild"))
     return { kind: "cancelled" }
   }
 }
