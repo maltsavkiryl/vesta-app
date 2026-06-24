@@ -13,7 +13,7 @@ import {
 } from "./PlanningTodosSections"
 import { usePlanningTodosScreen } from "./usePlanningTodosScreen"
 
-export function PlanningTodosScreen() {
+export function PlanningTodosScreen({ embedded = false }: { embedded?: boolean }) {
   const tokens = useDesignTokens()
   const screen = usePlanningTodosScreen()
   const { onRefresh, refreshing } = useRefreshHandler(screen.refetch)
@@ -26,7 +26,7 @@ export function PlanningTodosScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title={translate("planning:todos.title")} />
+        {embedded ? null : <PageHeader delay={0} title={translate("planning:todos.title")} />}
         <EmptyState
           actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
@@ -48,7 +48,7 @@ export function PlanningTodosScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title={translate("planning:todos.title")} />
+      {embedded ? null : <PageHeader delay={0} title={translate("planning:todos.title")} />}
       {isFirstLoad ? (
         <GroupedSection title={translate("planning:todos.sectionTodo")}>
           <PlanningTodosSkeleton />

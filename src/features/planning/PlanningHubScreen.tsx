@@ -121,21 +121,21 @@ export function PlanningHubScreen() {
 
       {/* Tab content — keep all mounted for instant tab switch */}
       <View style={[styles.tabPane, activeTab === "shifts" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningShiftsScreen />
+        <PlanningShiftsScreen embedded />
       </View>
       <View style={[styles.tabPane, activeTab === "todos" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningTodosScreen />
+        <PlanningTodosScreen embedded />
       </View>
       <View style={[styles.tabPane, activeTab === "calls" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningCallsScreen />
+        <PlanningCallsScreen embedded />
       </View>
       <View
         style={[styles.tabPane, activeTab === "requests" ? styles.tabVisible : styles.tabHidden]}
       >
-        <PlanningRequestsScreen />
+        <PlanningRequestsScreen embedded />
       </View>
       <View style={[styles.tabPane, activeTab === "leave" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningLeaveScreen />
+        <PlanningLeaveScreen embedded />
       </View>
     </View>
   )

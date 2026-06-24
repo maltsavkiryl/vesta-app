@@ -13,7 +13,7 @@ import {
 } from "./PlanningRequestsSections"
 import { usePlanningRequestsScreen } from "./usePlanningRequestsScreen"
 
-export function PlanningRequestsScreen() {
+export function PlanningRequestsScreen({ embedded = false }: { embedded?: boolean }) {
   const tokens = useDesignTokens()
   const screen = usePlanningRequestsScreen()
   const { onRefresh, refreshing } = useRefreshHandler(screen.refetch)
@@ -50,7 +50,7 @@ export function PlanningRequestsScreen() {
         onRefresh={onRefresh}
         refreshing={refreshing}
       >
-        <PageHeader delay={0} title={translate("planning:requests.title")} />
+        {embedded ? null : <PageHeader delay={0} title={translate("planning:requests.title")} />}
         <EmptyState
           actionLabel={translate("common:actions.retry")}
           icon={<Ionicons color={tokens.textMuted} name="wifi-outline" size={18} />}
@@ -69,7 +69,7 @@ export function PlanningRequestsScreen() {
       onRefresh={onRefresh}
       refreshing={refreshing}
     >
-      <PageHeader delay={0} title={translate("planning:requests.title")} />
+      {embedded ? null : <PageHeader delay={0} title={translate("planning:requests.title")} />}
 
       <PlanningRequestShortcuts
         onNewChangeRequest={screen.handleNewChangeRequest}
