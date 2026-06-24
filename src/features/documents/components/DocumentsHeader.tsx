@@ -24,7 +24,7 @@ export function DocumentsHeader({
   onSearchPress,
   onUploadPress,
   query,
-  searchPlaceholder = "Search documents...",
+  searchPlaceholder = translate("documents:searchPlaceholder"),
   showSearchButton = true,
   showTitle = true,
   showUploadButton = true,

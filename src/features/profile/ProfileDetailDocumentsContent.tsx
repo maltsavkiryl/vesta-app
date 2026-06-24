@@ -95,7 +95,7 @@ function LegalDocumentsContent() {
       <DocumentsHeader
         isSearching={isSearching}
         query={query}
-        searchPlaceholder="Search legal documents..."
+        searchPlaceholder={translate("documents:searchLegal")}
         showSearchButton={false}
         showTitle={false}
         showUploadButton={false}
@@ -137,8 +137,8 @@ function LegalDocumentsContent() {
             onAction={hasSearchQuery ? cancelSearch : undefined}
             subtitle={
               hasSearchQuery
-                ? "Try another search term or clear the filter to see every required document."
-                : "Anything that needs an upload or review will appear here."
+                ? translate("documents:legalEmptyFiltered")
+                : translate("documents:legalEmpty")
             }
             title={hasSearchQuery ? "No matching legal documents" : "Nothing needed right now"}
           />
@@ -167,7 +167,7 @@ function ContractsContent() {
       <DocumentsHeader
         isSearching={isSearching}
         query={query}
-        searchPlaceholder="Search contracts..."
+        searchPlaceholder={translate("documents:searchContracts")}
         showSearchButton={false}
         showTitle={false}
         showUploadButton={false}
@@ -211,8 +211,8 @@ function ContractsContent() {
             onAction={hasSearchQuery ? cancelSearch : undefined}
             subtitle={
               hasSearchQuery
-                ? "Try a different contract name or clear the search."
-                : "Signed and pending agreements will appear here when your employer sends them."
+                ? translate("documents:contractsEmptyFiltered")
+                : translate("documents:contractsEmpty")
             }
             title={hasSearchQuery ? "No matching contracts" : "No contracts on file"}
           />
@@ -232,7 +232,7 @@ function PayslipsContent() {
       <DocumentsHeader
         isSearching={isSearching}
         query={query}
-        searchPlaceholder="Search payslips..."
+        searchPlaceholder={translate("documents:searchPayslips")}
         showSearchButton={false}
         showTitle={false}
         showUploadButton={false}
@@ -260,8 +260,8 @@ function PayslipsContent() {
             onAction={hasSearchQuery ? cancelSearch : undefined}
             subtitle={
               hasSearchQuery
-                ? "Try a different month or clear the search."
-                : "Payslips will show up here after payroll is published."
+                ? translate("documents:payslipsEmptyFiltered")
+                : translate("documents:payslipsEmpty")
             }
             title={
               hasSearchQuery

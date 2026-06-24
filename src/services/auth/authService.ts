@@ -51,7 +51,7 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
     if (!selected.ok || !selected.data)
       return failure<AuthError>({
         type: "invalid-credentials",
-        message: "Could not start a session for this employer.",
+        message: translate("auth:errors.sessionStartFailed"),
       })
     await tokenStore.set({
       accessToken: selected.data.access_token,
@@ -76,7 +76,7 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
     if (memberships.length === 0)
       return failure<AuthError>({
         type: "account-not-found",
-        message: "No employer is linked to this account yet.",
+        message: translate("auth:errors.noEmployerLinked"),
       })
     // A single membership signs in straight away; more than one needs a choice.
     if (memberships.length === 1) {
@@ -105,7 +105,7 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
       if (!pendingIdToken)
         return failure<AuthError>({
           type: "invalid-credentials",
-          message: "Your sign-in expired. Please sign in again.",
+          message: translate("auth:errors.sessionExpired"),
         })
       return completeSelection(pendingIdToken, employerUniqueCode)
     },
@@ -122,7 +122,7 @@ export function createAuthService(authApi: Pick<ApisauceInstance, "post">) {
       } catch {
         return failure<AuthError>({
           type: "invalid-credentials",
-          message: "We couldn't verify your identity. Please try again.",
+          message: translate("auth:errors.verifyFailed"),
         })
       }
       const accepted = await authApi.post<AccessTokenResponse>(

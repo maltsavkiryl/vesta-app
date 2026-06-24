@@ -184,13 +184,13 @@ export function ChangePasswordSection() {
   const handleSubmit = async () => {
     if (nextPassword.length < 6) {
       fireHaptic("warning")
-      setError("Use a password with at least 6 characters.")
+      setError(translate("auth:validation.passwordMin6"))
       return
     }
 
     if (nextPassword !== confirmPassword) {
       fireHaptic("warning")
-      setError("The new passwords do not match.")
+      setError(translate("auth:validation.passwordsMismatchNew"))
       return
     }
 
