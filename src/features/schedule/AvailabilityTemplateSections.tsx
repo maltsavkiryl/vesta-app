@@ -6,6 +6,7 @@ import type { AvailabilityTemplate, AvailabilityWeekday } from "@/core/models"
 import { getAvailabilityTemplateSummary } from "@/features/schedule/availability-template.utils"
 import { durationLabel } from "@/features/schedule/availability.utils"
 import { availabilityWeekdayLabels, availabilityWeekdays } from "@/features/schedule/schedule.utils"
+import { translate } from "@/i18n/translate"
 import { GroupedSection, SelectionRow, Text, useDesignTokens } from "@/ui"
 import { useListItemEntrance } from "@/ui/foundations/motion"
 
@@ -17,7 +18,7 @@ export function AvailabilityTemplateIntro() {
       <Text
         size="xs"
         style={{ color: tokens.textSecondary }}
-        text="Set your usual pattern here, then adjust specific dates only when something changes."
+        text={translate("planning:availability.templateHint")}
       />
     </View>
   )

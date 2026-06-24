@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { formatFullDate, formatShortDate, getShiftTimeRange } from "@/core/date"
 import type { RequestCategory, Shift } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import {
   AppButton,
   AppScrollScreen,
@@ -52,7 +53,7 @@ export function RequestSuccessContent({
       contentContainerStyle={[styles.successScroll, { paddingBottom: insets.bottom + 30 }]}
       variant="grouped"
     >
-      <SuccessState subtitle={successCopy} title="Request submitted" />
+      <SuccessState subtitle={successCopy} title={translate("planning:requests.submitSuccess")} />
       <View style={styles.successBody}>
         <SurfaceCard style={styles.successCard}>
           <Text
@@ -72,7 +73,11 @@ export function RequestSuccessContent({
           ) : null}
           <Text size="xxs" style={{ color: tokens.textSecondary }} text={reason} />
         </SurfaceCard>
-        <AppButton fullWidth label="Done" onPress={() => router.back()} />
+        <AppButton
+          fullWidth
+          label={translate("common:actions.done")}
+          onPress={() => router.back()}
+        />
       </View>
     </AppScrollScreen>
   )
@@ -128,8 +133,8 @@ export function RequestTargetSection({
             </SurfaceCard>
           ) : (
             <EmptyState
-              subtitle="When a shift is scheduled, you can ask for a replacement or report a conflict here."
-              title="No upcoming shifts to update"
+              subtitle={translate("planning:requests.noShiftsSubtitle")}
+              title={translate("planning:requests.noShiftsTitle")}
             />
           )
         ) : requestDates.length > 0 ? (
@@ -146,8 +151,8 @@ export function RequestTargetSection({
           </View>
         ) : (
           <EmptyState
-            subtitle="Time-off requests appear here when the next planning window opens."
-            title="No dates open right now"
+            subtitle={translate("planning:requests.noDatesSubtitle")}
+            title={translate("planning:requests.noDatesTitle")}
           />
         )}
       </View>
@@ -199,7 +204,7 @@ export function RequestNoteSection({
   setNote: (note: string) => void
 }) {
   return (
-    <GroupedSection bodyStyle={sectionBodyStyle} title="Note">
+    <GroupedSection bodyStyle={sectionBodyStyle} title={translate("planning:requests.noteLabel")}>
       <View style={groupBodyStyle}>
         <TextField
           caption="Optional context shown with your request."
@@ -208,7 +213,7 @@ export function RequestNoteSection({
           multiline
           numberOfLines={4}
           onChangeText={setNote}
-          placeholder="Anything your manager should know"
+          placeholder={translate("planning:requests.managerNotePlaceholder")}
           textAlignVertical="top"
           value={note}
           variant="default"

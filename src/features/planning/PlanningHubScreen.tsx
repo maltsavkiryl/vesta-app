@@ -76,7 +76,7 @@ export function PlanningHubScreen() {
           />
           <View style={styles.headerActions}>
             <Pressable
-              accessibilityLabel="Add my shifts to my phone calendar"
+              accessibilityLabel={translate("planning:addToCalendarA11y")}
               accessibilityRole="button"
               disabled={isSyncing}
               onPress={() => {

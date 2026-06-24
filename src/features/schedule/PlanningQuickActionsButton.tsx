@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons"
 
 import type { PlanningQuickActionOption } from "@/features/schedule/showPlanningQuickActions"
 import { showPlanningQuickActions } from "@/features/schedule/showPlanningQuickActions"
+import { translate } from "@/i18n/translate"
 import { IconButton, useDesignTokens } from "@/ui"
 
 export function PlanningQuickActionsButton({
@@ -15,7 +16,7 @@ export function PlanningQuickActionsButton({
 
   return (
     <IconButton
-      accessibilityLabel="Open planning tools"
+      accessibilityLabel={translate("planning:quickActionsA11y")}
       onPress={() => {
         showPlanningQuickActions({
           options,
