@@ -3,6 +3,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
 import { formatDurationLabel } from "@/core/date"
+import { translate } from "@/i18n/translate"
 import {
   AppButton,
   DetailRow,
@@ -31,8 +32,8 @@ export function ClockOutEmptyState() {
       actionLabel="Back to Time"
       icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
       onAction={() => router.replace("/(app)/(tabs)/time")}
-      subtitle="You're not currently clocked in."
-      title="No active session"
+      subtitle={translate("time:clockOut.notClockedIn")}
+      title={translate("time:clockOut.noSessionTitle")}
     />
   )
 }
@@ -59,8 +60,8 @@ export function ClockOutCelebration({
     <View style={styles.celebration}>
       <SuccessState
         icon="sparkles"
-        subtitle="Your time is saved."
-        title="Shift complete!"
+        subtitle={translate("time:clockOut.savedSubtitle")}
+        title={translate("time:clockOut.completeTitle")}
         tone="success"
       >
         <View
@@ -79,7 +80,7 @@ export function ClockOutCelebration({
               <Text
                 size="xxs"
                 style={[styles.statLabel, { color: tokens.textSecondary }]}
-                text="Worked"
+                text={translate("time:worked")}
               />
             </View>
             <View style={[styles.statDivider, { backgroundColor: tokens.border }]} />
@@ -92,7 +93,7 @@ export function ClockOutCelebration({
               <Text
                 size="xxs"
                 style={[styles.statLabel, { color: tokens.textSecondary }]}
-                text="Break"
+                text={translate("time:clockOut.breakLabel")}
               />
             </View>
           </View>
@@ -100,7 +101,7 @@ export function ClockOutCelebration({
       </SuccessState>
 
       <View style={styles.celebrationFooter}>
-        <AppButton label="Done" onPress={onDone} />
+        <AppButton label={translate("common:actions.done")} onPress={onDone} />
       </View>
     </View>
   )
@@ -131,11 +132,11 @@ export function ClockOutContent({
         />
       </View>
 
-      <GroupedSection title="Shift summary">
-        <DetailRow label="Clocked in" value={summary.startedAtLabel} />
-        <DetailRow label="Clocked out" value={summary.clockOutTime} />
+      <GroupedSection title={translate("time:shiftSummary")}>
+        <DetailRow label={translate("time:clockOut.clockedIn")} value={summary.startedAtLabel} />
+        <DetailRow label={translate("time:clockOut.clockedOut")} value={summary.clockOutTime} />
         <DetailRow
-          label="Break time"
+          label={translate("time:clockOut.breakTime")}
           value={summary.breakLabel}
           valueTone="warning"
           isLast={summary.overtime === 0}
@@ -143,7 +144,7 @@ export function ClockOutContent({
         {summary.overtime > 0 ? (
           <DetailRow
             isLast
-            label="Overtime"
+            label={translate("time:clockOut.overtime")}
             value={formatDurationLabel(summary.overtime)}
             valueTone="warning"
           />
@@ -162,7 +163,7 @@ export function ClockOutContent({
         <View style={styles.footerActions}>
           <AppButton
             isLoading={isFinishing}
-            label="Confirm clock out"
+            label={translate("time:clockOut.confirm")}
             onPress={() => {
               void onFinish()
             }}
@@ -171,7 +172,7 @@ export function ClockOutContent({
           />
           <AppButton
             disabled={isFinishing}
-            label="Keep working"
+            label={translate("time:clockOut.keepWorking")}
             onPress={onKeepWorking}
             variant="secondary"
           />
