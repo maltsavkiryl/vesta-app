@@ -16,6 +16,9 @@ export const styles = StyleSheet.create({
   animatedSectionHost: {
     position: "relative",
   },
+  animatedSectionLayer: {
+    pointerEvents: "box-none",
+  },
   breakButton: {
     alignItems: "center",
     borderCurve: "continuous",
@@ -113,6 +116,7 @@ export const styles = StyleSheet.create({
   hiddenMeasure: {
     left: 0,
     opacity: 0,
+    pointerEvents: "none",
     position: "absolute",
     right: 0,
     top: 0,

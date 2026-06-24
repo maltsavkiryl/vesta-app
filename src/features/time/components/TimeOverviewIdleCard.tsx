@@ -135,7 +135,6 @@ export function IdleCardContent({
                   detailHeight.value = nextHeight
                 }
               }}
-              pointerEvents="none"
               style={styles.hiddenMeasure}
             >
               <IdleDetails

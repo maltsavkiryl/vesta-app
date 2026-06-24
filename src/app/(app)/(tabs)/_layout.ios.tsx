@@ -71,7 +71,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger>
       </NativeTabs>
 
-      <View pointerEvents="box-none" style={styles.overlay}>
+      <View style={styles.overlay}>
         <RequestComposeAccessory />
       </View>
     </View>
@@ -84,5 +84,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
+    pointerEvents: "box-none",
   },
 })

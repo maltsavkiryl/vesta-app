@@ -219,7 +219,7 @@ export function SurfaceCard({
 
 function TopEdgeOverlay({ insetTop, tokens }: { insetTop: number; tokens: DesignTokens }) {
   return (
-    <View pointerEvents="none" style={[styles.topEdgeOverlay, { height: insetTop + 24 }]}>
+    <View style={[styles.topEdgeOverlay, { height: insetTop + 24, pointerEvents: "none" }]}>
       <LinearGradient
         colors={getTopEdgeGradientColors(tokens)}
         end={{ x: 0.5, y: 1 }}

@@ -143,12 +143,11 @@ export function CollapsibleSection({
         accessible={false}
         importantForAccessibility="no-hide-descendants"
         onLayout={(event) => handleLayout(event.nativeEvent.layout.height)}
-        pointerEvents="none"
         style={styles.hiddenMeasure}
       >
         {children}
       </View>
-      <Animated.View pointerEvents="box-none" style={animatedStyle}>
+      <Animated.View style={[animatedStyle, styles.animatedSectionLayer]}>
         <View>{children}</View>
       </Animated.View>
     </View>

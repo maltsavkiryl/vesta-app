@@ -54,9 +54,8 @@ export function AuthBackgroundLayers() {
           "rgba(60, 110, 220, 0.00)",
         ]}
         end={{ x: 1, y: 0 }}
-        pointerEvents="none"
         start={{ x: 0.4, y: 0.6 }}
-        style={StyleSheet.absoluteFill}
+        style={styles.gradientOverlay}
       />
       <LinearGradient
         colors={[
@@ -65,9 +64,8 @@ export function AuthBackgroundLayers() {
           "rgba(100, 140, 220, 0.00)",
         ]}
         end={{ x: 0.3, y: 0.55 }}
-        pointerEvents="none"
         start={{ x: 0, y: 1 }}
-        style={StyleSheet.absoluteFill}
+        style={styles.gradientOverlay}
       />
     </>
   )
@@ -162,6 +160,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: "none",
   },
   header: {
     gap: 4,
