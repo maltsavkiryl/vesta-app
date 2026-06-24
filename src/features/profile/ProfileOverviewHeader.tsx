@@ -46,7 +46,7 @@ export function ProfileOverviewHeader({
   return (
     <View style={styles.profileHeader}>
       <Pressable
-        accessibilityHint="Opens profile photo options"
+        accessibilityHint={translate("profile:photo.optionsA11y")}
         accessibilityLabel={
           avatarUri ? translate("profile:photo.change") : translate("profile:photo.add")
         }

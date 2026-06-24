@@ -22,6 +22,14 @@ const nl: Translations = {
       loading: "Laden",
       closeSheet: "Blad sluiten",
       dragHandle: "Sleepgreep",
+      dragDownToClose: "Sleep omlaag om te sluiten",
+    },
+    nav: {
+      home: "Home",
+      planning: "Planning",
+      time: "Tijd",
+      inbox: "Inbox",
+      profile: "Profiel",
     },
   },
   errorScreen: {
@@ -956,6 +964,7 @@ const nl: Translations = {
       choosePhoto: "Foto kiezen",
       change: "Profielfoto wijzigen",
       add: "Profielfoto toevoegen",
+      optionsA11y: "Opent opties voor profielfoto",
       title: "Profielfoto",
       prompt: "Kies hoe je je profielfoto wilt bijwerken.",
       cameraNeeded: "Cameratoegang nodig",

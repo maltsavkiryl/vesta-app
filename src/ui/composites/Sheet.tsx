@@ -153,7 +153,7 @@ export function Sheet({
           {/* Drag handle — announced by VoiceOver/TalkBack so users know the sheet is dismissible */}
           <View
             accessible
-            accessibilityHint="Drag down to close"
+            accessibilityHint={translate("common:a11y.dragDownToClose")}
             accessibilityLabel={translate("common:a11y.dragHandle")}
             accessibilityRole="adjustable"
             style={styles.handleContainer}

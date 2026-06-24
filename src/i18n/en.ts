@@ -20,6 +20,14 @@ const en = {
       loading: "Loading",
       closeSheet: "Close sheet",
       dragHandle: "Drag handle",
+      dragDownToClose: "Drag down to close",
+    },
+    nav: {
+      home: "Home",
+      planning: "Planning",
+      time: "Time",
+      inbox: "Inbox",
+      profile: "Profile",
     },
   },
   errorScreen: {
@@ -933,6 +941,7 @@ const en = {
       choosePhoto: "Choose photo",
       change: "Change profile photo",
       add: "Add profile photo",
+      optionsA11y: "Opens profile photo options",
       title: "Profile photo",
       prompt: "Choose how to update your profile photo.",
       cameraNeeded: "Camera access needed",

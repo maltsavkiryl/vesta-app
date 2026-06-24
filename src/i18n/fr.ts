@@ -22,6 +22,14 @@ const fr: Translations = {
       loading: "Chargement",
       closeSheet: "Fermer la feuille",
       dragHandle: "Poignée",
+      dragDownToClose: "Glisser vers le bas pour fermer",
+    },
+    nav: {
+      home: "Accueil",
+      planning: "Planning",
+      time: "Temps",
+      inbox: "Boîte de réception",
+      profile: "Profil",
     },
   },
   errorScreen: {
@@ -968,6 +976,7 @@ const fr: Translations = {
       choosePhoto: "Choisir une photo",
       change: "Changer la photo de profil",
       add: "Ajouter une photo de profil",
+      optionsA11y: "Ouvre les options de photo de profil",
       title: "Photo de profil",
       prompt: "Choisissez comment mettre à jour votre photo de profil.",
       cameraNeeded: "Accès à la caméra nécessaire",

@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { NativeTabs } from "expo-router/unstable-native-tabs"
 
 import { RequestComposeAccessory } from "@/features/schedule/RequestComposeAccessory"
+import { translate } from "@/i18n/translate"
 import { useDesignTokens } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -34,12 +35,12 @@ export default function TabLayout() {
         tintColor={tokens.accent}
       >
         <NativeTabs.Trigger name="home">
-          <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>{translate("common:nav.home")}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
         </NativeTabs.Trigger>
 
         <NativeTabs.Trigger name="schedule">
-          <NativeTabs.Trigger.Label>Planning</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>{translate("common:nav.planning")}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
             sf={{ default: "calendar", selected: "calendar.circle.fill" }}
             md="calendar_today"
@@ -47,7 +48,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger>
 
         <NativeTabs.Trigger name="time">
-          <NativeTabs.Trigger.Label>Time</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>{translate("common:nav.time")}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
             sf={{ default: "clock", selected: "clock.fill" }}
             md="schedule"
@@ -55,7 +56,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger>
 
         <NativeTabs.Trigger name="inbox">
-          <NativeTabs.Trigger.Label>Inbox</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>{translate("common:nav.inbox")}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
             sf={{ default: "envelope", selected: "envelope.fill" }}
             md="mail"
@@ -63,7 +64,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger>
 
         <NativeTabs.Trigger name="profile">
-          <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>{translate("common:nav.profile")}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
             sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }}
             md="account_circle"
