@@ -136,7 +136,7 @@ export async function uploadDocumentFromSource({
 }
 
 export function showDocumentUploadOptions({
-  target = { title: "Uploaded document" },
+  target = { title: translate("documents:uploadedDocument") },
   uploadDocument,
 }: {
   target?: UploadTarget

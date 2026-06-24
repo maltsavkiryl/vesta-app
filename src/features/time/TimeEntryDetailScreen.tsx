@@ -12,6 +12,7 @@ import {
   TimeEntryTimelineSection,
 } from "@/features/time/TimeEntryDetailSections"
 import { useTimeEntryDetailScreen } from "@/features/time/useTimeEntryDetailScreen"
+import { translate } from "@/i18n/translate"
 import { AppScrollScreen } from "@/ui"
 
 export function TimeEntryDetailScreen() {
@@ -20,7 +21,7 @@ export function TimeEntryDetailScreen() {
   if (!screen.entry) {
     return (
       <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
-        <Stack.Screen options={{ title: "Entry details" }} />
+        <Stack.Screen options={{ title: translate("time:entryDetailTitle") }} />
         <TimeEntryDetailEmptyState />
       </AppScrollScreen>
     )

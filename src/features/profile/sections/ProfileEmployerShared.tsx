@@ -77,9 +77,9 @@ export function EmployerPreviewCard({
       </View>
       <MetricGrid
         items={[
-          { label: "City", value: employer.city },
-          { label: "Code", value: employer.code },
-          { label: "Type", value: employer.type },
+          { label: translate("profile:edit.city"), value: employer.city },
+          { label: translate("profile:employerDetailCode"), value: employer.code },
+          { label: translate("profile:employerDetailType"), value: employer.type },
         ]}
       />
       <AppButton

@@ -14,7 +14,7 @@ function promptForProfilePhotoAction() {
       { text: translate("profile:photo.choosePhoto"), onPress: () => resolve("library") },
       {
         style: "cancel" as const,
-        text: "Cancel",
+        text: translate("common:actions.cancel"),
         onPress: () => resolve("cancel"),
       },
     ]

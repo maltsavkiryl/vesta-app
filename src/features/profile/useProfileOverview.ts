@@ -72,9 +72,9 @@ export function useProfileOverview() {
       translate("profile:overview.signOutTitle"),
       translate("profile:overview.signOutBody"),
       [
-        { style: "cancel", text: "Cancel" },
+        { style: "cancel", text: translate("common:actions.cancel") },
         {
-          text: "Sign out",
+          text: translate("profile:overview.signOut"),
           style: "destructive",
           onPress: () => {
             void (async () => {
@@ -122,7 +122,7 @@ export function useProfileOverview() {
     signOutRow: {
       destructive: true,
       icon: "log-out-outline" as const,
-      label: "Sign out",
+      label: translate("profile:overview.signOut"),
       onPress: handleSignOut,
       showChevron: false,
     },

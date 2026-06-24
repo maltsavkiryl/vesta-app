@@ -80,8 +80,8 @@ export function JoinModePicker({
   tokens: DesignTokens
 }) {
   const options: { label: string; value: JoinMode }[] = [
-    { label: "Invite code", value: "code" },
-    { label: "Search", value: "search" },
+    { label: translate("onboarding:employer.inviteCode"), value: "code" },
+    { label: translate("onboarding:employer.search"), value: "search" },
   ]
   const selectedIndex = Math.max(
     options.findIndex((option) => option.value === joinMode),
