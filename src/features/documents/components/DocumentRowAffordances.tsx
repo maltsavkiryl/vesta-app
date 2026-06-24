@@ -29,7 +29,7 @@ export function DocumentRowTail({
   statusLabel,
   textSecondary,
 }: {
-  actionLabel: "Upload" | "View"
+  actionLabel: string
   accent: string
   accentForeground: string
   isMissing: boolean
