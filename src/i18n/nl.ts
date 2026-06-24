@@ -267,6 +267,10 @@ const nl: Translations = {
       getStarted: "Aan de slag",
       skip: "Nu overslaan",
     },
+    done: {
+      title: "Klaar om te starten",
+      subtitle: "Je account is klaar. Dit is de configuratie waarmee je begint.",
+    },
     role: {
       title: "Wat is je functie?",
       subtitle: "We personaliseren je ervaring op basis van hoe je werkt.",
@@ -527,6 +531,44 @@ const nl: Translations = {
       privacyPreview: "Privacyvoorbeeld",
       maskedNationalNumber: "Gemaskeerd rijksregisternummer",
       hidden: "Verborgen",
+    },
+    detailHints: {
+      address:
+        "Dit adres wordt gebruikt voor arbeidsdocumenten, looncorrespondentie en wettelijk verplichte post.",
+      bank: "Bankgegevens worden in de app gemaskeerd en pas door de loonadministratie gebruikt nadat je werkgever ze heeft geverifieerd.",
+      reachability:
+        "Je actieve werkgever kan deze gegevens gebruiken voor roosterwijzigingen en dringende shift-updates.",
+      identity:
+        "Identiteitsnummers blijven verborgen na het opslaan. Vesta toont alleen wat de loonadministratie en tewerkstellingsnaleving vereisen.",
+    },
+    documents: {
+      loadingA11y: "Documenten laden",
+      requiredLoadErrorSubtitle:
+        "We konden je vereiste documenten niet laden. Controleer je verbinding en probeer opnieuw.",
+      contractsLoadErrorSubtitle:
+        "We konden je contracten niet laden. Controleer je verbinding en probeer opnieuw.",
+    },
+    employer: {
+      linked: "Gekoppeld",
+      linkedWorkplaces: "Gekoppelde werkplekken",
+      noLinkedTitle: "Geen gekoppelde werkplekken",
+      noLinkedSubtitle:
+        "Sluit je aan bij een werkplek om shifts, documenten en loon-updates in de app te ontvangen.",
+      availableInvitations: "Beschikbare uitnodigingen",
+      join: "Aansluiten",
+      askManagerCode: "Vraag je manager om de werkplekcode van 6 tekens.",
+      browseWorkplaces: "Werkplekken bekijken",
+      searchPlaceholder: "Zoek op naam, type of stad",
+      results: "Resultaten",
+      noResultsHint: "Probeer een andere term of vraag je manager om een uitnodigingscode.",
+      joinWorkplace: "WERKPLEK TOEVOEGEN",
+      chooseHowToAdd: "Kies hoe je een werkplek wilt toevoegen",
+      workplaceAdded: "Werkplek toegevoegd",
+      addWorkplace: "Werkplek toevoegen",
+    },
+    appearance: {
+      title: "Weergave",
+      motion: "Beweging",
     },
   },
   documents: {

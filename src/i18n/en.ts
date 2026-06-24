@@ -262,6 +262,10 @@ const en = {
       getStarted: "Get started",
       skip: "Skip for now",
     },
+    done: {
+      title: "Ready to start",
+      subtitle: "Your account is ready. Here is the setup you will start with.",
+    },
     role: {
       title: "What's your role?",
       subtitle: "We'll personalize your experience for how you work.",
@@ -517,6 +521,44 @@ const en = {
       privacyPreview: "Privacy preview",
       maskedNationalNumber: "Masked national number",
       hidden: "Hidden",
+    },
+    detailHints: {
+      address:
+        "This address is used for employment records, payroll correspondence, and legally required mail.",
+      bank: "Bank details are masked in the app and only used by payroll once your employer verifies them.",
+      reachability:
+        "Your active employer can use these details for schedule changes and urgent shift updates.",
+      identity:
+        "Identity numbers stay hidden after saving. Vesta only exposes what payroll and employment compliance require.",
+    },
+    documents: {
+      loadingA11y: "Loading documents",
+      requiredLoadErrorSubtitle:
+        "We couldn't load your required documents. Check your connection and try again.",
+      contractsLoadErrorSubtitle:
+        "We couldn't load your contracts. Check your connection and try again.",
+    },
+    employer: {
+      linked: "Linked",
+      linkedWorkplaces: "Linked workplaces",
+      noLinkedTitle: "No linked workplaces",
+      noLinkedSubtitle:
+        "Join a workplace to receive shifts, documents, and payroll updates in the app.",
+      availableInvitations: "Available invitations",
+      join: "Join",
+      askManagerCode: "Ask your manager for the 6-character workplace code.",
+      browseWorkplaces: "Browse workplaces",
+      searchPlaceholder: "Search by name, type or city",
+      results: "Results",
+      noResultsHint: "Try a different term or ask your manager for an invite code.",
+      joinWorkplace: "JOIN WORKPLACE",
+      chooseHowToAdd: "Choose how you want to add a workplace",
+      workplaceAdded: "Workplace added",
+      addWorkplace: "Add workplace",
+    },
+    appearance: {
+      title: "Appearance",
+      motion: "Motion",
     },
   },
   documents: {

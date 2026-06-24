@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { ListCard, ListCardItem, SuccessState, Text, useDesignTokens } from "@/ui"
 
 import { onboardingStyles } from "./onboarding.styles"
@@ -30,8 +31,8 @@ export function OnboardingDone({
       <SuccessState
         icon="checkmark-outline"
         style={styles.successState}
-        subtitle="Your account is ready. Here is the setup you will start with."
-        title="Ready to start"
+        subtitle={translate("onboarding:done.subtitle")}
+        title={translate("onboarding:done.title")}
       />
       <ListCard style={styles.summaryCard}>
         {rows.map((row, index) => (

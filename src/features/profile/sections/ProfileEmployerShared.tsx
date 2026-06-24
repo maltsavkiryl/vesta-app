@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { Employer } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { AppButton, MetricGrid, Text, useDesignTokens } from "@/ui"
 
 export function getEmployerInitial(name: string) {
@@ -81,7 +82,11 @@ export function EmployerPreviewCard({
           { label: "Type", value: employer.type },
         ]}
       />
-      <AppButton label="Add workplace" onPress={onJoin} pressHaptic="none" />
+      <AppButton
+        label={translate("profile:employer.addWorkplace")}
+        onPress={onJoin}
+        pressHaptic="none"
+      />
     </View>
   )
 }
