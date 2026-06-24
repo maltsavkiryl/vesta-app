@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { ListCard, ListCardItem, Text, ToggleSwitch, appTypography, useDesignTokens } from "@/ui"
 
 import { onboardingStyles } from "./onboarding.styles"
@@ -18,12 +19,12 @@ export function OnboardingNotifications({ notifications, onToggle }: OnboardingN
     <View style={onboardingStyles.section}>
       <View style={onboardingStyles.titleBlock}>
         <Text
-          text="Stay in the loop"
+          text={translate("onboarding:notificationsStep.title")}
           weight="bold"
           style={[appTypography.onboardingTitle, { color: tokens.textPrimary }]}
         />
         <Text
-          text="Choose what updates you'd like to receive. You can change these anytime."
+          text={translate("onboarding:notificationsStep.subtitle")}
           size="xs"
           style={{ color: tokens.textSecondary }}
         />
@@ -43,9 +44,9 @@ export function OnboardingNotifications({ notifications, onToggle }: OnboardingN
                 <Ionicons color={tokens.textSecondary} name={item.icon} size={16} />
               </View>
             }
-            subtitle={item.desc}
+            subtitle={translate(item.descKey)}
             subtitleStyle={{ color: tokens.textMuted }}
-            title={item.label}
+            title={translate(item.labelKey)}
             titleStyle={{ color: tokens.textPrimary }}
             trailing={
               <ToggleSwitch value={notifications[item.key]} onChange={() => onToggle(item.key)} />

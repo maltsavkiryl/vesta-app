@@ -9,6 +9,7 @@ import {
 } from "@/features/employers/employerInviteCode"
 import { consumePendingEmployerInviteCode } from "@/features/employers/employerQrScanSession"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 import { ONBOARDING_ROLES, ONBOARDING_TOTAL_STEPS } from "./onboarding/types"
@@ -149,7 +150,10 @@ export function useOnboardingScreen() {
     setTimeSlot,
     step,
     timeSlot,
-    roleLabel: ONBOARDING_ROLES.find((item) => item.id === selectedRole)?.label ?? selectedRole,
+    roleLabel: (() => {
+      const match = ONBOARDING_ROLES.find((item) => item.id === selectedRole)
+      return match ? translate(match.labelKey) : selectedRole
+    })(),
   }
 }
 
