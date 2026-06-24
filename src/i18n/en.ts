@@ -638,6 +638,8 @@ const en = {
     },
     errors: {
       loadFailed: "Failed to load time entries",
+      clockInUnavailable: "Clock-in unavailable",
+      breakUnavailable: "Break unavailable",
       chooseWorkplace: "Choose a workplace before starting.",
       startFailed: "Could not start the timer.",
       noSession: "There is no active clock session.",
@@ -647,6 +649,12 @@ const en = {
     },
   },
   profile: {
+    alerts: {
+      saveFailedTitle: "Couldn't save changes",
+      photoFailedTitle: "Couldn't update photo",
+      signOutFailedTitle: "Couldn't sign out",
+      faceIdUnavailableTitle: "Face ID unavailable",
+    },
     completeness: {
       complete: "Complete",
       stepsLeft: "{{count}} step left",
@@ -965,6 +973,10 @@ const en = {
     sharePayslipPdfFailed: "Vesta couldn't create the payslip PDF.",
     shareNoFile: "This document doesn't have a saved file yet.",
     shareOpenFailed: "Vesta couldn't open this document right now.",
+    shareUnavailable: "Share unavailable",
+    downloadUnavailable: "Download unavailable",
+    fileUnavailable: "File unavailable",
+    signFailedTitle: "Couldn't sign contract",
     uploadDocument: "Upload document",
     view: "View",
     reviewSign: "Review & sign",

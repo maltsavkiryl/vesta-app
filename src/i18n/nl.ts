@@ -654,6 +654,8 @@ const nl: Translations = {
     },
     errors: {
       loadFailed: "Tijdregistraties laden mislukt",
+      clockInUnavailable: "Inklokken niet beschikbaar",
+      breakUnavailable: "Pauze niet beschikbaar",
       chooseWorkplace: "Kies een werkplek voordat je start.",
       startFailed: "Kon de timer niet starten.",
       noSession: "Er is geen actieve kloksessie.",
@@ -663,6 +665,12 @@ const nl: Translations = {
     },
   },
   profile: {
+    alerts: {
+      saveFailedTitle: "Wijzigingen niet opgeslagen",
+      photoFailedTitle: "Foto niet bijgewerkt",
+      signOutFailedTitle: "Afmelden mislukt",
+      faceIdUnavailableTitle: "Face ID niet beschikbaar",
+    },
     completeness: {
       complete: "Volledig",
       stepsLeft: "{{count}} stap over",
@@ -990,6 +998,10 @@ const nl: Translations = {
     sharePayslipPdfFailed: "Vesta kon de loonbrief-PDF niet aanmaken.",
     shareNoFile: "Dit document heeft nog geen opgeslagen bestand.",
     shareOpenFailed: "Vesta kon dit document momenteel niet openen.",
+    shareUnavailable: "Delen niet beschikbaar",
+    downloadUnavailable: "Downloaden niet beschikbaar",
+    fileUnavailable: "Bestand niet beschikbaar",
+    signFailedTitle: "Ondertekenen mislukt",
     uploadDocument: "Document uploaden",
     view: "Bekijken",
     reviewSign: "Bekijken & ondertekenen",

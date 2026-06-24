@@ -661,6 +661,8 @@ const fr: Translations = {
     },
     errors: {
       loadFailed: "Échec du chargement des entrées de temps",
+      clockInUnavailable: "Pointage indisponible",
+      breakUnavailable: "Pause indisponible",
       chooseWorkplace: "Choisissez un lieu de travail avant de commencer.",
       startFailed: "Impossible de démarrer le minuteur.",
       noSession: "Aucune session de pointage active.",
@@ -670,6 +672,12 @@ const fr: Translations = {
     },
   },
   profile: {
+    alerts: {
+      saveFailedTitle: "Modifications non enregistrées",
+      photoFailedTitle: "Photo non mise à jour",
+      signOutFailedTitle: "Déconnexion impossible",
+      faceIdUnavailableTitle: "Face ID indisponible",
+    },
     completeness: {
       complete: "Complet",
       stepsLeft: "{{count}} étape restante",
@@ -1005,6 +1013,10 @@ const fr: Translations = {
     sharePayslipPdfFailed: "Vesta n'a pas pu créer le PDF de la fiche de paie.",
     shareNoFile: "Ce document n'a pas encore de fichier enregistré.",
     shareOpenFailed: "Vesta n'a pas pu ouvrir ce document pour le moment.",
+    shareUnavailable: "Partage indisponible",
+    downloadUnavailable: "Téléchargement indisponible",
+    fileUnavailable: "Fichier indisponible",
+    signFailedTitle: "Échec de la signature",
     uploadDocument: "Téléverser un document",
     view: "Voir",
     reviewSign: "Vérifier et signer",

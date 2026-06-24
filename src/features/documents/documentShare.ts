@@ -84,7 +84,7 @@ async function shareFile({
     }
   } catch {}
 
-  Alert.alert("Share unavailable", translate("documents:shareCannot"))
+  Alert.alert(translate("documents:shareUnavailable"), translate("documents:shareCannot"))
   return false
 }
 
@@ -159,7 +159,10 @@ export async function shareContractPdf(contract: Contract) {
       uri,
     })
   } catch {
-    Alert.alert("Download unavailable", translate("documents:shareContractPdfFailed"))
+    Alert.alert(
+      translate("documents:downloadUnavailable"),
+      translate("documents:shareContractPdfFailed"),
+    )
     return false
   }
 }
@@ -188,14 +191,17 @@ export async function sharePayslipPdf(payslip: Payslip) {
       uri,
     })
   } catch {
-    Alert.alert("Download unavailable", translate("documents:sharePayslipPdfFailed"))
+    Alert.alert(
+      translate("documents:downloadUnavailable"),
+      translate("documents:sharePayslipPdfFailed"),
+    )
     return false
   }
 }
 
 export async function shareUploadedDocument(document: DocumentItem) {
   if (!document.uploadedUri) {
-    Alert.alert("File unavailable", translate("documents:shareNoFile"))
+    Alert.alert(translate("documents:fileUnavailable"), translate("documents:shareNoFile"))
     return false
   }
 
@@ -225,6 +231,6 @@ export async function openDocumentFile(
     return true
   }
 
-  Alert.alert("File unavailable", translate("documents:shareOpenFailed"))
+  Alert.alert(translate("documents:fileUnavailable"), translate("documents:shareOpenFailed"))
   return false
 }
