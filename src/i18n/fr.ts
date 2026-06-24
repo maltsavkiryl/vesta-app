@@ -1138,6 +1138,7 @@ const fr: Translations = {
     uploadCameraNeededBody: "Autorisez l'accès à la caméra pour prendre une photo du document.",
     uploadFailed: "Impossible de téléverser le fichier",
     uploadComplete: "Téléversement terminé",
+    uploadCompleteBody: "{{title}} a été téléversé.",
     uploadUnavailable: "Téléversement indisponible",
     uploadDevBuild:
       "Reconstruisez l'app de développement pour activer les téléversements de documents.",

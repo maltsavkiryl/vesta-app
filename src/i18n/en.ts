@@ -1096,6 +1096,7 @@ const en = {
     uploadCameraNeededBody: "Allow camera access to take a document photo.",
     uploadFailed: "Cannot upload file",
     uploadComplete: "Upload complete",
+    uploadCompleteBody: "{{title}} has been uploaded.",
     uploadUnavailable: "Upload unavailable",
     uploadDevBuild: "Rebuild the development app to enable document uploads.",
   },

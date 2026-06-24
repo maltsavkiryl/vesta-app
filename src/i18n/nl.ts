@@ -1123,6 +1123,7 @@ const nl: Translations = {
     uploadCameraNeededBody: "Sta cameratoegang toe om een documentfoto te maken.",
     uploadFailed: "Kan bestand niet uploaden",
     uploadComplete: "Upload voltooid",
+    uploadCompleteBody: "{{title}} is geüpload.",
     uploadUnavailable: "Uploaden niet beschikbaar",
     uploadDevBuild: "Herbouw de ontwikkel-app om document-uploads in te schakelen.",
   },
