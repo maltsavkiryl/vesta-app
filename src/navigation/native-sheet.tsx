@@ -291,13 +291,16 @@ function createHeaderBaseOptions(
     headerStyle: { backgroundColor: isIos ? "transparent" : backgroundColor },
     headerTransparent: isIos,
     headerTintColor: theme.colors.text,
+    // When no title is given, render an empty header title rather than leaving it
+    // undefined — otherwise React Navigation falls back to the raw route name
+    // (e.g. a lowercase "notifications" / "request" leaks into the header).
     headerTitle: title
       ? () => (
           <View style={styles.titleWrapper}>
             <Text text={title} size="sm" weight="semiBold" style={{ color: theme.colors.text }} />
           </View>
         )
-      : undefined,
+      : () => null,
     headerLeft: options.headerLeft,
     headerRight: options.headerRight,
     unstable_headerLeftItems: options.unstable_headerLeftItems,
