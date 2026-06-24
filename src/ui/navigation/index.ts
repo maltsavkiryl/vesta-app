@@ -1,4 +1,3 @@
-export * from "./Header"
 export {
   HeaderActionButton,
   createHeaderActionOptions,
