@@ -6,35 +6,26 @@ import { ListCard, ListCardItem, SuccessState, Text, useDesignTokens } from "@/u
 import { onboardingStyles } from "./onboarding.styles"
 
 export interface OnboardingDoneProps {
-  availabilityDays: string[]
-  employerName?: string
-  enabledNotifications: number
-  role: string
+  email: string
+  fullName: string
+  phone: string
 }
 
-export function OnboardingDone({
-  availabilityDays,
-  employerName,
-  enabledNotifications,
-  role,
-}: OnboardingDoneProps) {
+export function OnboardingDone({ email, fullName, phone }: OnboardingDoneProps) {
   const tokens = useDesignTokens()
+  const notProvided = translate("onboarding:doneSummary.notProvided")
   const rows = [
     {
-      label: translate("onboarding:doneSummary.roleLabel"),
-      value: role || translate("onboarding:roles.Waiter"),
+      label: translate("onboarding:doneSummary.nameLabel"),
+      value: fullName || notProvided,
     },
     {
-      label: translate("onboarding:doneSummary.workplaceLabel"),
-      value: employerName ?? translate("onboarding:doneSummary.noWorkplace"),
+      label: translate("onboarding:doneSummary.emailLabel"),
+      value: email || notProvided,
     },
     {
-      label: translate("onboarding:doneSummary.availabilityLabel"),
-      value: translate("onboarding:doneSummary.daysPerWeek", { count: availabilityDays.length }),
-    },
-    {
-      label: translate("onboarding:doneSummary.notificationsLabel"),
-      value: translate("onboarding:doneSummary.enabledCount", { count: enabledNotifications }),
+      label: translate("onboarding:doneSummary.phoneLabel"),
+      value: phone || notProvided,
     },
   ]
 
