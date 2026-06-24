@@ -13,6 +13,7 @@ import {
 import { AppearanceSection, MotionSection } from "@/features/profile/sections/ProfileSectionShared"
 import { openSupportComposer, reportProblem } from "@/features/profile/supportEmail"
 import { changeAppLanguage } from "@/i18n"
+import { translate } from "@/i18n/translate"
 import { useAppSession } from "@/providers/app-provider"
 
 import type { SectionKey } from "./profileSections"
@@ -37,20 +38,20 @@ function SupportSectionContent({
     <SupportSection
       onOpenClockHelp={() =>
         Alert.alert(
-          "Clocking in and out",
-          "Use the Time tab to start work, begin breaks, and confirm clock-out totals.",
+          translate("profile:settingsHelp.clockingTitle"),
+          translate("profile:settingsHelp.clockingBody"),
         )
       }
       onOpenDocsHelp={() =>
         Alert.alert(
-          "Documents and payroll",
-          "Use Legal documents, Contracts, and Payslips in Profile to manage your payroll paperwork.",
+          translate("profile:settingsHelp.documentsTitle"),
+          translate("profile:settingsHelp.documentsBody"),
         )
       }
       onOpenScheduleHelp={() =>
         Alert.alert(
-          "Schedules and availability",
-          "Use Schedule to review shifts, set availability, and request changes.",
+          translate("profile:settingsHelp.schedulesTitle"),
+          translate("profile:settingsHelp.schedulesBody"),
         )
       }
       onOpenSupportComposer={() => {

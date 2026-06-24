@@ -40,12 +40,12 @@ export function InviteCodePanel({
           code={joinCode}
           helperText={
             joinCode.length === 0
-              ? "Enter a 6-character code to continue."
+              ? translate("profile:employerJoin.enterCodeError")
               : joinCode.length < 6
                 ? `${6 - joinCode.length} more characters needed.`
                 : codeMatchedEmployer
                   ? `Matched with ${codeMatchedEmployer.name}.`
-                  : "No workplace found for this code."
+                  : translate("profile:employerJoin.noWorkplaceForCode")
           }
           onChangeCode={onSetJoinCode}
           onOpenQrScanner={onOpenQrScanner}

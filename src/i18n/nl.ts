@@ -714,6 +714,80 @@ const nl: Translations = {
       title: "Weergave",
       motion: "Beweging",
     },
+    setup: {
+      accountSetup: "Accountconfiguratie",
+      readyTitle: "Klaar om te werken",
+      readyBody: "Alles wat belangrijk is, staat klaar voor shifts, loon en ondersteuning.",
+      almostTitle: "Bijna klaar",
+      almostBody: "Rond de resterende configuratie af om je account gereed te houden.",
+      basicsHint: "Vul je profielbasis aan zodat de rest van je configuratie klopt.",
+      linkWorkplaceHint: "Koppel een werkplek voordat je shifts en documenten beheert.",
+      phoneHint: "Voeg je telefoonnummer toe zodat werkgevers je snel kunnen bereiken over shifts.",
+      addressHint: "Voeg je thuisadres toe voor loon en officiële correspondentie.",
+      payrollHint: "Vervolledig je loongegevens zodat uitbetalingen en naleving op schema blijven.",
+      emergencyHint:
+        "Voeg een noodcontact toe zodat werkgevers weten wie ze moeten bellen indien nodig.",
+    },
+    overview: {
+      signOutTitle: "Uitloggen?",
+      signOutBody: "Je moet opnieuw inloggen om toegang te krijgen tot je account.",
+      tryAgain: "Probeer het opnieuw.",
+      noContracts: "Geen contracten",
+      noPayslips: "Geen loonbrieven",
+    },
+    formError: "Er is iets misgegaan. Probeer het opnieuw.",
+    settingsHelp: {
+      clockingTitle: "In- en uitklokken",
+      clockingBody:
+        "Gebruik het tabblad Tijd om te starten, pauzes te nemen en uitkloktotalen te bevestigen.",
+      documentsTitle: "Documenten en loon",
+      documentsBody:
+        "Gebruik Juridische documenten, Contracten en Loonbrieven in Profiel om je loonadministratie te beheren.",
+      schedulesTitle: "Planning en beschikbaarheid",
+      schedulesBody:
+        "Gebruik Planning om shifts te bekijken, beschikbaarheid in te stellen en wijzigingen aan te vragen.",
+    },
+    security: {
+      setupBiometricFirst:
+        "Stel eerst Face ID of een andere biometrische ontgrendeling in op dit toestel.",
+      biometricUnlock: "Biometrische ontgrendeling",
+      usePasscode: "Toegangscode gebruiken",
+      biometricDevBuild: "Herbouw de ontwikkel-app om Face ID in te schakelen.",
+    },
+    support: {
+      emailUnavailable: "E-mail niet beschikbaar",
+      emailUnavailableBody:
+        "Stel een mail-app in op dit toestel om contact op te nemen met Vesta-support.",
+      helpBody: "Ik heb hulp nodig met de mobiele app voor werknemers.",
+      whatHappened: "Wat is er gebeurd:",
+      supportSubject: "Vesta mobiele supportaanvraag",
+      problemBody: "Ik meld een probleem in de mobiele app voor werknemers.",
+      expectedBehavior: "Verwacht gedrag:",
+      actualBehavior: "Werkelijk gedrag:",
+      stepsToReproduce: "Stappen om te reproduceren:",
+      problemSubject: "Vesta mobiel probleemrapport",
+    },
+    photo: {
+      takePhoto: "Foto maken",
+      choosePhoto: "Foto kiezen",
+      title: "Profielfoto",
+      prompt: "Kies hoe je je profielfoto wilt bijwerken.",
+      cameraNeeded: "Cameratoegang nodig",
+      cameraNeededBody: "Sta cameratoegang toe om een profielfoto te maken.",
+      photoNeeded: "Toegang tot foto's nodig",
+      photoNeededBody: "Sta toegang tot de fotobibliotheek toe om een profielfoto te kiezen.",
+      unavailable: "Foto niet beschikbaar",
+      devBuild: "Herbouw de ontwikkel-app om profielfoto's te kunnen wijzigen.",
+    },
+    employerJoin: {
+      enterCodeError: "Voer een code van 6 tekens in om verder te gaan.",
+      noWorkplaceForCode: "Geen werkplek gevonden voor deze code.",
+      enterCodeTab: "Voer een werkplekcode in",
+      findTab: "Een werkplek zoeken",
+      codeHint:
+        "Gebruik de code die je manager heeft gedeeld om de juiste werkplek aan je profiel te koppelen.",
+      browseHint: "Blader door werkplekken en kies degene die je wilt toevoegen.",
+    },
   },
   documents: {
     title: "Documenten",

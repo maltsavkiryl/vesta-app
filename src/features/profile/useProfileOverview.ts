@@ -8,6 +8,7 @@ import { useDocumentsStateQuery } from "@/features/documents/data/documents.quer
 import { payslips } from "@/features/documents/documents.data"
 import { useProfileActions } from "@/features/profile/data/profile.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
+import { translate } from "@/i18n/translate"
 import { useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -67,25 +68,29 @@ export function useProfileOverview() {
   }
 
   const handleSignOut = () => {
-    Alert.alert("Sign out?", "You'll need to sign in again to access your account.", [
-      { style: "cancel", text: "Cancel" },
-      {
-        text: "Sign out",
-        style: "destructive",
-        onPress: () => {
-          void (async () => {
-            try {
-              await signOut()
-              fireHaptic("success")
-              router.replace("/")
-            } catch {
-              fireHaptic("error")
-              Alert.alert("Couldn't sign out", "Please try again.")
-            }
-          })()
+    Alert.alert(
+      translate("profile:overview.signOutTitle"),
+      translate("profile:overview.signOutBody"),
+      [
+        { style: "cancel", text: "Cancel" },
+        {
+          text: "Sign out",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              try {
+                await signOut()
+                fireHaptic("success")
+                router.replace("/")
+              } catch {
+                fireHaptic("error")
+                Alert.alert("Couldn't sign out", translate("profile:overview.tryAgain"))
+              }
+            })()
+          },
         },
-      },
-    ])
+      ],
+    )
   }
 
   return {
@@ -101,13 +106,13 @@ export function useProfileOverview() {
           ? `${pendingContractCount} awaiting signature`
           : contracts.length > 0
             ? `${contracts.length} on file`
-            : "No contracts",
+            : translate("profile:overview.noContracts"),
       fullName,
       hasPendingContracts: pendingContractCount > 0,
       hasRequiredDocuments: pendingDocumentCount > 0,
       legalDocumentsSummary:
         pendingDocumentCount > 0 ? `${pendingDocumentCount} required` : "All set",
-      payslipsSummary: latestPayslip?.month ?? "No payslips",
+      payslipsSummary: latestPayslip?.month ?? translate("profile:overview.noPayslips"),
       notificationCount,
       state,
       themeContext,

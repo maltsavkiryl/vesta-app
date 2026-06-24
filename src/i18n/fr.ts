@@ -721,6 +721,85 @@ const fr: Translations = {
       title: "Apparence",
       motion: "Animations",
     },
+    setup: {
+      accountSetup: "Configuration du compte",
+      readyTitle: "Prêt à travailler",
+      readyBody: "Tout l'essentiel est enregistré pour les services, la paie et le support.",
+      almostTitle: "Presque prêt",
+      almostBody: "Terminez les détails de configuration restants pour garder votre compte prêt.",
+      basicsHint:
+        "Complétez les bases de votre profil pour que le reste de votre configuration reste exact.",
+      linkWorkplaceHint: "Liez un lieu de travail avant de gérer les services et documents.",
+      phoneHint:
+        "Ajoutez votre numéro de téléphone pour que les employeurs puissent vous joindre rapidement.",
+      addressHint:
+        "Ajoutez votre adresse de domicile pour la paie et la correspondance officielle.",
+      payrollHint:
+        "Complétez vos informations de paie pour que les versements et la conformité restent à jour.",
+      emergencyHint:
+        "Ajoutez un contact d'urgence pour que les employeurs sachent qui appeler si nécessaire.",
+    },
+    overview: {
+      signOutTitle: "Se déconnecter ?",
+      signOutBody: "Vous devrez vous reconnecter pour accéder à votre compte.",
+      tryAgain: "Veuillez réessayer.",
+      noContracts: "Aucun contrat",
+      noPayslips: "Aucune fiche de paie",
+    },
+    formError: "Une erreur est survenue. Veuillez réessayer.",
+    settingsHelp: {
+      clockingTitle: "Pointage entrée et sortie",
+      clockingBody:
+        "Utilisez l'onglet Heures pour commencer, prendre des pauses et confirmer les totaux de pointage.",
+      documentsTitle: "Documents et paie",
+      documentsBody:
+        "Utilisez Documents légaux, Contrats et Fiches de paie dans Profil pour gérer vos documents de paie.",
+      schedulesTitle: "Plannings et disponibilités",
+      schedulesBody:
+        "Utilisez Planning pour consulter les services, définir vos disponibilités et demander des changements.",
+    },
+    security: {
+      setupBiometricFirst:
+        "Configurez d'abord Face ID ou une autre méthode de déverrouillage biométrique sur cet appareil.",
+      biometricUnlock: "Déverrouillage biométrique",
+      usePasscode: "Utiliser le code",
+      biometricDevBuild: "Reconstruisez l'app de développement pour activer Face ID.",
+    },
+    support: {
+      emailUnavailable: "E-mail indisponible",
+      emailUnavailableBody:
+        "Configurez une app de messagerie sur cet appareil pour contacter le support Vesta.",
+      helpBody: "J'ai besoin d'aide avec l'app mobile employé.",
+      whatHappened: "Ce qui s'est passé :",
+      supportSubject: "Demande de support mobile Vesta",
+      problemBody: "Je signale un problème dans l'app mobile employé.",
+      expectedBehavior: "Comportement attendu :",
+      actualBehavior: "Comportement réel :",
+      stepsToReproduce: "Étapes pour reproduire :",
+      problemSubject: "Rapport de problème mobile Vesta",
+    },
+    photo: {
+      takePhoto: "Prendre une photo",
+      choosePhoto: "Choisir une photo",
+      title: "Photo de profil",
+      prompt: "Choisissez comment mettre à jour votre photo de profil.",
+      cameraNeeded: "Accès à la caméra nécessaire",
+      cameraNeededBody: "Autorisez l'accès à la caméra pour prendre une photo de profil.",
+      photoNeeded: "Accès aux photos nécessaire",
+      photoNeededBody: "Autorisez l'accès à la photothèque pour choisir une photo de profil.",
+      unavailable: "Photo indisponible",
+      devBuild:
+        "Reconstruisez l'app de développement pour activer le changement de photo de profil.",
+    },
+    employerJoin: {
+      enterCodeError: "Saisissez un code de 6 caractères pour continuer.",
+      noWorkplaceForCode: "Aucun lieu de travail trouvé pour ce code.",
+      enterCodeTab: "Saisir un code de lieu de travail",
+      findTab: "Trouver un lieu de travail",
+      codeHint:
+        "Utilisez le code partagé par votre manager pour lier le bon lieu de travail à votre profil.",
+      browseHint: "Parcourez les lieux de travail et choisissez celui que vous voulez ajouter.",
+    },
   },
   documents: {
     title: "Documents",

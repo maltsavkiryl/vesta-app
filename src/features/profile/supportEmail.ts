@@ -2,6 +2,7 @@ import { Alert, Linking, Platform } from "react-native"
 import Constants from "expo-constants"
 
 import Config from "@/config"
+import { translate } from "@/i18n/translate"
 
 type SupportDiagnostics = {
   accountEmail?: string
@@ -42,7 +43,10 @@ async function openEmail({ body, subject }: { body: string; subject: string }) {
     }
   } catch {}
 
-  Alert.alert("Email unavailable", "Set up a mail app on this device to contact Vesta support.")
+  Alert.alert(
+    translate("profile:support.emailUnavailable"),
+    translate("profile:support.emailUnavailableBody"),
+  )
   return false
 }
 
@@ -72,13 +76,13 @@ export function openSupportComposer(diagnostics: SupportDiagnostics) {
     body: [
       "Hi Vesta support,",
       "",
-      "I need help with the employee mobile app.",
+      translate("profile:support.helpBody"),
       "",
-      "What happened:",
+      translate("profile:support.whatHappened"),
       "",
       buildDiagnosticsFooter(diagnostics),
     ].join("\n"),
-    subject: "Vesta mobile support request",
+    subject: translate("profile:support.supportSubject"),
   })
 }
 
@@ -87,16 +91,16 @@ export function reportProblem(diagnostics: SupportDiagnostics) {
     body: [
       "Hi Vesta support,",
       "",
-      "I'm reporting a problem in the employee mobile app.",
+      translate("profile:support.problemBody"),
       "",
-      "Expected behavior:",
+      translate("profile:support.expectedBehavior"),
       "",
-      "Actual behavior:",
+      translate("profile:support.actualBehavior"),
       "",
-      "Steps to reproduce:",
+      translate("profile:support.stepsToReproduce"),
       "",
       buildDiagnosticsFooter(diagnostics),
     ].join("\n"),
-    subject: "Vesta mobile problem report",
+    subject: translate("profile:support.problemSubject"),
   })
 }

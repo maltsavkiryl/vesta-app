@@ -1,4 +1,5 @@
 import type { AppStoreState } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 export interface ProfileSetupStatus {
   detail: string
@@ -25,19 +26,19 @@ function getSetupSteps(state: AppStoreState): SetupStep[] {
     {
       complete:
         hasValue(profile.firstName) && hasValue(profile.lastName) && hasValue(profile.email),
-      detail: "Complete your profile basics so the rest of your setup stays accurate.",
+      detail: translate("profile:setup.basicsHint"),
       id: "identity",
       weight: 20,
     },
     {
       complete: employers.length > 0,
-      detail: "Link a workplace before you start managing shifts and documents.",
+      detail: translate("profile:setup.linkWorkplaceHint"),
       id: "workplaces",
       weight: 15,
     },
     {
       complete: hasValue(profile.phone),
-      detail: "Add your phone number so employers can reach you quickly about shifts.",
+      detail: translate("profile:setup.phoneHint"),
       id: "contact",
       weight: 15,
     },
@@ -47,7 +48,7 @@ function getSetupSteps(state: AppStoreState): SetupStep[] {
         hasValue(profile.address.postalCode) &&
         hasValue(profile.address.city) &&
         hasValue(profile.address.country),
-      detail: "Add your home address for payroll and official correspondence.",
+      detail: translate("profile:setup.addressHint"),
       id: "address",
       weight: 15,
     },
@@ -59,7 +60,7 @@ function getSetupSteps(state: AppStoreState): SetupStep[] {
         hasValue(profile.legal.nationalRegisterNumber) &&
         hasValue(profile.legal.taxId) &&
         hasValue(profile.legal.socialSecurityNumber),
-      detail: "Finish your payroll details so payouts and compliance stay on track.",
+      detail: translate("profile:setup.payrollHint"),
       id: "payroll",
       weight: 25,
     },
@@ -68,7 +69,7 @@ function getSetupSteps(state: AppStoreState): SetupStep[] {
         hasValue(profile.emergencyContact.name) &&
         hasValue(profile.emergencyContact.relationship) &&
         hasValue(profile.emergencyContact.phone),
-      detail: "Add an emergency contact so employers know who to call if needed.",
+      detail: translate("profile:setup.emergencyHint"),
       id: "emergency",
       weight: 10,
     },
@@ -86,18 +87,20 @@ export function getProfileSetupStatus(state: AppStoreState): ProfileSetupStatus 
 
   if (remainingCount === 0) {
     return {
-      detail: "Everything important is on file for shifts, payroll, and support.",
+      detail: translate("profile:setup.readyBody"),
       progress: 100,
       remainingCount: 0,
-      title: "Ready to work",
+      title: translate("profile:setup.readyTitle"),
     }
   }
 
   return {
-    detail:
-      remainingSteps[0]?.detail ?? "Finish the remaining setup details to keep your account ready.",
+    detail: remainingSteps[0]?.detail ?? translate("profile:setup.almostBody"),
     progress: completedWeight,
     remainingCount,
-    title: completedWeight >= 70 ? "Almost ready" : "Account setup",
+    title:
+      completedWeight >= 70
+        ? translate("profile:setup.almostTitle")
+        : translate("profile:setup.accountSetup"),
   }
 }

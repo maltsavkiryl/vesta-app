@@ -5,6 +5,7 @@ import { useRouter } from "expo-router"
 import { createInitialState } from "@/core/mockState"
 import { useProfileActions } from "@/features/profile/data/profile.mutations"
 import { useProfileStateQuery } from "@/features/profile/data/profile.queries"
+import { translate } from "@/i18n/translate"
 import { useAppTheme, useDesignTokens } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -93,10 +94,7 @@ export function useProfileDetailScreen(section: SectionKey) {
 
       if (!hasHardware || !isEnrolled) {
         fireHaptic("warning")
-        Alert.alert(
-          "Face ID unavailable",
-          "Set up Face ID or another biometric unlock method on this device first.",
-        )
+        Alert.alert("Face ID unavailable", translate("profile:security.setupBiometricFirst"))
         return
       }
 
@@ -105,9 +103,9 @@ export function useProfileDetailScreen(section: SectionKey) {
         LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
       )
         ? "Face ID"
-        : "Biometric unlock"
+        : translate("profile:security.biometricUnlock")
       const result = await LocalAuthentication.authenticateAsync({
-        fallbackLabel: "Use passcode",
+        fallbackLabel: translate("profile:security.usePasscode"),
         promptMessage: `Enable ${biometricType}`,
       })
 
@@ -126,7 +124,7 @@ export function useProfileDetailScreen(section: SectionKey) {
       fireHaptic("warning")
     } catch {
       fireHaptic("error")
-      Alert.alert("Face ID unavailable", "Rebuild the development app to enable Face ID.")
+      Alert.alert("Face ID unavailable", translate("profile:security.biometricDevBuild"))
     }
   }
 
