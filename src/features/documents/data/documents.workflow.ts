@@ -1,3 +1,4 @@
+import { translate } from "@/i18n/translate"
 import { persistLocalAsset } from "@/services/app/file-storage.service"
 import type { Result } from "@/shared/result"
 
@@ -16,7 +17,7 @@ export async function uploadDocumentWorkflow(
       ok: false,
       error: {
         type: "validation",
-        message: "Choose a file before uploading the document.",
+        message: translate("documents:chooseFileFirst"),
       },
     }
   }

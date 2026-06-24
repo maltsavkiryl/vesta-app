@@ -5,6 +5,7 @@ import * as FileSystem from "expo-file-system/legacy"
 
 import type { DocumentItem } from "@/core/models"
 import type { DocumentsRepository } from "@/features/documents/data/documents.repository"
+import { translate } from "@/i18n/translate"
 
 import type { Contract, Payslip } from "./documents.types"
 
@@ -83,7 +84,7 @@ async function shareFile({
     }
   } catch {}
 
-  Alert.alert("Share unavailable", "This device can't share the selected file.")
+  Alert.alert("Share unavailable", translate("documents:shareCannot"))
   return false
 }
 
@@ -158,7 +159,7 @@ export async function shareContractPdf(contract: Contract) {
       uri,
     })
   } catch {
-    Alert.alert("Download unavailable", "Vesta couldn't create the contract PDF.")
+    Alert.alert("Download unavailable", translate("documents:shareContractPdfFailed"))
     return false
   }
 }
@@ -187,14 +188,14 @@ export async function sharePayslipPdf(payslip: Payslip) {
       uri,
     })
   } catch {
-    Alert.alert("Download unavailable", "Vesta couldn't create the payslip PDF.")
+    Alert.alert("Download unavailable", translate("documents:sharePayslipPdfFailed"))
     return false
   }
 }
 
 export async function shareUploadedDocument(document: DocumentItem) {
   if (!document.uploadedUri) {
-    Alert.alert("File unavailable", "This document doesn't have a saved file yet.")
+    Alert.alert("File unavailable", translate("documents:shareNoFile"))
     return false
   }
 
@@ -224,6 +225,6 @@ export async function openDocumentFile(
     return true
   }
 
-  Alert.alert("File unavailable", "Vesta couldn't open this document right now.")
+  Alert.alert("File unavailable", translate("documents:shareOpenFailed"))
   return false
 }
