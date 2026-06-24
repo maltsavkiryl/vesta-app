@@ -27,6 +27,8 @@ export function SelectionCard({
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       onPress={() => {
         firePressHaptic(pressHaptic)
         onPress()
@@ -86,6 +88,8 @@ export function SelectionChip({
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       onPress={() => {
         firePressHaptic(pressHaptic)
         onPress()
@@ -204,6 +208,8 @@ export function ToggleSwitch({
 
   return (
     <Pressable
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
       accessibilityLabel={accessibilityLabel}
       onPress={() => {
         firePressHaptic(pressHaptic)

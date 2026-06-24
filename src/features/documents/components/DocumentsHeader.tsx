@@ -45,7 +45,7 @@ export function DocumentsHeader({
           rightAccessory={<Ionicons color={tokens.textMuted} name="close-outline" size={15} />}
           value={query}
         />
-        <Pressable onPress={onCancelSearch}>
+        <Pressable accessibilityRole="button" onPress={onCancelSearch}>
           <Text
             text={translate("common:actions.cancel")}
             size="xs"

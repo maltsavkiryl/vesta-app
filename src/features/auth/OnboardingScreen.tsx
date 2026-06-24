@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { translate } from "@/i18n/translate"
 import { AppButton, AppScrollScreen, MotionView, useDesignTokens } from "@/ui"
 
 import { OnboardingAvailability } from "./onboarding/OnboardingAvailability"
@@ -62,6 +63,8 @@ export function OnboardingScreen() {
     <AppScrollScreen contentContainerStyle={[styles.screen, { paddingBottom: insets.bottom + 32 }]}>
       <View style={styles.stepHeader}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={translate("common:actions.back")}
           onPress={back}
           style={[
             styles.backButton,

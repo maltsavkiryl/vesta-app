@@ -102,6 +102,7 @@ function ContractActionButton({
   return (
     <Animated.View style={[styles.actionFlex, animatedStyle]}>
       <Pressable
+        accessibilityRole="button"
         onPress={onPress}
         style={[styles.actionBase, ...(Array.isArray(baseStyle) ? baseStyle : [baseStyle])]}
         {...pressHandlers}

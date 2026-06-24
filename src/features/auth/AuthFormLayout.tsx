@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { translate } from "@/i18n/translate"
 import { MotionView, Text } from "@/ui"
 
 import { AuthLogo } from "./AuthLogo"
@@ -105,6 +106,8 @@ export function AuthFormLayout({
             <View style={styles.topBar}>
               {onBack ? (
                 <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={translate("common:actions.back")}
                   hitSlop={8}
                   onPress={onBack}
                   style={[

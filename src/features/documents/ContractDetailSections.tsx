@@ -107,6 +107,7 @@ export function ContractActionRow({
     <View style={styles.actions}>
       <Animated.View style={[styles.actionFlex, downloadAnim]}>
         <Pressable
+          accessibilityRole="button"
           onPress={() => {
             void shareContractPdf(contract)
           }}
@@ -134,6 +135,7 @@ export function ContractActionRow({
       {isPending ? (
         <Animated.View style={[styles.actionFlex, signAnim]}>
           <Pressable
+            accessibilityRole="button"
             onPress={onSign}
             style={[styles.primaryAction, { backgroundColor: tokens.accent }]}
             {...signHandlers}

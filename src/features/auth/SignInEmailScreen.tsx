@@ -96,6 +96,7 @@ export function SignInEmailScreen() {
         />
 
         <Pressable
+          accessibilityRole="button"
           hitSlop={8}
           onPress={() => router.push("/(auth)/forgot-password")}
           style={styles.inlineLinkRow}
