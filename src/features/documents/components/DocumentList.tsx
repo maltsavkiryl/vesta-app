@@ -22,7 +22,14 @@ export function AttentionBanner({ count, onPress }: { count: number; onPress: ()
       icon={<Ionicons color={tokens.danger} name="alert-circle-outline" size={15} />}
       onPress={onPress}
       tone="danger"
-      trailing={<Text text="View" size="xxs" weight="semiBold" style={{ color: tokens.danger }} />}
+      trailing={
+        <Text
+          text={translate("documents:view")}
+          size="xxs"
+          weight="semiBold"
+          style={{ color: tokens.danger }}
+        />
+      }
     >
       <Text
         text={`${count} document${count > 1 ? "s" : ""} still need${count === 1 ? "s" : ""} an upload`}

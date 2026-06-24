@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { PayrollProfileGap } from "@/features/profile/payrollProfile"
+import { translate } from "@/i18n/translate"
 import { AppButton, MotionView, SurfaceCard, Text, useDesignTokens } from "@/ui"
 
 // Short, conversational fragments used to weave the gaps into a single sentence.
@@ -72,7 +73,7 @@ export function PayrollProfileNudge({
           </View>
           <View accessible={false} style={styles.headerText}>
             <Text
-              text="Finish setting up payroll"
+              text={translate("home:payrollNudge.title")}
               weight="semiBold"
               style={{ color: tokens.textPrimary }}
             />
@@ -81,7 +82,7 @@ export function PayrollProfileNudge({
           {onDismiss ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Dismiss"
+              accessibilityLabel={translate("home:payrollNudge.dismiss")}
               hitSlop={8}
               onPress={onDismiss}
               style={styles.dismiss}
@@ -92,9 +93,9 @@ export function PayrollProfileNudge({
         </View>
 
         <AppButton
-          accessibilityLabel="Complete profile"
+          accessibilityLabel={translate("home:payrollNudge.cta")}
           fullWidth
-          label="Complete profile"
+          label={translate("home:payrollNudge.cta")}
           onPress={onPress}
         />
       </SurfaceCard>

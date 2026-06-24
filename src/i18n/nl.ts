@@ -17,6 +17,11 @@ const nl: Translations = {
       loading: "Laden…",
       retry: "Probeer opnieuw",
     },
+    a11y: {
+      loading: "Laden",
+      closeSheet: "Blad sluiten",
+      dragHandle: "Sleepgreep",
+    },
   },
   errorScreen: {
     friendlySubtitle:
@@ -56,6 +61,8 @@ const nl: Translations = {
     },
     markAllRead: "Alles als gelezen markeren",
     title: "Meldingen",
+    inbox: "Postvak",
+    dismissNotification: "Melding sluiten",
     unread: "{{count}} ongelezen",
   },
   planning: {
@@ -312,11 +319,15 @@ const nl: Translations = {
     tasks: {
       title: "Taken",
       viewAll: "Alles bekijken",
+      pending: "In behandeling",
+      completed: "Voltooid",
     },
     updates: {
       title: "Updates",
       viewAll: "Alles bekijken",
     },
+    topFocus: "Belangrijkste focus",
+    loadingA11y: "Startpagina laden",
     earnings: {
       title: "{{month}} inkomsten",
       hoursWorked: "Gewerkte uren",
@@ -384,6 +395,11 @@ const nl: Translations = {
     loadErrorSubtitle: "Controleer je verbinding en probeer opnieuw.",
     searchPlaceholder: "Documenten zoeken...",
     markAllReadSuccess: "Alle meldingen als gelezen gemarkeerd",
+    searchDocuments: "Documenten zoeken",
+    uploadDocument: "Document uploaden",
+    view: "Bekijken",
+    reviewSign: "Bekijken & ondertekenen",
+    netPayShort: "Nettoloon",
   },
   employers: {
     scanQrTitle: "Scan de werkgever-QR-code",
@@ -396,6 +412,7 @@ const nl: Translations = {
     invalidQrTitle: "Ongeldige QR-code",
     invalidQrSubtitle: "Deze QR-code bevat geen 6-cijferige uitnodigingscode.",
     closeScanner: "Scanner sluiten",
+    inviteCodeInput: "Invoer uitnodigingscode",
   },
 }
 

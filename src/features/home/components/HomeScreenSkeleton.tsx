@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { Skeleton, SurfaceCard } from "@/ui"
 
 /**
@@ -9,7 +10,11 @@ import { Skeleton, SurfaceCard } from "@/ui"
  */
 export function HomeScreenSkeleton() {
   return (
-    <View accessibilityLabel="Loading home" accessibilityState={{ busy: true }} style={styles.root}>
+    <View
+      accessibilityLabel={translate("home:loadingA11y")}
+      accessibilityState={{ busy: true }}
+      style={styles.root}
+    >
       <View style={styles.header}>
         <View style={styles.headerCopy}>
           <Skeleton height={12} radius={6} width={90} />

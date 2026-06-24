@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 
+import { translate } from "@/i18n/translate"
 import { Text, appLayout, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
@@ -49,7 +50,7 @@ export function DocumentContractCard({
       <View style={styles.contractActions}>
         <ContractActionButton
           icon="eye-outline"
-          label="View"
+          label={translate("documents:view")}
           onPress={onView}
           baseStyle={[
             styles.contractSecondary,
@@ -60,7 +61,7 @@ export function DocumentContractCard({
         {contract.status === "pending" ? (
           <ContractActionButton
             icon="pencil-outline"
-            label="Review & sign"
+            label={translate("documents:reviewSign")}
             onPress={onSign}
             baseStyle={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
             textColor={tokens.accentForeground}
@@ -69,7 +70,7 @@ export function DocumentContractCard({
         ) : (
           <ContractActionButton
             icon="download-outline"
-            label="Download"
+            label={translate("documents:downloadAction")}
             onPress={onDownload}
             baseStyle={[styles.contractPrimary, { backgroundColor: tokens.accent }]}
             textColor={tokens.accentForeground}

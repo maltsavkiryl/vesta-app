@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { AppScrollScreen, Text, appLayout, useDesignTokens } from "@/ui"
 
 import {
@@ -32,7 +33,7 @@ export function NotificationsScreen() {
     >
       <Text
         preset="heading"
-        text="Inbox"
+        text={translate("notifications:inbox")}
         weight="bold"
         style={[styles.title, { color: tokens.textPrimary }]}
       />

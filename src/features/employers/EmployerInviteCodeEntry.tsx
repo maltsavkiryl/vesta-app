@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 
+import { translate } from "@/i18n/translate"
 import { Text, useDesignTokens } from "@/ui"
 import { usePressScale } from "@/ui/composites/app-motion"
 
@@ -26,7 +27,7 @@ export function EmployerInviteCodeEntry({
   return (
     <View style={styles.stack}>
       <Pressable
-        accessibilityLabel="Invite code input"
+        accessibilityLabel={translate("employers:inviteCodeInput")}
         accessibilityRole="button"
         onPress={() => inputRef.current?.focus()}
       >
@@ -74,7 +75,7 @@ export function EmployerInviteCodeEntry({
 
       <Animated.View style={animatedStyle}>
         <Pressable
-          accessibilityLabel="Scan QR code"
+          accessibilityLabel={translate("employers:scanQrCode")}
           accessibilityRole="button"
           onPress={onOpenQrScanner}
           style={[

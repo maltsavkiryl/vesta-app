@@ -10,6 +10,7 @@ import Animated, {
 } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { translate } from "@/i18n/translate"
 import { useAppMotion } from "@/providers/motion-provider"
 import { SPRING_SNAPPY } from "@/ui/foundations/motion"
 import { useDesignTokens } from "@/ui/foundations/tokens"
@@ -128,7 +129,7 @@ export function Sheet({
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close sheet"
+          accessibilityLabel={translate("common:a11y.closeSheet")}
           onPress={onClose}
           style={StyleSheet.absoluteFill}
         />
@@ -153,7 +154,7 @@ export function Sheet({
           <View
             accessible
             accessibilityHint="Drag down to close"
-            accessibilityLabel="Drag handle"
+            accessibilityLabel={translate("common:a11y.dragHandle")}
             accessibilityRole="adjustable"
             style={styles.handleContainer}
           >

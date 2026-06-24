@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native"
 
 import type { NotificationItem } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import { ListCard, SectionBlock, Text, useDesignTokens } from "@/ui"
 
 import { completedTaskHistory, TaskRow, type TaskItem, UpdateRow } from "./HomeTaskSectionRows"
@@ -22,7 +23,7 @@ export function HomeTasksSection({
     <SectionBlock
       actionLabel="View all"
       badgeLabel={`${tasks.length} pending`}
-      title="Tasks"
+      title={translate("home:tasks.title")}
       onAction={onViewAll}
     >
       <ListCard>
@@ -51,7 +52,11 @@ export function HomeUpdatesSection({
   if (notifications.length === 0) return null
 
   return (
-    <SectionBlock actionLabel="View all" title="Updates" onAction={onViewAll}>
+    <SectionBlock
+      actionLabel="View all"
+      title={translate("home:updates.title")}
+      onAction={onViewAll}
+    >
       <ListCard>
         {notifications.slice(0, 3).map((notification, index, items) => (
           <UpdateRow
@@ -81,13 +86,13 @@ export function HomeTasksDrawerGroups({
         backgroundColor={backgroundColor}
         onComplete={onComplete}
         tasks={pendingTasks}
-        title="Pending"
+        title={translate("home:tasks.pending")}
       />
       <TaskGroup
         backgroundColor={backgroundColor}
         onComplete={() => undefined}
         tasks={completedTaskHistory}
-        title="Completed"
+        title={translate("home:tasks.completed")}
       />
     </>
   )

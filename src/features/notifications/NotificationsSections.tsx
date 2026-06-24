@@ -4,6 +4,7 @@ import Animated from "react-native-reanimated"
 
 import type { NotificationItem, NotificationKind } from "@/core/models"
 import type { TxKeyPath } from "@/i18n"
+import { translate } from "@/i18n/translate"
 import type { DesignTokens } from "@/ui"
 import { Text, useDesignTokens } from "@/ui"
 import { MotionPressable } from "@/ui"
@@ -224,7 +225,7 @@ function NotificationRowItem({
       </Animated.View>
       <Animated.View
         accessible
-        accessibilityLabel="Dismiss notification"
+        accessibilityLabel={translate("notifications:dismissNotification")}
         accessibilityRole="button"
         onStartShouldSetResponder={() => true}
         onResponderRelease={onDismiss}

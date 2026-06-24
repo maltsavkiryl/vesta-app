@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { MetaPill, SurfaceCard, Text, useDesignTokens } from "@/ui"
 
 import type { CockpitAction } from "./homeCockpit.types"
@@ -23,7 +24,7 @@ export function HomeCockpitPrimaryCard({ action }: { action: CockpitAction }) {
         <View style={styles.primaryHeader}>
           <MetaPill
             backgroundColor={tokens.accentMuted}
-            label="Top focus"
+            label={translate("home:topFocus")}
             leading={<Ionicons color={tokens.accent} name="sparkles-outline" size={12} />}
             textStyle={{ color: tokens.accent }}
           />

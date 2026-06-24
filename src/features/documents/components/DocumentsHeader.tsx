@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { IconButton, SearchField, Text, appTypography, useDesignTokens } from "@/ui"
 
 type DocumentsHeaderProps = {
@@ -45,7 +46,12 @@ export function DocumentsHeader({
           value={query}
         />
         <Pressable onPress={onCancelSearch}>
-          <Text text="Cancel" size="xs" weight="medium" style={{ color: tokens.accent }} />
+          <Text
+            text={translate("common:actions.cancel")}
+            size="xs"
+            weight="medium"
+            style={{ color: tokens.accent }}
+          />
         </Pressable>
       </View>
     )
@@ -55,7 +61,7 @@ export function DocumentsHeader({
     <View style={styles.header}>
       {showTitle ? (
         <Text
-          text="Documents"
+          text={translate("documents:title")}
           weight="bold"
           style={[appTypography.pageTitle, { color: tokens.textPrimary }]}
         />
@@ -64,13 +70,16 @@ export function DocumentsHeader({
       )}
       <View style={styles.actions}>
         {showSearchButton && onSearchPress ? (
-          <IconButton accessibilityLabel="Search documents" onPress={onSearchPress}>
+          <IconButton
+            accessibilityLabel={translate("documents:searchDocuments")}
+            onPress={onSearchPress}
+          >
             <Ionicons color={tokens.textSecondary} name="search-outline" size={16} />
           </IconButton>
         ) : null}
         {showUploadButton && onUploadPress ? (
           <IconButton
-            accessibilityLabel="Upload document"
+            accessibilityLabel={translate("documents:uploadDocument")}
             onPress={onUploadPress}
             tone="accent"
             variant="solid"
