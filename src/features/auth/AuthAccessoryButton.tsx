@@ -18,6 +18,7 @@ export function AuthAccessoryButton({
 
   return (
     <Pressable
+      accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       hitSlop={10}
       onPress={onPress}

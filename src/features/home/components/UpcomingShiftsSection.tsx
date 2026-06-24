@@ -25,6 +25,7 @@ function UpcomingShiftCard({
   return (
     <Animated.View style={[entranceStyle, pressStyle]}>
       <Pressable
+        accessibilityRole="button"
         onPress={onPress}
         {...pressHandlers}
         style={[

@@ -10,7 +10,11 @@ export function HomeCockpitPrimaryCard({ action }: { action: CockpitAction }) {
   const tokens = useDesignTokens()
 
   return (
-    <Pressable onPress={action.onPress} style={({ pressed }) => [pressed && styles.pressed]}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={action.onPress}
+      style={({ pressed }) => [pressed && styles.pressed]}
+    >
       <SurfaceCard
         elevated
         style={[
@@ -83,6 +87,7 @@ export function HomeCockpitMiniCard({
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [styles.miniPressable, pressed && styles.pressed]}
     >
