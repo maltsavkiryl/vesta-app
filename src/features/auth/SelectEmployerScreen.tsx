@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { Text, useDesignTokens } from "@/ui"
 
 import { AuthFormLayout, AUTH_SCREEN_PALETTE } from "./AuthFormLayout"
@@ -15,15 +16,15 @@ export function SelectEmployerScreen() {
   return (
     <AuthFormLayout
       onBack={handleBackToSignIn}
-      subtitle="You're linked to more than one workplace. Choose which one to continue as."
-      title="Choose your workplace"
+      subtitle={translate("auth:selectEmployer.subtitle")}
+      title={translate("auth:selectEmployer.title")}
     >
       <View style={styles.list}>
         {employers.length === 0 ? (
           <Text
             size="xs"
             style={{ color: AUTH_SCREEN_PALETTE.panelMuted }}
-            text="No workplaces to choose from. Please sign in again."
+            text={translate("auth:selectEmployer.empty")}
           />
         ) : (
           employers.map((employer) => {

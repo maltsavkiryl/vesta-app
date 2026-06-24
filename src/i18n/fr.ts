@@ -173,6 +173,41 @@ const fr: Translations = {
       hoursLabel: "Heures",
     },
   },
+  auth: {
+    heroTitle: "Votre vie professionnelle,\nsimplifiée",
+    heroSubtitle: "Shifts, pointage et paie — tout ce dont vous avez besoin, au même endroit.",
+    loginWithEmail: "Se connecter avec un e-mail",
+    orContinue: "ou continuer avec",
+    or: "ou",
+    continueApple: "Continuer avec Apple",
+    continueGoogle: "Continuer avec Google",
+    emailSubtitle:
+      "Utilisez le même compte professionnel que pour la planification et le pointage.",
+    forgotPassword: "Mot de passe oublié ?",
+    createAccount: "Créer un compte",
+    signInInstead: "Se connecter plutôt",
+    backToSignIn: "Retour à la connexion",
+    fillDemo: "Remplir les identifiants démo (dev)",
+    fillDemoLabel: "Remplir les identifiants démo",
+    registerSubtitle: "Ajoutez vos informations pour continuer.",
+    resetSuccessHint: "Utilisez votre nouveau mot de passe lors de votre prochaine connexion.",
+    fields: {
+      email: "E-mail",
+      password: "Mot de passe",
+      newPassword: "Nouveau mot de passe",
+      confirmPassword: "Confirmer le mot de passe",
+      firstName: "Prénom",
+      lastName: "Nom",
+      clearEmail: "Effacer l'e-mail",
+      clearPassword: "Effacer le mot de passe",
+    },
+    selectEmployer: {
+      title: "Choisissez votre lieu de travail",
+      subtitle:
+        "Vous êtes lié à plusieurs lieux de travail. Choisissez celui avec lequel continuer.",
+      empty: "Aucun lieu de travail disponible. Veuillez vous reconnecter.",
+    },
+  },
   onboarding: {
     welcome: {
       titleNamed: "Bienvenue chez Vesta,\n{{name}}.",
