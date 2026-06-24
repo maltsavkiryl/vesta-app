@@ -385,6 +385,7 @@ const en = {
     },
   },
   onboarding: {
+    startUsingVesta: "Start using Vesta",
     welcome: {
       titleNamed: "Welcome to Vesta,\n{{name}}.",
       title: "Welcome to Vesta.",
@@ -474,6 +475,10 @@ const en = {
       useThisEmployer: "Use this employer",
       employerSelected: "Employer selected",
       willBeUsed: "{{name}} will be used when you finish onboarding.",
+      codeHelperEmpty: "Type or paste your invite code",
+      codeHelperRemaining: "{{count}} more to enter",
+      codeHelperFound: "Employer found!",
+      codeHelperNotRecognized: "Code not recognized",
     },
   },
   home: {
@@ -638,6 +643,8 @@ const en = {
     },
     errors: {
       loadFailed: "Failed to load time entries",
+      clockInUnavailable: "Clock-in unavailable",
+      breakUnavailable: "Break unavailable",
       chooseWorkplace: "Choose a workplace before starting.",
       startFailed: "Could not start the timer.",
       noSession: "There is no active clock session.",
@@ -647,6 +654,12 @@ const en = {
     },
   },
   profile: {
+    alerts: {
+      saveFailedTitle: "Couldn't save changes",
+      photoFailedTitle: "Couldn't update photo",
+      signOutFailedTitle: "Couldn't sign out",
+      faceIdUnavailableTitle: "Face ID unavailable",
+    },
     completeness: {
       complete: "Complete",
       stepsLeft: "{{count}} step left",
@@ -772,6 +785,13 @@ const en = {
       chooseHowToAdd: "Choose how you want to add a workplace",
       workplaceAdded: "Workplace added",
       addWorkplace: "Add workplace",
+      search: "Search",
+      searchByHint: "Search by name, city, type, or invite code.",
+      staffCount: "{{count}} staff",
+      peopleCount: "{{count}} people",
+      noResults: "No results",
+      noResultsFor: 'No results for "{{query}}"',
+      nowLinked: "{{name}} is now linked to your profile.",
     },
     appearance: {
       title: "Appearance",
@@ -862,6 +882,8 @@ const en = {
       findTab: "Find a workplace",
       codeHint: "Use the code your manager shared to link the right workplace to your profile.",
       browseHint: "Browse workplaces and choose the one you want to add.",
+      codeMoreNeeded: "{{count}} more characters needed.",
+      codeMatched: "Matched with {{name}}.",
     },
     overviewTitles: {
       employment: "Work",
@@ -965,6 +987,10 @@ const en = {
     sharePayslipPdfFailed: "Vesta couldn't create the payslip PDF.",
     shareNoFile: "This document doesn't have a saved file yet.",
     shareOpenFailed: "Vesta couldn't open this document right now.",
+    shareUnavailable: "Share unavailable",
+    downloadUnavailable: "Download unavailable",
+    fileUnavailable: "File unavailable",
+    signFailedTitle: "Couldn't sign contract",
     uploadDocument: "Upload document",
     view: "View",
     reviewSign: "Review & sign",

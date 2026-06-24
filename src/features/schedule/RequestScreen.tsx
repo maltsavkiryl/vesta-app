@@ -22,6 +22,7 @@ export function RequestScreen() {
     detailTargetLabel,
     done,
     handleSubmit,
+    isSubmitting,
     note,
     reason,
     requestDates,
@@ -80,7 +81,7 @@ export function RequestScreen() {
 
           <View style={styles.submitBlock}>
             <AppButton
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               fullWidth
               label={actionCopy.submitLabel}
               onPress={handleSubmit}

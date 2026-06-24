@@ -42,9 +42,11 @@ export function InviteCodePanel({
             joinCode.length === 0
               ? translate("profile:employerJoin.enterCodeError")
               : joinCode.length < 6
-                ? `${6 - joinCode.length} more characters needed.`
+                ? translate("profile:employerJoin.codeMoreNeeded", { count: 6 - joinCode.length })
                 : codeMatchedEmployer
-                  ? `Matched with ${codeMatchedEmployer.name}.`
+                  ? translate("profile:employerJoin.codeMatched", {
+                      name: codeMatchedEmployer.name,
+                    })
                   : translate("profile:employerJoin.noWorkplaceForCode")
           }
           onChangeCode={onSetJoinCode}
@@ -77,7 +79,7 @@ export function EmployerSearchPanel({
         title={translate("profile:employer.browseWorkplaces")}
         tone="accent"
       >
-        Search by name, city, type, or invite code.
+        {translate("profile:employer.searchByHint")}
       </Banner>
 
       <View style={styles.searchField}>
@@ -122,7 +124,9 @@ export function EmployerSearchPanel({
                         />
                       </View>
                       <Text
-                        text={`${employer.teamSize} staff`}
+                        text={translate("profile:employer.staffCount", {
+                          count: employer.teamSize,
+                        })}
                         size="xxs"
                         style={{ color: tokens.textMuted }}
                       />
@@ -138,7 +142,11 @@ export function EmployerSearchPanel({
               <Ionicons color={tokens.accent} name="search-outline" size={18} />
             </View>
             <Text
-              text={`No results${joinSearch ? ` for "${joinSearch}"` : ""}`}
+              text={
+                joinSearch
+                  ? translate("profile:employer.noResultsFor", { query: joinSearch })
+                  : translate("profile:employer.noResults")
+              }
               size="xs"
               weight="semiBold"
               style={{ color: tokens.textPrimary, textAlign: "center" }}

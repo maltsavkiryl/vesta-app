@@ -393,6 +393,7 @@ const nl: Translations = {
     },
   },
   onboarding: {
+    startUsingVesta: "Vesta gebruiken",
     welcome: {
       titleNamed: "Welkom bij Vesta,\n{{name}}.",
       title: "Welkom bij Vesta.",
@@ -483,6 +484,10 @@ const nl: Translations = {
       useThisEmployer: "Deze werkgever gebruiken",
       employerSelected: "Werkgever geselecteerd",
       willBeUsed: "{{name}} wordt gebruikt wanneer je de onboarding voltooit.",
+      codeHelperEmpty: "Typ of plak je uitnodigingscode",
+      codeHelperRemaining: "Nog {{count}} in te voeren",
+      codeHelperFound: "Werkgever gevonden!",
+      codeHelperNotRecognized: "Code niet herkend",
     },
   },
   home: {
@@ -654,6 +659,8 @@ const nl: Translations = {
     },
     errors: {
       loadFailed: "Tijdregistraties laden mislukt",
+      clockInUnavailable: "Inklokken niet beschikbaar",
+      breakUnavailable: "Pauze niet beschikbaar",
       chooseWorkplace: "Kies een werkplek voordat je start.",
       startFailed: "Kon de timer niet starten.",
       noSession: "Er is geen actieve kloksessie.",
@@ -663,6 +670,12 @@ const nl: Translations = {
     },
   },
   profile: {
+    alerts: {
+      saveFailedTitle: "Wijzigingen niet opgeslagen",
+      photoFailedTitle: "Foto niet bijgewerkt",
+      signOutFailedTitle: "Afmelden mislukt",
+      faceIdUnavailableTitle: "Face ID niet beschikbaar",
+    },
     completeness: {
       complete: "Volledig",
       stepsLeft: "{{count}} stap over",
@@ -789,6 +802,13 @@ const nl: Translations = {
       chooseHowToAdd: "Kies hoe je een werkplek wilt toevoegen",
       workplaceAdded: "Werkplek toegevoegd",
       addWorkplace: "Werkplek toevoegen",
+      search: "Zoeken",
+      searchByHint: "Zoek op naam, stad, type of uitnodigingscode.",
+      staffCount: "{{count}} medewerkers",
+      peopleCount: "{{count}} personen",
+      noResults: "Geen resultaten",
+      noResultsFor: 'Geen resultaten voor "{{query}}"',
+      nowLinked: "{{name}} is nu gekoppeld aan je profiel.",
     },
     appearance: {
       title: "Weergave",
@@ -884,6 +904,8 @@ const nl: Translations = {
       codeHint:
         "Gebruik de code die je manager heeft gedeeld om de juiste werkplek aan je profiel te koppelen.",
       browseHint: "Blader door werkplekken en kies degene die je wilt toevoegen.",
+      codeMoreNeeded: "Nog {{count}} tekens nodig.",
+      codeMatched: "Gekoppeld met {{name}}.",
     },
     overviewTitles: {
       employment: "Werk",
@@ -990,6 +1012,10 @@ const nl: Translations = {
     sharePayslipPdfFailed: "Vesta kon de loonbrief-PDF niet aanmaken.",
     shareNoFile: "Dit document heeft nog geen opgeslagen bestand.",
     shareOpenFailed: "Vesta kon dit document momenteel niet openen.",
+    shareUnavailable: "Delen niet beschikbaar",
+    downloadUnavailable: "Downloaden niet beschikbaar",
+    fileUnavailable: "Bestand niet beschikbaar",
+    signFailedTitle: "Ondertekenen mislukt",
     uploadDocument: "Document uploaden",
     view: "Bekijken",
     reviewSign: "Bekijken & ondertekenen",

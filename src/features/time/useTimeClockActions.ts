@@ -4,6 +4,7 @@ import { Alert } from "react-native"
 import type { Employer, Shift, UserProfile } from "@/core/models"
 import { useTimeActions } from "@/features/time/data/time.mutations"
 import { formatClockStartDistance, resolveClockStart } from "@/features/time/data/time.workflow"
+import { translate } from "@/i18n/translate"
 import { fireHaptic } from "@/utils/haptics"
 
 import { showClockEmployerOptions } from "./showClockEmployerOptions"
@@ -45,7 +46,7 @@ export function useTimeClockActions({
       })
       if (!resolution.ok) {
         fireHaptic("error")
-        Alert.alert("Clock-in unavailable", resolution.error.message)
+        Alert.alert(translate("time:errors.clockInUnavailable"), resolution.error.message)
         return
       }
 
@@ -54,7 +55,7 @@ export function useTimeClockActions({
         const selectedEmployerId = await showClockEmployerOptions({
           options: resolution.data.options.map((option) => ({
             description: option.inGeofence
-              ? "In geofence"
+              ? translate("time:card.inGeofence")
               : (formatClockStartDistance(option.distanceMeters) ?? option.locationLabel),
             id: option.employerId,
             title: option.employerName,
@@ -85,7 +86,7 @@ export function useTimeClockActions({
       })
       if (!result.ok) {
         fireHaptic("error")
-        Alert.alert("Clock-in unavailable", result.error.message)
+        Alert.alert(translate("time:errors.clockInUnavailable"), result.error.message)
         return
       }
 
@@ -105,7 +106,7 @@ export function useTimeClockActions({
       })
       if (!result.ok) {
         fireHaptic("error")
-        Alert.alert("Break unavailable", result.error.message)
+        Alert.alert(translate("time:errors.breakUnavailable"), result.error.message)
         return
       }
 
@@ -125,7 +126,7 @@ export function useTimeClockActions({
       })
       if (!result.ok) {
         fireHaptic("error")
-        Alert.alert("Break unavailable", result.error.message)
+        Alert.alert(translate("time:errors.breakUnavailable"), result.error.message)
         return
       }
 

@@ -60,7 +60,7 @@ export function useProfileOverview() {
 
     if (!result.ok) {
       fireHaptic("error")
-      Alert.alert("Couldn't update photo", result.error.message)
+      Alert.alert(translate("profile:alerts.photoFailedTitle"), result.error.message)
       return
     }
 
@@ -84,7 +84,10 @@ export function useProfileOverview() {
                 router.replace("/")
               } catch {
                 fireHaptic("error")
-                Alert.alert("Couldn't sign out", translate("profile:overview.tryAgain"))
+                Alert.alert(
+                  translate("profile:alerts.signOutFailedTitle"),
+                  translate("profile:overview.tryAgain"),
+                )
               }
             })()
           },

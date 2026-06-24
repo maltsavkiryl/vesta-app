@@ -65,7 +65,7 @@ export function useProfileDetailScreen(section: SectionKey) {
       legalState,
       onError: (message) => {
         fireHaptic("error")
-        Alert.alert("Couldn't save changes", message)
+        Alert.alert(translate("profile:alerts.saveFailedTitle"), message)
       },
       onSaved: () => {
         fireHaptic("success")
@@ -94,7 +94,10 @@ export function useProfileDetailScreen(section: SectionKey) {
 
       if (!hasHardware || !isEnrolled) {
         fireHaptic("warning")
-        Alert.alert("Face ID unavailable", translate("profile:security.setupBiometricFirst"))
+        Alert.alert(
+          translate("profile:alerts.faceIdUnavailableTitle"),
+          translate("profile:security.setupBiometricFirst"),
+        )
         return
       }
 
@@ -124,7 +127,10 @@ export function useProfileDetailScreen(section: SectionKey) {
       fireHaptic("warning")
     } catch {
       fireHaptic("error")
-      Alert.alert("Face ID unavailable", translate("profile:security.biometricDevBuild"))
+      Alert.alert(
+        translate("profile:alerts.faceIdUnavailableTitle"),
+        translate("profile:security.biometricDevBuild"),
+      )
     }
   }
 

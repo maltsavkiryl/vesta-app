@@ -398,6 +398,7 @@ const fr: Translations = {
     },
   },
   onboarding: {
+    startUsingVesta: "Commencer avec Vesta",
     welcome: {
       titleNamed: "Bienvenue chez Vesta,\n{{name}}.",
       title: "Bienvenue chez Vesta.",
@@ -490,6 +491,10 @@ const fr: Translations = {
       useThisEmployer: "Utiliser cet employeur",
       employerSelected: "Employeur sélectionné",
       willBeUsed: "{{name}} sera utilisé lorsque vous terminerez l'intégration.",
+      codeHelperEmpty: "Saisissez ou collez votre code d'invitation",
+      codeHelperRemaining: "Encore {{count}} à saisir",
+      codeHelperFound: "Employeur trouvé !",
+      codeHelperNotRecognized: "Code non reconnu",
     },
   },
   home: {
@@ -661,6 +666,8 @@ const fr: Translations = {
     },
     errors: {
       loadFailed: "Échec du chargement des entrées de temps",
+      clockInUnavailable: "Pointage indisponible",
+      breakUnavailable: "Pause indisponible",
       chooseWorkplace: "Choisissez un lieu de travail avant de commencer.",
       startFailed: "Impossible de démarrer le minuteur.",
       noSession: "Aucune session de pointage active.",
@@ -670,6 +677,12 @@ const fr: Translations = {
     },
   },
   profile: {
+    alerts: {
+      saveFailedTitle: "Modifications non enregistrées",
+      photoFailedTitle: "Photo non mise à jour",
+      signOutFailedTitle: "Déconnexion impossible",
+      faceIdUnavailableTitle: "Face ID indisponible",
+    },
     completeness: {
       complete: "Complet",
       stepsLeft: "{{count}} étape restante",
@@ -797,6 +810,13 @@ const fr: Translations = {
       chooseHowToAdd: "Choisissez comment ajouter un lieu de travail",
       workplaceAdded: "Lieu de travail ajouté",
       addWorkplace: "Ajouter un lieu de travail",
+      search: "Rechercher",
+      searchByHint: "Recherchez par nom, ville, type ou code d'invitation.",
+      staffCount: "{{count}} employés",
+      peopleCount: "{{count}} personnes",
+      noResults: "Aucun résultat",
+      noResultsFor: 'Aucun résultat pour "{{query}}"',
+      nowLinked: "{{name}} est désormais lié à votre profil.",
     },
     appearance: {
       title: "Apparence",
@@ -897,6 +917,8 @@ const fr: Translations = {
       codeHint:
         "Utilisez le code partagé par votre manager pour lier le bon lieu de travail à votre profil.",
       browseHint: "Parcourez les lieux de travail et choisissez celui que vous voulez ajouter.",
+      codeMoreNeeded: "Encore {{count}} caractères requis.",
+      codeMatched: "Associé à {{name}}.",
     },
     overviewTitles: {
       employment: "Travail",
@@ -1005,6 +1027,10 @@ const fr: Translations = {
     sharePayslipPdfFailed: "Vesta n'a pas pu créer le PDF de la fiche de paie.",
     shareNoFile: "Ce document n'a pas encore de fichier enregistré.",
     shareOpenFailed: "Vesta n'a pas pu ouvrir ce document pour le moment.",
+    shareUnavailable: "Partage indisponible",
+    downloadUnavailable: "Téléchargement indisponible",
+    fileUnavailable: "Fichier indisponible",
+    signFailedTitle: "Échec de la signature",
     uploadDocument: "Téléverser un document",
     view: "Voir",
     reviewSign: "Vérifier et signer",

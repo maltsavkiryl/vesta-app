@@ -23,13 +23,21 @@ import { useContractDetailScreen } from "./useContractDetailScreen"
 export function ContractDetailScreen() {
   const tokens = useDesignTokens()
   const { theme } = useAppTheme()
-  const { canSign, contract, mode, router, setSignature, signCurrentContract, signature } =
-    useContractDetailScreen()
+  const {
+    canSign,
+    contract,
+    isSigning,
+    mode,
+    router,
+    setSignature,
+    signCurrentContract,
+    signature,
+  } = useContractDetailScreen()
   const headerActions = createHeaderActionOptions(theme, {
     right:
       mode === "sign"
         ? {
-            disabled: !canSign,
+            disabled: !canSign || isSigning,
             kind: "confirm",
             haptic: "none",
             label: translate("documents:sign"),

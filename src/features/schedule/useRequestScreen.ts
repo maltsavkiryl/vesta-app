@@ -27,6 +27,9 @@ export function useRequestScreen() {
   const [reason, setReason] = useState("")
   const [note, setNote] = useState("")
   const [done, setDone] = useState(false)
+  // Guards against double-taps firing duplicate requests while the create
+  // mutation is still in flight.
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const today = getTodayDateString()
   const config = requestCategoryConfig[category]
@@ -58,36 +61,42 @@ export function useRequestScreen() {
   }
 
   const handleSubmit = async () => {
-    const result = await createRequest({
-      category,
-      note: note.trim() || undefined,
-      reason,
-      statusDetail:
-        category === "shift_change"
-          ? "Waiting for colleague and manager approval"
-          : "Waiting for manager review",
-      target:
-        category === "shift_change"
-          ? {
-              kind: "shift" as const,
-              label: summaryTarget,
-              shiftId: selectedShiftId,
-            }
-          : {
-              endDate: selectedDates[selectedDates.length - 1],
-              kind: "dates" as const,
-              label: summaryTarget,
-              startDate: selectedDates[0],
-            },
-      type: config.type,
-    })
-    if (!result.ok) {
-      fireHaptic("error")
-      return
-    }
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      const result = await createRequest({
+        category,
+        note: note.trim() || undefined,
+        reason,
+        statusDetail:
+          category === "shift_change"
+            ? "Waiting for colleague and manager approval"
+            : "Waiting for manager review",
+        target:
+          category === "shift_change"
+            ? {
+                kind: "shift" as const,
+                label: summaryTarget,
+                shiftId: selectedShiftId,
+              }
+            : {
+                endDate: selectedDates[selectedDates.length - 1],
+                kind: "dates" as const,
+                label: summaryTarget,
+                startDate: selectedDates[0],
+              },
+        type: config.type,
+      })
+      if (!result.ok) {
+        fireHaptic("error")
+        return
+      }
 
-    fireHaptic("success")
-    setDone(true)
+      fireHaptic("success")
+      setDone(true)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return {
@@ -98,6 +107,7 @@ export function useRequestScreen() {
     detailTargetLabel,
     done,
     handleSubmit,
+    isSubmitting,
     note,
     reason,
     requestDates,

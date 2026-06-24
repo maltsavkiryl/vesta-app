@@ -151,7 +151,7 @@ export function JoinSuccessCard({
         style={titleStyle}
       />
       <Text
-        text={`${joinedEmployer.name} is now linked to your profile.`}
+        text={translate("profile:employer.nowLinked", { name: joinedEmployer.name })}
         size="xs"
         style={bodyStyle}
       />
