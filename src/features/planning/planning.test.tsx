@@ -513,12 +513,14 @@ describe("PlanningChangeNewScreen", () => {
     expect(submitBtn.props.accessibilityState?.disabled).toBe(true)
   })
 
-  it("submit enabled after selecting a shift", () => {
+  it("submit enabled after selecting a shift and entering a note", () => {
     const { PlanningChangeNewScreen } = require("./PlanningChangeNewScreen")
     render(<PlanningChangeNewScreen />)
 
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
+    // A note counts as a change — canSubmit requires at least one field to differ
+    fireEvent.changeText(screen.getByLabelText(/Note/i), "Please adjust my shift")
 
     // Real English text from en.ts planning.requests.changeRequest
     const submitBtn = screen.getByRole("button", { name: /Change request/ })
@@ -531,6 +533,7 @@ describe("PlanningChangeNewScreen", () => {
 
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
+    fireEvent.changeText(screen.getByLabelText(/Note/i), "Please adjust my shift")
 
     // Real English text from en.ts planning.requests.changeRequest
     const submitBtn = screen.getByRole("button", { name: /Change request/ })
@@ -564,6 +567,7 @@ describe("PlanningChangeNewScreen", () => {
 
     const shiftRow = screen.getByRole("radio", { name: /./i })
     fireEvent.press(shiftRow)
+    fireEvent.changeText(screen.getByLabelText(/Note/i), "Please adjust my shift")
 
     // Real English text from en.ts planning.requests.changeRequest
     const submitBtn = screen.getByRole("button", { name: /Change request/ })

@@ -34,6 +34,7 @@ export function useTimeClockActions({
   // Guards the break start/end punches against double-taps (a slow location +
   // network round-trip would otherwise let a second tap fire a duplicate punch).
   const [breakPending, setBreakPending] = useState(false)
+  const breakPendingRef = useRef(false)
 
   const handleClockIn = useCallback(async () => {
     if (clockInPendingRef.current) return
@@ -105,7 +106,8 @@ export function useTimeClockActions({
   }, [employers, profileRole, shifts, startClock])
 
   const handleStartBreak = useCallback(async () => {
-    if (breakPending) return
+    if (breakPendingRef.current) return
+    breakPendingRef.current = true
     setBreakPending(true)
     try {
       const result = await startBreak({
@@ -120,12 +122,14 @@ export function useTimeClockActions({
 
       fireHaptic("success")
     } finally {
+      breakPendingRef.current = false
       setBreakPending(false)
     }
-  }, [breakPending, startBreak])
+  }, [startBreak])
 
   const handleEndBreak = useCallback(async () => {
-    if (breakPending) return
+    if (breakPendingRef.current) return
+    breakPendingRef.current = true
     setBreakPending(true)
     try {
       const result = await endBreak({
@@ -140,9 +144,10 @@ export function useTimeClockActions({
 
       fireHaptic("success")
     } finally {
+      breakPendingRef.current = false
       setBreakPending(false)
     }
-  }, [breakPending, endBreak])
+  }, [endBreak])
 
   return {
     breakPending,
