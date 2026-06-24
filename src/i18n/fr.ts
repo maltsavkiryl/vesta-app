@@ -11,12 +11,14 @@ const fr: Translations = {
       ok: "OK",
       retry: "Réessayer",
       save: "Enregistrer",
+      search: "Rechercher",
     },
     states: {
       empty: "Rien pour le moment",
       error: "Une erreur est survenue",
       loading: "Chargement…",
       retry: "Réessayer",
+      notAdded: "Non renseigné",
     },
     a11y: {
       loading: "Chargement",

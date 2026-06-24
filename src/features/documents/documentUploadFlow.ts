@@ -126,7 +126,10 @@ export async function uploadDocumentFromSource({
     }
 
     fireHaptic("success")
-    Alert.alert(translate("documents:uploadComplete"), translate("documents:uploadCompleteBody", { title: target.title }))
+    Alert.alert(
+      translate("documents:uploadComplete"),
+      translate("documents:uploadCompleteBody", { title: target.title }),
+    )
     return "completed"
   } catch {
     fireHaptic("error")

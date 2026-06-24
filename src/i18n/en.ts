@@ -9,12 +9,14 @@ const en = {
       ok: "OK",
       retry: "Retry",
       save: "Save",
+      search: "Search",
     },
     states: {
       empty: "Nothing here yet",
       error: "Something went wrong",
       loading: "Loading…",
       retry: "Try again",
+      notAdded: "Not added",
     },
     a11y: {
       loading: "Loading",

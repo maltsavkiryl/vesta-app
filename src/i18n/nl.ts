@@ -11,12 +11,14 @@ const nl: Translations = {
       ok: "Oké",
       retry: "Opnieuw proberen",
       save: "Opslaan",
+      search: "Zoeken",
     },
     states: {
       empty: "Hier is nog niets",
       error: "Er is iets misgegaan",
       loading: "Laden…",
       retry: "Probeer opnieuw",
+      notAdded: "Niet toegevoegd",
     },
     a11y: {
       loading: "Laden",
