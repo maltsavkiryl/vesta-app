@@ -557,6 +557,7 @@ const en = {
       viewAll: "View all",
       empty: "No upcoming shifts",
       emptySubtitle: "Your next assigned shifts will appear here as soon as planning is published.",
+      railA11y: "Upcoming shifts, scroll horizontally",
     },
     tasks: {
       title: "Tasks",

@@ -8,6 +8,7 @@ import {
   type ScrollViewProps,
   type StyleProp,
   StyleSheet,
+  useWindowDimensions,
   View,
   type ViewStyle,
 } from "react-native"
@@ -137,17 +138,20 @@ export function AppSegmentedControl<T extends string>({
   value: T
 }) {
   const tokens = useDesignTokens()
+  const { width: screenWidth } = useWindowDimensions()
   const selectedIndex = Math.max(
     options.findIndex((option) => option.value === value),
     0,
   )
+  // Scale down on narrow devices when many segments compete for space.
+  const fontSize = options.length >= 5 && screenWidth < 390 ? 11 : 13
   const fontStyle = useMemo(
-    () => ({ color: tokens.textSecondary, fontSize: 13, fontWeight: "500" as const }),
-    [tokens.textSecondary],
+    () => ({ color: tokens.textSecondary, fontSize, fontWeight: "500" as const }),
+    [tokens.textSecondary, fontSize],
   )
   const activeFontStyle = useMemo(
-    () => ({ color: tokens.textPrimary, fontSize: 13, fontWeight: "600" as const }),
-    [tokens.textPrimary],
+    () => ({ color: tokens.textPrimary, fontSize, fontWeight: "600" as const }),
+    [tokens.textPrimary, fontSize],
   )
 
   return (

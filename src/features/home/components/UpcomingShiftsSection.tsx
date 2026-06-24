@@ -103,6 +103,7 @@ export function UpcomingShiftsSection({
         <View style={styles.upcomingRail}>
           <ScrollView
             horizontal
+            accessibilityLabel={translate("home:upcoming.railA11y")}
             contentContainerStyle={styles.upcomingList}
             showsHorizontalScrollIndicator={false}
           >

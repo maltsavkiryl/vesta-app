@@ -576,6 +576,7 @@ const fr: Translations = {
       empty: "Aucun service à venir",
       emptySubtitle:
         "Vos prochains services planifiés apparaîtront ici dès que le planning sera publié.",
+      railA11y: "Services à venir, défiler horizontalement",
     },
     tasks: {
       title: "Tâches",

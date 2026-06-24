@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Alert } from "react-native"
 import { useRouter } from "expo-router"
 
@@ -46,25 +46,24 @@ export function useProfileOverview() {
   const pendingContractCount = contracts.filter((contract) => contract.status === "pending").length
   const latestPayslip = payslips[0]
   const setupStatus = getProfileSetupStatus(state)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   const handleProfilePhotoPress = async () => {
     const selection = await selectProfilePhoto()
+    if (selection.kind === "cancelled") return
 
-    if (selection.kind === "cancelled") {
-      return
+    setIsUploadingPhoto(true)
+    try {
+      const result = await updateProfile({ avatarUri: selection.uri })
+      if (!result.ok) {
+        fireHaptic("error")
+        Alert.alert(translate("profile:alerts.photoFailedTitle"), result.error.message)
+        return
+      }
+      fireHaptic("success")
+    } finally {
+      setIsUploadingPhoto(false)
     }
-
-    const result = await updateProfile({
-      avatarUri: selection.uri,
-    })
-
-    if (!result.ok) {
-      fireHaptic("error")
-      Alert.alert(translate("profile:alerts.photoFailedTitle"), result.error.message)
-      return
-    }
-
-    fireHaptic("success")
   }
 
   const handleSignOut = () => {
@@ -101,6 +100,7 @@ export function useProfileOverview() {
     email: state.profile.email,
     fullName,
     initials: getInitials(state.profile.firstName, state.profile.lastName),
+    isUploadingPhoto,
     onProfilePhotoPress: handleProfilePhotoPress,
     profileSetupStatus: setupStatus,
     sections: buildProfileOverviewSections({

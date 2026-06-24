@@ -569,6 +569,7 @@ const nl: Translations = {
       empty: "Geen aankomende shifts",
       emptySubtitle:
         "Je volgende ingeplande shifts verschijnen hier zodra de planning gepubliceerd is.",
+      railA11y: "Aankomende shifts, horizontaal scrollen",
     },
     tasks: {
       title: "Taken",
