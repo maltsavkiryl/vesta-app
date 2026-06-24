@@ -291,16 +291,21 @@ function createHeaderBaseOptions(
     headerStyle: { backgroundColor: isIos ? "transparent" : backgroundColor },
     headerTransparent: isIos,
     headerTintColor: theme.colors.text,
-    // When no title is given, render an empty header title rather than leaving it
-    // undefined — otherwise React Navigation falls back to the raw route name
-    // (e.g. a lowercase "notifications" / "request" leaks into the header).
-    headerTitle: title
-      ? () => (
-          <View style={styles.titleWrapper}>
-            <Text text={title} size="sm" weight="semiBold" style={{ color: theme.colors.text }} />
-          </View>
-        )
-      : () => null,
+    // With a title, render it with the app's styled Text. Without one, set an
+    // empty `title` (not an empty `headerTitle`) so that (a) React Navigation
+    // doesn't fall back to the raw route name (e.g. lowercase "notifications" /
+    // "request"), and (b) a screen that sets its own `title` via <Stack.Screen>
+    // (profile sections like Payslips) still wins — a render-fn `headerTitle`
+    // here would take precedence and blank those titles out.
+    ...(title
+      ? {
+          headerTitle: () => (
+            <View style={styles.titleWrapper}>
+              <Text text={title} size="sm" weight="semiBold" style={{ color: theme.colors.text }} />
+            </View>
+          ),
+        }
+      : { title: "" }),
     headerLeft: options.headerLeft,
     headerRight: options.headerRight,
     unstable_headerLeftItems: options.unstable_headerLeftItems,
