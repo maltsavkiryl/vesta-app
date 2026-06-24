@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 
 import { useAuthActions } from "@/features/auth/data/auth.mutations"
 import { type AppLocale, mapToSupportedLocale } from "@/i18n"
+import { translate } from "@/i18n/translate"
 import {
   AppButton,
   Banner,
@@ -32,7 +33,7 @@ export function NotificationPreferencesSection({
   tokens: DesignTokens
 }) {
   return (
-    <GroupedSection title="Notifications">
+    <GroupedSection title={translate("profile:settings.notifications")}>
       {Object.entries(notificationPreferences).map(([key, enabled], index, entries) => (
         <ListRow
           key={key}
@@ -73,7 +74,7 @@ export function LanguageSection({
   const activeLocale = mapToSupportedLocale(currentLanguage)
 
   return (
-    <GroupedSection title="Language">
+    <GroupedSection title={translate("profile:settings.language")}>
       {LANGUAGE_OPTIONS.map((language, index) => {
         const selected = activeLocale === language.value
 
@@ -115,13 +116,18 @@ export function SecuritySection({
 }) {
   return (
     <>
-      <GroupedSection title="Account access">
+      <GroupedSection title={translate("profile:settings.accountAccess")}>
         <ListRow
-          title="Password"
+          title={translate("profile:settings.password")}
           subtitle={`Last changed ${passwordLastChangedAt}`}
           leading={<Ionicons color={tokens.textSecondary} name="key-outline" size={18} />}
           trailing={
-            <Text text="Change" size="xs" weight="semiBold" style={{ color: tokens.accent }} />
+            <Text
+              text={translate("profile:settings.change")}
+              size="xs"
+              weight="semiBold"
+              style={{ color: tokens.accent }}
+            />
           }
           onPress={onChangePassword}
         />
@@ -147,16 +153,16 @@ export function SecuritySection({
           }
         />
       </GroupedSection>
-      <SectionFooter text="Biometric unlock stays on this device. Vesta never receives your Face ID data." />
-      <GroupedSection title="Sessions">
+      <SectionFooter text={translate("profile:settings.biometricHint")} />
+      <GroupedSection title={translate("profile:settings.sessions")}>
         <ListRow
           isLast
-          title="Signed-in device"
-          subtitle="This iPhone"
+          title={translate("profile:settings.signedInDevice")}
+          subtitle={translate("profile:settings.thisDevice")}
           leading={
             <Ionicons color={tokens.textSecondary} name="phone-portrait-outline" size={18} />
           }
-          trailing={<StatusBadge label="Current" tone="success" />}
+          trailing={<StatusBadge label={translate("profile:settings.current")} tone="success" />}
         />
       </GroupedSection>
     </>
@@ -205,12 +211,12 @@ export function ChangePasswordSection() {
 
   return (
     <>
-      <GroupedSection title="Update password">
+      <GroupedSection title={translate("profile:settings.updatePassword")}>
         <TextField
           autoCapitalize="none"
           autoCorrect={false}
           containerStyle={styles.field}
-          label="Current password"
+          label={translate("profile:settings.currentPassword")}
           onChangeText={setCurrentPassword}
           secureTextEntry
           textContentType="password"
@@ -221,7 +227,7 @@ export function ChangePasswordSection() {
           autoCapitalize="none"
           autoCorrect={false}
           containerStyle={styles.field}
-          label="New password"
+          label={translate("profile:settings.newPassword")}
           onChangeText={setNextPassword}
           secureTextEntry
           textContentType="newPassword"
@@ -232,7 +238,7 @@ export function ChangePasswordSection() {
           autoCapitalize="none"
           autoCorrect={false}
           containerStyle={styles.field}
-          label="Confirm new password"
+          label={translate("profile:settings.confirmNewPassword")}
           onChangeText={setConfirmPassword}
           onSubmitEditing={() => {
             if (canSubmit) {
@@ -260,7 +266,7 @@ export function ChangePasswordSection() {
         }}
         pressHaptic="none"
       />
-      <SectionFooter text="This updates the password saved for this account on this device." />
+      <SectionFooter text={translate("profile:settings.passwordHint")} />
     </>
   )
 }
@@ -284,26 +290,26 @@ export function PrivacySection({
 }) {
   return (
     <>
-      <GroupedSection title="Data sharing">
+      <GroupedSection title={translate("profile:settings.dataSharing")}>
         <ListRow
-          title="Employer data"
-          subtitle="Share profile, availability, and documents with linked employers"
+          title={translate("profile:settings.employerData")}
+          subtitle={translate("profile:settings.employerDataDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="business-outline" size={18} />}
           trailing={
             <ToggleSwitch
-              accessibilityLabel="Employer data sharing"
+              accessibilityLabel={translate("profile:settings.employerDataA11y")}
               onChange={onToggleEmployerSharing}
               value={employerDataSharingEnabled}
             />
           }
         />
         <ListRow
-          title="App analytics"
-          subtitle="Help Vesta understand which workflows need improvement"
+          title={translate("profile:settings.appAnalytics")}
+          subtitle={translate("profile:settings.appAnalyticsDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="analytics-outline" size={18} />}
           trailing={
             <ToggleSwitch
-              accessibilityLabel="App analytics"
+              accessibilityLabel={translate("profile:settings.appAnalytics")}
               onChange={onToggleAnalytics}
               value={analyticsEnabled}
             />
@@ -311,31 +317,31 @@ export function PrivacySection({
         />
         <ListRow
           isLast
-          title="Crash reports"
-          subtitle="Send diagnostics when the app fails"
+          title={translate("profile:settings.crashReports")}
+          subtitle={translate("profile:settings.crashReportsDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="bug-outline" size={18} />}
           trailing={
             <ToggleSwitch
-              accessibilityLabel="Crash reports"
+              accessibilityLabel={translate("profile:settings.crashReports")}
               onChange={onToggleCrashReports}
               value={crashReportsEnabled}
             />
           }
         />
       </GroupedSection>
-      <GroupedSection title="Permissions">
+      <GroupedSection title={translate("profile:settings.permissions")}>
         <ListRow
-          title="Document uploads"
-          subtitle="Camera and file picker are requested only when uploading"
+          title={translate("profile:settings.documentUploads")}
+          subtitle={translate("profile:settings.documentUploadsDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="cloud-upload-outline" size={18} />}
-          trailing={<StatusBadge label="On demand" tone="accent" />}
+          trailing={<StatusBadge label={translate("profile:settings.onDemand")} tone="accent" />}
         />
         <ListRow
           isLast
-          title="Location"
-          subtitle="Not used by this app"
+          title={translate("profile:settings.location")}
+          subtitle={translate("profile:settings.locationDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="location-outline" size={18} />}
-          trailing={<StatusBadge label="Off" tone="neutral" />}
+          trailing={<StatusBadge label={translate("profile:settings.off")} tone="neutral" />}
         />
       </GroupedSection>
     </>
@@ -359,44 +365,54 @@ export function SupportSection({
 }) {
   return (
     <>
-      <GroupedSection title="Help topics">
+      <GroupedSection title={translate("profile:settings.helpTopics")}>
         <ListRow
-          title="Clocking in and out"
-          subtitle="Time tracking, breaks, and corrections"
+          title={translate("profile:settings.helpClocking")}
+          subtitle={translate("profile:settings.helpClockingDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="time-outline" size={18} />}
           onPress={onOpenClockHelp}
         />
         <ListRow
-          title="Schedules and availability"
-          subtitle="Shift updates, requests, and weekly planning"
+          title={translate("profile:settings.helpSchedules")}
+          subtitle={translate("profile:settings.helpSchedulesDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="calendar-outline" size={18} />}
           onPress={onOpenScheduleHelp}
         />
         <ListRow
           isLast
-          title="Documents and payroll"
-          subtitle="Uploads, payslips, and employment records"
+          title={translate("profile:settings.helpDocuments")}
+          subtitle={translate("profile:settings.helpDocumentsDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="document-text-outline" size={18} />}
           onPress={onOpenDocsHelp}
         />
       </GroupedSection>
-      <GroupedSection title="Contact">
+      <GroupedSection title={translate("profile:settings.contact")}>
         <ListRow
-          title="Message Vesta support"
-          subtitle="Average reply within one business day"
+          title={translate("profile:settings.messageSupport")}
+          subtitle={translate("profile:settings.messageSupportDesc")}
           leading={<Ionicons color={tokens.accent} name="chatbubble-ellipses-outline" size={18} />}
           trailing={
-            <Text text="Start" size="xs" weight="semiBold" style={{ color: tokens.accent }} />
+            <Text
+              text={translate("profile:settings.start")}
+              size="xs"
+              weight="semiBold"
+              style={{ color: tokens.accent }}
+            />
           }
           onPress={onOpenSupportComposer}
         />
         <ListRow
           isLast
-          title="Report a problem"
-          subtitle="Send app version and diagnostics"
+          title={translate("profile:settings.reportProblem")}
+          subtitle={translate("profile:settings.reportProblemDesc")}
           leading={<Ionicons color={tokens.textSecondary} name="flag-outline" size={18} />}
           trailing={
-            <Text text="Report" size="xs" weight="semiBold" style={{ color: tokens.accent }} />
+            <Text
+              text={translate("profile:settings.report")}
+              size="xs"
+              weight="semiBold"
+              style={{ color: tokens.accent }}
+            />
           }
           onPress={onReportProblem}
         />
@@ -413,10 +429,10 @@ export function BankingVerificationSection({
   tokens: DesignTokens
 }) {
   return (
-    <GroupedSection title="Verification">
+    <GroupedSection title={translate("profile:settings.verification")}>
       <ListRow
         isLast
-        title="Payroll verification"
+        title={translate("profile:settings.payrollVerification")}
         subtitle={hasIban ? "Ready to submit to employer" : "Add an IBAN to verify"}
         leading={<Ionicons color={tokens.textSecondary} name="checkmark-done-outline" size={18} />}
         trailing={
@@ -438,13 +454,13 @@ export function LegalPrivacyPreviewSection({
   tokens: DesignTokens
 }) {
   return (
-    <GroupedSection title="Privacy preview">
+    <GroupedSection title={translate("profile:settings.privacyPreview")}>
       <ListRow
         isLast
-        title="Masked national number"
+        title={translate("profile:settings.maskedNationalNumber")}
         subtitle={maskedNationalNumber}
         leading={<Ionicons color={tokens.textSecondary} name="shield-outline" size={18} />}
-        trailing={<StatusBadge label="Hidden" tone="accent" />}
+        trailing={<StatusBadge label={translate("profile:settings.hidden")} tone="accent" />}
       />
     </GroupedSection>
   )
