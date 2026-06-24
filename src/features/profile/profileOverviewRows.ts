@@ -2,11 +2,12 @@ import type { ReactNode } from "react"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { AppStoreState } from "@/core/models"
+import { translate } from "@/i18n/translate"
 import type { AppTone } from "@/ui/composites/appTone"
 import { maskIban } from "@/utils/formatters"
 
 import {
-  PROFILE_OVERVIEW_TITLES,
+  PROFILE_OVERVIEW_TITLE_KEYS,
   type ProfileOverviewSection,
   type ProfileRoute,
 } from "./profileSections"
@@ -47,60 +48,60 @@ export function buildProfileOverviewSections({
 }) {
   const employersSummary =
     state.employers.length === 0
-      ? "Link your first workplace"
+      ? translate("profile:overviewRows.linkFirst")
       : state.employers.length === 1
-        ? (state.employers[0]?.name ?? "1 linked")
-        : `${state.employers.length} linked`
-  const contactSummary = state.profile.phone || "Add phone number"
+        ? (state.employers[0]?.name ?? translate("profile:overviewRows.linkedCount", { count: 1 }))
+        : translate("profile:overviewRows.linkedCount", { count: state.employers.length })
+  const contactSummary = state.profile.phone || translate("profile:overviewRows.addPhone")
   const addressSummary =
     state.profile.address.street && state.profile.address.postalCode
       ? `${state.profile.address.city}, ${state.profile.address.country}`
-      : "Add home address"
+      : translate("profile:overviewRows.addAddress")
   const bankSummary =
     maskIban(state.profile.bankAccount.iban) === "Not added"
-      ? "Add payout account"
+      ? translate("profile:overviewRows.addPayout")
       : maskIban(state.profile.bankAccount.iban)
   const legalSummary =
     state.profile.legal.nationalRegisterNumber &&
     state.profile.legal.taxId &&
     state.profile.legal.socialSecurityNumber
       ? state.profile.legal.payrollStatus
-      : "Finish payroll details"
-  const hasContactGap = contactSummary === "Add phone number"
-  const hasAddressGap = addressSummary === "Add home address"
-  const hasBankGap = bankSummary === "Add payout account"
-  const hasLegalGap = legalSummary === "Finish payroll details"
+      : translate("profile:overviewRows.finishPayroll")
+  const hasContactGap = contactSummary === translate("profile:overviewRows.addPhone")
+  const hasAddressGap = addressSummary === translate("profile:overviewRows.addAddress")
+  const hasBankGap = bankSummary === translate("profile:overviewRows.addPayout")
+  const hasLegalGap = legalSummary === translate("profile:overviewRows.finishPayroll")
   const securitySummary = state.profile.security.faceIdEnabled
-    ? `Password + ${state.profile.security.biometricType}`
-    : "Password only"
+    ? translate("profile:overviewRows.passwordPlus", { type: state.profile.security.biometricType })
+    : translate("profile:overviewRows.passwordOnly")
 
   return {
     employment: [
       {
         icon: "business-outline",
-        label: "Workplaces",
+        label: translate("profile:sectionMeta.workplacesLabel"),
         route: "/profile/employers",
         value: employersSummary,
       },
       {
-        badge: hasRequiredDocuments ? "Missing" : undefined,
+        badge: hasRequiredDocuments ? translate("profile:overviewRows.badgeMissing") : undefined,
         badgeTone: hasRequiredDocuments ? "danger" : undefined,
         icon: "shield-checkmark-outline",
-        label: "Legal documents",
+        label: translate("profile:sectionMeta.legalDocumentsTitle"),
         route: "/profile/legal-documents",
         value: legalDocumentsSummary,
       },
       {
-        badge: hasPendingContracts ? "Needed" : undefined,
+        badge: hasPendingContracts ? translate("profile:overviewRows.badgeNeeded") : undefined,
         badgeTone: hasPendingContracts ? "accent" : undefined,
         icon: "document-text-outline",
-        label: "Contracts",
+        label: translate("profile:sectionMeta.contractsTitle"),
         route: "/profile/contracts",
         value: contractSummary,
       },
       {
         icon: "cash-outline",
-        label: "Payslips",
+        label: translate("profile:sectionMeta.payslipsTitle"),
         route: "/profile/payslips",
         value: payslipsSummary,
       },
@@ -108,39 +109,39 @@ export function buildProfileOverviewSections({
     personal: [
       {
         icon: "person-outline",
-        label: "Personal details",
+        label: translate("profile:sectionMeta.personalTitle"),
         route: "/profile/personal",
         value: fullName,
       },
       {
-        badge: hasContactGap ? "Needed" : undefined,
+        badge: hasContactGap ? translate("profile:overviewRows.badgeNeeded") : undefined,
         badgeTone: hasContactGap ? "accent" : undefined,
         icon: "mail-outline",
-        label: "Contact details",
+        label: translate("profile:sectionMeta.contactTitle"),
         route: "/profile/contact",
         value: contactSummary,
       },
       {
-        badge: hasAddressGap ? "Needed" : undefined,
+        badge: hasAddressGap ? translate("profile:overviewRows.badgeNeeded") : undefined,
         badgeTone: hasAddressGap ? "accent" : undefined,
         icon: "location-outline",
-        label: "Address",
+        label: translate("profile:sectionMeta.addressTitle"),
         route: "/profile/address",
         value: addressSummary,
       },
       {
-        badge: hasBankGap ? "Needed" : undefined,
+        badge: hasBankGap ? translate("profile:overviewRows.badgeNeeded") : undefined,
         badgeTone: hasBankGap ? "accent" : undefined,
         icon: "card-outline",
-        label: "Bank details",
+        label: translate("profile:sectionMeta.bankingTitle"),
         route: "/profile/banking",
         value: bankSummary,
       },
       {
-        badge: hasLegalGap ? "Needed" : undefined,
+        badge: hasLegalGap ? translate("profile:overviewRows.badgeNeeded") : undefined,
         badgeTone: hasLegalGap ? "accent" : undefined,
         icon: "document-text-outline",
-        label: "Legal information",
+        label: translate("profile:sectionMeta.legalTitle"),
         route: "/profile/legal",
         value: legalSummary,
       },
@@ -148,46 +149,49 @@ export function buildProfileOverviewSections({
     settings: [
       {
         icon: themeContext === "dark" ? "moon-outline" : "sunny-outline",
-        label: "Appearance",
+        label: translate("profile:sectionMeta.appearanceTitle"),
         route: "/profile/appearance",
-        value: themeContext === "dark" ? "Dark" : "Light",
+        value:
+          themeContext === "dark"
+            ? translate("profile:overviewRows.dark")
+            : translate("profile:overviewRows.light"),
       },
       {
         icon: "notifications-outline",
-        label: "Notifications",
+        label: translate("profile:sectionMeta.preferencesTitle"),
         route: "/profile/preferences",
-        value: `${notificationCount} enabled`,
+        value: translate("profile:overviewRows.enabledCount", { count: notificationCount }),
       },
       {
         icon: "globe-outline",
-        label: "Language",
+        label: translate("profile:sectionMeta.languageTitle"),
         route: "/profile/language",
         value: state.profile.language,
       },
       {
         icon: "shield-checkmark-outline",
-        label: "Security",
+        label: translate("profile:sectionMeta.securityTitle"),
         route: "/profile/security",
         value: securitySummary,
       },
       {
         icon: "lock-closed-outline",
-        label: "Privacy",
+        label: translate("profile:sectionMeta.privacyTitle"),
         route: "/profile/privacy",
-        value: "App diagnostics & sharing",
+        value: translate("profile:sectionMeta.privacyValue"),
       },
     ],
     support: [
       {
         icon: "help-circle-outline",
-        label: "Help & support",
+        label: translate("profile:sectionMeta.supportTitle"),
         route: "/profile/support",
-        value: "Get help or contact Vesta",
+        value: translate("profile:sectionMeta.supportValue"),
       },
     ],
   } satisfies Record<ProfileOverviewSection, ProfileOverviewRow[]>
 }
 
 export const PROFILE_OVERVIEW_ORDER = Object.keys(
-  PROFILE_OVERVIEW_TITLES,
+  PROFILE_OVERVIEW_TITLE_KEYS,
 ) as ProfileOverviewSection[]

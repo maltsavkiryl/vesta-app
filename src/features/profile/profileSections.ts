@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons"
 
-import type { AppLocale } from "@/i18n"
+import type { AppLocale, TxKeyPath } from "@/i18n"
+import { translate } from "@/i18n/translate"
 
 export type ProfileOverviewSection = "personal" | "employment" | "settings" | "support"
 export type ProfileRoute =
@@ -47,108 +48,133 @@ export interface LanguageOption {
   value: AppLocale
 }
 
+// Language labels are endonyms (the language's own name) — intentionally not translated.
 export const LANGUAGE_OPTIONS: readonly LanguageOption[] = [
   { label: "Nederlands", value: "nl" },
   { label: "Français", value: "fr" },
   { label: "English", value: "en" },
 ]
 
-export const PROFILE_OVERVIEW_TITLES: Record<ProfileOverviewSection, string> = {
-  employment: "Work",
-  personal: "Profile",
-  settings: "Preferences",
-  support: "Help",
+// Overview-section titles, keyed for i18n. Values are translation keys; resolve
+// with `getProfileOverviewTitles()` / `translate()` so locale is read at render.
+export const PROFILE_OVERVIEW_TITLE_KEYS: Record<ProfileOverviewSection, TxKeyPath> = {
+  employment: "profile:overviewTitles.employment",
+  personal: "profile:overviewTitles.personal",
+  settings: "profile:overviewTitles.settings",
+  support: "profile:overviewTitles.support",
 }
 
-export const PROFILE_SECTION_META: Record<
-  SectionKey,
-  {
-    icon: keyof typeof Ionicons.glyphMap
-    title: string
-    subtitle?: string
+export function getProfileOverviewTitles(): Record<ProfileOverviewSection, string> {
+  return {
+    employment: translate(PROFILE_OVERVIEW_TITLE_KEYS.employment),
+    personal: translate(PROFILE_OVERVIEW_TITLE_KEYS.personal),
+    settings: translate(PROFILE_OVERVIEW_TITLE_KEYS.settings),
+    support: translate(PROFILE_OVERVIEW_TITLE_KEYS.support),
   }
-> = {
+}
+
+interface ProfileSectionMeta {
+  icon: keyof typeof Ionicons.glyphMap
+  titleKey: TxKeyPath
+  subtitleKey?: TxKeyPath
+}
+
+export const PROFILE_SECTION_META: Record<SectionKey, ProfileSectionMeta> = {
   "address": {
     icon: "location-outline",
-    subtitle: "The address used for official employment and payroll correspondence.",
-    title: "Address",
+    subtitleKey: "profile:sectionMeta.addressSubtitle",
+    titleKey: "profile:sectionMeta.addressTitle",
   },
   "appearance": {
     icon: "color-palette-outline",
-    subtitle: "Choose how Vesta should appear on this device.",
-    title: "Appearance",
+    subtitleKey: "profile:sectionMeta.appearanceSubtitle",
+    titleKey: "profile:sectionMeta.appearanceTitle",
   },
   "banking": {
     icon: "card-outline",
-    subtitle: "Payroll account and reimbursement details.",
-    title: "Bank details",
+    subtitleKey: "profile:sectionMeta.bankingSubtitle",
+    titleKey: "profile:sectionMeta.bankingTitle",
   },
   "contact": {
     icon: "call-outline",
-    subtitle: "How employers can reach you for urgent shift and payroll updates.",
-    title: "Contact details",
+    subtitleKey: "profile:sectionMeta.contactSubtitle",
+    titleKey: "profile:sectionMeta.contactTitle",
   },
   "contracts": {
     icon: "document-text-outline",
-    title: "Contracts",
+    titleKey: "profile:sectionMeta.contractsTitle",
   },
   "employers": {
     icon: "briefcase-outline",
-    subtitle: "Restaurants and workplaces linked to your Vesta profile.",
-    title: "Employers",
+    subtitleKey: "profile:sectionMeta.employersSubtitle",
+    titleKey: "profile:sectionMeta.employersTitle",
   },
   "legal-documents": {
     icon: "shield-checkmark-outline",
-    title: "Legal documents",
+    titleKey: "profile:sectionMeta.legalDocumentsTitle",
   },
   "join-employer": {
     icon: "add-circle-outline",
-    title: "Add workplace",
+    titleKey: "profile:sectionMeta.joinEmployerTitle",
   },
   "language": {
     icon: "globe-outline",
-    subtitle: "Choose the language used throughout the app.",
-    title: "Language",
+    subtitleKey: "profile:sectionMeta.languageSubtitle",
+    titleKey: "profile:sectionMeta.languageTitle",
   },
   "legal": {
     icon: "shield-checkmark-outline",
-    subtitle: "Private identity details required for compliant employment.",
-    title: "Legal information",
+    subtitleKey: "profile:sectionMeta.legalSubtitle",
+    titleKey: "profile:sectionMeta.legalTitle",
   },
   "personal": {
     icon: "person-outline",
-    subtitle: "Names, profile basics, and employee identity.",
-    title: "Personal details",
+    subtitleKey: "profile:sectionMeta.personalSubtitle",
+    titleKey: "profile:sectionMeta.personalTitle",
   },
   "payslips": {
     icon: "cash-outline",
-    title: "Payslips",
+    titleKey: "profile:sectionMeta.payslipsTitle",
   },
   "preferences": {
     icon: "notifications-outline",
-    subtitle: "Choose how Vesta should notify you.",
-    title: "Notifications",
+    subtitleKey: "profile:sectionMeta.preferencesSubtitle",
+    titleKey: "profile:sectionMeta.preferencesTitle",
   },
   "privacy": {
     icon: "lock-closed-outline",
-    subtitle: "Control app analytics, diagnostics, and employer data sharing.",
-    title: "Privacy",
+    subtitleKey: "profile:sectionMeta.privacySubtitle",
+    titleKey: "profile:sectionMeta.privacyTitle",
   },
   "security": {
     icon: "shield-checkmark-outline",
-    subtitle: "Manage your password and device unlock settings.",
-    title: "Security",
+    subtitleKey: "profile:sectionMeta.securitySubtitle",
+    titleKey: "profile:sectionMeta.securityTitle",
   },
   "change-password": {
     icon: "key-outline",
-    subtitle: "Update the password used to sign in on this device.",
-    title: "Change password",
+    subtitleKey: "profile:sectionMeta.changePasswordSubtitle",
+    titleKey: "profile:sectionMeta.changePasswordTitle",
   },
   "support": {
     icon: "help-circle-outline",
-    subtitle: "Find answers or contact Vesta support.",
-    title: "Help & support",
+    subtitleKey: "profile:sectionMeta.supportSubtitle",
+    titleKey: "profile:sectionMeta.supportTitle",
   },
+}
+
+/** Resolves a section's translated icon/title/subtitle at call time. */
+export function getProfileSectionMeta(section: SectionKey): {
+  icon: keyof typeof Ionicons.glyphMap
+  title: string
+  subtitle?: string
+} {
+  const meta = PROFILE_SECTION_META[section]
+  return {
+    icon: meta.icon,
+    title: translate(meta.titleKey),
+    subtitle: meta.subtitleKey ? translate(meta.subtitleKey) : undefined,
+  }
 }
 
 const EDITABLE_PROFILE_SECTIONS: SectionKey[] = [

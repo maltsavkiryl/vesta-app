@@ -14,7 +14,7 @@ import { fireHaptic } from "@/utils/haptics"
 
 import { PROFILE_OVERVIEW_ORDER, buildProfileOverviewSections } from "./profileOverviewRows"
 import { selectProfilePhoto } from "./profilePhotoUploadFlow"
-import { PROFILE_OVERVIEW_TITLES } from "./profileSections"
+import { getProfileOverviewTitles } from "./profileSections"
 import { getProfileSetupStatus } from "./profileSetupStatus"
 
 function getInitials(firstName: string, lastName: string) {
@@ -118,7 +118,7 @@ export function useProfileOverview() {
       themeContext,
     }),
     sectionOrder: PROFILE_OVERVIEW_ORDER,
-    sectionTitles: PROFILE_OVERVIEW_TITLES,
+    sectionTitles: getProfileOverviewTitles(),
     signOutRow: {
       destructive: true,
       icon: "log-out-outline" as const,

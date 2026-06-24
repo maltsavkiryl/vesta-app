@@ -6,8 +6,9 @@ import {
   isDetailSectionEditable,
 } from "@/features/profile/ProfileDetailContent"
 import { SectionFooter } from "@/features/profile/ProfileDetailSections"
-import { PROFILE_SECTION_META, getProfileSection } from "@/features/profile/profileSections"
+import { getProfileSection, getProfileSectionMeta } from "@/features/profile/profileSections"
 import { useProfileDetailScreen } from "@/features/profile/useProfileDetailScreen"
+import { translate } from "@/i18n/translate"
 import { AppScrollScreen, createHeaderActionOptions } from "@/ui"
 
 export function ProfileDetailScreen() {
@@ -41,11 +42,13 @@ export function ProfileDetailScreen() {
           disabled: !currentSectionIsDirty,
           kind: "confirm",
           haptic: "none",
-          label: "Save",
+          label: translate("common:actions.save"),
           onPress: screen.saveCurrentSection,
         }
       : undefined,
   })
+
+  const sectionMeta = getProfileSectionMeta(section)
 
   return (
     <AppScrollScreen variant="grouped" contentContainerStyle={styles.screen}>
@@ -53,12 +56,10 @@ export function ProfileDetailScreen() {
         options={{
           headerBackVisible: false,
           ...headerActions,
-          title: PROFILE_SECTION_META[section].title,
+          title: sectionMeta.title,
         }}
       />
-      {PROFILE_SECTION_META[section].subtitle ? (
-        <SectionFooter text={PROFILE_SECTION_META[section].subtitle} />
-      ) : null}
+      {sectionMeta.subtitle ? <SectionFooter text={sectionMeta.subtitle} /> : null}
       {renderProfileDetailSection(section, screen)}
     </AppScrollScreen>
   )

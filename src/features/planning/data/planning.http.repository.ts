@@ -29,6 +29,7 @@ import type {
   ScheduleOverview,
   CreateRequestInput,
 } from "@/features/schedule/data/schedule.repository"
+import { translate } from "@/i18n/translate"
 import type { HttpClient } from "@/services/api/httpClient"
 import { failure, success, type Result } from "@/shared/result"
 
@@ -74,12 +75,12 @@ function toPlanningError(
   status: number | null | undefined,
   fallbackMessage: string,
 ): PlanningError {
-  if (status === 403) return { type: "forbidden", message: "Access denied." }
-  if (status === 404) return { type: "not-found", message: "Resource not found." }
-  if (status === 409)
-    return { type: "conflict", message: "This action conflicts with an existing state." }
+  if (status === 403)
+    return { type: "forbidden", message: translate("planning:errors.accessDenied") }
+  if (status === 404) return { type: "not-found", message: translate("planning:errors.notFound") }
+  if (status === 409) return { type: "conflict", message: translate("planning:errors.conflict") }
   if (status === 422)
-    return { type: "already-claimed", message: "This call has already been claimed." }
+    return { type: "already-claimed", message: translate("planning:errors.alreadyClaimed") }
   if (status === 400) return { type: "validation", message: fallbackMessage }
   return { type: "validation", message: fallbackMessage }
 }
@@ -131,7 +132,10 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     const overrides = { ...current.overrides, [day.date]: day }
     const result = await saveMyAvailability(current.template, Object.values(overrides))
     if (!result.ok) {
-      return failure<ScheduleError>({ type: "validation", message: "Could not save availability." })
+      return failure<ScheduleError>({
+        type: "validation",
+        message: translate("planning:errors.saveAvailabilityFailed"),
+      })
     }
     return success(day)
   }
@@ -143,7 +147,10 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     const current = await getMyAvailability()
     const result = await saveMyAvailability(template, Object.values(current.overrides))
     if (!result.ok) {
-      return failure<ScheduleError>({ type: "validation", message: "Could not save availability." })
+      return failure<ScheduleError>({
+        type: "validation",
+        message: translate("planning:errors.saveAvailabilityFailed"),
+      })
     }
     return success(template)
   }
@@ -156,7 +163,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     // use the dedicated planning flows, time-off is expressed via availability.
     return failure<ScheduleError>({
       type: "validation",
-      message: "Use the planning tools to request a swap, change or time off.",
+      message: translate("planning:errors.usePlanningTools"),
     })
   }
 
@@ -168,7 +175,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     // the transformer), so this path is unreachable for server-backed shifts.
     return failure<ScheduleError>({
       type: "not-found",
-      message: "This shift doesn't need a response.",
+      message: translate("planning:errors.noResponseNeeded"),
     })
   }
 
@@ -178,7 +185,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   ): Promise<Result<PlanningWindow, ScheduleError>> {
     return failure<ScheduleError>({
       type: "not-found",
-      message: "Planning windows are managed from the availability screen.",
+      message: translate("planning:errors.windowsFromAvailability"),
     })
   }
 
@@ -221,7 +228,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
     }
     const res = await httpClient.put<void>("/employee/planning/availability", body)
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not save availability."))
+    return failure(toPlanningError(res.status, translate("planning:errors.saveAvailabilityFailed")))
   }
 
   // ---------------------------------------------------------------------------
@@ -237,13 +244,13 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
   async function completeTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>> {
     const res = await httpClient.post<void>(`/employee/planning/todos/${input.todoCode}/complete`)
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not complete todo."))
+    return failure(toPlanningError(res.status, translate("planning:errors.completeTodoFailed")))
   }
 
   async function uncompleteTodo(input: CompleteTodoInput): Promise<Result<void, PlanningError>> {
     const res = await httpClient.post<void>(`/employee/planning/todos/${input.todoCode}/uncomplete`)
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not uncomplete todo."))
+    return failure(toPlanningError(res.status, translate("planning:errors.uncompleteTodoFailed")))
   }
 
   // ---------------------------------------------------------------------------
@@ -280,7 +287,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
       `/employers/${employerCode}/establishments/${establishmentCode}/calls/${callCode}/claim`,
     )
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not claim this call."))
+    return failure(toPlanningError(res.status, translate("planning:errors.claimFailed")))
   }
 
   // ---------------------------------------------------------------------------
@@ -306,7 +313,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
       note: params.input.note ?? null,
     })
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not create shift swap request."))
+    return failure(toPlanningError(res.status, translate("planning:errors.swapCreateFailed")))
   }
 
   async function decideShiftSwap(
@@ -317,13 +324,13 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
       { accept: params.accept, note: params.note ?? null },
     )
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not decide shift swap."))
+    return failure(toPlanningError(res.status, translate("planning:errors.swapDecideFailed")))
   }
 
   async function cancelShiftSwap(swapCode: string): Promise<Result<void, PlanningError>> {
     const res = await httpClient.post<void>(`/employee/planning/shift-swaps/${swapCode}/cancel`)
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not cancel shift swap."))
+    return failure(toPlanningError(res.status, translate("planning:errors.swapCancelFailed")))
   }
 
   // ---------------------------------------------------------------------------
@@ -341,7 +348,7 @@ export function createPlanningHttpRepository(httpClient: HttpClient): PlanningRe
       note: params.input.note ?? null,
     })
     if (res.ok) return success(undefined)
-    return failure(toPlanningError(res.status, "Could not create shift change request."))
+    return failure(toPlanningError(res.status, translate("planning:errors.changeCreateFailed")))
   }
 
   // ---------------------------------------------------------------------------
