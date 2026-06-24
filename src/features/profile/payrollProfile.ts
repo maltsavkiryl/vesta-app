@@ -1,4 +1,5 @@
 import type { UserProfile } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 /**
  * A single missing payroll-profile requirement, surfaced to the employee as a
@@ -25,22 +26,22 @@ export function getPayrollProfileGaps(profile: UserProfile): PayrollProfileGap[]
   const gaps: PayrollProfileGap[] = []
 
   if (!hasValue(profile.firstName)) {
-    gaps.push({ key: "firstName", label: "First name" })
+    gaps.push({ key: "firstName", label: translate("profile:payrollGaps.firstName") })
   }
   if (!hasValue(profile.lastName)) {
-    gaps.push({ key: "lastName", label: "Last name" })
+    gaps.push({ key: "lastName", label: translate("profile:payrollGaps.lastName") })
   }
   if (!hasValue(profile.email)) {
-    gaps.push({ key: "email", label: "Email address" })
+    gaps.push({ key: "email", label: translate("profile:payrollGaps.email") })
   }
   if (!hasValue(profile.phone)) {
-    gaps.push({ key: "phone", label: "Phone number" })
+    gaps.push({ key: "phone", label: translate("profile:payrollGaps.phone") })
   }
   if (!hasValue(profile.bankAccount.iban)) {
-    gaps.push({ key: "iban", label: "Bank account (IBAN)" })
+    gaps.push({ key: "iban", label: translate("profile:payrollGaps.iban") })
   }
   if (!hasValue(profile.legal.socialSecurityNumber)) {
-    gaps.push({ key: "ssin", label: "National number (SSIN)" })
+    gaps.push({ key: "ssin", label: translate("profile:payrollGaps.ssin") })
   }
 
   const addressComplete =
@@ -49,7 +50,7 @@ export function getPayrollProfileGaps(profile: UserProfile): PayrollProfileGap[]
     hasValue(profile.address.city) &&
     hasValue(profile.address.country)
   if (!addressComplete) {
-    gaps.push({ key: "address", label: "Home address" })
+    gaps.push({ key: "address", label: translate("profile:payrollGaps.address") })
   }
 
   return gaps

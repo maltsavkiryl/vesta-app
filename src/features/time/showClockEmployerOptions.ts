@@ -28,7 +28,7 @@ export async function showClockEmployerOptions({
         {
           onPress: () => resolve(null),
           style: "cancel" as const,
-          text: "Cancel",
+          text: translate("common:actions.cancel"),
         },
       ],
       { cancelable: true, onDismiss: () => resolve(null) },

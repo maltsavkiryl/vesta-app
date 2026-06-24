@@ -32,7 +32,7 @@ export function ContractDetailScreen() {
             disabled: !canSign,
             kind: "confirm",
             haptic: "none",
-            label: "Sign",
+            label: translate("documents:sign"),
             onPress: signCurrentContract,
           }
         : undefined,

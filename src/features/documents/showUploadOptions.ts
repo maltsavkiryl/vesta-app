@@ -16,6 +16,6 @@ export function showNativeUploadOptions({
   Alert.alert(title, translate("documents:uploadSourcePrompt"), [
     { text: translate("documents:takePhoto"), onPress: () => onSelect("camera") },
     { text: translate("documents:browseFiles"), onPress: () => onSelect("files") },
-    { style: "cancel", text: "Cancel", onPress: onCancel },
+    { style: "cancel", text: translate("common:actions.cancel"), onPress: onCancel },
   ])
 }
