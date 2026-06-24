@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Alert } from "react-native"
 import { useRouter } from "expo-router"
 
@@ -20,13 +20,28 @@ export function useOnboardingScreen() {
 
   // Seed the form from the loaded profile (empty for a brand-new employee).
   const profile = accountState?.profile ?? createInitialState().profile
-  const initialForm = useMemo(() => createProfileFormState(profile), [profile])
+  const initialForm = createProfileFormState(profile)
 
   const [step, setStep] = useState(0)
   const [personalState, setPersonalState] = useState(initialForm.personalState)
   const [contactState, setContactState] = useState(initialForm.contactState)
   const [bankState, setBankState] = useState(initialForm.bankState)
   const [legalState, setLegalState] = useState(initialForm.legalState)
+
+  // Onboarding opens right after login, so the profile query may still be in
+  // flight when this mounts — useState would then keep the fallback values even
+  // after the real profile lands. Re-seed exactly once, when the profile first
+  // arrives and before the employee has had a chance to edit anything.
+  const seededRef = useRef(Boolean(accountState?.profile))
+  useEffect(() => {
+    if (seededRef.current || !accountState?.profile) return
+    const form = createProfileFormState(accountState.profile)
+    setPersonalState(form.personalState)
+    setContactState(form.contactState)
+    setBankState(form.bankState)
+    setLegalState(form.legalState)
+    seededRef.current = true
+  }, [accountState?.profile])
   // Guards the final "complete onboarding" punch against double-taps while the
   // save + completion mutations are in flight.
   const [isCompleting, setIsCompleting] = useState(false)
