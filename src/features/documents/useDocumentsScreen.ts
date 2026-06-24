@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 
 import { useDocumentActions } from "@/features/documents/data/documents.mutations"
 import { useDocumentsStateQuery } from "@/features/documents/data/documents.queries"
+import { translate } from "@/i18n/translate"
 
 import { payslips } from "./documents.data"
 import { isRequiredDocument, matchesQuery } from "./documents.utils"
@@ -34,7 +35,7 @@ export function useDocumentsScreen() {
   )
 
   const openUploadOptions = (
-    target: { id?: string; title: string } = { title: "Uploaded document" },
+    target: { id?: string; title: string } = { title: translate("documents:uploadedDocument") },
   ) => showDocumentUploadOptions({ target, uploadDocument })
 
   const cancelSearch = () => {
