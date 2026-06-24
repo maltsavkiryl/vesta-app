@@ -5,6 +5,7 @@
  * or moved shifts never leave a stale reminder behind. No-ops without permission
  * (the push flow owns the permission prompt) and never throws.
  */
+import { Platform } from "react-native"
 import * as Notifications from "expo-notifications"
 
 import type { Shift } from "@/core/models"
@@ -36,6 +37,8 @@ async function cancelTrackedReminders() {
 }
 
 export async function syncShiftReminders(shifts: Shift[]): Promise<void> {
+  // Local notification scheduling isn't available on web; skip rather than throw.
+  if (Platform.OS === "web") return
   try {
     const { status } = await Notifications.getPermissionsAsync()
     if (status !== "granted") return
