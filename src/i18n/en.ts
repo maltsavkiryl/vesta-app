@@ -60,6 +60,7 @@ const en = {
     },
     markAllRead: "Mark all read",
     title: "Notifications",
+    bellA11yUnread: "Notifications, you have unread items",
     inbox: "Inbox",
     dismissNotification: "Dismiss notification",
     unread: "{{count}} unread",

@@ -62,6 +62,7 @@ const fr: Translations = {
     },
     markAllRead: "Tout marquer comme lu",
     title: "Notifications",
+    bellA11yUnread: "Notifications, vous avez des éléments non lus",
     inbox: "Boîte de réception",
     dismissNotification: "Ignorer la notification",
     unread: "{{count}} non lues",

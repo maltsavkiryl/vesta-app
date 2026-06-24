@@ -104,6 +104,7 @@ export function ActiveCardActions({
     <View style={styles.actionSection}>
       {isOnBreak ? (
         <Pressable
+          accessibilityRole="button"
           onPress={(event) => {
             event.stopPropagation()
             onEndBreak()
@@ -124,6 +125,7 @@ export function ActiveCardActions({
       ) : (
         <View style={styles.actionGrid}>
           <Pressable
+            accessibilityRole="button"
             onPress={(event) => {
               event.stopPropagation()
               onStartBreak()
@@ -145,6 +147,7 @@ export function ActiveCardActions({
             />
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={(event) => {
               event.stopPropagation()
               onClockOut()
