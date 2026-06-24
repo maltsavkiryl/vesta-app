@@ -174,7 +174,11 @@ export function CollapseToggle({
 
   return (
     <Pressable
-      accessibilityLabel={collapsed ? "Expand time card" : "Collapse time card"}
+      accessibilityLabel={
+        collapsed
+          ? translate("time:activeCard.expandCard")
+          : translate("time:activeCard.collapseCard")
+      }
       accessibilityRole="button"
       onPress={(event) => {
         event.stopPropagation()

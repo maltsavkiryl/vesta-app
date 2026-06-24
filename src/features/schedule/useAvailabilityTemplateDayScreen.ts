@@ -17,6 +17,7 @@ import {
 } from "@/features/schedule/availability.utils"
 import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
+import { translate } from "@/i18n/translate"
 import { createHeaderActionOptions, useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -137,7 +138,10 @@ export function useAvailabilityTemplateDayScreen() {
             day,
             field,
             returnTo: "availability-template-day",
-            title: field === "startTime" ? "Choose start time" : "Choose end time",
+            title:
+              field === "startTime"
+                ? translate("planning:availability.chooseStartTime")
+                : translate("planning:availability.chooseEndTime"),
             value: field === "startTime" ? editedRule.startTime : editedRule.endTime,
           },
           pathname: "/(app)/availability-time-picker",

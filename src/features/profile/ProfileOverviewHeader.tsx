@@ -1,6 +1,7 @@
 import { Image, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
+import { translate } from "@/i18n/translate"
 import { Text, useDesignTokens } from "@/ui"
 
 function ProfileAvatar({ avatarUri, initials }: { avatarUri?: string; initials: string }) {
@@ -46,7 +47,9 @@ export function ProfileOverviewHeader({
     <View style={styles.profileHeader}>
       <Pressable
         accessibilityHint="Opens profile photo options"
-        accessibilityLabel={avatarUri ? "Change profile photo" : "Add profile photo"}
+        accessibilityLabel={
+          avatarUri ? translate("profile:photo.change") : translate("profile:photo.add")
+        }
         accessibilityRole="button"
         hitSlop={12}
         onPress={onAvatarPress}

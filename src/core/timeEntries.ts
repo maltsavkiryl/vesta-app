@@ -1,5 +1,7 @@
 import { format } from "date-fns/format"
 
+import { translate } from "@/i18n/translate"
+
 import { formatTimeValue, parseDateValue } from "./date"
 import { formatDurationLabel } from "./date"
 import type {
@@ -70,7 +72,10 @@ export function buildTimeEntryFromClockSession({
     employerId: clockSession.employerId,
     shiftId: clockSession.shiftId,
     date: format(new Date(startedAt), "yyyy-MM-dd"),
-    shiftLabel: clockSession.source === "shift" ? "Clocked shift" : "Manual timer",
+    shiftLabel:
+      clockSession.source === "shift"
+        ? translate("time:clockedShift")
+        : translate("time:manualTimer"),
     venueName: clockSession.venueName,
     venueAddress: clockSession.venueAddress,
     clockInAt: clockSession.startedAt ?? clockOutAt,

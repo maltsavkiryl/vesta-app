@@ -1,5 +1,6 @@
 import { createInitialState } from "@/core/mockState"
 import type { AppStoreState, ClockSession, Employer, Shift, TimeEntry } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 import { normalizeEmail, withStateAuthStatus } from "./app-state.reducer"
 import type {
@@ -146,7 +147,9 @@ function normalizeTimeEntry(entry: TimeEntry, employers: Employer[], shifts: Shi
     scheduledStart:
       source === "shift" ? (entry.scheduledStart ?? matchedShift?.startTime) : undefined,
     shiftId: source === "shift" ? (entry.shiftId ?? matchedShift?.id) : undefined,
-    shiftLabel: entry.shiftLabel || (source === "shift" ? "Clocked shift" : "Manual timer"),
+    shiftLabel:
+      entry.shiftLabel ||
+      (source === "shift" ? translate("time:clockedShift") : translate("time:manualTimer")),
     source,
     venueAddress: entry.venueAddress ?? matchedShift?.venueAddress ?? entry.venueName,
     venueName: entry.venueName ?? matchedShift?.venueName ?? "Unknown workplace",

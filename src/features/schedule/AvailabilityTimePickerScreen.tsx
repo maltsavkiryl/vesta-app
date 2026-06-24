@@ -10,6 +10,7 @@ import {
   timeValueToDate,
   type AvailabilityTimeField,
 } from "@/features/schedule/availability.utils"
+import { translate } from "@/i18n/translate"
 import { createHeaderActionOptions, useAppTheme, useDesignTokens } from "@/ui"
 
 type AvailabilityTimeReturnTarget =
@@ -125,7 +126,11 @@ export function AvailabilityTimePickerScreen() {
       <Stack.Screen
         options={{
           headerBackVisible: false,
-          title: title ?? (field === "startTime" ? "Choose start time" : "Choose end time"),
+          title:
+            title ??
+            (field === "startTime"
+              ? translate("planning:availability.chooseStartTime")
+              : translate("planning:availability.chooseEndTime")),
           ...headerActions,
         }}
       />
