@@ -22,7 +22,7 @@ export function PlanningLeaveBalanceCard({ entitlement }: { entitlement: LeaveEn
       ? [
           {
             label: translate("planning:leave.hoursLabel"),
-            value: `${entitlement.entitlementHours}u`,
+            value: `${entitlement.entitlementHours}${translate("planning:leave.hoursUnit")}`,
           },
         ]
       : []),
@@ -35,7 +35,7 @@ export function PlanningLeaveBalanceCard({ entitlement }: { entitlement: LeaveEn
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={translate("planning:leave.currentYear", { year: String(year) }).toUpperCase()}
+          text={translate("planning:leave.currentYear", { year: String(year) }).toLocaleUpperCase()}
           weight="semiBold"
         />
         <View style={[styles.leafIconContainer, { backgroundColor: tokens.accentMuted }]}>

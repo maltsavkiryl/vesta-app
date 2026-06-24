@@ -65,13 +65,13 @@ export function PlanningTodosSkeleton() {
 
 export function PlanningTodoItem({
   index = 0,
-  isCompleting,
+  isDisabled,
   onComplete,
   onUncomplete,
   todo,
 }: {
   index?: number
-  isCompleting: boolean
+  isDisabled: boolean
   onComplete: (id: string) => void
   onUncomplete: (id: string) => void
   todo: PlanningTodo
@@ -87,7 +87,6 @@ export function PlanningTodoItem({
       fireHaptic("selection")
     } else {
       onComplete(todo.id)
-      // Signature moment: haptic + spring pulse on check-off
       fireHaptic("success")
       triggerPulse()
     }
@@ -97,9 +96,9 @@ export function PlanningTodoItem({
     <Animated.View style={entranceStyle}>
       <Pressable
         accessibilityRole="checkbox"
-        accessibilityState={{ checked: done }}
+        accessibilityState={{ checked: done, disabled: isDisabled }}
         accessibilityLabel={todo.label}
-        disabled={isCompleting}
+        disabled={isDisabled}
         onPress={handlePress}
         style={({ pressed }) => [styles.todoRow, { opacity: pressed ? 0.8 : 1 }]}
       >
@@ -138,13 +137,15 @@ export function PlanningTodoItem({
 // ─── Section ──────────────────────────────────────────────────────────────────
 
 export function PlanningTodosSection({
-  isCompleting,
+  completingIds,
+  uncompletingIds,
   onComplete,
   onUncomplete,
   title,
   todos,
 }: {
-  isCompleting: boolean
+  completingIds: Set<string>
+  uncompletingIds: Set<string>
   onComplete: (id: string) => void
   onUncomplete: (id: string) => void
   title: string
@@ -159,7 +160,7 @@ export function PlanningTodosSection({
           <PlanningTodoItem
             key={todo.id}
             index={i}
-            isCompleting={isCompleting}
+            isDisabled={completingIds.has(todo.id) || uncompletingIds.has(todo.id)}
             onComplete={onComplete}
             onUncomplete={onUncomplete}
             todo={todo}

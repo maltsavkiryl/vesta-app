@@ -7,6 +7,7 @@ const en = {
       close: "Close",
       done: "Done",
       ok: "OK",
+      openSettings: "Open Settings",
       retry: "Retry",
       save: "Save",
       search: "Search",
@@ -243,6 +244,9 @@ const en = {
       alreadyClaimed: "This shift was already claimed",
       forbidden: "You're not eligible for this shift",
       conflict: "This call conflicts with your current schedule.",
+      modeOpenCall: "Open",
+      modeUrgent: "Urgent",
+      modeFillIn: "Fill-in",
     },
     todos: {
       title: "Today's Tasks",
@@ -338,6 +342,7 @@ const en = {
       employer: "Employer",
       total: "Total",
       hoursLabel: "Hours",
+      hoursUnit: "h",
     },
   },
   auth: {
@@ -552,6 +557,7 @@ const en = {
       viewAll: "View all",
       empty: "No upcoming shifts",
       emptySubtitle: "Your next assigned shifts will appear here as soon as planning is published.",
+      railA11y: "Upcoming shifts, scroll horizontally",
     },
     tasks: {
       title: "Tasks",
@@ -684,6 +690,8 @@ const en = {
     capture: {
       locationNotShared: "Location not shared",
       savedWithoutMap: "The entry will still be saved without a map snapshot.",
+      locationPermissionDeniedBody:
+        "Location access has been denied. Open Settings to allow Vesta to use your location.",
       locationUnavailable: "Location unavailable",
       locationFailed: "We couldn't capture your location for this event.",
       cameraNeeded: "Camera access needed",
@@ -1036,6 +1044,7 @@ const en = {
     signatureDisclaimer:
       "By signing, you confirm you have read and agree to all terms of this document.",
     downloadAction: "Download",
+    downloadPayslipA11y: "Download payslip PDF",
     signContract: "Sign contract",
     shareFile: "Share file",
     uploadDetails: "Upload details",
@@ -1044,6 +1053,8 @@ const en = {
     uploaded: "Uploaded",
     fileName: "File name",
     format: "Format",
+    unknown: "Unknown",
+    unknownFormat: "Unknown",
     loadError: "Couldn't load documents",
     loadErrorSubtitle: "Check your connection and try again.",
     searchPlaceholder: "Search documents...",

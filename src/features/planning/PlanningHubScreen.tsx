@@ -9,7 +9,7 @@
  * existing /(app)/availability/* stack screens.
  */
 import { useState } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -47,9 +47,22 @@ export function PlanningHubScreen() {
   const tokens = useDesignTokens()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<PlanningTab>("shifts")
+  // Track which tabs have ever been visited so we only mount them once first accessed.
+  // "shifts" is the default, so it's pre-mounted.
+  const [mountedTabs, setMountedTabs] = useState<Set<PlanningTab>>(new Set(["shifts"]))
   const { state: openCalls } = usePlanningCallsQuery()
   const openShiftCount = openCalls?.length ?? 0
   const { isSyncing, syncToCalendar } = useCalendarSync()
+
+  const handleTabChange = (tab: PlanningTab) => {
+    setActiveTab(tab)
+    setMountedTabs((prev) => {
+      if (prev.has(tab)) return prev
+      const next = new Set(prev)
+      next.add(tab)
+      return next
+    })
+  }
 
   const handleOpenAvailabilityTemplate = () => {
     router.push("/(app)/availability-template" as never)
@@ -78,6 +91,7 @@ export function PlanningHubScreen() {
             <Pressable
               accessibilityLabel={translate("planning:addToCalendarA11y")}
               accessibilityRole="button"
+              accessibilityState={{ busy: isSyncing }}
               disabled={isSyncing}
               onPress={() => {
                 void syncToCalendar()
@@ -90,7 +104,11 @@ export function PlanningHubScreen() {
                 },
               ]}
             >
-              <Ionicons color={tokens.accent} name="download-outline" size={17} />
+              {isSyncing ? (
+                <ActivityIndicator color={tokens.accent} size="small" />
+              ) : (
+                <Ionicons color={tokens.accent} name="calendar-number-outline" size={17} />
+              )}
             </Pressable>
             <Pressable
               accessibilityLabel={translate("planning:availability.editAccessibilityLabel")}
@@ -112,31 +130,49 @@ export function PlanningHubScreen() {
         {/* Five-segment control */}
         <MotionView delay={60} style={styles.segmentWrapper}>
           <AppSegmentedControl
-            onChange={setActiveTab}
+            onChange={handleTabChange}
             options={getTabOptions(openShiftCount)}
             value={activeTab}
           />
         </MotionView>
       </View>
 
-      {/* Tab content — keep all mounted for instant tab switch */}
-      <View style={[styles.tabPane, activeTab === "shifts" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningShiftsScreen embedded />
-      </View>
-      <View style={[styles.tabPane, activeTab === "todos" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningTodosScreen embedded />
-      </View>
-      <View style={[styles.tabPane, activeTab === "calls" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningCallsScreen embedded />
-      </View>
-      <View
-        style={[styles.tabPane, activeTab === "requests" ? styles.tabVisible : styles.tabHidden]}
-      >
-        <PlanningRequestsScreen embedded />
-      </View>
-      <View style={[styles.tabPane, activeTab === "leave" ? styles.tabVisible : styles.tabHidden]}>
-        <PlanningLeaveScreen embedded />
-      </View>
+      {/* Lazy-mount tabs: each tab mounts on first visit and stays mounted for instant re-visits */}
+      {mountedTabs.has("shifts") && (
+        <View
+          style={[styles.tabPane, activeTab === "shifts" ? styles.tabVisible : styles.tabHidden]}
+        >
+          <PlanningShiftsScreen embedded />
+        </View>
+      )}
+      {mountedTabs.has("todos") && (
+        <View
+          style={[styles.tabPane, activeTab === "todos" ? styles.tabVisible : styles.tabHidden]}
+        >
+          <PlanningTodosScreen embedded />
+        </View>
+      )}
+      {mountedTabs.has("calls") && (
+        <View
+          style={[styles.tabPane, activeTab === "calls" ? styles.tabVisible : styles.tabHidden]}
+        >
+          <PlanningCallsScreen embedded />
+        </View>
+      )}
+      {mountedTabs.has("requests") && (
+        <View
+          style={[styles.tabPane, activeTab === "requests" ? styles.tabVisible : styles.tabHidden]}
+        >
+          <PlanningRequestsScreen embedded />
+        </View>
+      )}
+      {mountedTabs.has("leave") && (
+        <View
+          style={[styles.tabPane, activeTab === "leave" ? styles.tabVisible : styles.tabHidden]}
+        >
+          <PlanningLeaveScreen embedded />
+        </View>
+      )}
     </View>
   )
 }

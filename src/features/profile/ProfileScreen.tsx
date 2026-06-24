@@ -21,6 +21,7 @@ export function ProfileScreen() {
           email={screen.email}
           fullName={screen.fullName}
           initials={screen.initials}
+          isUploadingPhoto={screen.isUploadingPhoto}
           onAvatarPress={screen.onProfilePhotoPress}
         />
       </MotionView>

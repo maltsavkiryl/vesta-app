@@ -59,7 +59,8 @@ export function PlanningTodosScreen({ embedded = false }: { embedded?: boolean }
         <>
           <PlanningTodosBrief dressNote={screen.dressNote} note={screen.note} />
           <PlanningTodosSection
-            isCompleting={screen.isCompleting || screen.isUncompleting}
+            completingIds={screen.completingIds}
+            uncompletingIds={screen.uncompletingIds}
             onComplete={(id) => {
               void screen.handleComplete(id)
             }}
@@ -70,7 +71,8 @@ export function PlanningTodosScreen({ embedded = false }: { embedded?: boolean }
             todos={screen.pendingTodos}
           />
           <PlanningTodosSection
-            isCompleting={screen.isCompleting || screen.isUncompleting}
+            completingIds={screen.completingIds}
+            uncompletingIds={screen.uncompletingIds}
             onComplete={(id) => {
               void screen.handleComplete(id)
             }}

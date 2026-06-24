@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
 
+import { formatShortDate } from "@/core/date"
 import type { MyRequests, ShiftChangeRequest, ShiftSwapRequest } from "@/core/models"
 import { translate } from "@/i18n/translate"
 import {
@@ -196,7 +197,7 @@ export function PlanningSwapRequestRow({
         <Text
           size="xxs"
           style={{ color: tokens.textSecondary }}
-          text={request.createdAt.slice(0, 10)}
+          text={formatShortDate(request.createdAt.slice(0, 10))}
         />
         {isPending && isTarget && onDecide ? (
           <View style={styles.decideRow}>
@@ -254,7 +255,11 @@ export function PlanningChangeRequestRow({
           />
         </View>
         {request.requestedDate ? (
-          <Text size="xxs" style={{ color: tokens.textSecondary }} text={request.requestedDate} />
+          <Text
+            size="xxs"
+            style={{ color: tokens.textSecondary }}
+            text={formatShortDate(request.requestedDate)}
+          />
         ) : null}
         {request.note ? (
           <Text

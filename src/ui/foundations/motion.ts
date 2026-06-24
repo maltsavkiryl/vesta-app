@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useCallback, useEffect } from "react"
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -71,10 +71,10 @@ export function useCelebratePulse(): { animatedStyle: object; triggerPulse: () =
   const { shouldReduceMotion } = useAppMotion()
   const scale = useSharedValue(1)
 
-  const triggerPulse = () => {
+  const triggerPulse = useCallback(() => {
     if (shouldReduceMotion) return
     scale.value = withSequence(withSpring(1.06, SPRING_SNAPPY), withSpring(1, SPRING_SNAPPY))
-  }
+  }, [shouldReduceMotion, scale])
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

@@ -22,7 +22,21 @@ export function usePlanningChangeNewScreen() {
   const [success, setSuccess] = useState(false)
 
   const myShifts = useMemo(() => shifts ?? [], [shifts])
-  const canSubmit = Boolean(selectedShiftId)
+
+  const selectedShift = useMemo(
+    () => myShifts.find((s) => s.id === selectedShiftId) ?? null,
+    [myShifts, selectedShiftId],
+  )
+
+  // At least one field must differ from the original shift; otherwise this is a no-op.
+  const hasChange =
+    selectedShift !== null &&
+    ((requestedDate.trim() !== "" && requestedDate.trim() !== selectedShift.date) ||
+      (requestedStartTime.trim() !== "" && requestedStartTime.trim() !== selectedShift.startTime) ||
+      (requestedEndTime.trim() !== "" && requestedEndTime.trim() !== selectedShift.endTime) ||
+      note.trim().length > 0)
+
+  const canSubmit = Boolean(selectedShiftId && hasChange)
 
   const handleSubmit = async () => {
     if (!selectedShiftId) return

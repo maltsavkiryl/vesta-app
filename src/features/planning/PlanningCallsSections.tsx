@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react"
 import { StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import Animated from "react-native-reanimated"
@@ -43,21 +44,25 @@ export function PlanningCallsListSkeleton() {
 
 // ─── Mode badge ───────────────────────────────────────────────────────────────
 
+function getModeLabel(mode: string): string {
+  const key = mode.toLowerCase().replace(/[^a-z]/g, "")
+  if (key === "opencall" || key === "open") return translate("planning:calls.modeOpenCall")
+  if (key === "urgent") return translate("planning:calls.modeUrgent")
+  if (key === "fillin" || key === "fill") return translate("planning:calls.modeFillIn")
+  return mode
+}
+
 function CallModeBadge({ mode }: { mode: string }) {
   const tokens = useDesignTokens()
+  const label = getModeLabel(mode)
   return (
     <View
       accessible
-      accessibilityLabel={mode.toUpperCase()}
+      accessibilityLabel={label}
       accessibilityRole="text"
       style={[styles.modeBadge, { backgroundColor: tokens.accentMuted }]}
     >
-      <Text
-        size="xxs"
-        style={{ color: tokens.accent }}
-        text={mode.toUpperCase()}
-        weight="semiBold"
-      />
+      <Text size="xxs" style={{ color: tokens.accent }} text={label} weight="semiBold" />
     </View>
   )
 }
@@ -87,6 +92,10 @@ export function PlanningCallCard({
     claimState === "forbidden" ||
     claimState === "conflict"
 
+  // Informational conflicts (already-claimed, scheduling conflict) use warning tone.
+  // Hard errors (forbidden, server error) use danger tone.
+  const isWarningError = claimState === "already-claimed" || claimState === "conflict"
+
   const errorMessage =
     claimState === "already-claimed"
       ? translate("planning:calls.alreadyClaimed")
@@ -98,13 +107,20 @@ export function PlanningCallCard({
             ? translate("planning:calls.claimError")
             : null
 
-  const handleClaim = () => {
-    // Signature moment: haptic + spring pulse, fired optimistically
-    if (!isClaimed && !isClaiming) {
+  // Fire success feedback only after the claim is confirmed, not optimistically.
+  const prevClaimState = useRef<ClaimState>(claimState)
+  useEffect(() => {
+    if (prevClaimState.current !== "claimed" && claimState === "claimed") {
       fireHaptic("success")
       triggerPulse()
     }
-    onClaim()
+    prevClaimState.current = claimState
+  }, [claimState, triggerPulse])
+
+  const handleClaim = () => {
+    if (!isClaimed && !isClaiming) {
+      onClaim()
+    }
   }
 
   return (
@@ -166,11 +182,21 @@ export function PlanningCallCard({
             <View
               style={[
                 styles.errorRow,
-                { backgroundColor: tokens.dangerSoft, borderColor: `${tokens.danger}25` },
+                isWarningError
+                  ? { backgroundColor: tokens.warningSoft, borderColor: `${tokens.warning}25` }
+                  : { backgroundColor: tokens.dangerSoft, borderColor: `${tokens.danger}25` },
               ]}
             >
-              <Ionicons color={tokens.danger} name="alert-circle-outline" size={14} />
-              <Text size="xxs" style={{ color: tokens.danger }} text={errorMessage} />
+              <Ionicons
+                color={isWarningError ? tokens.warning : tokens.danger}
+                name={isWarningError ? "warning-outline" : "alert-circle-outline"}
+                size={14}
+              />
+              <Text
+                size="xxs"
+                style={{ color: isWarningError ? tokens.warning : tokens.danger }}
+                text={errorMessage}
+              />
             </View>
           ) : null}
 

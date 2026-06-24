@@ -16,12 +16,15 @@ export function useRegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const clearError = () => {
     if (error) setError(undefined)
   }
 
   const handleSubmit = async () => {
+    if (isSubmitting) return
+
     if (!firstName.trim() || !lastName.trim()) {
       fireHaptic("warning")
       setError(translate("auth:validation.nameRequired"))
@@ -47,15 +50,19 @@ export function useRegisterScreen() {
     }
 
     setError(undefined)
-    const result = await register({ firstName, lastName, email, password })
-    if (!result.ok) {
-      fireHaptic("error")
-      setError(result.error.message)
-      return
+    setIsSubmitting(true)
+    try {
+      const result = await register({ firstName, lastName, email, password })
+      if (!result.ok) {
+        fireHaptic("error")
+        setError(result.error.message)
+        return
+      }
+      fireHaptic("success")
+      router.replace("/(auth)/onboarding")
+    } finally {
+      setIsSubmitting(false)
     }
-
-    fireHaptic("success")
-    router.replace("/(auth)/onboarding")
   }
 
   return {
@@ -64,6 +71,7 @@ export function useRegisterScreen() {
     error,
     firstName,
     handleSubmit,
+    isSubmitting,
     lastName,
     password,
     router,

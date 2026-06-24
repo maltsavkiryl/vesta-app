@@ -103,8 +103,8 @@ export function AuthFormLayout({
       >
         <View style={styles.main}>
           <View>
-            <View style={styles.topBar}>
-              {onBack ? (
+            {onBack ? (
+              <View style={styles.topBar}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={translate("common:actions.back")}
@@ -120,8 +120,8 @@ export function AuthFormLayout({
                 >
                   <Ionicons color={AUTH_SCREEN_PALETTE.panelText} name="chevron-back" size={18} />
                 </Pressable>
-              ) : null}
-            </View>
+              </View>
+            ) : null}
 
             <MotionView style={styles.heroSection}>
               <AuthLogo style={styles.logo} />

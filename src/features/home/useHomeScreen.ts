@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { AppState } from "react-native"
 import { useRouter } from "expo-router"
 
 import type { AppNavigationRoute, Shift } from "@/core/models"
@@ -41,9 +42,13 @@ export function useHomeScreen() {
   const [payrollNudgeDismissed, setPayrollNudgeDismissed] = useState(false)
   const latestPayslip = payslips[0]
 
+  // Recompute greeting when the app comes back to the foreground (e.g. after midnight),
+  // not on a 60s polling interval that forces a whole-screen re-render.
   useEffect(() => {
-    const interval = setInterval(() => setGreeting(getGreeting()), 60_000)
-    return () => clearInterval(interval)
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") setGreeting(getGreeting())
+    })
+    return () => subscription.remove()
   }, [])
 
   const upcomingShifts = home?.shifts.slice(0, 6) ?? []

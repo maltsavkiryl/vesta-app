@@ -106,6 +106,8 @@ export function useTimeCardController() {
   const scheduleQuery = useScheduleStateQuery()
   const profileQuery = useProfileStateQuery()
   const fallbackState = useMemo(() => createInitialState(), [])
+  const isLoading = query.isLoading
+  const isError = query.isError
   const state = query.data ?? {
     clockSession: fallbackState.clockSession,
     timeEntries: fallbackState.timeEntries,
@@ -153,6 +155,8 @@ export function useTimeCardController() {
     handleEndBreak,
     handleStartBreak,
     idleState,
+    isError,
+    isLoading,
     openClockOut: () => {
       fireHaptic("selection")
       router.push("/(app)/clock-out" as never)

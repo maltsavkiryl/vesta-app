@@ -1,10 +1,18 @@
-import { Image, Pressable, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 import { translate } from "@/i18n/translate"
 import { Text, useDesignTokens } from "@/ui"
 
-function ProfileAvatar({ avatarUri, initials }: { avatarUri?: string; initials: string }) {
+function ProfileAvatar({
+  avatarUri,
+  initials,
+  isUploading,
+}: {
+  avatarUri?: string
+  initials: string
+  isUploading: boolean
+}) {
   const tokens = useDesignTokens()
 
   return (
@@ -13,6 +21,7 @@ function ProfileAvatar({ avatarUri, initials }: { avatarUri?: string; initials: 
         style={[
           styles.avatar,
           { backgroundColor: avatarUri ? tokens.surface : tokens.textPrimary },
+          isUploading ? styles.avatarFaded : null,
         ]}
       >
         {avatarUri ? (
@@ -22,7 +31,11 @@ function ProfileAvatar({ avatarUri, initials }: { avatarUri?: string; initials: 
         )}
       </View>
       <View style={[styles.avatarBadge, { backgroundColor: tokens.accent }]}>
-        <Ionicons color="#FFFFFF" name="camera" size={12} />
+        {isUploading ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <Ionicons color="#FFFFFF" name="camera" size={12} />
+        )}
       </View>
     </View>
   )
@@ -33,12 +46,14 @@ export function ProfileOverviewHeader({
   email,
   fullName,
   initials,
+  isUploadingPhoto = false,
   onAvatarPress,
 }: {
   avatarUri?: string
   email: string
   fullName: string
   initials: string
+  isUploadingPhoto?: boolean
   onAvatarPress: () => void
 }) {
   const tokens = useDesignTokens()
@@ -51,10 +66,12 @@ export function ProfileOverviewHeader({
           avatarUri ? translate("profile:photo.change") : translate("profile:photo.add")
         }
         accessibilityRole="button"
+        accessibilityState={{ busy: isUploadingPhoto }}
+        disabled={isUploadingPhoto}
         hitSlop={12}
         onPress={onAvatarPress}
       >
-        <ProfileAvatar avatarUri={avatarUri} initials={initials} />
+        <ProfileAvatar avatarUri={avatarUri} initials={initials} isUploading={isUploadingPhoto} />
       </Pressable>
       <Text text={fullName} size="xl" weight="bold" style={{ color: tokens.textPrimary }} />
       <Text text={email} size="xs" style={{ color: tokens.textSecondary }} />
@@ -81,6 +98,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     width: 24,
+  },
+  avatarFaded: {
+    opacity: 0.6,
   },
   avatarFrame: {
     alignItems: "center",
