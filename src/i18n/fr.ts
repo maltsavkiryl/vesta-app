@@ -30,6 +30,14 @@ const fr: Translations = {
     reset: "Redémarrer l'application",
     title: "Une erreur est survenue",
   },
+  appLock: {
+    locked: "Vesta est verrouillé",
+    subtitle: "Déverrouillez avec la biométrie pour continuer.",
+    unlocking: "Déverrouillage…",
+    unlock: "Déverrouiller",
+    usePasscode: "Utiliser le code",
+    prompt: "Déverrouiller Vesta",
+  },
   notifications: {
     actions: {
       editTemplate: "Modifier le modèle",
@@ -116,6 +124,7 @@ const fr: Translations = {
       openInMapsA11y: "Ouvrir le lieu dans Plans",
     },
     shiftDetail: {
+      backToPlanning: "Retour au planning",
       notFoundTitle: "Service plus disponible",
       notFoundSubtitle:
         "Ce service n'est plus dans votre planning. Il a peut-être été supprimé ou modifié.",
@@ -184,6 +193,13 @@ const fr: Translations = {
       freeDesc: "Vous êtes libre à cette date, sauf si un nouveau service est attribué plus tard.",
       overrideDesc: "La disponibilité de cette date utilise une exception de date.",
       shiftsListed: "{{count}} services sont listés ci-dessous.",
+    },
+    calendarA11y: {
+      available: "disponible",
+      preferred: "préfère travailler",
+      unavailable: "indisponible",
+      shiftCount: "{{count}} services",
+      needsResponse: "réponse requise",
     },
     requestCategories: {
       timeOffTitle: "Congé",
@@ -256,6 +272,9 @@ const fr: Translations = {
       endTime: "Heure de fin",
       end: "Fin",
       totalSpan: "Durée totale",
+      totalSpanValue: "Durée totale {{duration}}",
+      overrideIntro:
+        "Utilisez une disponibilité différente de vos heures habituelles du {{weekday}} pour cette date.",
       customDateHint: "Cette date utilise actuellement sa propre disponibilité personnalisée.",
       customDateWarning:
         "N'enregistrez cet écran que si cette date doit différer de vos heures habituelles.",
@@ -634,6 +653,7 @@ const fr: Translations = {
       overtime: "Heures supplémentaires",
       confirm: "Confirmer le pointage de sortie",
       keepWorking: "Continuer à travailler",
+      backToTime: "Retour au Temps",
     },
     entryDetail: {
       notFoundTitle: "Entrée plus disponible",
@@ -753,6 +773,17 @@ const fr: Translations = {
     },
     settings: {
       notifications: "Notifications",
+      enabled: "Activé",
+      muted: "Désactivé",
+      lastChanged: "Modifié le {{date}}",
+      saving: "Enregistrement…",
+      savePassword: "Enregistrer le mot de passe",
+      payrollReadyDesc: "Prêt à envoyer à l'employeur",
+      payrollMissingDesc: "Ajoutez un IBAN pour vérifier",
+      ready: "Prêt",
+      missing: "Manquant",
+      faceIdOn: "Activé pour déverrouiller l'app",
+      faceIdOff: "Utilisez la biométrie de l'appareil pour déverrouiller plus vite",
       language: "Langue",
       accountAccess: "Accès au compte",
       password: "Mot de passe",
@@ -1049,6 +1080,14 @@ const fr: Translations = {
       "Les contrats signés et en attente apparaîtront ici dès que votre employeur les enverra.",
     payslipsEmptyFiltered: "Essayez un autre mois ou effacez la recherche.",
     payslipsEmpty: "Les fiches de paie apparaîtront ici après la publication de la paie.",
+    clearSearch: "Effacer la recherche",
+    legalNoMatchTitle: "Aucun document juridique correspondant",
+    legalNothingTitle: "Rien de requis pour le moment",
+    contractsNoMatchTitle: "Aucun contrat correspondant",
+    contractsNoneTitle: "Aucun contrat au dossier",
+    payslipsNoMatchTitle: "Aucune fiche de paie correspondante",
+    payslipsNoneTitle: "Pas encore de fiches de paie",
+    uploadsStillNeeded: "{{count}} documents doivent encore être téléversés",
     chooseFileFirst: "Choisissez un fichier avant de téléverser le document.",
     shareCannot: "Cet appareil ne peut pas partager le fichier sélectionné.",
     shareContractPdfFailed: "Vesta n'a pas pu créer le PDF du contrat.",

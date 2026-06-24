@@ -29,7 +29,7 @@ export function ClockOutEmptyState() {
 
   return (
     <EmptyState
-      actionLabel="Back to Time"
+      actionLabel={translate("time:clockOut.backToTime")}
       icon={<Ionicons color={tokens.textMuted} name="time-outline" size={18} />}
       onAction={() => router.replace("/(app)/(tabs)/time")}
       subtitle={translate("time:clockOut.notClockedIn")}

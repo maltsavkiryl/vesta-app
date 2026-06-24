@@ -28,6 +28,14 @@ const en = {
     reset: "Restart app",
     title: "Something went wrong",
   },
+  appLock: {
+    locked: "Vesta is locked",
+    subtitle: "Unlock with biometrics to continue.",
+    unlocking: "Unlocking…",
+    unlock: "Unlock",
+    usePasscode: "Use passcode",
+    prompt: "Unlock Vesta",
+  },
   notifications: {
     actions: {
       editTemplate: "Edit template",
@@ -111,6 +119,7 @@ const en = {
       openInMapsA11y: "Open venue in Maps",
     },
     shiftDetail: {
+      backToPlanning: "Back to Planning",
       notFoundTitle: "Shift no longer available",
       notFoundSubtitle:
         "This shift is no longer in your planning. It may have been removed or changed.",
@@ -176,6 +185,13 @@ const en = {
       freeDesc: "You are free on this date unless a new shift is assigned later.",
       overrideDesc: "Availability for this date is using a date override.",
       shiftsListed: "{{count}} shifts are listed below.",
+    },
+    calendarA11y: {
+      available: "available",
+      preferred: "preferred to work",
+      unavailable: "unavailable",
+      shiftCount: "{{count}} shifts",
+      needsResponse: "needs response",
     },
     requestCategories: {
       timeOffTitle: "Time off",
@@ -247,6 +263,8 @@ const en = {
       endTime: "End time",
       end: "End",
       totalSpan: "Total span",
+      totalSpanValue: "Total span {{duration}}",
+      overrideIntro: "Use different availability than your usual {{weekday}} hours for this date.",
       customDateHint: "This date is currently using its own custom availability.",
       customDateWarning: "Save this screen only if this date should differ from your usual hours.",
       templateHint:
@@ -614,6 +632,7 @@ const en = {
       overtime: "Overtime",
       confirm: "Confirm clock out",
       keepWorking: "Keep working",
+      backToTime: "Back to Time",
     },
     entryDetail: {
       notFoundTitle: "Entry no longer available",
@@ -729,6 +748,17 @@ const en = {
     },
     settings: {
       notifications: "Notifications",
+      enabled: "Enabled",
+      muted: "Muted",
+      lastChanged: "Last changed {{date}}",
+      saving: "Saving…",
+      savePassword: "Save password",
+      payrollReadyDesc: "Ready to submit to employer",
+      payrollMissingDesc: "Add an IBAN to verify",
+      ready: "Ready",
+      missing: "Missing",
+      faceIdOn: "Enabled for app unlock",
+      faceIdOff: "Use device biometrics to unlock faster",
       language: "Language",
       accountAccess: "Account access",
       password: "Password",
@@ -1008,6 +1038,14 @@ const en = {
     contractsEmpty: "Signed and pending agreements will appear here when your employer sends them.",
     payslipsEmptyFiltered: "Try a different month or clear the search.",
     payslipsEmpty: "Payslips will show up here after payroll is published.",
+    clearSearch: "Clear search",
+    legalNoMatchTitle: "No matching legal documents",
+    legalNothingTitle: "Nothing needed right now",
+    contractsNoMatchTitle: "No matching contracts",
+    contractsNoneTitle: "No contracts on file",
+    payslipsNoMatchTitle: "No matching payslips",
+    payslipsNoneTitle: "No payslips yet",
+    uploadsStillNeeded: "{{count}} documents still need an upload",
     chooseFileFirst: "Choose a file before uploading the document.",
     shareCannot: "This device can't share the selected file.",
     shareContractPdfFailed: "Vesta couldn't create the contract PDF.",

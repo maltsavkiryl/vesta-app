@@ -125,7 +125,9 @@ export function AvailabilityTemplateTotalSpan({
     <Text
       size="xxs"
       style={[styles.centerText, { color: tokens.textMuted }]}
-      text={`Total span ${durationLabel(startTime, endTime)}`}
+      text={translate("planning:availability.totalSpanValue", {
+        duration: durationLabel(startTime, endTime),
+      })}
       weight="medium"
     />
   )

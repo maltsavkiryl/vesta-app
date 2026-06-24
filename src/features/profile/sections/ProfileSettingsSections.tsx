@@ -38,7 +38,9 @@ export function NotificationPreferencesSection({
         <ListRow
           key={key}
           title={key.replace(/([A-Z])/g, " $1").replace(/^./, (value) => value.toUpperCase())}
-          subtitle={enabled ? "Enabled" : "Muted"}
+          subtitle={
+            enabled ? translate("profile:settings.enabled") : translate("profile:settings.muted")
+          }
           isLast={index === entries.length - 1}
           leading={
             <Ionicons
@@ -119,7 +121,7 @@ export function SecuritySection({
       <GroupedSection title={translate("profile:settings.accountAccess")}>
         <ListRow
           title={translate("profile:settings.password")}
-          subtitle={`Last changed ${passwordLastChangedAt}`}
+          subtitle={translate("profile:settings.lastChanged", { date: passwordLastChangedAt })}
           leading={<Ionicons color={tokens.textSecondary} name="key-outline" size={18} />}
           trailing={
             <Text
@@ -135,7 +137,9 @@ export function SecuritySection({
           isLast
           title={biometricType}
           subtitle={
-            faceIdEnabled ? "Enabled for app unlock" : "Use device biometrics to unlock faster"
+            faceIdEnabled
+              ? translate("profile:settings.faceIdOn")
+              : translate("profile:settings.faceIdOff")
           }
           leading={
             <Ionicons
@@ -260,7 +264,11 @@ export function ChangePasswordSection() {
       <AppButton
         disabled={!canSubmit}
         fullWidth
-        label={isSaving ? "Saving..." : "Save password"}
+        label={
+          isSaving
+            ? translate("profile:settings.saving")
+            : translate("profile:settings.savePassword")
+        }
         onPress={() => {
           void handleSubmit()
         }}
@@ -433,11 +441,17 @@ export function BankingVerificationSection({
       <ListRow
         isLast
         title={translate("profile:settings.payrollVerification")}
-        subtitle={hasIban ? "Ready to submit to employer" : "Add an IBAN to verify"}
+        subtitle={
+          hasIban
+            ? translate("profile:settings.payrollReadyDesc")
+            : translate("profile:settings.payrollMissingDesc")
+        }
         leading={<Ionicons color={tokens.textSecondary} name="checkmark-done-outline" size={18} />}
         trailing={
           <StatusBadge
-            label={hasIban ? "Ready" : "Missing"}
+            label={
+              hasIban ? translate("profile:settings.ready") : translate("profile:settings.missing")
+            }
             tone={hasIban ? "success" : "warning"}
           />
         }

@@ -67,7 +67,7 @@ function DocumentsListSkeleton({ rows = 3 }: { rows?: number }) {
 function DocumentsErrorState({ onRetry, subtitle }: { onRetry: () => void; subtitle: string }) {
   return (
     <EmptyState
-      actionLabel="Try again"
+      actionLabel={translate("common:states.retry")}
       onAction={onRetry}
       subtitle={subtitle}
       title={translate("documents:loadError")}
@@ -132,7 +132,7 @@ function LegalDocumentsContent() {
           ))
         ) : (
           <DocumentsEmptyState
-            actionLabel={hasSearchQuery ? "Clear search" : undefined}
+            actionLabel={hasSearchQuery ? translate("documents:clearSearch") : undefined}
             iconName="document-text-outline"
             onAction={hasSearchQuery ? cancelSearch : undefined}
             subtitle={
@@ -140,7 +140,11 @@ function LegalDocumentsContent() {
                 ? translate("documents:legalEmptyFiltered")
                 : translate("documents:legalEmpty")
             }
-            title={hasSearchQuery ? "No matching legal documents" : "Nothing needed right now"}
+            title={
+              hasSearchQuery
+                ? translate("documents:legalNoMatchTitle")
+                : translate("documents:legalNothingTitle")
+            }
           />
         )}
       </View>
@@ -206,7 +210,7 @@ function ContractsContent() {
           ))
         ) : (
           <DocumentsEmptyState
-            actionLabel={hasSearchQuery ? "Clear search" : undefined}
+            actionLabel={hasSearchQuery ? translate("documents:clearSearch") : undefined}
             iconName="document-attach-outline"
             onAction={hasSearchQuery ? cancelSearch : undefined}
             subtitle={
@@ -214,7 +218,11 @@ function ContractsContent() {
                 ? translate("documents:contractsEmptyFiltered")
                 : translate("documents:contractsEmpty")
             }
-            title={hasSearchQuery ? "No matching contracts" : "No contracts on file"}
+            title={
+              hasSearchQuery
+                ? translate("documents:contractsNoMatchTitle")
+                : translate("documents:contractsNoneTitle")
+            }
           />
         )}
       </View>
@@ -255,7 +263,7 @@ function PayslipsContent() {
           ))
         ) : (
           <DocumentsEmptyState
-            actionLabel={hasSearchQuery ? "Clear search" : undefined}
+            actionLabel={hasSearchQuery ? translate("documents:clearSearch") : undefined}
             iconName="cash-outline"
             onAction={hasSearchQuery ? cancelSearch : undefined}
             subtitle={
@@ -265,10 +273,10 @@ function PayslipsContent() {
             }
             title={
               hasSearchQuery
-                ? "No matching payslips"
+                ? translate("documents:payslipsNoMatchTitle")
                 : payslips.length === 0
-                  ? "No payslips yet"
-                  : "No matching payslips"
+                  ? translate("documents:payslipsNoneTitle")
+                  : translate("documents:payslipsNoMatchTitle")
             }
           />
         )}

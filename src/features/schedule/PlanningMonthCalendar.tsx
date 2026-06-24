@@ -4,23 +4,25 @@ import { Ionicons } from "@expo/vector-icons"
 
 import { formatFullDate, formatMonthLabel, getLocalToday } from "@/core/date"
 import type { CalendarDayState } from "@/features/schedule/schedule.utils"
+import type { TxKeyPath } from "@/i18n"
+import { translate } from "@/i18n/translate"
 import { Text, useDesignTokens } from "@/ui"
 
-const availabilityA11yLabel: Record<CalendarDayState["availabilityStatus"], string> = {
-  available: "available",
-  preferred: "preferred to work",
-  unavailable: "unavailable",
+const availabilityA11yKey: Record<CalendarDayState["availabilityStatus"], TxKeyPath> = {
+  available: "planning:calendarA11y.available",
+  preferred: "planning:calendarA11y.preferred",
+  unavailable: "planning:calendarA11y.unavailable",
 }
 
 function buildDayAccessibilityLabel(dateString: string, dayState: CalendarDayState): string {
   const parts = [formatFullDate(dateString)]
   if (dayState.shiftCount > 0) {
-    parts.push(`${dayState.shiftCount} ${dayState.shiftCount === 1 ? "shift" : "shifts"}`)
+    parts.push(translate("planning:calendarA11y.shiftCount", { count: dayState.shiftCount }))
   } else {
-    parts.push(availabilityA11yLabel[dayState.availabilityStatus])
+    parts.push(translate(availabilityA11yKey[dayState.availabilityStatus]))
   }
   if (dayState.needsResponse) {
-    parts.push("needs response")
+    parts.push(translate("planning:calendarA11y.needsResponse"))
   }
   return parts.join(", ")
 }
