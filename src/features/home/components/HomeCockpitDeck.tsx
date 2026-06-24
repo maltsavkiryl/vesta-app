@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 
+import { translate } from "@/i18n/translate"
 import { useDesignTokens } from "@/ui"
 
 import type { HomeCockpitDeckProps } from "./homeCockpit.types"
@@ -30,23 +31,31 @@ export function HomeCockpitDeck({
   const miniCards = [
     {
       icon: "checkbox-outline" as const,
-      label: pendingTaskCount > 0 ? `${pendingTaskCount} pending` : "All clear",
+      label:
+        pendingTaskCount > 0
+          ? translate("home:cockpit.pendingCount", { count: pendingTaskCount })
+          : translate("home:cockpit.allClear"),
       onPress: onOpenTasks,
-      title: "Tasks",
+      title: translate("home:tasks.title"),
       tone: pendingTaskCount > 0 ? tokens.warning : tokens.success,
     },
     {
       icon: "calendar-outline" as const,
-      label: nextShift ? `${nextShift.dayLabel} ${nextShift.startTime}` : "Nothing queued",
+      label: nextShift
+        ? `${nextShift.dayLabel} ${nextShift.startTime}`
+        : translate("home:cockpit.nothingQueued"),
       onPress: onOpenSchedule,
-      title: "Planning",
+      title: translate("planning:sections.tabs.shifts"),
       tone: tokens.accent,
     },
     {
       icon: "notifications-outline" as const,
-      label: unreadCount > 0 ? `${unreadCount} waiting` : "Caught up",
+      label:
+        unreadCount > 0
+          ? translate("home:cockpit.waitingCount", { count: unreadCount })
+          : translate("home:cockpit.caughtUp"),
       onPress: onOpenNotifications,
-      title: "Updates",
+      title: translate("home:updates.title"),
       tone: unreadCount > 0 ? tokens.danger : tokens.textSecondary,
     },
   ]

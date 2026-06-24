@@ -9,6 +9,7 @@ import { useScheduleActions } from "@/features/schedule/data/schedule.mutations"
 import { useScheduleStateQuery } from "@/features/schedule/data/schedule.queries"
 import { getTemplateAvailability, getWeekdayKey } from "@/features/schedule/schedule.utils"
 import { useAvailabilityTimeFieldController } from "@/features/schedule/useAvailabilityTimeFieldController"
+import { translate } from "@/i18n/translate"
 import { createHeaderActionOptions, useAppTheme } from "@/ui"
 import { fireHaptic } from "@/utils/haptics"
 
@@ -134,7 +135,7 @@ export function useAvailabilityScreen() {
           disabled: isSaving,
           kind: "confirm",
           haptic: "none",
-          label: "Save",
+          label: translate("common:actions.save"),
           onPress: () => {
             void handleSave()
           },

@@ -30,7 +30,7 @@ export function showPlanningQuickActions({
     })),
     {
       style: "cancel" as const,
-      text: "Cancel",
+      text: translate("common:actions.cancel"),
       onPress: onCancel,
     },
   ])

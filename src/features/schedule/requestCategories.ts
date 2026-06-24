@@ -2,6 +2,7 @@ import type { ButtonProps } from "@expo/ui/swift-ui"
 import { Ionicons } from "@expo/vector-icons"
 
 import type { RequestCategory, RequestType } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 type RequestCategoryTone = "accent" | "warning" | "danger"
 type SystemImageName = NonNullable<ButtonProps["systemImage"]>
@@ -24,25 +25,25 @@ export const requestCategoryOrder: RequestCategory[] = [
 
 export const requestCategoryConfig: Record<RequestCategory, RequestCategoryConfig> = {
   time_off: {
-    description: "Request one or more days off",
+    description: translate("planning:requestCategories.timeOffDesc"),
     icon: "calendar-clear-outline",
     reasonPresets: ["Personal", "Medical", "Family", "Travel"],
     systemImage: "calendar.badge.plus",
-    title: "Time off",
+    title: translate("planning:requestCategories.timeOffTitle"),
     tone: "accent",
     type: "Time off",
   },
   shift_change: {
-    description: "Ask for help with a scheduled shift",
+    description: translate("planning:requestCategories.shiftChangeDesc"),
     icon: "swap-horizontal-outline",
     reasonPresets: ["Running late", "Need replacement", "Schedule conflict", "Transport issue"],
     systemImage: "arrow.left.arrow.right.circle",
-    title: "Shift change",
+    title: translate("planning:requestCategories.shiftChangeTitle"),
     tone: "warning",
     type: "Shift swap",
   },
   availability_issue: {
-    description: "Flag an availability conflict or exception",
+    description: translate("planning:requestCategories.availabilityIssueDesc"),
     icon: "alert-circle-outline",
     reasonPresets: [
       "Class or exam",
@@ -51,7 +52,7 @@ export const requestCategoryConfig: Record<RequestCategory, RequestCategoryConfi
       "Unexpected conflict",
     ],
     systemImage: "exclamationmark.circle",
-    title: "Availability issue",
+    title: translate("planning:requestCategories.availabilityIssueTitle"),
     tone: "danger",
     type: "Unavailability",
   },

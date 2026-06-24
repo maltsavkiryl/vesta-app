@@ -20,10 +20,22 @@ export function OnboardingDone({
 }: OnboardingDoneProps) {
   const tokens = useDesignTokens()
   const rows = [
-    { label: "Role", value: role || "Waiter" },
-    { label: "Workplace", value: employerName ?? "No workplace selected" },
-    { label: "Availability", value: `${availabilityDays.length} days/week` },
-    { label: "Notifications", value: `${enabledNotifications} enabled` },
+    {
+      label: translate("onboarding:doneSummary.roleLabel"),
+      value: role || translate("onboarding:roles.Waiter"),
+    },
+    {
+      label: translate("onboarding:doneSummary.workplaceLabel"),
+      value: employerName ?? translate("onboarding:doneSummary.noWorkplace"),
+    },
+    {
+      label: translate("onboarding:doneSummary.availabilityLabel"),
+      value: translate("onboarding:doneSummary.daysPerWeek", { count: availabilityDays.length }),
+    },
+    {
+      label: translate("onboarding:doneSummary.notificationsLabel"),
+      value: translate("onboarding:doneSummary.enabledCount", { count: enabledNotifications }),
+    },
   ]
 
   return (

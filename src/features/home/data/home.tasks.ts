@@ -1,4 +1,5 @@
 import type { DocumentItem, HomeTask, PlanningWindow, Shift } from "@/core/models"
+import { translate } from "@/i18n/translate"
 
 export interface HomeTasksInput {
   documents: DocumentItem[]
@@ -24,14 +25,14 @@ export function deriveHomeTasks({
   if (documents.some((document) => document.status === "action_required")) {
     tasks.push({
       id: "task-upload-id-card",
-      title: "Upload your ID card",
-      subtitle: "Required before the next payroll run",
+      title: translate("home:derivedTasks.uploadIdTitle"),
+      subtitle: translate("home:derivedTasks.uploadIdSubtitle"),
       urgency: "high",
-      actionLabel: "Upload",
+      actionLabel: translate("home:derivedTasks.upload"),
       action: {
         type: "uploadDocument",
         documentId: "document-1",
-        title: "ID card verification",
+        title: translate("home:derivedTasks.uploadIdActionTitle"),
       },
     })
   }
@@ -39,10 +40,11 @@ export function deriveHomeTasks({
   if (nextShiftToReview) {
     tasks.push({
       id: `task-review-${nextShiftToReview.id}`,
-      title: `Review ${nextShiftToReview.dayLabel} shift update`,
-      subtitle: nextShiftToReview.changeSummary ?? "Your manager needs a response on this shift",
+      title: translate("home:derivedTasks.reviewShiftTitle", { day: nextShiftToReview.dayLabel }),
+      subtitle:
+        nextShiftToReview.changeSummary ?? translate("home:derivedTasks.reviewShiftSubtitle"),
       urgency: "medium",
-      actionLabel: "Review",
+      actionLabel: translate("home:derivedTasks.review"),
       action: { type: "respondToShift", shiftId: nextShiftToReview.id },
     })
   }
@@ -50,10 +52,12 @@ export function deriveHomeTasks({
   if (nextPlanningWindow) {
     tasks.push({
       id: `task-availability-${nextPlanningWindow.id}`,
-      title: `Set availability for ${nextPlanningWindow.label.toLowerCase()}`,
-      subtitle: "Help the team finalize rota planning",
+      title: translate("home:derivedTasks.setAvailabilityTitle", {
+        window: nextPlanningWindow.label.toLowerCase(),
+      }),
+      subtitle: translate("home:derivedTasks.setAvailabilitySubtitle"),
       urgency: "low",
-      actionLabel: "Set",
+      actionLabel: translate("home:derivedTasks.set"),
       action: { type: "editAvailabilityOverride", date: nextPlanningWindow.startDate },
     })
   }
